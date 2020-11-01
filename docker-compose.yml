@@ -32,7 +32,7 @@ services:
     volumes:
       - mariadb_epgstation:/var/lib/mysql
     env_file:
-      - mariadb_epgstation.env
+      - .mariadb_epgstation.env
     environment:
       TZ: "Asia/Tokyo"
     networks:
