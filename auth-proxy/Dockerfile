@@ -4,12 +4,11 @@ WORKDIR /workdir
 
 COPY . .
 
-RUN go build -o auth
+RUN go build -o auth-proxy
 
 FROM alpine
 
-EXPOSE 8888
-
 COPY --from=go /workdir/auth-proxy /usr/bin/
 
+EXPOSE 8888
 ENTRYPOINT /usr/bin/auth-proxy

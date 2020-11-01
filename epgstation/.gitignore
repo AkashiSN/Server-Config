@@ -1,4 +1,5 @@
 data/streamfiles/*
+data/*
 logs/Operator/*
 logs/Service/*
 recorded/*

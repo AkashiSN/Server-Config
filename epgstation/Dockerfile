@@ -26,8 +26,8 @@ COPY --from=ffmpeg /lib/x86_64-linux-gnu/libnppicc.so.11 /lib/x86_64-linux-gnu/l
 COPY --from=ffmpeg /lib/x86_64-linux-gnu/libnppidei.so.11 /lib/x86_64-linux-gnu/libnppidei.so.11
 
 # Copy ffmpeg
-COPY --from=build /usr/bin/ffmpeg /usr/bin/ffmpeg
-COPY --from=build /usr/bin/ffprobe /usr/bin/ffprobe
+COPY --from=ffmpeg /usr/bin/ffmpeg /usr/bin/ffmpeg
+COPY --from=ffmpeg /usr/bin/ffprobe /usr/bin/ffprobe
 
 # Copy epgstation
 COPY --from=epgstation /app /app/

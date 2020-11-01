@@ -1,4 +1,4 @@
-version: 3.8
+version: "3.8"
 
 services:
   mirakurun:
@@ -63,7 +63,7 @@ services:
       - mirakurun
       - mariadb_epgstation
     ports:
-        - "127.0.0.1:8888:8888"
+      - "127.0.0.1:8888:8888"
     #user: "1000:1000"
     networks:
       - mynet
