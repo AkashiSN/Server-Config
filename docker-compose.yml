@@ -1,0 +1,91 @@
+version: 3.8
+
+services:
+  mirakurun:
+    image: chinachu/mirakurun
+    cap_add:
+      - SYS_ADMIN
+      - SYS_NICE
+    environment:
+      TZ: Asia/Tokyo
+      # LOG_LEVEL: "3"
+      # DEBUG: "true"
+    devices:
+      - /dev/bus:/dev/bus
+      - /dev/dvb:/dev/dvb
+    volumes:
+      - ./mirakurun/run/:/var/run/
+      - ./mirakurun/opt/:/opt/
+      - ./mirakurun/config/:/app-config/
+      - ./mirakurun/data/:/app-data/
+    networks:
+      - mynet
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-file: "1"
+        max-size: 10m
+
+  mariadb_epgstation:
+    image: mariadb:10.5
+    volumes:
+      - mariadb_epgstation:/var/lib/mysql
+    env_file:
+      - mariadb_epgstation.env
+    environment:
+      TZ: "Asia/Tokyo"
+    networks:
+      - mynet
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --performance-schema=false --expire_logs_days=1
+    restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  epgstation:
+    build:
+      context: epgstation
+      args:
+        - FFMPEG_IMAGE=${FFMPEG_IMAGE}
+    runtime: nvidia
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ./epgstation/config:/app/config
+        - ./epgstation/data:/app/data
+        - ./epgstation/thumbnail:/app/thumbnail
+        - ./epgstation/logs:/app/logs
+        - ./epgstation/recorded:/app/recorded
+    environment:
+      TZ: "Asia/Tokyo"
+    depends_on:
+      - mirakurun
+      - mariadb_epgstation
+    ports:
+        - "127.0.0.1:8888:8888"
+    #user: "1000:1000"
+    networks:
+      - mynet
+    command: /bin/sh -c "envsubst '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' < /app/config/config.json.template > /app/config/config.json && npm start"
+    restart: always
+
+  auth-proxy:
+    build:
+      context: auth-proxy
+    environment:
+      TZ: "Asia/Tokyo"
+    depends_on:
+      - epgstation
+    ports:
+      - "127.0.0.1:8080:8080"
+    command: -clientID ${SLACK_CLIENT_ID}
+    restart: always
+
+volumes:
+  mariadb_epgstation:
+    driver: local
+
+networks:
+  mynet:
+    driver: bridge

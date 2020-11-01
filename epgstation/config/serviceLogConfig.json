@@ -1,0 +1,33 @@
+{
+    "appenders": {
+        "system": {
+            "type": "file",
+            "maxLogSize": 1048576,
+            "backups": 3,
+            "filename": "%ServiceSystem%",
+            "pattern": "-yyyy-MM-dd"
+        },
+        "access": {
+            "type": "file",
+            "maxLogSize": 1048576,
+            "backups": 3,
+            "filename": "%ServiceAccess%",
+            "pattern": "-yyyy-MM-dd"
+        },
+        "stream": {
+            "type": "file",
+            "maxLogSize": 1048576,
+            "backups": 3,
+            "filename": "%ServiceStream%",
+            "pattern": "-yyyy-MM-dd"
+        },
+        "console": { "type": "console" },
+        "stdout": { "type": "stdout" }
+    },
+    "categories": {
+        "default": { "appenders": [ "console", "stdout" ], "level": "debug" },
+        "system": { "appenders": [ "system", "stdout" ], "level": "debug" },
+        "access": { "appenders": [ "access" ], "level": "debug" },
+        "stream": { "appenders": [ "stream", "stdout" ], "level": "debug" }
+    }
+}
