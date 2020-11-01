@@ -69,6 +69,20 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 # Create a symbolic link to /usr/bin
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+# Add nvidia-docker repository
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+   && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - \
+   && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+# Update the apt package index
+sudo apt update
+
+# Install the latest version of nvidia-docker2
+sudo apt install -y nvidia-docker2
+
+# Restart the Docker daemon
+sudo systemctl restart docker
 ```
 
 ### Nginx
