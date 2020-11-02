@@ -92,11 +92,23 @@ services:
       DOMAIN: ${DOMAIN}
     depends_on:
       - auth-proxy
+    networks:
+      - mynet
+    command: /bin/sh -c "envsubst '$$DOMAIN' < /etc/nginx/conf.d/tv.conf.template > /etc/nginx/conf.d/tv.conf && nginx -g 'daemon off;'"
+    restart: always
+
+  sslh:
+    build:
+      context: sslh
+    environment:
+      TZ: "Asia/Tokyo"
+    depends_on:
+      - nginx
     ports:
       - "443:443"
     networks:
       - mynet
-    command: /bin/sh -c "envsubst '$$DOMAIN' < /etc/nginx/conf.d/tv.conf.template > /etc/nginx/conf.d/tv.conf && nginx -g 'daemon off;'"
+    command: -f -u root --listen=0.0.0.0:443 --tls=nginx:8443 --openvpn=openvpn:9443
     restart: always
 
 volumes:
