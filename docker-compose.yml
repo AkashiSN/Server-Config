@@ -50,6 +50,8 @@ services:
       args:
         - FFMPEG_IMAGE=${FFMPEG_IMAGE}
     runtime: nvidia
+    env_file:
+      - .mariadb_epgstation.env
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - ./epgstation/config:/app/config
@@ -62,8 +64,6 @@ services:
     depends_on:
       - mirakurun
       - mariadb_epgstation
-    ports:
-      - "127.0.0.1:8888:8888"
     #user: "1000:1000"
     networks:
       - mynet
@@ -77,9 +77,26 @@ services:
       TZ: "Asia/Tokyo"
     depends_on:
       - epgstation
-    ports:
-      - "127.0.0.1:8080:8080"
+    networks:
+      - mynet
     command: -clientID ${SLACK_CLIENT_ID}
+    restart: always
+
+  nginx:
+    image: nginx:mainline
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - ./nginx/conf.d:/etc/nginx/conf.d 
+    environment:
+      TZ: "Asia/Tokyo"
+      DOMAIN: ${DOMAIN}
+    depends_on:
+      - auth-proxy
+    ports:
+      - "443:443"
+    networks:
+      - mynet
+    command: /bin/sh -c "envsubst '$$DOMAIN' < /etc/nginx/conf.d/tv.conf.template > /etc/nginx/conf.d/tv.conf && nginx -g 'daemon off;'"
     restart: always
 
 volumes:

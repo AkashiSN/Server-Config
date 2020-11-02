@@ -36,6 +36,25 @@ user=$(whoami)
 sudo chsh -s $(which zsh) $user
 ```
 
+### Nvidia driver
+```bash
+# Download setting file
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+
+# Add nvidia's official GPG key
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+
+# Set up the stable repository
+sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
+
+# Update the apt package index
+sudo apt update
+
+# Install the latest version of Nvidia driver
+sudo apt -y install cuda-drivers
+```
+
 ### Docker
 
 ```bash
@@ -85,59 +104,56 @@ sudo apt install -y nvidia-docker2
 sudo systemctl restart docker
 ```
 
-### Nginx
-```bash
-# Set up the mailline repository
-sudo add-apt-repository \
-    "deb [arch=amd64] https://nginx.org/packages/mainline/ubuntu \
-    $(lsb_release -cs) \
-    nginx"
-
-# Add Nginx's official GPG key
-curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
-
-# Update the apt package index
-sudo apt update
-
-# Install the latest version of Nginx
-sudo apt install nginx
-
-# Set HostName to environment variable
-export HOST_NAME=
-
-# Copy setting file
-envsubst '$$HOST_NAME' < tv.conf.template > /etc/nginx/conf.d/tv.conf
-```
-
 ### Let's Encrypt
 
 ```bash
-# Set up the certbot repository
-sudo add-apt-repository ppa:certbot/certbot
+# Ensure that your version of snapd is up to date
+sudo snap install core
+sudo snap refresh core
 
-# Update the apt package index
-sudo apt update
+# Install certbot with classic mode
+sudo snap install --classic certbot
 
-# Install the latest version of certbot and cloudflare extention
-sudo apt install -y certbot
-sudo apt install -y python3-certbot-dns-cloudflare
+# Confirm plugin containment level
+sudo snap set certbot trust-plugin-with-root=ok
+
+# Prepare the Certbot command
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+# Install certbot cloudflare addon
+sudo snap install certbot-dns-cloudflare
+
+# Connect with plugin
+sudo snap connect certbot:plugin certbot-dns-cloudflare
+
+# Become root
+sudo -i
+
+# Do not write histroyfile
+unset HISTFILE
 
 # Set Email and domain to environment variable
 export EMAIL=
 export DOMAIN=
 export CLOUDFLARE_API=
 
+# Create secret directory
+mkdir -p /root/.secrets/certbot/
+
 # Create cloudflare setting file
-cat << EOS > sudo tee /etc/letsencrypt/cloudflare.ini
+cat << EOS > /root/.secrets/certbot/cloudflare.ini
 dns_cloudflare_email = ${EMAIL}
 dns_cloudflare_api_key = ${CLOUDFLARE_API}
 EOS
 
-# Obtain ssl certificate
-sudo certbot certonly --dns-cloudflare --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini --dns-cloudflare-propagation-seconds 60 --server https://acme-v02.api.letsencrypt.org/directory -d ${DOMAIN} -d "*.${DOMAIN}" -m ${EMAIL}
+# Change permission
+chmod 640 /root/.secrets/certbot/cloudflare.ini
 
-# Reload nginx when certificate is renewed
-echo "ExecStartPost=/bin/systemctl reload nginx" | sudo tee /lib/systemd/system/certbot.service
+# Obtain ssl certificate
+certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/certbot/cloudflare.ini --dns-cloudflare-propagation-seconds 60 --server https://acme-v02.api.letsencrypt.org/directory -d ${DOMAIN} -d "*.${DOMAIN}" -m ${EMAIL}
+
+# Exit root
+exit
 ```
 
 ### DD Max m4 driver
@@ -167,6 +183,7 @@ CHECK_MODULE_VERSION="no"
 MAKE="'make' all KVER=${kernelver}"
 CLEAN="make clean"
 EOF
+
 let "module_number=0" || true
 for file in $(find ./ -type f -name "*.ko"); do
       MODULE_LOCATION=$(dirname $file | cut -d\/ -f 2-)
@@ -199,12 +216,15 @@ dkms status
 sudo mkdir -p /etc/depmod.d
 echo 'search extra updates built-in' | sudo tee /etc/depmod.d/extra.conf
 sudo depmod -a
+
+# restart
+sudo reboot
 ```
 
 ### SSLH
 ```bash
 # Install the prerequisites:
-sudo apt install -y libwrap0-dev libconfig8-dev libsystemd-dev libcap-dev libbsd-dev
+sudo apt install -y libwrap0-dev libconfig-dev libsystemd-dev libcap-dev libbsd-dev libpcre++-dev
 
 # cd work directory
 cd ~/work
