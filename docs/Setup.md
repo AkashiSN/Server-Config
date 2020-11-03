@@ -218,3 +218,10 @@ sudo depmod -a
 # restart
 sudo reboot
 ```
+
+### Serve setting
+自動で休止モードにならないようにする
+https://askubuntu.com/questions/47311/how-do-i-disable-my-system-from-going-to-sleep
+```bash
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+```
