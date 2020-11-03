@@ -221,28 +221,6 @@ sudo depmod -a
 sudo reboot
 ```
 
-### SSLH
-```bash
-# Install the prerequisites:
-sudo apt install -y libwrap0-dev libconfig-dev libsystemd-dev libcap-dev libbsd-dev libpcre++-dev
-
-# cd work directory
-cd ~/work
-
-# Download sslh source
-wget https://github.com/yrutschle/sslh/archive/v1.21c.tar.gz
-tar xvf v1.21c.tar.gz
-cd sslh-1.21c
-
-# Run make and install
-make USELIBWRAP=1 USELIBCAP=1 USESYSTEMD=1 USELIBBSD=1
-sudo make install
-
-# Copy config file
-cp basic.cfg /etc/sslh.cfg
-cp scripts/systemd.sslh.service /etc/systemd/system/sslh.service
-```
-
 ### OpenVPN
 ```bash
 # Add OpenVPN's official GPG key

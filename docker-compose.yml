@@ -100,6 +100,8 @@ services:
   sslh:
     build:
       context: sslh
+    cap_add:
+      - NET_ADMIN
     environment:
       TZ: "Asia/Tokyo"
     depends_on:
@@ -108,7 +110,6 @@ services:
       - "443:443"
     networks:
       - mynet
-    command: -f -u root --listen=0.0.0.0:443 --tls=nginx:8443 --openvpn=openvpn:9443
     restart: always
 
 volumes:
