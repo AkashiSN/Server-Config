@@ -32,7 +32,7 @@ sudo docker-compose build
 データベースのバックアップがあるなら、以下でリストアする
 https://hub.docker.com/_/mariadb
 ```bash
-sudo docker-compose up mariadb_epgstation
+sudo docker-compose up -d mariadb_epgstation
 
 export MYSQL_ROOT_PASSWORD=
 sudo -E docker-compose exec -T mariadb_epgstation sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < all-databases.sql
