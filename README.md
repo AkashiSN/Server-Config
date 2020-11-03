@@ -34,8 +34,16 @@ https://hub.docker.com/_/mariadb
 ```bash
 sudo docker-compose up -d mariadb_epgstation
 
+sudo -i
+
+# Do not write histroyfile
+unset HISTFILE
+
 export MYSQL_ROOT_PASSWORD=
-sudo -E docker-compose exec -T mariadb_epgstation sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < all-databases.sql
+
+docker-compose exec -T mariadb_epgstation sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < all-databases.sql
+
+exit
 ```
 
 ### OpenVPN用の証明書の作成
@@ -62,7 +70,7 @@ cp demoCA/cacert.pem ./cert/server/cacert.pem
 cp demoCA/private/cakey.pem ./cert/server/cakey.pem
 
 # Generate the server certificate
-CA.pl -newreq "-newkey rsa:4096"
+CA.pl -newreq  -extra-req "-newkey rsa:4096"
 
 # Country Name: JP
 # State Or Province Name: Osaka
@@ -78,10 +86,10 @@ mv newcert.pem ./cert/server/server.pem
 mv newkey.pem ./cert/server/server.key
 
 # Generate tls-auth key
-openvpn --genkey --secret ./cert/server/ta.key
+openvpn --genkey secret ./cert/server/ta.key
 
 # Generate, sign and move the certificate and key files for the first OpenVPN client
-CA.pl -newreq "-newkey rsa:4096"
+CA.pl -newreq  -extra-req "-newkey rsa:4096"
 
 # Common Name: <client name>
 
@@ -102,9 +110,12 @@ mv ./cert/client/<client name>-no-pass.key ./cert/client/<client name>.key
 
 # Add read permission for non-root users to the client key files
 chmod 644 ./cert/client/<client name>.key
+
+# exit from container
+exit
 ```
 
-クライアント用の設定ファイルを以下のように作成する
+クライアント用の設定ファイル(`<client name>.ovpn`)を以下のように作成する
 ```ovpn
 client
 dev tun
