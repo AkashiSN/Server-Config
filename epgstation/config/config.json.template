@@ -6,7 +6,7 @@
     "mirakurunPath": "http://mirakurun:40772/",
     "dbType": "mysql",
     "mysql": {
-        "host": "mysql-epgstation",
+        "host": "mariadb_epgstation",
         "user": "${MYSQL_USER}",
         "database": "${MYSQL_DATABASE}",
         "password": "${MYSQL_PASSWORD}",

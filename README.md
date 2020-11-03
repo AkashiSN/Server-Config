@@ -29,23 +29,6 @@ MYSQL_DATABASE="epgstation"
 sudo docker-compose build
 ```
 
-データベースのバックアップがあるなら、以下でリストアする
-https://hub.docker.com/_/mariadb
-```bash
-sudo docker-compose up -d mariadb_epgstation
-
-sudo -i
-
-# Do not write histroyfile
-unset HISTFILE
-
-export MYSQL_ROOT_PASSWORD=
-
-docker-compose exec -T mariadb_epgstation sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < all-databases.sql
-
-exit
-```
-
 ### OpenVPN用の証明書の作成
 https://help.ui.com/hc/en-us/articles/115015971688-EdgeRouter-OpenVPN-Server
 ```bash
