@@ -35,14 +35,14 @@ https://hub.docker.com/_/mariadb
 sudo docker-compose up mariadb_epgstation
 
 export MYSQL_ROOT_PASSWORD=
-sudo -E docker-compose exec -i mariadb_epgstation sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < all-databases.sql
+sudo -E docker-compose exec -T mariadb_epgstation sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < all-databases.sql
 ```
 
 ### OpenVPN用の証明書の作成
 https://help.ui.com/hc/en-us/articles/115015971688-EdgeRouter-OpenVPN-Server
 ```bash
 # Launch shell in openvpn container
-sudo docker-compose run --rm -it --entrypoint=bash openvpn
+sudo docker-compose run --rm --entrypoint bash openvpn
 
 # Generate a Diffie-Hellman (DH) key
 openssl dhparam -out ./cert/server/dh.pem -2 2048
