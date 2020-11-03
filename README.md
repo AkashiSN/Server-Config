@@ -15,7 +15,7 @@ SLACK_CLIENT_ID=
 DOMAIN=
 ```
 
-`.mariadb_epgstation.env`を以下で作成
+`.mariadb_epgstation.env`を以下のように作成
 ```env
 MYSQL_USER="epgstation"
 MYSQL_PASSWORD="epgstation"
@@ -45,10 +45,10 @@ https://help.ui.com/hc/en-us/articles/115015971688-EdgeRouter-OpenVPN-Server
 sudo docker-compose run --rm --entrypoint bash openvpn
 
 # Generate a Diffie-Hellman (DH) key
-openssl dhparam -out ./cert/server/dh.pem -2 2048
+openssl dhparam -out ./cert/server/dh.pem -2 4096
 
 # Generate a root certificate
-./CA.pl -newca
+CA.pl -newca -extra-req "-newkey rsa:4096"
 
 # PEM Passphrase: <secret>
 # Country Name: JP
@@ -62,7 +62,7 @@ cp demoCA/cacert.pem ./cert/server/cacert.pem
 cp demoCA/private/cakey.pem ./cert/server/cakey.pem
 
 # Generate the server certificate
-./CA.pl -newreq
+CA.pl -newreq "-newkey rsa:4096"
 
 # Country Name: JP
 # State Or Province Name: Osaka
@@ -71,7 +71,7 @@ cp demoCA/private/cakey.pem ./cert/server/cakey.pem
 # Common Name: <vpn host name>
 
 # Sign the server certificate
-./CA.pl -sign
+CA.pl -sign
 
 # Move and rename the server certificate and key files to the OpenVPN directory
 mv newcert.pem ./cert/server/server.pem
@@ -81,12 +81,12 @@ mv newkey.pem ./cert/server/server.key
 openvpn --genkey --secret ./cert/server/ta.key
 
 # Generate, sign and move the certificate and key files for the first OpenVPN client
-./CA.pl -newreq
+CA.pl -newreq "-newkey rsa:4096"
 
 # Common Name: <client name>
 
 # Sign the client certificate
-./CA.pl -sign
+CA.pl -sign
 
 # Move and rename the client certificate and key files to the OpenVPN directory
 mv newcert.pem ./cert/client/<client name>.pem
