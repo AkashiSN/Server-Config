@@ -32,5 +32,5 @@ COPY --from=ffmpeg /usr/bin/ffprobe /usr/bin/ffprobe
 # Copy epgstation
 COPY --from=epgstation /app /app/
 
-EXPOSE 8888
+EXPOSE 80
 WORKDIR /app

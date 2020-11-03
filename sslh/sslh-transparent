@@ -1,18 +1,3 @@
 #!/bin/bash
  
-# `ip addr`コマンドの結果からネットワークデバイス名を抽出する
-NATDEVICE=$(ip addr | awk 'match($0, /global [[:alnum:]]+/) {print substr($0, RSTART+7, RLENGTH)}')
-if [ -z "${NATDEVICE}" ]; then
-    ip addr
-    echo "Failed to extract NATDEVICE."
-    exit 1
-fi
-
-iptables -t mangle -N SSLH
-iptables -t mangle -A OUTPUT --protocol tcp --out-interface ${NATDEVICE} --sport 443 --jump SSLH
-iptables -t mangle -A SSLH --jump MARK --set-mark 0x1
-iptables -t mangle -A SSLH --jump ACCEPT
-ip rule add fwmark 0x1 lookup 100
-ip route add local 0.0.0.0/0 dev lo table 100
- 
 /usr/sbin/sslh-fork -F /opt/sslh/sslh.cfg

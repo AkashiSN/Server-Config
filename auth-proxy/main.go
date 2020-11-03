@@ -111,5 +111,5 @@ func main() {
 	}
 
 	server := serve(*clientID)
-	log.Println(server.Start(":8080"))
+	log.Println(server.Start(":80"))
 }

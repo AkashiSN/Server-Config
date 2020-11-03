@@ -1,7 +1,7 @@
 {
     "readOnlyOnce": false,
-    "serverPort": 8888,
-    "socketioPort": 8888,
+    "serverPort": 80,
+    "socketioPort": 80,
     "clientSocketioPort": 443,
     "mirakurunPath": "http://mirakurun:40772/",
     "dbType": "mysql",

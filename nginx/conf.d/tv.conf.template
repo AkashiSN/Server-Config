@@ -32,21 +32,21 @@ server{
     # only returns a 202 Accepted response or a 401 Unauthorized response;
     location = /oauth2/auth {
         internal;
-        proxy_pass              http://auth-proxy:8080;
+        proxy_pass              http://auth-proxy:80;
         proxy_pass_request_body off;
     }
 
     # to start oauth cycle
     location = /oauth2/start  {
         internal;
-        proxy_pass              http://auth-proxy:8080;
+        proxy_pass              http://auth-proxy:80;
         proxy_pass_request_body off;
     }
 
     # to complete oauth cycle
     location = /oauth2/callback {
         auth_request      off;
-        proxy_pass        http://auth-proxy:8080;
+        proxy_pass        http://auth-proxy:80;
     }
 
     location / {
@@ -56,6 +56,6 @@ server{
         # ^で401がかえってきたら認証を開始
         error_page 401 = /oauth2/start;
 
-        proxy_pass http://epgstation:8888/;
+        proxy_pass http://epgstation:80/;
     }
 }

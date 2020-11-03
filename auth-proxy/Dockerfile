@@ -10,5 +10,5 @@ FROM alpine
 
 COPY --from=go /workdir/auth-proxy /usr/bin/
 
-EXPOSE 8888
+EXPOSE 80
 ENTRYPOINT [ "/usr/bin/auth-proxy" ]
