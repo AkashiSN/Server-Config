@@ -5,8 +5,8 @@
 sudo apt update
 # Upgrade outdated packages
 sudo apt upgrade -y
-# Install git, wget, curl, gettext
-sudo apt install -y git wget curl gettext
+# Install git, wget, curl
+sudo apt install -y git wget curl
 ```
 
 ### Zsh, Vim
