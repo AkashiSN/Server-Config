@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# ERROR: Cannot open TUN/TAP dev /dev/net/tun: No such file or directory (errno=2)が出ないようにするため
+mkdir -p /dev/net
+if [ ! -c /dev/net/tun ]; then
+    mknod /dev/net/tun c 10 200
+fi
+
+# クライアント用のネットワーク
+OVPN_SERVER=${OVPN_SERVER:-172.16.10.0}
+
+# サーバの属しているセグメント
+SERVER_SEGMENT=${SERVER_SEGMENT:-"172.16.0.0 255.255.254.0"}
+
+# サーバのデフォルトゲートウェイ
+DEFAULT_GATEWAY=${DEFAULT_GATEWAY:-172.16.0.1}
+
+# `ip addr`コマンドの結果からネットワークデバイス名を抽出する
+OVPN_NATDEVICE=$(ip addr | awk 'match($0, /global [[:alnum:]]+/) {print substr($0, RSTART+7, RLENGTH)}')
+if [ -z "${OVPN_NATDEVICE}" ]; then
+    ip addr
+    echo "Failed to extract OVPN_NATDEVICE."
+    exit 1
+fi
+
+# iptablesの設定
+iptables -t nat -C POSTROUTING -s ${OVPN_SERVER}/24 -o ${OVPN_NATDEVICE} -j MASQUERADE || {
+    iptables -t nat -A POSTROUTING -s ${OVPN_SERVER}/24 -o ${OVPN_NATDEVICE} -j MASQUERADE
+}
+
+# OpenVPNサーバの起動
+/usr/sbin/openvpn \
+    --config /opt/openvpn/server.conf \
+    --cd /opt/openvpn \
+    --server ${OVPN_SERVER} 255.255.255.0 \ 
+    --push "route ${SERVER_SEGMENT}" \
+    --push "dhcp-option DNS ${DEFAULT_GATEWAY}" 

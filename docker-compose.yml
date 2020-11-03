@@ -97,6 +97,19 @@ services:
     command: /bin/sh -c "envsubst '$$DOMAIN' < /etc/nginx/conf.d/tv.conf.template > /etc/nginx/conf.d/tv.conf && nginx -g 'daemon off;'"
     restart: always
 
+  openvpn:
+    build:
+      context: openvpn
+    cap_add: 
+      - NET_ADMIN
+    volumes:
+      - ./openvpn:/opt/openvpn
+    environment: 
+      TZ: "Asia/Tokyo"
+    networks:
+      - mynet
+    restart: always
+  
   sslh:
     build:
       context: sslh
@@ -106,6 +119,7 @@ services:
       TZ: "Asia/Tokyo"
     depends_on:
       - nginx
+      - openvpn
     ports:
       - "443:443"
     networks:
