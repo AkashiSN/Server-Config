@@ -8,8 +8,24 @@ SSH keyでログインできる状態
 
 ## コンテナの準備
 
+`.env`を以下のように作成
+```env
+FFMPEG_IMAGE=
+SLACK_CLIENT_ID=
+DOMAIN=
+```
+
+`.mariadb_epgstation.env`を以下で作成
+```env
+MYSQL_USER="epgstation"
+MYSQL_PASSWORD="epgstation"
+MYSQL_ROOT_PASSWORD="epgstation"
+MYSQL_DATABASE="epgstation"
+```
+
+コンテナのビルドを行う
+
 ```bash
-# Build all container
 sudo docker-compose build
 ```
 
