@@ -58,7 +58,7 @@ services:
         - ./epgstation/data:/app/data
         - ./epgstation/thumbnail:/app/thumbnail
         - ./epgstation/logs:/app/logs
-        - ./epgstation/recorded:/app/recorded
+        - ${RECODED_PATH}:/app/recorded
     environment:
       TZ: "Asia/Tokyo"
     depends_on:
