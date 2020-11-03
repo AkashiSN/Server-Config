@@ -13,5 +13,9 @@ RUN curl -s https://swupdate.openvpn.net/repos/repo-public.gpg | apt-key add && 
     apt-get update && \
     apt-get install -y openvpn
 
+WORKDIR /opt/openvpn
+
+RUN cp /usr/lib/ssl/misc/CA.pl /opt/openvpn/CA.pl
+
 EXPOSE 443
 ENTRYPOINT [ "/opt/openvpn/run.sh" ]
