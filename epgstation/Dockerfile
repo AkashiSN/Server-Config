@@ -10,7 +10,7 @@ FROM l3tnun/epgstation as epgstation
 FROM ubuntu:20.04
 
 RUN apt-get update && \
-    apt-get install -y curl && \
+    apt-get install -y curl gettext && \
     apt-get install -y libva-drm2 && \
     curl -sL https://deb.nodesource.com/setup_14.x | bash - && \	
     apt-get install -y nodejs && \

@@ -1,3 +1,4 @@
+config/config.json
 data/streamfiles/*
 data/*
 logs/Operator/*

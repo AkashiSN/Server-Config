@@ -13,6 +13,10 @@ RUN curl -s https://swupdate.openvpn.net/repos/repo-public.gpg | apt-key add && 
     apt-get update && \
     apt-get install -y openvpn
 
+RUN apt-get install -y iptables iproute2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+
 WORKDIR /opt/openvpn
 
 RUN ln -s /usr/lib/ssl/misc/CA.pl /usr/bin/CA.pl

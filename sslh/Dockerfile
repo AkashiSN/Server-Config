@@ -26,8 +26,5 @@ RUN apt-get update && \
 COPY --from=build /workdir/sslh-1.21c/sslh-fork /usr/sbin/sslh-fork
 COPY --from=build /workdir/sslh-1.21c/sslh-select /usr/sbin/sslh-select
 
-COPY ./sslh-transparent /usr/sbin/sslh-transparent
-COPY ./sslh.cfg /etc/sslh.cfg
-
 EXPOSE 443
-ENTRYPOINT [ "/usr/sbin/sslh-transparent" ]
+ENTRYPOINT [ "/opt/sslh/sslh-transparent" ]

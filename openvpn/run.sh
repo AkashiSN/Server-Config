@@ -24,14 +24,44 @@ if [ -z "${OVPN_NATDEVICE}" ]; then
 fi
 
 # iptablesの設定
-iptables -t nat -C POSTROUTING -s ${OVPN_SERVER}/24 -o ${OVPN_NATDEVICE} -j MASQUERADE || {
-    iptables -t nat -A POSTROUTING -s ${OVPN_SERVER}/24 -o ${OVPN_NATDEVICE} -j MASQUERADE
+iptables -t nat -A POSTROUTING -s ${OVPN_SERVER}/24 -o ${OVPN_NATDEVICE} -j MASQUERADE || {
+    iptables -t nat -C POSTROUTING -s ${OVPN_SERVER}/24 -o ${OVPN_NATDEVICE} -j MASQUERADE
 }
 
 # OpenVPNサーバの起動
 /usr/sbin/openvpn \
-    --config /opt/openvpn/server.conf \
-    --cd /opt/openvpn \
-    --server ${OVPN_SERVER} 255.255.255.0 \ 
-    --push "route ${SERVER_SEGMENT}" \
-    --push "dhcp-option DNS ${DEFAULT_GATEWAY}" 
+    --cd "/opt/openvpn" \
+    \
+    --port  "443" \
+    --proto "tcp4" \
+    --dev   "tun" \
+    \
+    --ca        "/opt/openvpn/cert/server/cacert.pem" \
+    --cert      "/opt/openvpn/cert/server/server.pem" \
+    --key       "/opt/openvpn/cert/server/server.key" \
+    --dh        "/opt/openvpn/cert/server/dh.pem" \
+    --tls-auth  "/opt/openvpn/cert/server/ta.key" "0" \
+    \
+    --auth "SHA256" \
+    --cipher "AES-256-GCM" \
+    --data-ciphers "AES-256-GCM" \
+    --tls-version-min "1.2" \
+    --tls-cipher "TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384" \
+    --reneg-sec "60" \
+    \
+    --topology subnet \
+    --server    "${OVPN_SERVER}" "255.255.255.0" \
+    --ifconfig-pool-persist ipp.txt \
+    --push "redirect-gateway def1" \
+    --push "route ${SERVER_SEGMENT} 255.255.0.0" \
+    --push "dhcp-option DNS ${DEFAULT_GATEWAY}" \
+    \
+    --keepalive 10 120 \
+    --persist-key \
+    --persist-tun \
+    \
+    --status openvpn-status.log \
+    --verb 3 \
+    \
+    --tun-mtu 1500 \
+    --mssfix 1460

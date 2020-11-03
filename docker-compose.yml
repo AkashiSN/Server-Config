@@ -75,8 +75,6 @@ services:
       context: auth-proxy
     environment:
       TZ: "Asia/Tokyo"
-    depends_on:
-      - epgstation
     networks:
       - mynet
     command: -clientID ${SLACK_CLIENT_ID}
@@ -91,6 +89,7 @@ services:
       TZ: "Asia/Tokyo"
       DOMAIN: ${DOMAIN}
     depends_on:
+      - epgstation
       - auth-proxy
     networks:
       - mynet
@@ -115,6 +114,8 @@ services:
       context: sslh
     cap_add:
       - NET_ADMIN
+    volumes:
+      - ./sslh:/opt/sslh
     environment:
       TZ: "Asia/Tokyo"
     depends_on:
