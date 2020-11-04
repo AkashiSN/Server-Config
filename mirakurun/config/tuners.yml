@@ -3,7 +3,7 @@
     - GR
     - BS
     - CS
-  command: dvbv5-zap -a 0 -c /usr/local/etc/mirakurun/dvbv5_channels_isdb.conf -r -P <channel>
+  command: dvbv5-zap -a 0 -c /app-config/dvbv5_channels_isdb.conf -r -P <channel>
   dvbDevicePath: /dev/dvb/adapter0/dvr0
   decoder: arib-b25-stream-test
   isDisabled: false
@@ -13,7 +13,7 @@
     - GR
     - BS
     - CS
-  command: dvbv5-zap -a 1 -c /usr/local/etc/mirakurun/dvbv5_channels_isdb.conf -r -P <channel>
+  command: dvbv5-zap -a 1 -c /app-config/dvbv5_channels_isdb.conf -r -P <channel>
   dvbDevicePath: /dev/dvb/adapter1/dvr0
   decoder: arib-b25-stream-test
   isDisabled: false
@@ -23,7 +23,7 @@
     - GR
     - BS
     - CS
-  command: dvbv5-zap -a 2 -c /usr/local/etc/mirakurun/dvbv5_channels_isdb.conf -r -P <channel>
+  command: dvbv5-zap -a 2 -c /app-config/dvbv5_channels_isdb.conf -r -P <channel>
   dvbDevicePath: /dev/dvb/adapter2/dvr0
   decoder: arib-b25-stream-test
   isDisabled: false
@@ -33,7 +33,7 @@
     - GR
     - BS
     - CS
-  command: dvbv5-zap -a 3 -c /usr/local/etc/mirakurun/dvbv5_channels_isdb.conf -r -P <channel>
+  command: dvbv5-zap -a 3 -c /app-config/dvbv5_channels_isdb.conf -r -P <channel>
   dvbDevicePath: /dev/dvb/adapter3/dvr0
   decoder: arib-b25-stream-test
   isDisabled: false

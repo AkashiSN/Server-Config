@@ -9,7 +9,6 @@ services:
     environment:
       TZ: Asia/Tokyo
       # LOG_LEVEL: "3"
-      # DEBUG: "true"
     devices:
       - /dev/bus:/dev/bus
       - /dev/dvb:/dev/dvb

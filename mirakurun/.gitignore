@@ -1,3 +1,4 @@
 opt/*
 run/*
+data/*
 !.gitkeep
