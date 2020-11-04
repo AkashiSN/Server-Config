@@ -27,4 +27,5 @@ COPY --from=build /workdir/sslh-1.21c/sslh-fork /usr/sbin/sslh-fork
 COPY --from=build /workdir/sslh-1.21c/sslh-select /usr/sbin/sslh-select
 
 EXPOSE 443
-ENTRYPOINT [ "/opt/sslh/sslh-transparent" ]
+ENTRYPOINT [ "/usr/sbin/sslh-select" ]
+CMD [ "--verbose", "0", "--foreground", "--user", "root", "--listen", "0.0.0.0:443", "--tls", "nginx:443", "--openvpn", "openvpn:443", "--pidfile", "/var/run/sslh.pid" ]

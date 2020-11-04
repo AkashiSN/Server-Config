@@ -1,3 +1,0 @@
-#!/bin/bash
- 
-/usr/sbin/sslh-fork -F /opt/sslh/sslh.cfg
