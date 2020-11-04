@@ -8,7 +8,7 @@ services:
       - SYS_NICE
     environment:
       TZ: Asia/Tokyo
-      # LOG_LEVEL: "3"
+      LOG_LEVEL: "3"
     devices:
       - /dev/bus:/dev/bus
       - /dev/dvb:/dev/dvb
