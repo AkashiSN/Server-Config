@@ -36,11 +36,10 @@ iptables -t nat -A POSTROUTING -s ${OVPN_SERVER}/24 -o ${OVPN_NATDEVICE} -j MASQ
     --proto "tcp4" \
     --dev   "tun" \
     \
-    --ca       "/opt/openvpn/cert/server/cacert.pem" \
-    --cert     "/opt/openvpn/cert/server/server.pem" \
-    --key      "/opt/openvpn/cert/server/server.key" \
-    --dh       "/opt/openvpn/cert/server/dh.pem" \
-    --tls-auth "/opt/openvpn/cert/server/ta.key" "0" \
+    --ca   "/opt/openvpn/cert/server/cacert.pem" \
+    --cert "/opt/openvpn/cert/server/server.pem" \
+    --key  "/opt/openvpn/cert/server/server.key" \
+    --dh   "/opt/openvpn/cert/server/dh.pem" \
     \
     --auth "SHA256" \
     --cipher "AES-256-GCM" \

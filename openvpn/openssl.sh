@@ -76,10 +76,6 @@ openssl ca -batch -policy policy_anything -passin pass:"$ROOT_CA_PASSPHRASE" -ou
 mv newcert.pem ${SERVER_CERT_DIR}/server.pem
 mv newkey.pem ${SERVER_CERT_DIR}/server.key
 
-echo
-echo "Generate tls-auth key"
-echo
-openvpn --genkey secret ${SERVER_CERT_DIR}/ta.key
 
 #
 # Clinet certificate
@@ -127,9 +123,6 @@ $(openssl x509 -in ${CLIENT_CERT_DIR}/${CLIENT}.pem)
 <key>
 $(cat ${CLIENT_CERT_DIR}/${CLIENT}.key)
 </key>
-<tls-auth>
-$(cat ${SERVER_CERT_DIR}/ta.key)
-</tls-auth>
 EOS
 done
 
