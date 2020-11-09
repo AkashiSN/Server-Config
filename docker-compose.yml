@@ -30,8 +30,10 @@ services:
       - mariadb_epgstation:/var/lib/mysql
     environment:
       TZ: "Asia/Tokyo"
-    env_file:
-      - .env
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --performance-schema=false --expire_logs_days=1
     restart: always
     logging:
@@ -52,8 +54,9 @@ services:
         - ${RECODED_PATH}:/app/recorded
     environment:
       TZ: "Asia/Tokyo"
-    env_file:
-      - .env
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     depends_on:
       - mirakurun
       - mariadb_epgstation
@@ -66,8 +69,6 @@ services:
       context: auth-proxy
     environment:
       TZ: "Asia/Tokyo"
-    env_file:
-      - .env
     command: -clientID ${SLACK_CLIENT_ID}
     restart: always
 
@@ -78,8 +79,8 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
     environment:
       TZ: "Asia/Tokyo"
-    env_file:
-      - .env
+      TV_SUBDOMAIN: ${TV_SUBDOMAIN}
+      DOMAIN: ${DOMAIN}
     depends_on:
       - epgstation
       - auth-proxy
@@ -97,8 +98,6 @@ services:
       - ./openvpn:/opt/openvpn
     environment:
       TZ: "Asia/Tokyo"
-    env_file:
-      - .env
     restart: always
 
   sslh:

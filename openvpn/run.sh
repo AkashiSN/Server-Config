@@ -52,7 +52,6 @@ iptables -t nat -A POSTROUTING -s ${OVPN_SERVER}/24 -o ${OVPN_NATDEVICE} -j MASQ
     --topology subnet \
     --server "${OVPN_SERVER}" "255.255.255.0" \
     --ifconfig-pool-persist ipp.txt \
-    --push "redirect-gateway def1" \
     --push "route ${SERVER_SEGMENT} 255.255.0.0" \
     --push "dhcp-option DNS ${DEFAULT_GATEWAY}" \
     \
