@@ -19,7 +19,7 @@ RUN apt-get install -y iptables iproute2 && \
 
 WORKDIR /opt/openvpn
 
-RUN ln -s /usr/lib/ssl/misc/CA.pl /usr/bin/CA.pl
+RUN /opt/openvpn/openssl.sh ${STATE_NAME} ${LOCALITY_NAME} ${ORGANIZATION_NAME} ${ROOT_CA_PASSPHRASE} ${VPN_SUBDOMAIN}.${DOMAIN} ${CLIENTS}
 
 EXPOSE 443
 ENTRYPOINT [ "/opt/openvpn/run.sh" ]

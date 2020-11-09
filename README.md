@@ -10,17 +10,30 @@ SSH keyでログインできる状態
 
 `.env`を以下のように作成
 ```env
-FFMPEG_IMAGE=
-SLACK_CLIENT_ID=
-DOMAIN=
-```
-
-`.mariadb_epgstation.env`を以下のように作成
-```env
+# mysql
 MYSQL_USER="epgstation"
 MYSQL_PASSWORD="epgstation"
 MYSQL_ROOT_PASSWORD="epgstation"
 MYSQL_DATABASE="epgstation"
+
+# epgstation
+RECODED_PATH=
+
+# auth-proxy
+SLACK_CLIENT_ID=
+
+# Domain
+DOMAIN="akashisn.info"
+TV_SUBDOMAIN="tv"
+VPN_SUBDOMAIN="vpn"
+
+# OpenVPN
+STATE_NAME="Osaka"
+LOCALITY_NAME="Suita"
+ORGANIZATION_NAME="Sylc"
+ROOT_CA_PASSPHRASE="hogehoge"
+CLIENTS=""
+
 ```
 
 コンテナのビルドを行う
@@ -30,74 +43,6 @@ sudo docker-compose build
 ```
 
 ### OpenVPN用の証明書の作成
-https://help.ui.com/hc/en-us/articles/115015971688-EdgeRouter-OpenVPN-Server
-```bash
-# Launch shell in openvpn container
-sudo docker-compose run --rm --entrypoint bash openvpn
-
-# Generate a Diffie-Hellman (DH) key
-openssl dhparam -out ./cert/server/dh.pem -2 4096
-
-# Generate a root certificate
-CA.pl -newca -extra-req "-newkey rsa:4096"
-
-# PEM Passphrase: <secret>
-# Country Name: JP
-# State Or Province Name: Osaka
-# Locality Name: Suita
-# Organization Name: Sylc
-# Common Name: root
-
-# Copy the newly created certificate + key to the OpenVPN directory
-cp demoCA/cacert.pem ./cert/server/cacert.pem
-cp demoCA/private/cakey.pem ./cert/server/cakey.pem
-
-# Generate the server certificate
-CA.pl -newreq  -extra-req "-newkey rsa:4096"
-
-# Country Name: JP
-# State Or Province Name: Osaka
-# Locality Name: Suita
-# Organization Name: Sylc
-# Common Name: <vpn host name>
-
-# Sign the server certificate
-CA.pl -sign
-
-# Move and rename the server certificate and key files to the OpenVPN directory
-mv newcert.pem ./cert/server/server.pem
-mv newkey.pem ./cert/server/server.key
-
-# Generate tls-auth key
-openvpn --genkey secret ./cert/server/ta.key
-
-# Generate, sign and move the certificate and key files for the first OpenVPN client
-CA.pl -newreq  -extra-req "-newkey rsa:4096"
-
-# Common Name: <client name>
-
-# Sign the client certificate
-CA.pl -sign
-
-# Move and rename the client certificate and key files to the OpenVPN directory
-mv newcert.pem ./cert/client/<client name>.pem
-mv newkey.pem ./cert/client/<client name>.key
-
-# Remove the password from the server key file and optionally the client key file(s)
-openssl rsa -in ./cert/server/server.key -out ./cert/server/server-no-pass.key
-openssl rsa -in ./cert/client/<client name>.key -out ./cert/client/<client name>-no-pass.key
-
-# Overwrite the existing keys with the no-pass versions
-mv ./cert/server/server-no-pass.key ./cert/server/server.key 
-mv ./cert/client/<client name>-no-pass.key ./cert/client/<client name>.key 
-
-# Add read permission for non-root users to the client key files
-chmod 644 ./cert/client/<client name>.key
-
-# exit from container
-exit
-```
-
 クライアント用の設定ファイル(`<client name>.ovpn`)を以下のように作成する
 ```ovpn
 client
@@ -105,10 +50,10 @@ dev tun
 proto tcp
 remote <server> 443
 float
-resolv-retry infinite 
+resolv-retry infinite
 nobind
-persist-key 
-persist-tun 
+persist-key
+persist-tun
 verb 3
 redirect-gateway def1
 

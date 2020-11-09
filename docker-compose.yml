@@ -28,10 +28,10 @@ services:
     image: mariadb:10.5
     volumes:
       - mariadb_epgstation:/var/lib/mysql
-    env_file:
-      - .mariadb_epgstation.env
     environment:
       TZ: "Asia/Tokyo"
+    env_file:
+      - .env
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --performance-schema=false --expire_logs_days=1
     restart: always
     logging:
@@ -42,11 +42,7 @@ services:
   epgstation:
     build:
       context: epgstation
-      args:
-        - FFMPEG_IMAGE=${FFMPEG_IMAGE}
     runtime: nvidia
-    env_file:
-      - .mariadb_epgstation.env
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - ./epgstation/config:/app/config
@@ -56,6 +52,8 @@ services:
         - ${RECODED_PATH}:/app/recorded
     environment:
       TZ: "Asia/Tokyo"
+    env_file:
+      - .env
     depends_on:
       - mirakurun
       - mariadb_epgstation
@@ -68,6 +66,8 @@ services:
       context: auth-proxy
     environment:
       TZ: "Asia/Tokyo"
+    env_file:
+      - .env
     command: -clientID ${SLACK_CLIENT_ID}
     restart: always
 
@@ -75,29 +75,32 @@ services:
     image: nginx:mainline
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
-      - ./nginx/conf.d:/etc/nginx/conf.d 
+      - ./nginx/conf.d:/etc/nginx/conf.d
     environment:
       TZ: "Asia/Tokyo"
-      DOMAIN: ${DOMAIN}
+    env_file:
+      - .env
     depends_on:
       - epgstation
       - auth-proxy
     expose:
       - "443"
-    command: /bin/sh -c "envsubst '$$DOMAIN' < /etc/nginx/conf.d/tv.conf.template > /etc/nginx/conf.d/tv.conf && nginx -g 'daemon off;'"
+    command: /bin/sh -c "envsubst '$$TV_SUBDOMAIN $$DOMAIN' < /etc/nginx/conf.d/tv.conf.template > /etc/nginx/conf.d/tv.conf && nginx -g 'daemon off;'"
     restart: always
 
   openvpn:
     build:
       context: openvpn
-    cap_add: 
+    cap_add:
       - NET_ADMIN
     volumes:
       - ./openvpn:/opt/openvpn
-    environment: 
+    environment:
       TZ: "Asia/Tokyo"
+    env_file:
+      - .env
     restart: always
-  
+
   sslh:
     build:
       context: sslh

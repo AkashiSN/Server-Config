@@ -1,7 +1,5 @@
-ARG FFMPEG_IMAGE
-
 # ffmpeg
-FROM ${FFMPEG_IMAGE} AS ffmpeg
+FROM akashisn/ffmpeg AS ffmpeg
 
 # epgstaion
 FROM l3tnun/epgstation as epgstation
