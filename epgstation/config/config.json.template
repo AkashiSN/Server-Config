@@ -1,7 +1,7 @@
 {
     "readOnlyOnce": false,
-    "serverPort": 80,
-    "socketioPort": 80,
+    "serverPort": 8080,
+    "socketioPort": 8080,
     "clientSocketioPort": 443,
     "mirakurunPath": "http://mirakurun:40772/",
     "dbType": "mysql",
@@ -144,7 +144,7 @@
         "ios": "vlc-x-callback://x-callback-url/stream?url=https://ADDRESS&filename=FILENAME",
         "android": "intent://ADDRESS#Intent;package=org.videolan.vlc;type=video;scheme=https;end"
     },
-    
+
     "recordedDownloader": {
         "ios": "vlc-x-callback://x-callback-url/download?url=https://ADDRESS&filename=FILENAME"
     },

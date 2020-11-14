@@ -10,27 +10,53 @@ SSH keyでログインできる状態
 
 `.env`を以下のように作成
 ```env
-# mysql
-MYSQL_USER="epgstation"
-MYSQL_PASSWORD="epgstation"
-MYSQL_ROOT_PASSWORD="epgstation"
-MYSQL_DATABASE="epgstation"
+# www-data user
+UID=33
+GID=33
+
+# mysql-epgstation
+MYSQL_EPGSTATION_USER="epgstation"
+MYSQL_EPGSTATION_PASSWORD="epgstation"
+MYSQL_EPGSTATION_ROOT_PASSWORD="epgstation"
+MYSQL_EPGSTATION_DATABASE="epgstation"
 
 # epgstation
-RECODED_PATH=
+RECODED_PATH="/mnt/nas/recorded/"
+
+# mysql-nextcloud
+MYSQL_NEXTCLOUD_USER="nextcloud"
+MYSQL_NEXTCLOUD_PASSWORD="nextcloud"
+MYSQL_NEXTCLOUD_ROOT_PASSWORD="nextcloud"
+MYSQL_NEXTCLOUD_DATABASE="nextcloud"
+
+# redis
+REDIS_HOST_PASSWORD="redis"
+
+# nextcloud
+NEXTCLOUD_ADMIN_USER="admin"
+NEXTCLOUD_ADMIN_PASSWORD="path"
+NAS_PATH="/mnt/nas"
 
 # auth-proxy
-SLACK_CLIENT_ID=
+SLACK_CLIENT_ID="hoge.hoge"
 
 # Domain
 DOMAIN="akashisn.info"
 TV_SUBDOMAIN="tv"
+FILES_SUBDOMAIN="files"
 ```
 
 コンテナのビルドを行う
 
 ```bash
 sudo docker-compose build
+```
+
+現在のユーザーをグループwww-dataに追加する
+
+```bash
+sudo usermod -a -G www-data user
+sudo usermod -a -G user www-data
 ```
 
 ### OpenVPN用の証明書の作成

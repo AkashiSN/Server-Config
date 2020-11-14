@@ -25,9 +25,9 @@
         "stdout": { "type": "stdout" }
     },
     "categories": {
-        "default": { "appenders": [ "console", "stdout" ], "level": "debug" },
-        "system": { "appenders": [ "system", "stdout" ], "level": "debug" },
-        "access": { "appenders": [ "access", "stdout" ], "level": "debug" },
-        "stream": { "appenders": [ "stream", "stdout" ], "level": "debug" }
+        "default": { "appenders": [ "console", "stdout" ], "level": "info" },
+        "system": { "appenders": [ "system", "stdout" ], "level": "info" },
+        "access": { "appenders": [ "access", "stdout" ], "level": "info" },
+        "stream": { "appenders": [ "stream", "stdout" ], "level": "info" }
     }
 }

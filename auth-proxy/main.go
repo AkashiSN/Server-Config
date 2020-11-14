@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -29,11 +28,6 @@ func serve(clientID string) *echo.Echo{
 
 	// nginxからauth_requestでとんでくるルーティング
 	e.GET("/oauth2/auth", func(c echo.Context) error {
-		UA := c.Request().UserAgent()
-		if strings.Contains(UA, "VLC") {
-			return c.NoContent(http.StatusOK)
-		}
-
 		sess, err := session.Get("session", c)
 		if err != nil {
 			return c.NoContent(http.StatusUnauthorized)
@@ -58,16 +52,16 @@ func serve(clientID string) *echo.Echo{
 		if err != nil{
 			log.Fatal(err)
 		}
-		
+
 		//クエリパラメータ
 		params := request.URL.Query()
 		params.Add("scope", "identity.basic,identity.email")
 		params.Add("client_id", clientID)
 		params.Add("redirect_uri", url)
 		request.URL.RawQuery = params.Encode()
- 
+
 		log.Println(request.URL.String())
-		
+
 		return c.Redirect(http.StatusFound, request.URL.String())
 	})
 

@@ -5,14 +5,14 @@ map $http_upgrade $connection_upgrade {
 
 server{
     listen 443 ssl http2;
-    server_name ${TV_SUBDOMAIN}.${DOMAIN};
+    server_name ${FILES_SUBDOMAIN}.${DOMAIN};
 
     ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 
-    add_header X-Frame-Options          SAMEORIGIN;
-    add_header X-Content-Type-Options   nosniff;
-    add_header X-XSS-Protection         "1; mode=block";
+    add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;" always;
+
+    fastcgi_hide_header X-Powered-By;
 
     etag off;
 
@@ -49,6 +49,14 @@ server{
         proxy_pass        http://auth-proxy:80;
     }
 
+    location = /.well-known/carddav {
+        return 301 https://$host/remote.php/dav;
+    }
+
+    location = /.well-known/caldav {
+        return 301 https://$host/remote.php/dav;
+    }
+
     location / {
         # 認証済みかどうか確認
         auth_request /oauth2/auth;
@@ -56,6 +64,6 @@ server{
         # ^で401がかえってきたら認証を開始
         error_page 401 = /oauth2/start;
 
-        proxy_pass http://epgstation:8080/;
+        proxy_pass http://nextcloud:80/;
     }
 }
