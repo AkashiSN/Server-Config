@@ -19,7 +19,7 @@ RUN apt-get update && \
     apt-get -y remove curl && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 # Copy libnpp
 COPY --from=ffmpeg /lib/x86_64-linux-gnu/libnppc.so.11 /lib/x86_64-linux-gnu/libnppc.so.11
