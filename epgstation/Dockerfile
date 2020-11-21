@@ -16,7 +16,6 @@ RUN apt-get update && \
     apt-get install -y libva-drm2 && \
     curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get install -y nodejs && \
-    apt-get -y remove curl && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
@@ -35,5 +34,13 @@ COPY --from=ffmpeg /usr/bin/ffplay /usr/bin/ffplay
 # Copy epgstation
 COPY --from=epgstation /app /app/
 
+# Copy nvidia patch
+RUN mkdir -p /patched-lib && \
+    curl -sL -o /usr/local/bin/patch.sh https://raw.githubusercontent.com/keylase/nvidia-patch/master/patch.sh && \
+    curl -sL -o /usr/local/bin/docker-entrypoint.sh https://raw.githubusercontent.com/keylase/nvidia-patch/master/docker-entrypoint.sh && \
+    chmod +x /usr/local/bin/patch.sh /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 80
 WORKDIR /app
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

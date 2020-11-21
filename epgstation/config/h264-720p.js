@@ -10,19 +10,25 @@ const probesizeSize = '32M'; // Mirakurun の設定に応じて変更するこ�
 const dualMonoMode = 'main';
 const isDualMono = parseInt(process.env.AUDIOCOMPONENTTYPE, 10) == 2;
 
-const videoHeight = parseInt(process.env.VIDEORESOLUTION, 10);
-const audioBitrate = videoHeight > 720 ? '192k' : '128k';
-
-const preset = 'fast';
-const codec = 'libx264';
-const crf = 18;
-
-const args = ['-fflags', '+discardcorrupt', '-y', '-analyzeduration', analyzedurationSize, '-probesize', probesizeSize];
+const args = [
+    '-fflags', '+discardcorrupt',
+    '-y',
+    '-analyzeduration', analyzedurationSize,
+    '-probesize', probesizeSize
+];
 
 // dual mono 設定
 if (isDualMono) {
     Array.prototype.push.apply(args, ['-dual_mono_mode', dualMonoMode]);
 }
+
+// ハードウェアアクセラレーション 設定
+Array.prototype.push.apply(args,[
+    '-deint', 'adaptive',
+    '-drop_second_field', '1',
+    '-hwaccel', 'cuvid',
+    '-hwaccel_output_format', 'cuda'
+]);
 
 // input 設定
 Array.prototype.push.apply(args,['-i', input]);
@@ -31,22 +37,19 @@ Array.prototype.push.apply(args,['-i', input]);
 Array.prototype.push.apply(args,['-movflags', 'faststart']);
 
 // video filter 設定
-let videoFilter = 'yadif';
-if (videoHeight > 720) {
-    videoFilter += ',scale=-2:720'
-}
-Array.prototype.push.apply(args, ['-vf', videoFilter]);
+Array.prototype.push.apply(args, [
+    '-vf', 'yadif_cuda,scale_npp=-1:720:interp_algo=lanczos'
+]);
 
 // その他設定
 Array.prototype.push.apply(args,[
-    '-preset', preset,
     '-aspect', '16:9',
-    '-c:v', codec,
-    '-crf', crf,
+    '-c:v', 'h264_nvenc',
+    '-crf', '23',
     '-f', 'mp4',
     '-c:a', 'libfdk_aac',
     '-ar', '48000',
-    '-ab', audioBitrate,
+    '-ab', '256k',
     '-ac', '2',
     output
 ]);

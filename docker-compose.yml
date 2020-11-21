@@ -52,7 +52,6 @@ services:
         - ./epgstation/thumbnail:/app/thumbnail
         - ./epgstation/logs:/app/logs
         - ${RECODED_PATH}:/app/recorded
-    user: "${UID}:${GID}"
     environment:
       TZ: "Asia/Tokyo"
       MYSQL_USER: ${MYSQL_EPGSTATION_USER}
@@ -63,7 +62,8 @@ services:
       - mariadb_epgstation
     command: >
       /bin/sh -c
-        "envsubst \
+        "su -s /bin/bash www-data \
+        && envsubst \
           '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
           < /app/config/config.json.template \
           > /app/config/config.json \
