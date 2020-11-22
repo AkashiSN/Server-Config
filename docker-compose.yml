@@ -75,7 +75,8 @@ services:
       context: auth-proxy
     environment:
       TZ: "Asia/Tokyo"
-    command: -clientID ${SLACK_CLIENT_ID}
+      SLACK_CLIENT_ID: ${SLACK_CLIENT_ID}
+      SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET}
     restart: always
 
   mariadb_nextcloud:
@@ -156,6 +157,7 @@ services:
           '$$FILES_SUBDOMAIN $$DOMAIN' \
           < /etc/nginx/conf.d/files.conf.template \
           > /etc/nginx/conf.d/files.conf \
+        && cp /etc/nginx/conf.d/nginx.conf.template /etc/nginx/nginx.conf \
         && nginx -g 'daemon off;'"
     restart: always
 

@@ -33,18 +33,36 @@
         }
     ],
 
-    "liveHLS": [
+    "mpegTsStreaming": [
         {
             "name": "1080p (h264_nvenc)",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf scale_npp=-1:1080 -flags +loop-global_header %OUTPUT%"
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos -y -f mpegts pipe:1"
         },
         {
             "name": "720p (h264_nvenc)",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf scale_npp=-1:720 -flags +loop-global_header %OUTPUT%"
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos -y -f mpegts pipe:1"
         },
         {
             "name": "480p (h264_nvenc)",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf scale_npp=-1:480 -flags +loop-global_header %OUTPUT%"
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -b:a 128k -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:480:interp_algo=lanczos -y -f mpegts pipe:1"
+        },
+        {
+            "name": "無変換"
+        }
+    ],
+
+    "liveHLS": [
+        {
+            "name": "1080p (h264_nvenc)",
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos -flags +loop-global_header %OUTPUT%"
+        },
+        {
+            "name": "720p (h264_nvenc)",
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos -flags +loop-global_header %OUTPUT%"
+        },
+        {
+            "name": "480p (h264_nvenc)",
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -c:a libfdk_aac -ar 48000 -b:a 128k -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:480:interp_algo=lanczos -flags +loop-global_header %OUTPUT%"
         }
     ],
 
@@ -66,15 +84,15 @@
     "liveMP4": [
         {
             "name": "1080p (h264_nvenc)",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf scale_npp=-1:1080 -movflags frag_keyframe+empty_moov -y -f mp4 pipe:1"
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos -movflags frag_keyframe+empty_moov -y -f mp4 pipe:1"
         },
         {
             "name": "720p (h264_nvenc)",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf scale_npp=-1:720 -movflags frag_keyframe+empty_moov -y -f mp4 pipe:1"
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos -movflags frag_keyframe+empty_moov -y -f mp4 pipe:1"
         },
         {
             "name": "480p (h264_nvenc)",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf scale_npp=-1:480 -movflags frag_keyframe+empty_moov -y -f mp4 pipe:1"
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1 -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:480:interp_algo=lanczos -movflags frag_keyframe+empty_moov -y -f mp4 pipe:1"
         }
     ],
 
@@ -117,13 +135,13 @@
         "mp4": [
             {
                 "name": "1080p (h264_nvenc)",
-                "cmd": "%FFMPEG% -dual_mono_mode main %RE% -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos %VB% %VBUFFER% %AB% %ABUFFER% -profile:v baseline -preset veryfast -tune fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1",
+                "cmd": "%FFMPEG% -dual_mono_mode main %RE% -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos %VB% %VBUFFER% %AB% %ABUFFER% -profile:v baseline -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1",
                 "vb": "3000k",
                 "ab": "192k"
             },
             {
                 "name": "720p (h264_nvenc)",
-                "cmd": "%FFMPEG% -dual_mono_mode main %RE% -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos %VB% %VBUFFER% %AB% %ABUFFER% -profile:v baseline -preset veryfast -tune fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1",
+                "cmd": "%FFMPEG% -dual_mono_mode main %RE% -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos %VB% %VBUFFER% %AB% %ABUFFER% -profile:v baseline -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1",
                 "vb": "3000k",
                 "ab": "192k"
             }
@@ -131,13 +149,13 @@
         "mpegTs": [
             {
                 "name": "1080p (h264_nvenc)",
-                "cmd": "%FFMPEG% -dual_mono_mode main %RE% -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos %VB% %VBUFFER% %AB% %ABUFFER% -profile:v baseline -preset veryfast -tune fastdecode,zerolatency -y -f mpegts pipe:1",
+                "cmd": "%FFMPEG% -dual_mono_mode main %RE% -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos %VB% %VBUFFER% %AB% %ABUFFER% -profile:v baseline -y -f mpegts pipe:1",
                 "vb": "3000k",
                 "ab": "192k"
             },
             {
                 "name": "720p (h264_nvenc)",
-                "cmd": "%FFMPEG% -dual_mono_mode main %RE% -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos %VB% %VBUFFER% %AB% %ABUFFER% -profile:v baseline -preset veryfast -tune fastdecode,zerolatency -y -f mpegts pipe:1",
+                "cmd": "%FFMPEG% -dual_mono_mode main %RE% -i pipe:0 -sn -threads 8 -c:a libfdk_aac -ar 48000 -ac 2 -c:v h264_nvenc -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos %VB% %VBUFFER% %AB% %ABUFFER% -profile:v baseline -y -f mpegts pipe:1",
                 "vb": "3000k",
                 "ab": "192k"
             }
