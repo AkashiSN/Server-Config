@@ -39,6 +39,7 @@ NAS_PATH="/mnt/nas"
 
 # auth-proxy
 SLACK_CLIENT_ID="hoge.hoge"
+SLACK_CLIENT_SECRET=""
 
 # Domain
 DOMAIN="akashisn.info"
