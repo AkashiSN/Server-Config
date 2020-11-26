@@ -269,96 +269,19 @@ sudo service ddclient status
 
 ### Zsh, Vim
 ```bash
-# Install dependencies
-sudo apt install -y gawk
-
-# Install zsh
+# Install zsh, vim
 sudo apt install -y zsh vim
 
-# Download .zshrc
-wget -O $HOME/.zshrc https://gist.github.com/AkashiSN/4ff2eb541742bedb3d281725b6d15c3f/raw/zshrc
-
-# Download .vimrc
-wget -O $HOME/.vimrc https://gist.github.com/AkashiSN/4ff2eb541742bedb3d281725b6d15c3f/raw/vimrc
-
-# Change default login shell
-user=$(whoami)
-sudo chsh -s $(which zsh) $user
+# Install dotfiles and sometools.
+zsh <(curl -L https://raw.githubusercontent.com/AkashiSN/dotfiles/main/setup.zsh)
 ```
 
 ## Golang
 
 ```bash
-# clone anyenv
-git clone https://github.com/anyenv/anyenv $HOME/.anyenv
-
-# add path
-cat <<\EOF >> $HOME/.zprofile
-# Initial setting of anyenv.
-export PATH="$HOME/.anyenv/bin:$PATH"
-eval "$(anyenv init -)"
-
-EOF
-
-# configure anyenv
-$HOME/.anyenv/bin/anyenv init
-
-# install anyenv
-$HOME/.anyenv/bin/anyenv install --init
-
-# install plugins
-mkdir -p $($HOME/.anyenv/bin/anyenv root)/plugins
-git clone https://github.com/znz/anyenv-update.git $($HOME/.anyenv/bin/anyenv root)/plugins/anyenv-update
-git clone https://github.com/znz/anyenv-git.git $($HOME/.anyenv/bin/anyenv root)/plugins/anyenv-git
-
-# reload zsh
-exec zsh -l
-
-# install goenv
-anyenv install goenv
-
-# Add to zprofile
-cat <<\EOF >> $HOME/.zprofile
-# Add GOPATH
-export GOENV_DISABLE_GOPATH=1
-export GOPATH=$HOME/Project
-export PATH=$PATH:$GOPATH/bin
-
-EOF
-
-# reload zsh
-exec zsh -l
-
 # install golang
-goenv install 1.15.3
+goenv install 1.15.4
 
 # set default
-goenv global 1.15.3
-
-# install ghq
-curl -L -o /tmp/ghq_linux_amd64.zip https://github.com/x-motemen/ghq/releases/download/v1.1.5/ghq_linux_amd64.zip
-unzip /tmp/ghq_linux_amd64.zip -d /tmp/
-sudo mv /tmp/ghq_linux_amd64/ghq /usr/local/bin/
-git config --global ghq.root $GOPATH/src
-
-# install peco
-curl -L -o /tmp/peco_linux_amd64.tar.gz https://github.com/peco/peco/releases/download/v0.5.8/peco_linux_amd64.tar.gz
-tar xzvf /tmp/peco_linux_amd64.tar.gz -C /tmp
-sudo mv /tmp/peco_linux_amd64/peco /usr/local/bin/
-
-# setting for peco
-cat <<\EOF >> $HOME/.zprofile
-# Setting for peco
-function peco-src () {
-  local selected_dir=$(ghq list -p | peco --query "$LBUFFER")
-  if [ -n "$selected_dir" ]; then
-    BUFFER="cd ${selected_dir}"
-    zle accept-line
-  fi
-  zle clear-screen
-}
-zle -N peco-src
-bindkey '^]' peco-src
-
-EOF
+goenv global 1.15.4
 ```
