@@ -78,6 +78,19 @@ CLIENTS="iPadPro11 iPhone7 Pixel3XL MacBookPro13"
 sudo docker-compose run --rm --entrypoint=/opt/openvpn/openssl.sh openvpn
 ```
 
+## チューナ周波数の設定
+
+Thanks: https://qiita.com/KouCo/items/69bcacbf867366e5d692
+
+```bash
+cd mirakurun
+
+sudo docker build -t dvb-scan --target=dvb-tools .
+sudo docker run --rm -it --device /dev/dvb:/dev/dvb --cap-add SYS_ADMIN --cap-add SYS_NICE -v `pwd`/tuners:/workdir/tuners dvb-scan
+
+cd ..
+```
+
 ## コンテナの起動
 
 ```bash
