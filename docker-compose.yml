@@ -2,6 +2,8 @@ version: "3.8"
 
 services:
   mirakurun:
+    # build:
+    #   context: mirakurun
     image: chinachu/mirakurun
     cap_add:
       - SYS_ADMIN

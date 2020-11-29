@@ -1,10 +1,12 @@
 FROM ubuntu:20.04 as dvb-tools
 
+ENV DEBIAN_FRONTEND noninteractive
 WORKDIR /workdir
 
 # Install buld tools
-RUN apt-get install -y curl build-essential gettext automake autopoint libtool pkg-config && \
-    apt-get install -y udev systemd libudev-dev libsystemd-dev
+RUN apt-get update && \
+    apt-get install -y curl build-essential gettext automake autopoint libtool pkg-config && \
+    apt-get install -y udev libudev-dev systemd libjpeg-dev libelf-dev
 
 # Download v4l-utils
 RUN curl -L -o /workdir/v4l-utils-1.20.0.tar.bz2 https://linuxtv.org/downloads/v4l-utils/v4l-utils-1.20.0.tar.bz2 && \
@@ -19,7 +21,7 @@ RUN patch -u -d /workdir/v4l-utils-1.20.0 -p 1 < /workdir/v4l-utils-1.20.0.patch
     cd /workdir/v4l-utils-1.20.0 && \
     ./bootstrap.sh && \
     ./configure --disable-doxygen-doc --disable-doxygen-dot --disable-v4l2-compliance-libv4l \
-        --disable-v4l2-ctl-libv4l --disable-qv4l2 --enable-gconv --without-jpeg --enable-shared && \
+        --disable-v4l2-ctl-libv4l --disable-qv4l2 --enable-gconv --enable-shared && \
     make -j$(nproc) CFLAGS="-fPIC" && \
     make install
 
@@ -29,31 +31,16 @@ RUN cd /workdir/v4l-utils-1.20.0/contrib/gconv && \
 ENV GCONV_PATH=/usr/local/lib/gconv
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
+# Mirakurun
+FROM chinachu/mirakurun
+
+ENV LD_LIBRARY_PATH=/usr/local/lib
+ENV GCONV_PATH=/usr/local/lib/gconv
+
 ADD isdb-init /workdir/isdb-init
 ADD scan.sh /workdir/scan.sh
 
-ENTRYPOINT [ "/bin/sh", "/workdir/scan.sh" ]
-
-
-# # Mirakurun
-# FROM chinachu/mirakurun as mirakurun
-
-
-# release
-FROM ubuntu:20.04
-
-ENV DEBIAN_FRONTEND noninteractive
-
-# RUN apt-get update && \
-#     apt-get install -y curl gettext && \
-#     apt-get install -y libva-drm2 && \
-#     curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
-#     apt-get install -y nodejs && \
-#     apt-get autoremove -y && \
-#     apt-get clean && \
-#     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
-
-# # Copy mirakurun
-# COPY --from=mirakurun /app /app/
-
-# COPY --from=dvb-tools /
+# Copy dvb-tools
+COPY --from=dvb-tools /usr/local/bin/dvb* /usr/local/bin/
+COPY --from=dvb-tools /usr/local/lib/libdvbv5.so* /usr/local/lib/
+COPY --from=dvb-tools /usr/local/lib/gconv /usr/local/lib/gconv/
