@@ -48,13 +48,40 @@ RUN cd /workdir/libarib25-master && \
     make -j$(nproc) && \
     make install
 
+
 # Mirakurun
 FROM chinachu/mirakurun as mirakurun
 
+
+# Release
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND noninteractive
 ENV LD_LIBRARY_PATH=/usr/local/lib
 ENV GCONV_PATH=/usr/local/lib/gconv
+WORKDIR /app
 
 # Copy dvb-tools
 COPY --from=dvb-tools /usr/local/bin/dvb* /usr/local/bin/
 COPY --from=dvb-tools /usr/local/lib/libdvbv5.so* /usr/local/lib/
 COPY --from=dvb-tools /usr/local/lib/gconv /usr/local/lib/gconv/
+
+# Copy libarib25
+COPY --from=libarib25 /usr/local/bin/b25 /usr/local/bin/
+COPY --from=libarib25 /usr/local/lib/libarib25.so* /usr/local/lib/
+
+# Copy mirakurun
+COPY --from=mirakurun /app /app/
+
+# Install node and library
+RUN apt-get update && \
+    apt-get install -y curl && \
+    apt-get install -y pcscd pcsc-tools libccid libpcsclite1 && \
+    curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+
+CMD ["./docker/container-init.sh"]
+EXPOSE 40772 9229

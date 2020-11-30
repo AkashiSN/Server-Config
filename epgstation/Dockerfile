@@ -11,6 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility,video
 
+# Install node and library
 RUN apt-get update && \
     apt-get install -y curl gettext && \
     apt-get install -y libva-drm2 && \
