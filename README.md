@@ -80,15 +80,17 @@ sudo docker-compose run --rm --entrypoint=/opt/openvpn/openssl.sh openvpn
 
 ## チューナ周波数の設定
 
-Thanks: https://qiita.com/KouCo/items/69bcacbf867366e5d692
+Many thanks: https://qiita.com/KouCo/items/69bcacbf867366e5d692
+
+手動でチャンネルの周波数の設定を行う場合
 
 ```bash
-cd mirakurun
+cd mirakurun/scan
 
 sudo docker build -t dvb-scan --target=dvb-tools .
 sudo docker run --rm -it --device /dev/dvb:/dev/dvb --cap-add SYS_ADMIN --cap-add SYS_NICE -v `pwd`/tuners:/workdir/tuners dvb-scan
 
-cd ..
+cd ../..
 ```
 
 ## コンテナの起動

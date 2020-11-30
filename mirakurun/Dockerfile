@@ -1,3 +1,4 @@
+# dvb tools build
 FROM ubuntu:20.04 as dvb-tools
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -12,13 +13,9 @@ RUN apt-get update && \
 RUN curl -L -o /workdir/v4l-utils-1.20.0.tar.bz2 https://linuxtv.org/downloads/v4l-utils/v4l-utils-1.20.0.tar.bz2 && \
     tar xvf /workdir/v4l-utils-1.20.0.tar.bz2 -C /workdir/
 
-# Add patch
-ADD v4l-utils-1.20.0.patch /workdir/v4l-utils-1.20.0.patch
-
 # Build v4l-utils
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig
-RUN patch -u -d /workdir/v4l-utils-1.20.0 -p 1 < /workdir/v4l-utils-1.20.0.patch && \
-    cd /workdir/v4l-utils-1.20.0 && \
+RUN cd /workdir/v4l-utils-1.20.0 && \
     ./bootstrap.sh && \
     ./configure --disable-doxygen-doc --disable-doxygen-dot --disable-v4l2-compliance-libv4l \
         --disable-v4l2-ctl-libv4l --disable-qv4l2 --enable-gconv --enable-shared && \
@@ -28,17 +25,34 @@ RUN patch -u -d /workdir/v4l-utils-1.20.0 -p 1 < /workdir/v4l-utils-1.20.0.patch
 # Build gconv
 RUN cd /workdir/v4l-utils-1.20.0/contrib/gconv && \
     make install
-ENV GCONV_PATH=/usr/local/lib/gconv
-ENV LD_LIBRARY_PATH=/usr/local/lib
+
+
+# libarib25 build
+FROM ubuntu:20.04 as libarib25
+
+ENV DEBIAN_FRONTEND noninteractive
+WORKDIR /workdir
+
+# Install buld tools
+RUN apt-get update && \
+    apt-get install -y curl build-essential cmake && \
+    apt-get install -y libpcsclite-dev
+
+# Download libarib25
+RUN curl -L -o /workdir/libarib25.tar.gz https://github.com/stz2012/libarib25/archive/master.tar.gz && \
+    tar xvf /workdir/libarib25.tar.gz -C /workdir/
+
+# Build libarib25
+RUN cd /workdir/libarib25-master && \
+    cmake . && \
+    make -j$(nproc) && \
+    make install
 
 # Mirakurun
-FROM chinachu/mirakurun
+FROM chinachu/mirakurun as mirakurun
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 ENV GCONV_PATH=/usr/local/lib/gconv
-
-ADD isdb-init /workdir/isdb-init
-ADD scan.sh /workdir/scan.sh
 
 # Copy dvb-tools
 COPY --from=dvb-tools /usr/local/bin/dvb* /usr/local/bin/
