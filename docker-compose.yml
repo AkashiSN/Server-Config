@@ -147,8 +147,10 @@ services:
       - epgstation
       - auth-proxy
       - nextcloud
-    expose:
-      - "443"
+    # expose:
+      #   - "443"
+    ports:
+      - "443:443"
     command: >
       /bin/sh -c
         "envsubst \
@@ -163,30 +165,30 @@ services:
         && nginx -g 'daemon off;'"
     restart: always
 
-  openvpn:
-    build:
-      context: openvpn
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ./openvpn:/opt/openvpn
-    environment:
-      TZ: "Asia/Tokyo"
-    restart: always
+  # openvpn:
+  #   build:
+  #     context: openvpn
+  #   cap_add:
+  #     - NET_ADMIN
+  #   volumes:
+  #     - ./openvpn:/opt/openvpn
+  #   environment:
+  #     TZ: "Asia/Tokyo"
+  #   restart: always
 
-  sslh:
-    build:
-      context: sslh
-    cap_add:
-      - NET_ADMIN
-    environment:
-      TZ: "Asia/Tokyo"
-    depends_on:
-      - nginx
-      - openvpn
-    ports:
-      - "443:443"
-    restart: always
+  # sslh:
+  #   build:
+  #     context: sslh
+  #   cap_add:
+  #     - NET_ADMIN
+  #   environment:
+  #     TZ: "Asia/Tokyo"
+  #   depends_on:
+  #     - nginx
+  #     - openvpn
+  #   ports:
+  #     - "443:443"
+  #   restart: always
 
 volumes:
   mariadb_epgstation:
