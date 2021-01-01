@@ -165,6 +165,14 @@ services:
         && nginx -g 'daemon off;'"
     restart: always
 
+  # capt:
+  #   build:
+  #     context: capt
+  #   devices:
+  #     - /dev/usb:/dev/usb
+  #   environment:
+  #     TZ: "Asia/Tokyo"
+
   # openvpn:
   #   build:
   #     context: openvpn
