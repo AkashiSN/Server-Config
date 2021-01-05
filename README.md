@@ -10,10 +10,6 @@ SSH keyでログインできる状態
 
 `.env`を以下のように作成
 ```env
-# www-data user
-UID=33
-GID=33
-
 # mysql-epgstation
 MYSQL_EPGSTATION_USER="epgstation"
 MYSQL_EPGSTATION_PASSWORD="epgstation"
