@@ -34,7 +34,7 @@ REDIS_HOST_PASSWORD="redis"
 
 # nextcloud
 NEXTCLOUD_ADMIN_USER="admin"
-NEXTCLOUD_ADMIN_PASSWORD="path"
+NEXTCLOUD_ADMIN_PASSWORD="pass"
 NAS_PATH="/mnt/nas"
 
 # auth-proxy

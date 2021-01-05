@@ -13,7 +13,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES compute,utility,video
 
 # Install node and library
 RUN apt-get update && \
-    apt-get install -y curl gettext && \
+    apt-get install -y curl gettext sudo && \
     apt-get install -y libva-drm2 && \
     curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get install -y nodejs && \
