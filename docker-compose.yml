@@ -63,7 +63,8 @@ services:
       - mirakurun
       - mariadb_epgstation
     command: >
-      /usr/bin/sudo -E -u www-data /bin/sh -c
+      chown -R www-data:www-data /root/.npm
+      && /usr/bin/sudo -E -u www-data /bin/sh -c
         "envsubst \
           '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
           < /app/config/config.json.template \
