@@ -63,13 +63,14 @@ services:
       - mirakurun
       - mariadb_epgstation
     command: >
-      chown -R www-data:www-data /root/.npm
-      && /usr/bin/sudo -E -u www-data /bin/sh -c
-        "envsubst \
+      /bin/sh -c
+        "chown -R www-data:www-data /root/.npm \
+        && /usr/bin/sudo -E -u www-data /bin/sh -c
+        \"envsubst \
           '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
           < /app/config/config.json.template \
           > /app/config/config.json \
-        && npm start"
+        && npm start\""
     restart: always
 
   auth-proxy:
