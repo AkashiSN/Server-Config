@@ -28,6 +28,9 @@ server{
     proxy_set_header    Upgrade     $http_upgrade;
     proxy_set_header    Connection  $connection_upgrade;
 
+    proxy_buffers 16 16k;
+    proxy_buffer_size 16k;
+
     # for checking login status.
     # only returns a 202 Accepted response or a 401 Unauthorized response;
     location = /oauth2/auth {
