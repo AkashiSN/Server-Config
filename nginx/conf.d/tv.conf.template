@@ -35,6 +35,7 @@ server{
     # only returns a 202 Accepted response or a 401 Unauthorized response;
     location = /oauth2/auth {
         internal;
+        auth_request            off;
         proxy_pass              http://auth-proxy:80;
         proxy_pass_request_body off;
     }
@@ -42,6 +43,7 @@ server{
     # to start oauth cycle
     location = /oauth2/start  {
         internal;
+        auth_request            off;
         proxy_pass              http://auth-proxy:80;
         proxy_pass_request_body off;
     }

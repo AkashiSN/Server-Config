@@ -41,7 +41,7 @@ RUN mkdir -p /patched-lib && \
     curl -sL -o /usr/local/bin/docker-entrypoint.sh https://raw.githubusercontent.com/keylase/nvidia-patch/master/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/patch.sh /usr/local/bin/docker-entrypoint.sh
 
-EXPOSE 80
+EXPOSE 8080
 WORKDIR /app
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

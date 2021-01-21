@@ -152,7 +152,7 @@ func serve() *echo.Echo {
 		// 一時的なランダム文字列により正規ユーザかを確認
 		val, ok := sess.Values["state"]
 		if !ok || val != c.QueryParam("state") {
-			return c.String(http.StatusUnauthorized, "Forbidden")
+			return c.String(http.StatusUnauthorized, "Forbidden: invalid state")
 		}
 		sess.Values["state"] = ""
 
@@ -164,7 +164,7 @@ func serve() *echo.Echo {
 		code := c.QueryParam("code")
 		userName, err := checkCode(code, redirectURL)
 		if err != nil {
-			return c.String(http.StatusUnauthorized, "Forbidden")
+			return c.String(http.StatusUnauthorized, "Forbidden: invalid user")
 		}
 
 		sess.Options = &sessions.Options{

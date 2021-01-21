@@ -1,4 +1,4 @@
-config/config.json
+config/config.yml
 data/streamfiles/*
 data/*
 logs/Operator/*
