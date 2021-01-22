@@ -29,8 +29,8 @@ thumbnailPosition: 5
 ffmpeg: /usr/bin/ffmpeg
 ffprobe: /usr/bin/ffprobe
 
-encodeProcessNum: 4
-concurrentEncodeNum: 1
+encodeProcessNum: 6
+concurrentEncodeNum: 2
 encode:
   - name: H.264 1090p
     cmd: "%NODE% %ROOT%/config/h264-1080p.js"
@@ -57,7 +57,7 @@ stream:
       m2ts:
         - name: 1080p
           cmd:
-            '%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 192k -ac 2
+            '%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 256k -ac 2
             -c:v libx264 -vf yadif,scale=-2:1080 -b:v 3000k -preset veryfast -y -f mpegts pipe:1'
         - name: 720p
           cmd:
@@ -72,7 +72,7 @@ stream:
       webm:
         - name: 1080p
           cmd:
-            '%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a libvorbis -ar 48000 -b:a 192k -ac
+            '%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a libvorbis -ar 48000 -b:a 256k -ac
             2 -c:v libvpx-vp9 -vf yadif,scale=-2:1080 -b:v 3000k -deadline realtime -speed 4 -cpu-used 5 -y -f
             webm pipe:1'
         - name: 720p
@@ -87,9 +87,27 @@ stream:
             webm pipe:1'
 
       mp4:
+        - name: 1080p (NVENC)
+          cmd:
+            '%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1
+            -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc
+            -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos -b:v 3000k -profile:v baseline -preset llhq
+            -tune ll -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
+        - name: 720p (NVENC)
+          cmd:
+            '%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1
+            -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_nvenc
+            -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos -b:v 3000k -profile:v baseline -preset llhq
+            -tune ll -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
+        - name: 480p (NVENC)
+          cmd:
+            '%FFMPEG% -re -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1
+            -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_nvenc
+            -vf yadif_cuda,scale_npp=-1:480:interp_algo=lanczos -b:v 1500k -profile:v baseline -preset llhq
+            -tune ll -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
         - name: 1080p
           cmd:
-            '%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 192k -ac 2
+            '%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 256k -ac 2
             -c:v libx264 -vf yadif,scale=-2:1080 -b:v 3000k -profile:v baseline -preset veryfast -tune
             fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4
             pipe:1'
@@ -111,7 +129,7 @@ stream:
           cmd:
             '%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -threads 8 -ignore_unknown -max_muxing_queue_size
             1024 -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename
-            %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a aac -ar 48000 -b:a 192k
+            %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a aac -ar 48000 -b:a 256k
             -ac 2 -c:v libx264 -vf yadif,scale=-2:1080 -b:v 3000k -preset veryfast -flags +loop-global_header
             %OUTPUT%'
         - name: 720p
@@ -143,7 +161,7 @@ stream:
       webm:
         - name: 1080p
           cmd:
-            "%FFMPEG% -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a libvorbis -ar 48000 -b:a 192k -ac 2
+            "%FFMPEG% -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a libvorbis -ar 48000 -b:a 256k -ac 2
             -c:v libvpx-vp9 -vf yadif,scale=-2:1080 -b:v 3000k -deadline realtime -speed 4 -cpu-used 5 -y -f
             webm pipe:1"
         - name: 720p
@@ -158,9 +176,27 @@ stream:
             webm pipe:1"
 
       mp4:
+        - name: 1080p (NVENC)
+          cmd:
+            "%FFMPEG% -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1
+            -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc
+            -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos -b:v 3000k -profile:v baseline -preset llhq
+            -tune ll -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1"
+        - name: 720p (NVENC)
+          cmd:
+            "%FFMPEG% -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1
+            -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_nvenc
+            -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos -b:v 3000k -profile:v baseline -preset llhq
+            -tune ll -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1"
+        - name: 480p (NVENC)
+          cmd:
+            "%FFMPEG% -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1
+            -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_nvenc
+            -vf yadif_cuda,scale_npp=-1:480:interp_algo=lanczos -b:v 1500k -profile:v baseline -preset llhq
+            -tune ll -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1"
         - name: 1080p
           cmd:
-            "%FFMPEG% -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v
+            "%FFMPEG% -dual_mono_mode main -i pipe:0 -sn -threads 8 -c:a aac -ar 48000 -b:a 256k -ac 2 -c:v
             libx264 -vf yadif,scale=-2:1080 -b:v 3000k -profile:v baseline -preset veryfast -tune
             fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4
             pipe:1"
@@ -182,7 +218,7 @@ stream:
           cmd:
             "%FFMPEG% -dual_mono_mode main -i pipe:0 -sn -threads 8 -ignore_unknown -max_muxing_queue_size
             1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1 -hls_segment_filename
-            %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a aac -ar 48000 -b:a 192k
+            %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a aac -ar 48000 -b:a 256k
             -ac 2 -c:v libx264 -vf yadif,scale=-2:1080 -b:v 3000k -preset veryfast -flags +loop-global_header
             %OUTPUT%"
         - name: 720p
@@ -211,7 +247,7 @@ stream:
         - name: 1080p
           cmd:
             "%FFMPEG% -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 8 -c:a libvorbis -ar 48000 -b:a
-            192k -ac 2 -c:v libvpx-vp9 -vf scale=-2:1080 -b:v 3000k -deadline realtime -speed 4 -cpu-used 5 -y
+            256k -ac 2 -c:v libvpx-vp9 -vf scale=-2:1080 -b:v 3000k -deadline realtime -speed 4 -cpu-used 5 -y
             -f webm pipe:1"
         - name: 720p
           cmd:
@@ -225,9 +261,27 @@ stream:
             -f webm pipe:1"
 
       mp4:
+        - name: 1080p (NVENC)
+          cmd:
+            "%FFMPEG% -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1
+            -ss %SS% -i %INPUT% -sn -threads 8 -c:a aac -ar 48000 -b:a 256k -ac 2 -c:v h264_nvenc
+            -vf yadif_cuda,scale_npp=-1:1080:interp_algo=lanczos -b:v 3000k -profile:v baseline -preset veryfast llhq
+            -tune ll -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1"
+        - name: 720p (NVENC)
+          cmd:
+            "%FFMPEG% -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1
+            -ss %SS% -i %INPUT% -sn -threads 8 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_nvenc
+            -vf yadif_cuda,scale_npp=-1:720:interp_algo=lanczos -b:v 3000k -profile:v baseline -preset veryfast llhq
+            -tune ll -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1"
+        - name: 480p (NVENC)
+          cmd:
+            "%FFMPEG% -dual_mono_mode main -hwaccel cuvid -c:v mpeg2_cuvid -deint adaptive -drop_second_field 1
+            -ss %SS% -i %INPUT% -sn -threads 8 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_nvenc
+            -vf yadif_cuda,scale_npp=-1:480:interp_algo=lanczos -b:v 1500k -profile:v baseline -preset veryfast llhq
+            -tune ll -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1"
         - name: 1080p
           cmd:
-            "%FFMPEG% -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 8 -c:a aac -ar 48000 -b:a 192k -ac
+            "%FFMPEG% -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 8 -c:a aac -ar 48000 -b:a 256k -ac
             2 -c:v libx264 -vf scale=-2:1080 -b:v 3000k -profile:v baseline -preset veryfast -tune
             fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4
             pipe:1"
@@ -250,7 +304,7 @@ stream:
             "%FFMPEG% -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 8 -ignore_unknown
             -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
             -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
-            aac -ar 48000 -b:a 192k -ac 2 -c:v libx264 -vf scale=-2:1080 -b:v 3000k -preset veryfast -flags
+            aac -ar 48000 -b:a 256k -ac 2 -c:v libx264 -vf scale=-2:1080 -b:v 3000k -preset veryfast -flags
             +loop-global_header %OUTPUT%"
         - name: 720p
           cmd:
