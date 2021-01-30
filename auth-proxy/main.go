@@ -20,6 +20,24 @@ import (
 const slackAuthorizeURL = "https://slack.com/oauth/authorize"
 const slackOauthAccessURL = "https://slack.com/api/oauth.access"
 
+const unregister = `if ('serviceWorker' in navigator) {
+	navigator.serviceWorker.getRegistrations().then((registrations) => {
+		if (registrations.length != 0) {
+			for (let i = 0; i < registrations.length; i++) {
+				registrations[i].unregister();
+				console.log('ServiceWorker unregister.');
+			}
+			caches.keys().then((keys) => {
+				Promise.all(keys.map((key) => { caches.delete(key); })).then(() => {
+					console.log('caches delete.');
+				});
+			});
+		}
+	});
+}
+alert("ServiceWorker has been unregistered. Redirect to Slack...");
+document.location="/"`
+
 var slackClientID = os.Getenv("SLACK_CLIENT_ID")
 var slackClientSecret = os.Getenv("SLACK_CLIENT_SECRET")
 
@@ -152,7 +170,7 @@ func serve() *echo.Echo {
 		// 一時的なランダム文字列により正規ユーザかを確認
 		val, ok := sess.Values["state"]
 		if !ok || val != c.QueryParam("state") {
-			return c.String(http.StatusUnauthorized, "Forbidden: invalid state")
+			return c.HTML(http.StatusUnauthorized, "<script>"+unregister+"</script>")
 		}
 		sess.Values["state"] = ""
 
