@@ -111,7 +111,7 @@ client
 nobind
 dev tun
 remote-cert-tls server
-remote ${FQDN} 443 udp
+remote ${FQDN} 1194 udp
 remote ${FQDN} 443 tcp
 redirect-gateway def1
 

@@ -172,20 +172,6 @@ services:
   #   environment:
   #     TZ: "Asia/Tokyo"
 
-  openvpn_tcp:
-    build:
-      context: openvpn
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ./openvpn:/opt/openvpn
-    environment:
-      TZ: "Asia/Tokyo"
-    ports:
-      - "1194:1194"
-    command: tcp
-    restart: always
-
   openvpn_udp:
     build:
       context: openvpn
@@ -198,6 +184,22 @@ services:
     ports:
       - "1194:1194/udp"
     command: udp
+    restart: always
+
+  openvpn_tcp:
+    build:
+      context: openvpn
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./openvpn:/opt/openvpn
+    environment:
+      TZ: "Asia/Tokyo"
+    # expose:
+    #     - "1194"
+    ports:
+      - "1194:1194"
+    command: tcp
     restart: always
 
   # sslh:
