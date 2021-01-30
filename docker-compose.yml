@@ -48,12 +48,12 @@ services:
       context: epgstation
     runtime: nvidia
     volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ./epgstation/config:/app/config
-        - ./epgstation/data:/app/data
-        - ./epgstation/thumbnail:/app/thumbnail
-        - ./epgstation/logs:/app/logs
-        - ${RECODED_PATH}:/app/recorded
+      - /etc/localtime:/etc/localtime:ro
+      - ./epgstation/config:/app/config
+      - ./epgstation/data:/app/data
+      - ./epgstation/thumbnail:/app/thumbnail
+      - ./epgstation/logs:/app/logs
+      - ${RECODED_PATH}:/app/recorded
     environment:
       TZ: "Asia/Tokyo"
       MYSQL_USER: ${MYSQL_EPGSTATION_USER}
@@ -63,12 +63,12 @@ services:
       - mirakurun
       - mariadb_epgstation
     command: >
-        /usr/bin/sudo -E -u www-data /bin/sh -c
-        "envsubst \
-          '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
-          < /app/config/config.yml.template \
-          > /app/config/config.yml \
-        && HOME=/app npm start"
+      /usr/bin/sudo -E -u www-data /bin/sh -c
+      "envsubst \
+        '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
+        < /app/config/config.yml.template \
+        > /app/config/config.yml \
+      && HOME=/app npm start"
     restart: always
 
   auth-proxy:
@@ -146,10 +146,8 @@ services:
       - epgstation
       - auth-proxy
       - nextcloud
-    # expose:
-      #   - "443"
-    ports:
-      - "443:443"
+    expose:
+      - "443"
     command: >
       /bin/sh -c
         "envsubst \
@@ -195,26 +193,24 @@ services:
       - ./openvpn:/opt/openvpn
     environment:
       TZ: "Asia/Tokyo"
-    # expose:
-    #     - "1194"
-    ports:
-      - "1194:1194"
+    expose:
+      - "1194"
     command: tcp
     restart: always
 
-  # sslh:
-  #   build:
-  #     context: sslh
-  #   cap_add:
-  #     - NET_ADMIN
-  #   environment:
-  #     TZ: "Asia/Tokyo"
-  #   depends_on:
-  #     - nginx
-  #     - openvpn
-  #   ports:
-  #     - "443:443"
-  #   restart: always
+  sslh:
+    build:
+      context: sslh
+    cap_add:
+      - NET_ADMIN
+    environment:
+      TZ: "Asia/Tokyo"
+    depends_on:
+      - nginx
+      - openvpn_tcp
+    ports:
+      - "443:443"
+    restart: always
 
 volumes:
   mariadb_epgstation:
