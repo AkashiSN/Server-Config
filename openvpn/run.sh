@@ -8,9 +8,6 @@ if [ ! -c /dev/net/tun ]; then
     mknod /dev/net/tun c 10 200
 fi
 
-# サーバの属しているセグメント
-SERVER_SEGMENT=${SERVER_SEGMENT:-"172.16.0.0 255.255.254.0"}
-
 # `ip addr`コマンドの結果からネットワークデバイス名を抽出する
 OVPN_NATDEVICE=$(ip addr | awk 'match($0, /global [[:alnum:]]+/) {print substr($0, RSTART+7, RLENGTH)}')
 if [ -z "${OVPN_NATDEVICE}" ]; then
