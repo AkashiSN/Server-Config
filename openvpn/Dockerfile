@@ -17,5 +17,7 @@ RUN apt-get update && \
 
 WORKDIR /opt/openvpn
 
-EXPOSE 443
+EXPOSE 1194/udp
+EXPOSE 1194/tcp
+
 ENTRYPOINT [ "/opt/openvpn/run.sh" ]

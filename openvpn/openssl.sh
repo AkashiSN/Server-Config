@@ -76,6 +76,11 @@ openssl ca -batch -policy policy_anything -passin pass:"$ROOT_CA_PASSPHRASE" -ou
 mv newcert.pem ${SERVER_CERT_DIR}/server.pem
 mv newkey.pem ${SERVER_CERT_DIR}/server.key
 
+#
+# TLS-Auth key
+#
+
+openvpn --genkey --secret ${SERVER_CERT_DIR}/ta.key
 
 #
 # Clinet certificate
@@ -103,26 +108,29 @@ for CLIENT in "${CLIENTS[@]}"; do
 
 	cat << EOS > ${CLIENT_CONFIG_DIR}/${CLIENT}.ovpn
 client
-dev tun
-proto tcp
-remote ${FQDN} 443
-float
-resolv-retry infinite
 nobind
-persist-key
-persist-tun
-verb 3
+dev tun
+remote-cert-tls server
+remote ${FQDN} 443 udp
+remote ${FQDN} 443 tcp
 redirect-gateway def1
 
-<ca>
-$(openssl x509 -in ${SERVER_CERT_DIR}/cacert.pem)
-</ca>
-<cert>
-$(openssl x509 -in ${CLIENT_CERT_DIR}/${CLIENT}.pem)
-</cert>
+auth SHA256
+cipher AES-256-GCM
+
 <key>
 $(cat ${CLIENT_CERT_DIR}/${CLIENT}.key)
 </key>
+<cert>
+$(openssl x509 -in ${CLIENT_CERT_DIR}/${CLIENT}.pem)
+</cert>
+<ca>
+$(openssl x509 -in ${SERVER_CERT_DIR}/cacert.pem)
+</ca>
+key-direction 1
+<tls-auth>
+$(cat ${SERVER_CERT_DIR}/ta.key)
+</tls-auth>
 EOS
 done
 
