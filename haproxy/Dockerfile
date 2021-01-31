@@ -1,7 +1,6 @@
 FROM haproxy:2.3
 
 RUN apt-get update && \
-    apt-get install -y openvpn && \
     apt-get install -y iptables iproute2 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
