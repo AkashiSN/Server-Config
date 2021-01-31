@@ -1,6 +1,9 @@
 version: "3.8"
 
 services:
+  #
+  # TV
+  #
   mirakurun:
     # build:
     #   context: mirakurun
@@ -80,6 +83,10 @@ services:
       SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET}
     restart: always
 
+  #
+  # Nextcloud
+  #
+
   mariadb_nextcloud:
     image: mariadb:10.5
     volumes:
@@ -131,11 +138,17 @@ services:
       - redis_nextcloud
     restart: always
 
+  #
+  # Nginx
+  #
+
   nginx:
-    image: nginx:mainline
+    build:
+      context: nginx
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - nextcloud:/var/www/html
+      - log_volume:/var/log/nginx
       - ./nginx/conf.d:/etc/nginx/conf.d
     environment:
       TZ: "Asia/Tokyo"
@@ -165,13 +178,9 @@ services:
         && nginx -g 'daemon off;'"
     restart: always
 
-  # capt:
-  #   build:
-  #     context: capt
-  #   devices:
-  #     - /dev/usb:/dev/usb
-  #   environment:
-  #     TZ: "Asia/Tokyo"
+  #
+  # VPN
+  #
 
   openvpn_udp:
     build:
@@ -200,6 +209,10 @@ services:
       - "1194"
     command: tcp
     restart: always
+
+  #
+  # Proxy server
+  #
 
   # sslh:
   #   build:
@@ -231,6 +244,42 @@ services:
       - "443:443"
     restart: always
 
+  #
+  # Logging tools
+  #
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      GF_EXPLORE_ENABLED: "true"
+    ports:
+    # expose:
+      - "3000:3000"
+    networks:
+      - grafana
+
+  loki:
+    image: grafana/loki
+    expose:
+      - "3100"
+    networks:
+      - grafana
+
+  promtail:
+    image: grafana/promtail
+    volumes:
+      - log_volume:/var/log/nginx
+      - ./promtail:/etc/promtail
+    depends_on:
+      - nginx
+    ports:
+      - "9080:9080"
+    networks:
+      - grafana
+
+networks:
+  grafana:
+
 volumes:
   mariadb_epgstation:
     driver: local
@@ -239,4 +288,6 @@ volumes:
   redis_nextcloud:
     driver: local
   nextcloud:
+    driver: local
+  log_volume:
     driver: local
