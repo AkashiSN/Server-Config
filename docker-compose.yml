@@ -158,7 +158,10 @@ services:
           '$$FILES_SUBDOMAIN $$DOMAIN' \
           < /etc/nginx/conf.d/files.conf.template \
           > /etc/nginx/conf.d/files.conf \
-        && cp /etc/nginx/conf.d/nginx.conf.template /etc/nginx/nginx.conf \
+        && envsubst \
+          '$$DOMAIN' \
+          < /etc/nginx/conf.d/nginx.conf.template \
+          > /etc/nginx/nginx.conf \
         && nginx -g 'daemon off;'"
     restart: always
 
@@ -198,16 +201,32 @@ services:
     command: tcp
     restart: always
 
-  sslh:
+  # sslh:
+  #   build:
+  #     context: sslh
+  #   cap_add:
+  #     - NET_ADMIN
+  #   environment:
+  #     TZ: "Asia/Tokyo"
+  #   depends_on:
+  #     - nginx
+  #     - openvpn_tcp
+  #   ports:
+  #     - "443:443"
+  #   restart: always
+
+  haproxy:
     build:
-      context: sslh
-    cap_add:
-      - NET_ADMIN
+      context: haproxy
     environment:
       TZ: "Asia/Tokyo"
     depends_on:
       - nginx
       - openvpn_tcp
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy
     ports:
       - "443:443"
     restart: always

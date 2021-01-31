@@ -26,5 +26,15 @@ http {
 
     #gzip  on;
 
+    server {
+        listen 443 ssl default_server;
+        server_name _;
+
+        ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+
+        return 444;
+    }
+
     include /etc/nginx/conf.d/*.conf;
 }
