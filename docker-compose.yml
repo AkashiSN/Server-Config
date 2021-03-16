@@ -130,6 +130,8 @@ services:
       NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER}
       NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD}
       NEXTCLOUD_TRUSTED_DOMAINS: ${FILES_SUBDOMAIN}.${DOMAIN}
+      PHP_MEMORY_LIMIT: 16G
+      PHP_UPLOAD_LIMIT: 100G
       NEXTCLOUD_DATA_DIR: /mnt/nas/nextcloud
       OVERWRITEPROTOCOL: https
       TRUSTED_PROXIES: nginx
@@ -161,8 +163,6 @@ services:
       - nextcloud
     ports:
       - "443:443"
-    # expose:
-    #   - "443"
     command: >
       /bin/sh -c
         "envsubst \
@@ -179,72 +179,6 @@ services:
           > /etc/nginx/nginx.conf \
         && nginx -g 'daemon off;'"
     restart: always
-
-  #
-  # VPN
-  #
-
-  # openvpn_udp:
-  #   build:
-  #     context: openvpn
-  #   cap_add:
-  #     - NET_ADMIN
-  #   volumes:
-  #     - ./openvpn:/opt/openvpn
-  #   environment:
-  #     TZ: "Asia/Tokyo"
-  #   ports:
-  #     - "1194:1194/udp"
-  #   command: udp
-  #   restart: always
-
-  # openvpn_tcp:
-  #   build:
-  #     context: openvpn
-  #   cap_add:
-  #     - NET_ADMIN
-  #   volumes:
-  #     - ./openvpn:/opt/openvpn
-  #   environment:
-  #     TZ: "Asia/Tokyo"
-  #   expose:
-  #     - "1194"
-  #   command: tcp
-  #   restart: always
-
-  #
-  # Proxy server
-  #
-
-  # sslh:
-  #   build:
-  #     context: sslh
-  #   cap_add:
-  #     - NET_ADMIN
-  #   environment:
-  #     TZ: "Asia/Tokyo"
-  #   depends_on:
-  #     - nginx
-  #     - openvpn_tcp
-  #   ports:
-  #     - "443:443"
-  #   restart: always
-
-  # haproxy:
-  #   build:
-  #     context: haproxy
-  #   environment:
-  #     TZ: "Asia/Tokyo"
-  #   depends_on:
-  #     - nginx
-  #     - openvpn_tcp
-  #   cap_add:
-  #     - NET_ADMIN
-  #   volumes:
-  #     - ./haproxy:/usr/local/etc/haproxy
-  #   ports:
-  #     - "443:443"
-  #   restart: always
 
   #
   # Logging tools
