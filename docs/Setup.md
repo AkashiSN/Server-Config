@@ -60,7 +60,7 @@ sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io
 
 # Download docker compose
-sudo curl -L "https://github.com/docker/compose/releases/download/latest/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
 # Apply executable permissions to the binary:
 sudo chmod +x /usr/local/bin/docker-compose
