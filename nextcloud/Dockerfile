@@ -3,7 +3,7 @@ FROM nextcloud:fpm
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && \
-    apt-get install -y libsmbclient-dev smbclient iproute2 && \
+    apt-get install -y imagemagick libmagickwand-dev libsmbclient-dev smbclient iproute2 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 

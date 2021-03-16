@@ -159,8 +159,10 @@ services:
       - epgstation
       - auth-proxy
       - nextcloud
-    expose:
-      - "443"
+    ports:
+      - "443:443"
+    # expose:
+    #   - "443"
     command: >
       /bin/sh -c
         "envsubst \
@@ -182,33 +184,33 @@ services:
   # VPN
   #
 
-  openvpn_udp:
-    build:
-      context: openvpn
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ./openvpn:/opt/openvpn
-    environment:
-      TZ: "Asia/Tokyo"
-    ports:
-      - "1194:1194/udp"
-    command: udp
-    restart: always
+  # openvpn_udp:
+  #   build:
+  #     context: openvpn
+  #   cap_add:
+  #     - NET_ADMIN
+  #   volumes:
+  #     - ./openvpn:/opt/openvpn
+  #   environment:
+  #     TZ: "Asia/Tokyo"
+  #   ports:
+  #     - "1194:1194/udp"
+  #   command: udp
+  #   restart: always
 
-  openvpn_tcp:
-    build:
-      context: openvpn
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ./openvpn:/opt/openvpn
-    environment:
-      TZ: "Asia/Tokyo"
-    expose:
-      - "1194"
-    command: tcp
-    restart: always
+  # openvpn_tcp:
+  #   build:
+  #     context: openvpn
+  #   cap_add:
+  #     - NET_ADMIN
+  #   volumes:
+  #     - ./openvpn:/opt/openvpn
+  #   environment:
+  #     TZ: "Asia/Tokyo"
+  #   expose:
+  #     - "1194"
+  #   command: tcp
+  #   restart: always
 
   #
   # Proxy server
@@ -228,21 +230,21 @@ services:
   #     - "443:443"
   #   restart: always
 
-  haproxy:
-    build:
-      context: haproxy
-    environment:
-      TZ: "Asia/Tokyo"
-    depends_on:
-      - nginx
-      - openvpn_tcp
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ./haproxy:/usr/local/etc/haproxy
-    ports:
-      - "443:443"
-    restart: always
+  # haproxy:
+  #   build:
+  #     context: haproxy
+  #   environment:
+  #     TZ: "Asia/Tokyo"
+  #   depends_on:
+  #     - nginx
+  #     - openvpn_tcp
+  #   cap_add:
+  #     - NET_ADMIN
+  #   volumes:
+  #     - ./haproxy:/usr/local/etc/haproxy
+  #   ports:
+  #     - "443:443"
+  #   restart: always
 
   #
   # Logging tools

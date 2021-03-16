@@ -210,69 +210,6 @@ Ref : https://askubuntu.com/questions/47311/how-do-i-disable-my-system-from-goin
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 ```
 
-## ddclinet
-
-IPv6アドレスのDDNSを設定する
-
-```bash
-# Install ddclinet from apt
-sudo apt install -y ddclient libdata-validate-ip-perl libio-socket-inet6-perl net-tools
-
-# Create work directory
-mkdir -p ~/work
-cd ~/work
-
-# Download ddclinet source
-wget https://github.com/ddclient/ddclient/archive/v3.9.1.tar.gz
-tar xvf v3.9.1.tar.gz
-cd ddclient-3.9.1
-
-# Copy overwrite ddclinet
-sudo cp ddclient /usr/sbin/ddclient
-sudo mkdir /etc/ddclient
-sudo mv /etc/ddclient.conf /etc/ddclient/
-
-```
-`/etc/ddclient/ddclient.conf`を以下のように編集する
-
-```conf
-##
-## Global Config
-##
-daemon=500
-ssl=yes
-ipv6=yes
-
-##
-## sub.domain.tld - Cloudflare
-##
-protocol=cloudflare
-use=web, web=https://v6.ident.me/
-login=<email>
-password=<global api key>
-zone=domain.tld
-sub.domain.tld
-```
-確認を行う
-
-```
-sudo ddclient -query
-sudo ddclient -daemon=0 -verbose -noquiet
-```
-
-良かったら、
-
-`/etc/default/ddclient`を
-```
-run_daemon="true"
-```
-とする。
-
-```
-sudo service ddclient restart
-sudo service ddclient status
-```
-
 ### Zsh, Vim
 ```bash
 # Install zsh, vim
