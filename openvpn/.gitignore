@@ -1,8 +1,0 @@
-cert/client/*
-cert/server/*
-config/*
-demoCA
-newreq.pem
-ipp.txt
-*.log
-!.gitkeep

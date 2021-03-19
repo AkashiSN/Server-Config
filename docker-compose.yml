@@ -118,7 +118,7 @@ services:
       context: nextcloud
     volumes:
       - nextcloud:/var/www/html
-      - ${NAS_PATH}:/mnt/nas
+      - ${NAS_PATH}:/mnt
     environment:
       TZ: "Asia/Tokyo"
       MYSQL_USER: ${MYSQL_NEXTCLOUD_USER}
