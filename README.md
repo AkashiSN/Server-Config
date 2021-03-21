@@ -17,7 +17,7 @@ MYSQL_EPGSTATION_ROOT_PASSWORD="epgstation"
 MYSQL_EPGSTATION_DATABASE="epgstation"
 
 # epgstation
-RECODED_PATH="/mnt/nas/recorded/"
+RECODED_PATH="/mnt/recorded/"
 
 # mysql-nextcloud
 MYSQL_NEXTCLOUD_USER="nextcloud"
@@ -31,7 +31,7 @@ REDIS_HOST_PASSWORD="redis"
 # nextcloud
 NEXTCLOUD_ADMIN_USER="admin"
 NEXTCLOUD_ADMIN_PASSWORD="pass"
-NAS_PATH="/mnt/nas"
+NAS_PATH="/mnt"
 
 # auth-proxy
 SLACK_CLIENT_ID="hoge.hoge"

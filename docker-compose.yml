@@ -132,7 +132,7 @@ services:
       NEXTCLOUD_TRUSTED_DOMAINS: ${FILES_SUBDOMAIN}.${DOMAIN}
       PHP_MEMORY_LIMIT: 16G
       PHP_UPLOAD_LIMIT: 100G
-      NEXTCLOUD_DATA_DIR: /mnt/nas/nextcloud
+      NEXTCLOUD_DATA_DIR: /mnt/nextcloud
       OVERWRITEPROTOCOL: https
       TRUSTED_PROXIES: nginx
     depends_on:
@@ -179,6 +179,16 @@ services:
           > /etc/nginx/nginx.conf \
         && nginx -g 'daemon off;'"
     restart: always
+
+  #
+  # DNS
+  #
+
+  dnsmasq:
+    build:
+      context: dnsmasq
+    ports:
+      - "172.16.0.3:53:53/udp"
 
   #
   # Logging tools
