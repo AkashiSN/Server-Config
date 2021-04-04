@@ -3,36 +3,36 @@
 
 ```bash
 # Install wireguard
-$ sudo apt install -y wireguard
+sudo apt install -y wireguard
 ```
 
 ## Setup
 
 ```bash
 # Set WIREGUARD_DIR env.
-$ export WIREGUARD_DIR=/etc/wireguard
+export WIREGUARD_DIR=/etc/wireguard
 
 # Generate private key
-$ wg genkey | sudo tee ${WIREGUARD_DIR}/server.key
+wg genkey | sudo tee ${WIREGUARD_DIR}/server.key
 
 # Generate public key
-$ sudo cat ${WIREGUARD_DIR}/clients/server.key | wg pubkey | sudo tee ${WIREGUARD_DIR}/server.pub
+sudo cat ${WIREGUARD_DIR}/clients/server.key | wg pubkey | sudo tee ${WIREGUARD_DIR}/server.pub
 
 # Generate preshared key
-$ wg genpsk | sudo tee ${WIREGUARD_DIR}/preshared.key
+wg genpsk | sudo tee ${WIREGUARD_DIR}/preshared.key
 
 # Change permission
-$ sudo chmod 600 ${WIREGUARD_DIR}/server.key ${WIREGUARD_DIR}/server.pub ${WIREGUARD_DIR}/preshared.key
+sudo chmod 600 ${WIREGUARD_DIR}/server.key ${WIREGUARD_DIR}/server.pub ${WIREGUARD_DIR}/preshared.key
 ```
 
 ## Server config
 
 ```bash
 # Set WIREGUARD_IP env.
-$ export WIREGUARD_IP=10.254.0.1/24
+export WIREGUARD_IP=10.254.0.1/24
 
 # Create wireguard interface config.
-$ cat << EOS | sudo tee ${WIREGUARD_DIR}/wg0.conf
+cat << EOS | sudo tee ${WIREGUARD_DIR}/wg0.conf
 [Interface]
 PrivateKey = $(cat ${WIREGUARD_DIR}/server.key)
 Address = ${WIREGUARD_IP}
@@ -46,7 +46,7 @@ EOS
 ## Client config
 
 ```bash
-$ cat ${WIREGUARD_DIR}/wireguard.sh
+cat ${WIREGUARD_DIR}/wireguard.sh
 ```
 
 ```bash
@@ -88,20 +88,20 @@ done
 
 ```bash
 # Set env.
-$ export CLIENT_START_IP=10.254.2.2
-$ export ENDPOINT=host:443
-$ export CLIENTS=("MacBookPro13" "Pixel3XL" "iPadPro11" "iPhone7" "Nexus5X")
+export CLIENT_START_IP=10.254.2.2
+export ENDPOINT=host:443
+export CLIENTS=("MacBookPro13" "Pixel3XL" "iPadPro11" "iPhone7" "Nexus5X")
 
 # Run script.
-$ sudo /bin/bash ${WIREGUARD_DIR}/wireguard.sh
+sudo /bin/bash ${WIREGUARD_DIR}/wireguard.sh
 ```
 
 ## Start, Stop
 
 ```bash
 # Start wireguard.
-$ sudo wg-quick up wg0
+sudo wg-quick up wg0
 
 # Stop wireguard.
-$ sudo wg-quick down wg0
+sudo wg-quick down wg0
 ```

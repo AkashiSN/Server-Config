@@ -2,19 +2,19 @@
 
 ```bash
 # Install openvpn
-$ sudo apt install -y openvpn
+sudo apt install -y openvpn
 ```
 
 ## Setup
 
 ```bash
 # Set OPENVPN_DIR env.
-$ export OPENVPN_DIR=/etc/openvpn
+export OPENVPN_DIR=/etc/openvpn
 ```
 
 ```bash
 # Set env file.
-$ cat ${OPENVPN_DIR}/.openvpn.env
+cat ${OPENVPN_DIR}/.openvpn.env
 ```
 
 ```bash
@@ -28,7 +28,7 @@ CLIENTS="iPadPro11 iPhone7 Pixel3XL MacBookPro13 Nexus5X Pixel4"
 ```
 
 ```bash
-$ cat ${OPENVPN_DIR}/openvpn.sh
+cat ${OPENVPN_DIR}/openvpn.sh
 ```
 
 ```bash
@@ -197,24 +197,24 @@ fi
 ```
 
 ```bash
-$ sudo /bin/bash ${OPENVPN_DIR}/openvpn.sh
+sudo /bin/bash ${OPENVPN_DIR}/openvpn.sh
 ```
 
 ### Add Client
 
 ```bash
-$ sudo /bin/bash ${OPENVPN_DIR}/openvpn.sh add_client "client name"
+sudo /bin/bash ${OPENVPN_DIR}/openvpn.sh add_client "client name"
 ```
 
 ## Server config
 
 ```bash
 # Set env.
-$ export OPENVPN_DIR=/etc/openvpn
-$ export OPENVPN_IP=10.254.3.0
+export OPENVPN_DIR=/etc/openvpn
+export OPENVPN_IP=10.254.3.0
 
 # Configure server.
-$ cat << EOS > ${OPENVPN_DIR}/server/vpn.conf
+cat << EOS > ${OPENVPN_DIR}/server/vpn.conf
 topology subnet
 server ${OPENVPN_IP} 255.255.255.0
 verb 3
@@ -248,15 +248,15 @@ group nogroup
 
 ```bash
 # Enable service.
-$ sudo systemctl enable openvpn-server@vpn
+sudo systemctl enable openvpn-server@vpn
 ```
 
 ## Start, Stop
 
 ```bash
 # Start openvpn.
-$ sudo systemctl start openvpn-server@vpn
+sudo systemctl start openvpn-server@vpn
 
 # Stop openvpn.
-$ sudo systemctl stop openvpn-server@vpn
+sudo systemctl stop openvpn-server@vpn
 ```
