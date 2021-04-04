@@ -56,24 +56,6 @@ sudo usermod -a -G www-data user
 sudo usermod -a -G user www-data
 ```
 
-### OpenVPN用の証明書の作成
-
-`openvpn/.openvpn.env`というファイルを以下のように作成する
-```env
-# OpenVPN
-STATE_NAME="Osaka"
-LOCALITY_NAME="Suita"
-ORGANIZATION_NAME="Sylc"
-ROOT_CA_PASSPHRASE="hogehoge"
-FQDN=""
-CLIENTS="iPadPro11 iPhone7 Pixel3XL MacBookPro13"
-```
-
-```bash
-# Create certificate
-sudo docker-compose run --rm --entrypoint=/opt/openvpn/openssl.sh openvpn
-```
-
 ## チューナ周波数の設定
 
 Many thanks: https://qiita.com/KouCo/items/69bcacbf867366e5d692

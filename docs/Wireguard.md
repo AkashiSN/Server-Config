@@ -47,7 +47,9 @@ EOS
 
 ```bash
 $ cat ${WIREGUARD_DIR}/wireguard.sh
+```
 
+```bash
 #!/bin/bash
 set -eu
 
