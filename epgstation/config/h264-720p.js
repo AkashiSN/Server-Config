@@ -44,10 +44,10 @@ Array.prototype.push.apply(args, [
 // その他設定
 Array.prototype.push.apply(args,[
     '-aspect', '16:9',
-    '-c:v', 'h264_nvenc',
+    '-c:v', 'libx264',
     '-crf', '23',
     '-f', 'mp4',
-    '-c:a', 'libfdk_aac',
+    '-c:a', 'aac',
     '-ar', '48000',
     '-ab', '256k',
     '-ac', '2',

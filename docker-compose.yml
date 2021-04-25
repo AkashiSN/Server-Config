@@ -5,9 +5,7 @@ services:
   # TV
   #
   mirakurun:
-    # build:
-    #   context: mirakurun
-    image: chinachu/mirakurun
+    image: akashisn/mirakurun
     cap_add:
       - SYS_ADMIN
       - SYS_NICE
@@ -47,9 +45,7 @@ services:
         max-file: "3"
 
   epgstation:
-    build:
-      context: epgstation
-    runtime: nvidia
+    image: akashisn/epgstation
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./epgstation/config:/app/config
