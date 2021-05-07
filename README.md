@@ -46,7 +46,7 @@ FILES_SUBDOMAIN="files"
 コンテナのビルドを行う
 
 ```bash
-sudo docker-compose build
+sudo docker-compose build --pull
 ```
 
 現在のユーザーをグループwww-dataに追加する
@@ -56,23 +56,8 @@ sudo usermod -a -G www-data user
 sudo usermod -a -G user www-data
 ```
 
-## チューナ周波数の設定
-
-Many thanks: https://qiita.com/KouCo/items/69bcacbf867366e5d692
-
-手動でチャンネルの周波数の設定を行う場合
-
-```bash
-cd mirakurun/scan
-
-sudo docker build -t dvb-scan --target=dvb-tools .
-sudo docker run --rm -it --device /dev/dvb:/dev/dvb --cap-add SYS_ADMIN --cap-add SYS_NICE -v `pwd`/tuners:/workdir/tuners dvb-scan
-
-cd ../..
-```
-
 ## コンテナの起動
 
 ```bash
-sudo docker-compose up
+sudo docker-compose up -d
 ```

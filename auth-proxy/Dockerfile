@@ -1,14 +1,16 @@
-FROM golang:1.15-alpine as go
+FROM golang:1.16-buster as build
 
-WORKDIR /workdir
+WORKDIR /go/src/github.com/AkashiSN/Server-Config/auth-proxy
 
 COPY . .
 
 RUN go build -o auth-proxy
 
-FROM alpine
 
-COPY --from=go /workdir/auth-proxy /usr/bin/
+# Final image
+FROM gcr.io/distroless/base-debian10
+
+COPY --from=build /go/src/github.com/AkashiSN/Server-Config/auth-proxy/auth-proxy /
 
 EXPOSE 80
-ENTRYPOINT [ "/usr/bin/auth-proxy" ]
+ENTRYPOINT [ "/auth-proxy" ]

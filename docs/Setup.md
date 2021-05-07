@@ -58,7 +58,11 @@ sudo apt update
 
 # Install the latest version of Docker Engine and containerd
 sudo apt install -y docker-ce docker-ce-cli containerd.io
+```
 
+#### Docker Compose
+
+```bash
 # Download docker compose
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
@@ -67,7 +71,11 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 # Create a symbolic link to /usr/bin
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+```
 
+#### Nvidia docker
+
+```bash
 # Add nvidia-docker repository
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
    && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - \
@@ -223,8 +231,8 @@ zsh <(curl -L https://raw.githubusercontent.com/AkashiSN/dotfiles/main/setup.zsh
 
 ```bash
 # install golang
-goenv install 1.15.4
+goenv install 1.16.3
 
 # set default
-goenv global 1.15.4
+goenv global 1.16.3
 ```
