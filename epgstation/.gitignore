@@ -3,5 +3,6 @@ data/streamfiles/*
 data/*
 logs/Operator/*
 logs/Service/*
+logs/EPGUpdater/*
 recorded/*
 thumbnail/*

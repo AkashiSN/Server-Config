@@ -64,7 +64,7 @@ services:
       /usr/bin/sudo -E -u www-data /bin/sh -c
       "envsubst \
         '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
-        < /app/config/config.yml.template \
+        < /app/config/config.sample.yml \
         > /app/config/config.yml \
       && HOME=/app npm start"
     restart: always
