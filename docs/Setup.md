@@ -73,6 +73,14 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
+#### Buildkit
+
+```bash
+# Download buildkit
+curl -s https://api.github.com/repos/moby/buildkit/releases/latest | grep -E 'browser_download_url' | grep linux-amd64 | cut -d '"' -f 4 | wget -O /tmp/buildkit-linux-amd64.tar.gz -i -
+sudo tar xvf /tmp/buildkit-linux-amd64.tar.gz -C /usr/local/
+```
+
 #### Nvidia docker
 
 ```bash
