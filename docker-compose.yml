@@ -121,6 +121,7 @@ services:
     volumes:
       - nextcloud:/var/www/html
       - ${NAS_PATH}:/mnt
+      - log_volume:/var/promtail
     environment:
       TZ: "Asia/Tokyo"
       MYSQL_USER: ${MYSQL_NEXTCLOUD_USER}
@@ -140,6 +141,10 @@ services:
     depends_on:
       - mariadb_nextcloud
       - redis_nextcloud
+    command: >
+      /bin/sh -c
+        "mkdir -p /var/promtail/nextcloud \
+        && /usr/bin/supervisord -c /supervisord.conf"
     restart: always
 
   #
