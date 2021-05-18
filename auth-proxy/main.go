@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gorilla/sessions"
@@ -17,10 +18,16 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-const slackAuthorizeURL = "https://slack.com/oauth/authorize"
-const slackOauthAccessURL = "https://slack.com/api/oauth.access"
+const (
+	slackAuthorizeURL   = "https://slack.com/oauth/authorize"
+	slackOauthAccessURL = "https://slack.com/api/oauth.access"
 
-const unregister = `if ('serviceWorker' in navigator) {
+	logFilePath       = "/var/promtail/auth-proxy/"
+	accessLogFileName = "access.log"
+	errorLogFileName  = "error.log"
+	infoLogFileName   = "info.log"
+
+	unregister = `if ('serviceWorker' in navigator) {
 	navigator.serviceWorker.getRegistrations().then((registrations) => {
 		if (registrations.length != 0) {
 			for (let i = 0; i < registrations.length; i++) {
@@ -37,9 +44,27 @@ const unregister = `if ('serviceWorker' in navigator) {
 }
 alert("ServiceWorker has been unregistered. Redirect to Slack...");
 document.location="/"`
+)
 
-var slackClientID = os.Getenv("SLACK_CLIENT_ID")
-var slackClientSecret = os.Getenv("SLACK_CLIENT_SECRET")
+var (
+	slackClientID     = os.Getenv("SLACK_CLIENT_ID")
+	slackClientSecret = os.Getenv("SLACK_CLIENT_SECRET")
+
+	infolog *log.Logger
+	errlog  *log.Logger
+)
+
+func init() {
+	if _, err := os.Stat(logFilePath); err != nil {
+		os.Mkdir(logFilePath, 0775)
+	}
+
+	infoLogFile, _ := os.OpenFile(filepath.Join(logFilePath, infoLogFileName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	infolog = log.New(infoLogFile, "", log.LstdFlags)
+
+	errorLogFile, _ := os.OpenFile(filepath.Join(logFilePath, errorLogFileName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	errlog = log.New(errorLogFile, "", log.LstdFlags)
+}
 
 func makeRandomStr(digit uint32) (string, error) {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -65,7 +90,7 @@ func checkCode(code, redirectURL string) (string, error) {
 
 	request, err := http.NewRequest("POST", slackOauthAccessURL, strings.NewReader(values.Encode()))
 	if err != nil {
-		log.Fatal(err)
+		errlog.Fatal(err)
 	}
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
@@ -101,8 +126,11 @@ func serve() *echo.Echo {
 	rand.Read(token)
 
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(token))))
+
+	accessLogFile, _ := os.OpenFile(filepath.Join(logFilePath, accessLogFileName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "${time_rfc3339}, ${remote_ip}, method=${method}, uri=${uri}, status=${status}, ua=${user_agent}\n",
+		Output: accessLogFile,
 	}))
 
 	// nginxからauth_requestでとんでくるルーティング
@@ -129,7 +157,7 @@ func serve() *echo.Echo {
 
 		request, err := http.NewRequest("GET", slackAuthorizeURL, nil)
 		if err != nil {
-			log.Fatal(err)
+			errlog.Fatal(err)
 		}
 
 		sess, _ := session.Get("session", c)
@@ -143,7 +171,7 @@ func serve() *echo.Echo {
 		// 一時的なランダム文字列
 		state, err := makeRandomStr(32)
 		if err != nil {
-			log.Fatal(err)
+			errlog.Fatal(err)
 		}
 
 		//クエリパラメータ
@@ -197,7 +225,7 @@ func serve() *echo.Echo {
 			return c.NoContent(http.StatusInternalServerError)
 		}
 
-		fmt.Println("Logined " + userName)
+		infolog.Println("Logined " + userName)
 
 		return c.Redirect(http.StatusFound, URL)
 	})
@@ -207,9 +235,9 @@ func serve() *echo.Echo {
 
 func main() {
 	if slackClientID == "" || slackClientSecret == "" {
-		log.Fatal("must be setted clientID and client secret")
+		errlog.Fatal("must be setted clientID and client secret")
 	}
 
 	server := serve()
-	log.Println(server.Start(":80"))
+	server.Start(":80")
 }

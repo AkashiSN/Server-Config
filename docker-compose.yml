@@ -50,28 +50,35 @@ services:
       - ./epgstation/config:/app/config
       - ./epgstation/data:/app/data
       - ./epgstation/thumbnail:/app/thumbnail
-      - ./epgstation/logs:/app/logs
       - ${RECODED_PATH}:/app/recorded
+      - log_volume:/var/promtail
     environment:
       TZ: "Asia/Tokyo"
       MYSQL_USER: ${MYSQL_EPGSTATION_USER}
       MYSQL_PASSWORD: ${MYSQL_EPGSTATION_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_EPGSTATION_DATABASE}
+      HOME: /app
     depends_on:
       - mirakurun
       - mariadb_epgstation
     command: >
-      /usr/bin/sudo -E -u www-data /bin/sh -c
-      "envsubst \
-        '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
-        < /app/config/config.sample.yml \
-        > /app/config/config.yml \
-      && HOME=/app npm start"
+      /bin/sh -c
+        "mkdir -p /var/promtail/epgstation \
+        && rm -rf /app/logs \
+        && ln -snf /var/promtail/epgstation /app/logs \
+        && chown -R www-data:www-data /var/promtail/epgstation /app/logs \
+        && envsubst \
+            '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
+            < /app/config/config.yml.template \
+            > /app/config/config.yml \
+        && /usr/bin/sudo -E -u www-data npm start"
     restart: always
 
   auth-proxy:
     build:
       context: auth-proxy
+    volumes:
+      - log_volume:/var/promtail
     environment:
       TZ: "Asia/Tokyo"
       SLACK_CLIENT_ID: ${SLACK_CLIENT_ID}
@@ -140,13 +147,12 @@ services:
   #
 
   nginx:
-    build:
-      context: nginx
+    image: nginx:mainline
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - nextcloud:/var/www/html
-      - log_volume:/var/log/nginx
       - ./nginx/conf.d:/etc/nginx/conf.d
+      - log_volume:/var/promtail
     environment:
       TZ: "Asia/Tokyo"
       TV_SUBDOMAIN: ${TV_SUBDOMAIN}
@@ -160,7 +166,8 @@ services:
       - "443:443"
     command: >
       /bin/sh -c
-        "envsubst \
+        "mkdir -p /var/promtail/nginx \
+        && envsubst \
           '$$TV_SUBDOMAIN $$DOMAIN' \
           < /etc/nginx/conf.d/tv.conf.template \
           > /etc/nginx/conf.d/tv.conf \
@@ -189,37 +196,18 @@ services:
   # Logging tools
   #
 
-  grafana:
-    image: grafana/grafana
-    environment:
-      GF_EXPLORE_ENABLED: "true"
-    ports:
-    # expose:
-      - "3000:3000"
-    networks:
-      - grafana
-
-  loki:
-    image: grafana/loki
-    expose:
-      - "3100"
-    networks:
-      - grafana
-
   promtail:
     image: grafana/promtail
     volumes:
-      - log_volume:/var/log/nginx
+      - log_volume:/var/promtail
       - ./promtail:/etc/promtail
+    command: >
+      -config.file=/etc/promtail/config.yml
+      -print-config-stderr
     depends_on:
       - nginx
     ports:
       - "9080:9080"
-    networks:
-      - grafana
-
-networks:
-  grafana:
 
 volumes:
   mariadb_epgstation:

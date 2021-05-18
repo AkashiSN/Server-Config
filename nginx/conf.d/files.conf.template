@@ -6,6 +6,9 @@ server{
     listen 443 ssl http2;
     server_name ${FILES_SUBDOMAIN}.${DOMAIN};
 
+    access_log /var/promtail/nginx/${FILES_SUBDOMAIN}.access.log main;
+    error_log /var/promtail/nginx/${FILES_SUBDOMAIN}.error.log warn;
+
     ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 

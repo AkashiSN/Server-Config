@@ -1,9 +1,8 @@
 user             nginx;
 worker_processes auto;
 
-error_log /var/log/nginx/error.log warn;
+error_log /var/promtail/nginx/error.log warn;
 pid       /var/run/nginx.pid;
-
 
 events {
     worker_connections 99560;
@@ -17,8 +16,6 @@ http {
                     '$status $body_bytes_sent "$http_referer" '
                     '"$http_user_agent"';
 
-    access_log /var/log/nginx/access.log main;
-
     sendfile        on;
     #tcp_nopush     on;
 
@@ -29,6 +26,9 @@ http {
     server {
         listen 443 ssl default_server;
         server_name _;
+
+        access_log /var/promtail/nginx/default.access.log main;
+        error_log  /var/promtail/nginx/default.error.log warn;
 
         ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
         ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
