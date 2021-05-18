@@ -27,3 +27,9 @@ scrape_configs:
           - localhost
         labels:
           __path__: /var/promtail/epgstation/**/*.log
+  - job_name: nextcloud
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          __path__: /var/promtail/nextcloud/*.log
