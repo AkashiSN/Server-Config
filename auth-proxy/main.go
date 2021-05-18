@@ -9,8 +9,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -52,18 +54,51 @@ var (
 
 	infolog *log.Logger
 	errlog  *log.Logger
+
+	accesslogWriter    *Writer
+	infoLogFileWriter  *Writer
+	errorLogFileWriter *Writer
 )
+
+func newWriter(fileName string) *Writer {
+	logFile, _ := os.OpenFile(filepath.Join(logFilePath, fileName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	return NewReplaceableWriter(logFile)
+}
+
+func (w *Writer) replaceWriter(fileName string) {
+	logFile, _ := os.OpenFile(filepath.Join(logFilePath, fileName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	w.Replace(logFile)
+}
 
 func init() {
 	if _, err := os.Stat(logFilePath); err != nil {
 		os.Mkdir(logFilePath, 0775)
 	}
 
-	infoLogFile, _ := os.OpenFile(filepath.Join(logFilePath, infoLogFileName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	infolog = log.New(infoLogFile, "", log.LstdFlags)
+	accesslogWriter = newWriter(accessLogFileName)
 
-	errorLogFile, _ := os.OpenFile(filepath.Join(logFilePath, errorLogFileName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	errlog = log.New(errorLogFile, "", log.LstdFlags)
+	infoLogFileWriter = newWriter(infoLogFileName)
+	infolog = log.New(infoLogFileWriter, "", log.LstdFlags)
+
+	errorLogFileWriter = newWriter(errorLogFileName)
+	errlog = log.New(errorLogFileWriter, "", log.LstdFlags)
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGUSR1)
+	go func() {
+		for {
+			<-ch
+			fmt.Println("Catch signal.")
+			accesslogWriter.replaceWriter(accessLogFileName)
+			infoLogFileWriter.replaceWriter(infoLogFileName)
+			errorLogFileWriter.replaceWriter(errorLogFileName)
+		}
+	}()
+
+	// Record my PID
+	f, _ := os.Create("/var/run/auth-proxy.pid")
+	fmt.Fprintf(f, "%d", os.Getpid())
+	f.Close()
 }
 
 func makeRandomStr(digit uint32) (string, error) {
@@ -127,10 +162,9 @@ func serve() *echo.Echo {
 
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(token))))
 
-	accessLogFile, _ := os.OpenFile(filepath.Join(logFilePath, accessLogFileName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "${time_rfc3339}, ${remote_ip}, method=${method}, uri=${uri}, status=${status}, ua=${user_agent}\n",
-		Output: accessLogFile,
+		Output: accesslogWriter,
 	}))
 
 	// nginxからauth_requestでとんでくるルーティング
@@ -210,6 +244,7 @@ func serve() *echo.Echo {
 		code := c.QueryParam("code")
 		userName, err := checkCode(code, redirectURL)
 		if err != nil {
+			errlog.Print(err)
 			return c.String(http.StatusUnauthorized, "Forbidden: invalid user")
 		}
 

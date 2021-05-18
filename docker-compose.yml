@@ -83,6 +83,10 @@ services:
       TZ: "Asia/Tokyo"
       SLACK_CLIENT_ID: ${SLACK_CLIENT_ID}
       SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET}
+    command: >
+      /bin/sh -c
+        "mkdir -p /var/promtail/auth-proxy \
+        && /usr/bin/supervisord -c /etc/supervisord.conf"
     restart: always
 
   #
@@ -144,7 +148,7 @@ services:
     command: >
       /bin/sh -c
         "mkdir -p /var/promtail/nextcloud \
-        && /usr/bin/supervisord -c /supervisord.conf"
+        && /usr/bin/supervisord -c /etc/supervisord.conf"
     restart: always
 
   #
@@ -152,7 +156,8 @@ services:
   #
 
   nginx:
-    image: nginx:mainline
+    build:
+      context: nginx
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - nextcloud:/var/www/html
@@ -184,7 +189,7 @@ services:
           '$$DOMAIN' \
           < /etc/nginx/conf.d/nginx.conf.template \
           > /etc/nginx/nginx.conf \
-        && nginx -g 'daemon off;'"
+        && /usr/bin/supervisord -c /etc/supervisord.conf"
     restart: always
 
   #
