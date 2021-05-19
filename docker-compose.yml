@@ -201,6 +201,7 @@ services:
       context: dnsmasq
     ports:
       - "172.16.0.3:53:53/udp"
+    restart: always
 
   #
   # Logging tools
@@ -218,6 +219,7 @@ services:
       - nginx
     ports:
       - "9080:9080"
+    restart: always
 
 volumes:
   mariadb_epgstation:
