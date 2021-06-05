@@ -12,6 +12,15 @@ sudo apt upgrade -y
 sudo apt install -y git wget curl
 ```
 
+### Zsh, Vim
+```bash
+# Install zsh, vim
+sudo apt install -y zsh vim
+
+# Install dotfiles and sometools.
+zsh <(curl -L https://raw.githubusercontent.com/AkashiSN/dotfiles/main/setup.zsh)
+```
+
 ### Nvidia driver
 ```bash
 # Download setting file
@@ -32,6 +41,26 @@ sudo apt -y install cuda-drivers
 
 # restart
 sudo reboot
+```
+
+### MicroK8s
+
+```bash
+# Install microk8s with snap
+sudo snap install microk8s --classic
+
+# Turn on the dashboard, dns services
+sudo microk8s enable dashboard dns
+```
+
+### kubectl
+
+```bash
+# Download latest kubectl
+sudo curl -L "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl
+
+# Apply executable permissions to the binary
+sudo chmod +x /usr/local/bin/kubectl
 ```
 
 ### Docker
@@ -224,23 +253,4 @@ Ref : https://askubuntu.com/questions/47311/how-do-i-disable-my-system-from-goin
 
 ```bash
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-```
-
-### Zsh, Vim
-```bash
-# Install zsh, vim
-sudo apt install -y zsh vim
-
-# Install dotfiles and sometools.
-zsh <(curl -L https://raw.githubusercontent.com/AkashiSN/dotfiles/main/setup.zsh)
-```
-
-## Golang
-
-```bash
-# install golang
-goenv install 1.16.3
-
-# set default
-goenv global 1.16.3
 ```
