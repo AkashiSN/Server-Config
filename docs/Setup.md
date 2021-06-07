@@ -180,6 +180,48 @@ certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/ce
 exit
 ```
 
+### Cloudflared
+
+```bash
+# Download cloudflared
+curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest | grep -E 'browser_download_url' | grep linux-amd64 | cut -d '"' -f 4 | xargs -n1 sudo curl -L -o /usr/local/bin/cloudflared
+
+# Apply executable permissions to the binary:
+sudo chmod +x /usr/local/bin/cloudflared
+```
+
+## Cloudflare Argo Tunnelの設定
+
+```bash
+# Become root
+sudo -i
+
+# Authorize cloudflared
+cloudflared tunnel login
+
+export TV_SUBDOMAIN=
+export DOMAIN=
+
+# Create tunnel
+TUNNEL_ID=$(cloudflared tunnel create -o yaml ${TV_SUBDOMAIN} | grep id | cut -d " " -f 2)
+
+# Set up dns for tunnel
+cloudflared tunnel route dns ${TV_SUBDOMAIN} ${TV_SUBDOMAIN}.${DOMAIN}
+
+# Create config file
+cat << EOS > /root/.cloudflared/config.yaml
+url: https://${TV_SUBDOMAIN}.${DOMAIN}
+tunnel: ${TUNNEL_ID}
+credentials-file: /root/.cloudflared/${TUNNEL_ID}.json
+EOS
+
+# Install cloudflared as service
+cloudflared service install
+
+# Run on boot
+systemctl enable cloudflared.service
+```
+
 ### DD Max m4 driver
 Many thanks : https://note.spage.jp/archives/712
 

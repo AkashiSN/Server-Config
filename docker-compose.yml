@@ -74,21 +74,6 @@ services:
         && /usr/bin/sudo -E -u www-data npm start"
     restart: always
 
-  auth-proxy:
-    build:
-      context: auth-proxy
-    volumes:
-      - log_volume:/var/promtail
-    environment:
-      TZ: "Asia/Tokyo"
-      SLACK_CLIENT_ID: ${SLACK_CLIENT_ID}
-      SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET}
-    command: >
-      /bin/sh -c
-        "mkdir -p /var/promtail/auth-proxy \
-        && /usr/bin/supervisord -c /etc/supervisord.conf"
-    restart: always
-
   #
   # Nextcloud
   #
@@ -170,7 +155,6 @@ services:
       DOMAIN: ${DOMAIN}
     depends_on:
       - epgstation
-      - auth-proxy
       - nextcloud
     ports:
       - "443:443"
