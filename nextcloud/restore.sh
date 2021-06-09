@@ -25,16 +25,19 @@ fi
 echo "Maintenance mode on"
 php /var/www/html/occ maintenance:mode --on
 
+echo "Remove exists nextcloud dir"
+rm -rf /var/www/html && mkdir /var/www/html
+
 echo "Restore nextcloud dir"
 tar xf "${DIRECTORY_BACKUP}" -C /var/www/html .
 
-echo "Drop exists database."
+echo "Drop exists database"
 mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} -e "DROP DATABASE ${MYSQL_DATABASE}"
 
-echo "Create new database."
+echo "Create new database"
 mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} -e "CREATE DATABASE ${MYSQL_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
 
-echo "Restore from backuped database."
+echo "Restore from backuped database"
 mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} --databases ${MYSQL_DATABASE} < "${DATABASE_BACKUP}"
 
 echo "Maintenance mode off"
