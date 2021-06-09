@@ -27,12 +27,12 @@ if [ -e /var/www/html/occ ]; then
   if [ $(php /var/www/html/occ status --no-warnings --output=json | jq '.installed') = "true" ]; then
     echo "Maintenance mode on"; php /var/www/html/occ maintenance:mode --on
   fi
-
-  echo "Remove exists nextcloud dir"
-  shopt -s dotglob
-  rm -rf /var/www/html/*
-  shopt -u dotglob
 fi
+
+echo "Remove exists nextcloud dir"
+shopt -s dotglob
+rm -rf /var/www/html/*
+shopt -u dotglob
 
 echo "Restore nextcloud dir"
 tar xf "${DIRECTORY_BACKUP}" -C /var/www/html .
