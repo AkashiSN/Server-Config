@@ -18,5 +18,6 @@ RUN apt-get update && \
 
 COPY supervisord.conf /etc/
 COPY *.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/*.sh
 
 ENV NEXTCLOUD_UPDATE=1
