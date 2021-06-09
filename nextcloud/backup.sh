@@ -1,6 +1,10 @@
 #!/bin/bash
 set -eu
 
+function search_file() {
+  echo $(find "$1" -maxdepth 1 -name "$2" -printf "%T+ %p\n" | sort -r | cut -d " " -f 2)
+}
+
 DATETIME=$(date +"%Y%m%d%H%M%S")
 echo "Now: ${DATETIME}"
 
@@ -10,7 +14,7 @@ DIRECTORY_BACKUP="${BACKUP_DIR}/nextcloud-dir-${DATETIME}.tar.gz"
 
 MAX_BACKUP=30
 
-SQL_BACKUP_LIST=($(ls -U1t ${BACKUP_DIR}/*.sql))
+SQL_BACKUP_LIST=($(search_file ${BACKUP_DIR} '*.sql'))
 if [ ${#SQL_BACKUP_LIST[@]} -gt ${MAX_BACKUP} ]; then
   # 最新のバックアップ以外を削除する
   for SQL_BACKUP in "${SQL_BACKUP_LIST[@]:1}"; do
@@ -19,7 +23,7 @@ if [ ${#SQL_BACKUP_LIST[@]} -gt ${MAX_BACKUP} ]; then
   done
 fi
 
-DIR_BACKUP_LIST=($(ls -U1t ${BACKUP_DIR}/*.tar.gz))
+DIR_BACKUP_LIST=($(search_file ${BACKUP_DIR} '*.tar.gz'))
 if [ ${#DIR_BACKUP_LIST[@]} -gt ${MAX_BACKUP} ]; then
   # 最新のバックアップ以外を削除する
   for DIR_BACKUP in "${DIR_BACKUP_LIST[@]:1}"; do
