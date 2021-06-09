@@ -24,7 +24,9 @@ fi
 
 if [ -e /var/www/html/occ ]; then
   # check nextcloud installed
-  php /var/www/html/occ status | grep "not installed" || echo "Maintenance mode on"; php /var/www/html/occ maintenance:mode --on
+  if [ $(php /var/www/html/occ status --no-warnings --output=json | jq '.installed') = "true" ]; then
+    echo "Maintenance mode on"; php /var/www/html/occ maintenance:mode --on
+  fi
 
   echo "Remove exists nextcloud dir"
   shopt -s dotglob
