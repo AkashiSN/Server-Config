@@ -22,9 +22,9 @@ if [ ! -e ${DIRECTORY_BACKUP} ];then
   echo "${DIRECTORY_BACKUP} is not exists."
 fi
 
-if [ -e /var/www/html/index.php ]; then
-  echo "Maintenance mode on"
-  php /var/www/html/occ maintenance:mode --on
+if [ -e /var/www/html/occ ]; then
+  # check nextcloud installed
+  php /var/www/html/occ status | grep "not installed" || echo "Maintenance mode on"; php /var/www/html/occ maintenance:mode --on
 
   echo "Remove exists nextcloud dir"
   shopt -s dotglob
