@@ -105,8 +105,7 @@ services:
     restart: always
 
   nextcloud:
-    build:
-      context: nextcloud
+    image: akashisn/nextcloud
     volumes:
       - nextcloud:/var/www/html
       - ${NAS_PATH}:/mnt
