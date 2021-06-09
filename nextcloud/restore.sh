@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 set -eu
 
 if [ $# -lt 1 ]; then
@@ -26,7 +26,9 @@ echo "Maintenance mode on"
 php /var/www/html/occ maintenance:mode --on
 
 echo "Remove exists nextcloud dir"
-rm -rf /var/www/html && mkdir /var/www/html
+shopt -s dotglob
+rm /var/www/html/*
+shopt -u dotglob
 
 echo "Restore nextcloud dir"
 tar xf "${DIRECTORY_BACKUP}" -C /var/www/html .
@@ -38,7 +40,7 @@ echo "Create new database"
 mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} -e "CREATE DATABASE ${MYSQL_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
 
 echo "Restore from backuped database"
-mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} --databases ${MYSQL_DATABASE} < "${DATABASE_BACKUP}"
+mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} --database ${MYSQL_DATABASE} < "${DATABASE_BACKUP}"
 
 echo "Maintenance mode off"
 php /var/www/html/occ maintenance:mode --off
