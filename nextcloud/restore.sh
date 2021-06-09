@@ -30,7 +30,7 @@ if [ -e /var/www/html/occ ]; then
 
   echo "Remove exists nextcloud dir"
   shopt -s dotglob
-  rm /var/www/html/*
+  rm -rf /var/www/html/*
   shopt -u dotglob
 fi
 
