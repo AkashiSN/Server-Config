@@ -29,13 +29,13 @@ echo "Restore nextcloud dir"
 tar xf "${DIRECTORY_BACKUP}" -C /var/www/html .
 
 echo "Drop exists database."
-mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -e "DROP DATABASE ${MYSQL_DATABASE}"
+mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} -e "DROP DATABASE ${MYSQL_DATABASE}"
 
 echo "Create new database."
-mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -e "CREATE DATABASE ${MYSQL_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} -e "CREATE DATABASE ${MYSQL_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
 
 echo "Restore from backuped database."
-mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} --databases ${MYSQL_DATABASE} < "${DATABASE_BACKUP}"
+mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} --databases ${MYSQL_DATABASE} < "${DATABASE_BACKUP}"
 
 echo "Maintenance mode off"
 php /var/www/html/occ maintenance:mode --off

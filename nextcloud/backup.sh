@@ -15,6 +15,7 @@ if [ ${#SQL_BACKUP_LIST[@]} -gt ${MAX_BACKUP} ]; then
   # 最新のバックアップ以外を削除する
   for SQL_BACKUP in "${SQL_BACKUP_LIST[@]:1}"; do
     rm ${SQL_BACKUP}
+    echo "Removed ${SQL_BACKUP}."
   done
 fi
 
@@ -23,6 +24,7 @@ if [ ${#DIR_BACKUP_LIST[@]} -gt ${MAX_BACKUP} ]; then
   # 最新のバックアップ以外を削除する
   for DIR_BACKUP in "${DIR_BACKUP_LIST[@]:1}"; do
     rm ${DIR_BACKUP}
+    echo "Removed ${DIR_BACKUP}."
   done
 fi
 
@@ -33,7 +35,7 @@ echo "Backup nextcloud dir"
 tar zcf "${DIRECTORY_BACKUP}" -C /var/www/html .
 
 echo "Backup nextcloud database"
-mysqldump --single-transaction --databases ${MYSQL_DATABASE} -u${MYSQL_USER} -p${MYSQL_PASSWORD} > "${DATABASE_BACKUP}"
+mysqldump --single-transaction --databases ${MYSQL_DATABASE} -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} > "${DATABASE_BACKUP}"
 
 echo "Maintenance mode off"
 php /var/www/html/occ maintenance:mode --off
