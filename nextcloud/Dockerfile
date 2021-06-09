@@ -10,7 +10,7 @@ RUN apt-get update && \
     pecl install smbclient && \
     docker-php-ext-enable smbclient && \
     \
-    echo '0 4 * * *  /bin/bash /usr/local/bin/backup.sh' > /var/spool/cron/crontabs/www-data  && \
+    echo '0 4 * * *  /bin/bash /usr/local/bin/backup.sh' >> /var/spool/cron/crontabs/www-data  && \
     \
     sed -i -e 's?access.log = /proc/self/fd/2?access.log = /proc/self/fd/1?' /usr/local/etc/php-fpm.d/docker.conf && \
     echo 'request_terminate_timeout=0' > /usr/local/etc/php/conf.d/request-terminate-timeout.ini && \
