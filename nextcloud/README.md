@@ -12,5 +12,5 @@ Restore by running the following before docker-compose up.
 
 ```bash
 $ docker-compose up -d mariadb_nextcloud redis_nextcloud
-$ docker-compose run -u www-data --entrypoint=restore.sh nextcloud ${DATETIME}
+$ docker-compose run --rm -u www-data --entrypoint=restore.sh nextcloud ${DATETIME}
 ```

@@ -51,6 +51,9 @@ sudo snap install microk8s --classic
 
 # Turn on the dashboard, dns services
 sudo microk8s enable dashboard dns
+
+# Set alias
+sudo snap alias microk8s.kubectl mk
 ```
 
 ### kubectl
