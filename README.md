@@ -33,14 +33,17 @@ NEXTCLOUD_ADMIN_USER="admin"
 NEXTCLOUD_ADMIN_PASSWORD="pass"
 NAS_PATH="/mnt"
 
-# auth-proxy
-SLACK_CLIENT_ID="hoge.hoge"
-SLACK_CLIENT_SECRET=""
+# samba
+SAMBA_PASSWORD="samba"
+SAMBA_PATH="/mnt/samba"
 
 # Domain
 DOMAIN="akashisn.info"
 TV_SUBDOMAIN="tv"
 FILES_SUBDOMAIN="files"
+
+# IP
+LOCAL_IP=192.168.1.1
 ```
 
 コンテナのビルドを行う

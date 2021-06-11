@@ -140,8 +140,7 @@ services:
   #
 
   nginx:
-    build:
-      context: nginx
+    image: akashisn/nginx
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - nextcloud:/var/www/html
@@ -180,10 +179,26 @@ services:
   #
 
   dnsmasq:
-    build:
-      context: dnsmasq
+    image: akashisn/dnsmasq
     ports:
-      - "172.16.0.3:53:53/udp"
+      - "${LOCAL_IP}:53:53/udp"
+    restart: always
+
+  #
+  # Samba
+  #
+
+  samba:
+    image: akashisn/samba
+    volumes:
+      - ${SAMBA_PATH}:${SAMBA_PATH}
+    environment:
+      TZ: "Asia/Tokyo"
+      SAMBA_PASSWORD: ${SAMBA_PASSWORD}
+      SAMBA_PATH: ${SAMBA_PATH}
+    ports:
+      - "139:139"
+      - "445:445"
     restart: always
 
   #
