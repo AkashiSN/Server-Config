@@ -44,7 +44,7 @@ services:
         max-file: "3"
 
   epgstation:
-    image: akashisn/epgstation:4.3.2
+    image: akashisn/epgstation:4.3.2-qsv
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./epgstation/config:/app/config
@@ -52,6 +52,8 @@ services:
       - ./epgstation/thumbnail:/app/thumbnail
       - ${RECODED_PATH}:/app/recorded
       - log_volume:/var/promtail
+    devices:
+      - /dev/dri:/dev/dri
     environment:
       TZ: "Asia/Tokyo"
       MYSQL_USER: ${MYSQL_EPGSTATION_USER}
