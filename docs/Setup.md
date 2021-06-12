@@ -21,6 +21,11 @@ sudo apt install -y zsh vim
 zsh <(curl -L https://raw.githubusercontent.com/AkashiSN/dotfiles/main/setup.zsh)
 ```
 
+### ZFS
+```bash
+$ sudo apt install -y zfsutils-linux
+```
+
 ### Nvidia driver
 ```bash
 # Download setting file
