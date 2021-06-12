@@ -192,6 +192,7 @@ services:
     image: akashisn/samba
     volumes:
       - ${SAMBA_PATH}:${SAMBA_PATH}
+      - log_volume:/var/promtail
     environment:
       TZ: "Asia/Tokyo"
       SAMBA_PASSWORD: ${SAMBA_PASSWORD}
@@ -205,19 +206,19 @@ services:
   # Logging tools
   #
 
-  promtail:
-    image: grafana/promtail
-    volumes:
-      - log_volume:/var/promtail
-      - ./promtail:/etc/promtail
-    command: >
-      -config.file=/etc/promtail/config.yml
-      -print-config-stderr
-    depends_on:
-      - nginx
-    ports:
-      - "9080:9080"
-    restart: always
+  # promtail:
+  #   image: grafana/promtail
+  #   volumes:
+  #     - log_volume:/var/promtail
+  #     - ./promtail:/etc/promtail
+  #   command: >
+  #     -config.file=/etc/promtail/config.yml
+  #     -print-config-stderr
+  #   depends_on:
+  #     - nginx
+  #   ports:
+  #     - "9080:9080"
+  #   restart: always
 
 volumes:
   mariadb_epgstation:

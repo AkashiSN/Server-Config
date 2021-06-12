@@ -1,8 +1,9 @@
 config/config.yml
 data/streamfiles/*
-data/*
+data/upload/*
 logs/Operator/*
 logs/Service/*
 logs/EPGUpdater/*
 recorded/*
 thumbnail/*
+!.gitkeep
