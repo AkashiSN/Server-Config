@@ -68,7 +68,7 @@ services:
         "mkdir -p /var/promtail/epgstation \
         && rm -rf /app/logs \
         && ln -snf /var/promtail/epgstation /app/logs \
-        && chown -R www-data:www-data /var/promtail/epgstation /app/logs \
+        && chown -R www-data:www-data /var/promtail/epgstation /app/logs /app/thumbnail /app/data \
         && envsubst \
             '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
             < /app/config/config.yml.template \
