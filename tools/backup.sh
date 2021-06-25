@@ -77,7 +77,7 @@ for DATASET in "${DATASETS[@]}"; do
     # 差分の元となるスナップショットがリモートに存在する
     if [ "$result" = "0" ]; then
 
-      echo "Transfer a differential snapshot to the remote."
+      echo "Transfer a differential snapshot (base=${base_snapshot}) to the remote."
       # 差分スナップショットを転送する
       zfs send -I ${base_snapshot} ${LOCAL_SNAPSHOTS[-1]} | ssh ${REMOTE_HOST} zfs recv ${REMOTE_POOL}/${DATASET}
       echo "Transfer complete."
@@ -112,18 +112,25 @@ for DATASET in "${DATASETS[@]}"; do
 
     echo "Clear local old snapshots."
     for LOCAL_SNAPSHOT in "${LOCAL_SNAPSHOTS[@]: 0:$((${#LOCAL_SNAPSHOTS[@]}-${MAX_SNAPSHOTS}))}"; do
+      echo "Destroy ${LOCAL_SNAPSHOT}"
       zfs destroy ${LOCAL_SNAPSHOT}
     done
 
   fi
 
-  if [ ${#REMOTE_SNAPSHOTS[@]} -ge ${MAX_SNAPSHOTS} ]; then # 最大スナップショット数より多い場合古いスナップショットを削除する
+  REMOTE_SNAPSHOTS=($(ssh ${REMOTE_HOST} zfs list -H -o name -t snapshot ${REMOTE_POOL}/${DATASET}))
+
+  if [ ${#REMOTE_SNAPSHOTS[@]} -gt ${MAX_SNAPSHOTS} ]; then # 最大スナップショット数より多い場合古いスナップショットを削除する
 
     echo "Clear remote old snapshots."
     for REMOTE_SNAPSHOT in "${REMOTE_SNAPSHOTS[@]: 0:$((${#REMOTE_SNAPSHOTS[@]}-${MAX_SNAPSHOTS}))}"; do
-      zfs destroy ${REMOTE_SNAPSHOT}
+      echo "Destroy ${REMOTE_SNAPSHOT}"
+      ssh ${REMOTE_HOST} zfs destroy ${REMOTE_SNAPSHOT}
     done
 
   fi
+
+  echo "${DATASET} done"
+  echo
 
 done
