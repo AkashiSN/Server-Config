@@ -12,6 +12,13 @@ sudo apt upgrade -y
 sudo apt install -y git wget curl
 ```
 
+### Timezone
+
+```bash
+# Set timezone to Asia/Tokyo
+timedatectl set-timezone Asia/Tokyo
+```
+
 ### Zsh, Vim
 ```bash
 # Install zsh, vim
