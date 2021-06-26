@@ -16,10 +16,12 @@ DIRECTORY_BACKUP="${BACKUP_DIR}/nextcloud-dir-${DATETIME}.tar.gz"
 
 if [ ! -e ${DATABASE_BACKUP} ];then
   echo "${DATABASE_BACKUP} is not exists."
+  exit 1
 fi
 
 if [ ! -e ${DIRECTORY_BACKUP} ];then
   echo "${DIRECTORY_BACKUP} is not exists."
+  exit 1
 fi
 
 if [ -e /var/www/html/occ ]; then
