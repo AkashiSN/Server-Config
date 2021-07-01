@@ -59,6 +59,12 @@ sudo usermod -a -G www-data user
 sudo usermod -a -G user www-data
 ```
 
+### Nextcloud
+
+```
+docker-compose exec -u www-data nextcloud php /var/www/html/occ config:system:set default_phone_region --value=JP
+```
+
 ## コンテナの起動
 
 ```bash
