@@ -48,6 +48,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./epgstation/config:/app/config
+      - ./epgstation/thumbnail:/app/thumbnail
       - ${RECODED_PATH}:/app/recorded
       - log_volume:/var/promtail
     devices:

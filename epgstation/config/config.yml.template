@@ -22,7 +22,7 @@ recorded:
   - name: recorded
     path: "%ROOT%/recorded"
 
-thumbnail: "%ROOT%/recorded/thumbnail"
+thumbnail: "%ROOT%/thumbnail"
 thumbnailSize: 480x270
 thumbnailPosition: 5
 
