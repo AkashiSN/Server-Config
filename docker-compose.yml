@@ -48,8 +48,6 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./epgstation/config:/app/config
-      - ./epgstation/data:/app/data
-      - ./epgstation/thumbnail:/app/thumbnail
       - ${RECODED_PATH}:/app/recorded
       - log_volume:/var/promtail
     devices:
@@ -68,12 +66,11 @@ services:
         "mkdir -p /var/promtail/epgstation \
         && rm -rf /app/logs \
         && ln -snf /var/promtail/epgstation /app/logs \
-        && chown -R www-data:www-data /var/promtail/epgstation /app/logs /app/thumbnail /app/data \
         && envsubst \
             '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
             < /app/config/config.yml.template \
             > /app/config/config.yml \
-        && /usr/bin/sudo -E -u www-data npm start"
+        && npm start"
     restart: always
 
   #

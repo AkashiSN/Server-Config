@@ -5,6 +5,7 @@ upstream php-handler {
 server{
     listen 443 ssl http2;
     server_name ${FILES_SUBDOMAIN}.${DOMAIN};
+    server_name ${FILES_SUBDOMAIN}-local.${DOMAIN};
 
     access_log /var/promtail/nginx/${FILES_SUBDOMAIN}.access.log main;
     error_log /var/promtail/nginx/${FILES_SUBDOMAIN}.error.log warn;

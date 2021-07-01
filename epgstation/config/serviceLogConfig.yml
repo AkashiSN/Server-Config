@@ -52,4 +52,4 @@ categories:
     appenders:
       - encode
       - stdout
-    level: info
+    level: debug
