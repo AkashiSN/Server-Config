@@ -64,7 +64,7 @@ for DATASET in "${DATASETS[@]}"; do
 
       echo "Transfer all differential snapshots to the remote."
       # 全ての差分スナップショットを転送する
-      zfs send -I ${LOCAL_SNAPSHOTS[0]} ${LOCAL_SNAPSHOTS[-1]} | ssh ${REMOTE_HOST} zfs recv ${REMOTE_POOL}/${DATASET}
+      zfs send -I ${LOCAL_SNAPSHOTS[0]} ${LOCAL_SNAPSHOTS[-1]} | ssh ${REMOTE_HOST} zfs recv -F ${REMOTE_POOL}/${DATASET}
       echo "Transfer complete."
 
     fi
@@ -79,7 +79,7 @@ for DATASET in "${DATASETS[@]}"; do
 
       echo "Transfer a differential snapshot (base=${base_snapshot}) to the remote."
       # 差分スナップショットを転送する
-      zfs send -I ${base_snapshot} ${LOCAL_SNAPSHOTS[-1]} | ssh ${REMOTE_HOST} zfs recv ${REMOTE_POOL}/${DATASET}
+      zfs send -I ${base_snapshot} ${LOCAL_SNAPSHOTS[-1]} | ssh ${REMOTE_HOST} zfs recv -F ${REMOTE_POOL}/${DATASET}
       echo "Transfer complete."
 
     # リモートとの整合性がとれない場合
@@ -99,7 +99,7 @@ for DATASET in "${DATASETS[@]}"; do
 
         echo "Transfer all differential snapshots to the remote."
         # 全ての差分スナップショットを転送する
-        zfs send -I ${LOCAL_SNAPSHOTS[0]} ${LOCAL_SNAPSHOTS[-1]} | ssh ${REMOTE_HOST} zfs recv ${REMOTE_POOL}/${DATASET}
+        zfs send -I ${LOCAL_SNAPSHOTS[0]} ${LOCAL_SNAPSHOTS[-1]} | ssh ${REMOTE_HOST} zfs recv -F ${REMOTE_POOL}/${DATASET}
         echo "Transfer complete."
 
       fi
