@@ -33,6 +33,12 @@ Array.prototype.push.apply(args,['-i', input]);
 Array.prototype.push.apply(args, ['-movflags', 'faststart']);
 Array.prototype.push.apply(args, ['-ignore_unknown']);
 
+// video 設定
+Array.prototype.push.apply(args, [
+    '-vf', 'hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1920:-1,fps=30000/1001',
+    '-c:v', 'h264_qsv',
+    '-global_quality', '20',
+]);
 
 // dual mono 設定
 if (isDualMono) {
@@ -59,16 +65,9 @@ if (isDualMono) {
     ]);
 }
 
-// video 設定
-Array.prototype.push.apply(args, [
-    '-vf', 'hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1920:-1,fps=30000/1001',
-    '-c:v', 'h264_qsv',
-    '-global_quality', '20',
-    '-f', 'mp4',
-]);
-
 // その他設定
 Array.prototype.push.apply(args,[
+    '-f', 'mp4',
     output
 ]);
 
