@@ -61,9 +61,9 @@ if (isDualMono) {
 
 // video 設定
 Array.prototype.push.apply(args, [
-    '-vf', 'hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,fps=30000/1001',
+    '-vf', 'hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1920:-1,fps=30000/1001',
     '-c:v', 'h264_qsv',
-    '-q:v', '20',
+    '-global_quality', '20',
     '-f', 'mp4',
 ]);
 
