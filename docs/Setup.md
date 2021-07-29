@@ -61,11 +61,21 @@ sudo reboot
 # Install microk8s with snap
 sudo snap install microk8s --classic
 
-# Turn on the dns storage services
-sudo microk8s enable dns storage
+# Turn on the dns, storage services
+sudo microk8s enable dns
+sudo microk8s enable storage
 
 # Set alias
 sudo snap alias microk8s.kubectl mk
+
+# Create config dir
+mkdir -p $HOME/.kube
+
+# Export config
+microk8s.config > $HOME/.kube/microk8s-config
+
+# Set default context
+ln -s $HOME/.kube/microk8s-config $HOME/.kube/config
 ```
 
 ### kubectl
@@ -76,6 +86,45 @@ sudo curl -L "https://storage.googleapis.com/kubernetes-release/release/$(curl -
 
 # Apply executable permissions to the binary
 sudo chmod +x /usr/local/bin/kubectl
+```
+
+### Knative
+
+```bash
+# Enable load balancer
+echo '192.168.100.1-192.168.100.254' | sudo microk8s enable metallb
+
+# Download istio
+curl -L https://istio.io/downloadIstio | sh -
+sudo mv istio-* /opt/istio
+sudo ln -s /opt/istio/bin/istioctl /usr/local/bin/istioctl
+
+# Install istio service
+istioctl install
+
+# Install knative service
+KNATIVE_SERVICE_VERSION=$(curl -sL https://api.github.com/repos/knative/serving/releases | grep -E 'tag_name' | sort --version-sort | tail -1 | cut -d '"' -f 4)
+kubectl apply -f https://github.com/knative/serving/releases/download/${KNATIVE_SERVICE_VERSION}/serving-crds.yaml
+kubectl apply -f https://github.com/knative/serving/releases/download/${KNATIVE_SERVICE_VERSION}/serving-core.yaml
+
+# Install istio for knative
+KNATIVE_NET_ISTIO_VERSION=$(curl -sL https://api.github.com/repos/knative-sandbox/net-istio/releases | grep -E 'tag_name' | sort --version-sort | tail -1 | cut -d '"' -f 4)
+kubectl apply -f https://github.com/knative-sandbox/net-istio/releases/download/${KNATIVE_NET_ISTIO_VERSION}/net-istio.yaml
+
+# Setup Knative DOMAIN DNS
+INGRESS_HOST=$(kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+KNATIVE_DOMAIN=${INGRESS_HOST}.sslip.io
+kubectl patch configmap -n knative-serving config-domain -p "{\"data\": {\"${KNATIVE_DOMAIN}\": \"\"}}"
+```
+
+### Knative client
+
+```bash
+# Download latest kn
+sudo curl -L $(curl -sL https://api.github.com/repos/knative/client/releases | grep -E 'browser_download_url' | grep -E 'linux-amd64' | sort --version-sort | tail -1 | cut -d '"' -f 4) -o /usr/local/bin/kn
+
+# Apply executable permissions to the binary
+sudo chmod +x /usr/local/bin/kn
 ```
 
 ### Docker
