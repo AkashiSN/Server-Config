@@ -5,7 +5,7 @@ services:
   # TV
   #
   mirakurun:
-    image: akashisn/mirakurun
+    image: ghcr.io/akashisn/dvb-docker/mirakurun
     cap_add:
       - SYS_ADMIN
       - SYS_NICE
@@ -44,7 +44,7 @@ services:
         max-file: "3"
 
   epgstation:
-    image: akashisn/epgstation:4.4-qsv
+    image: ghcr.io/akashisn/dvb-docker/epgstation:4.4-qsv
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./epgstation/config:/app/config
@@ -105,7 +105,7 @@ services:
     restart: always
 
   nextcloud:
-    image: akashisn/nextcloud
+    image: ghcr.io/akashisn/nextcloud
     volumes:
       - nextcloud:/var/www/html
       - ${NAS_PATH}:/mnt
@@ -140,7 +140,7 @@ services:
   #
 
   nginx:
-    image: akashisn/nginx
+    image: ghcr.io/akashisn/nginx
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - nextcloud:/var/www/html
@@ -179,7 +179,7 @@ services:
   #
 
   dnsmasq:
-    image: akashisn/dnsmasq
+    image: ghcr.io/akashisn/dnsmasq
     ports:
       - "${LOCAL_IP}:53:53/udp"
     restart: always
@@ -189,7 +189,7 @@ services:
   #
 
   samba:
-    image: akashisn/samba
+    image: ghcr.io/akashisn/samba
     volumes:
       - ${SAMBA_PATH}:${SAMBA_PATH}
       - log_volume:/var/promtail

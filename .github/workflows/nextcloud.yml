@@ -26,11 +26,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ github.workflow }}-
 
-      - name: Login to DockerHub
+      - name: Login to GHCR
         uses: docker/login-action@v1
         with:
+          registry: ghcr.io
           username: akashisn
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ github.token }}
 
       - name: Build and push - nextcloud
         uses: docker/build-push-action@v2
@@ -38,7 +39,7 @@ jobs:
           context: ./nextcloud
           file: ./nextcloud/Dockerfile
           tags: |
-            akashisn/nextcloud
+            ghcr.io/akashisn/nextcloud
           platforms: linux/amd64
           push: true
           cache-from: type=local,src=/tmp/.buildx-cache
