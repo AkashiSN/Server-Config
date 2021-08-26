@@ -115,6 +115,21 @@ kubectl apply -f https://github.com/knative-sandbox/net-istio/releases/download/
 INGRESS_HOST=$(kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 KNATIVE_DOMAIN=${INGRESS_HOST}.sslip.io
 kubectl patch configmap -n knative-serving config-domain -p "{\"data\": {\"${KNATIVE_DOMAIN}\": \"\"}}"
+
+# Install knative eventing
+KNATIVE_EVENTING_VERSION=$(curl -sL https://api.github.com/repos/knative/eventing/releases | grep -E 'tag_name' | sort --version-sort | tail -1 | cut -d '"' -f 4)
+kubectl apply -f https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/eventing-crds.yaml
+kubectl apply -f https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/eventing-core.yaml
+kubectl apply -f https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/in-memory-channel.yaml
+kubectl apply -f https://github.com/knative/eventing/releases/download/${KNATIVE_EVENTING_VERSION}/mt-channel-broker.yaml
+
+kubectl apply -f - <<EOF
+apiVersion: eventing.knative.dev/v1
+kind: broker
+metadata:
+ name: example-broker
+ namespace: default
+EOF
 ```
 
 ### Knative client
