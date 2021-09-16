@@ -23,6 +23,10 @@ cat << EOS > /etc/samba/smb.conf
   log level = 1
   max log size = 1000
 
+  dos charset = CP932
+  unix charset = UTF8
+  display charset = UTF8
+
   server role = standalone server
 
   usershare allow guests = no
