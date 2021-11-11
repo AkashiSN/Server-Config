@@ -59,6 +59,8 @@ services:
       MYSQL_PASSWORD: ${MYSQL_EPGSTATION_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_EPGSTATION_DATABASE}
       HOME: /app
+      TV_SUBDOMAIN: ${TV_SUBDOMAIN}
+      DOMAIN: ${DOMAIN}
     depends_on:
       - mirakurun
       - mariadb_epgstation
@@ -68,7 +70,7 @@ services:
         && rm -rf /app/logs \
         && ln -snf /var/promtail/epgstation /app/logs \
         && envsubst \
-            '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE' \
+            '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE $$TV_SUBDOMAIN $$DOMAIN' \
             < /app/config/config.yml.template \
             > /app/config/config.yml \
         && npm start"

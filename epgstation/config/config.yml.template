@@ -2,6 +2,9 @@ port: 8080
 socketioPort: 8080
 clientSocketioPort: 443
 mirakurunPath: http://mirakurun:40772/
+apiServers:
+  - https://${TV_SUBDOMAIN}.${DOMAIN}
+  - https://${TV_SUBDOMAIN}-local.${DOMAIN}
 
 dbtype: mysql
 mysql:
