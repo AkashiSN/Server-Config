@@ -2,37 +2,30 @@
   types:
     - GR
     - BS
-    - CS
   command: dvbv5-zap -a 0 -c /app-config/isdb.conf -r -P <channel>
   dvbDevicePath: /dev/dvb/adapter0/dvr0
   decoder: arib-b25-stream
   isDisabled: false
-
 - name: MaxM4
   types:
     - GR
     - BS
-    - CS
   command: dvbv5-zap -a 1 -c /app-config/isdb.conf -r -P <channel>
   dvbDevicePath: /dev/dvb/adapter1/dvr0
   decoder: arib-b25-stream
   isDisabled: false
-
 - name: MaxM4
   types:
     - GR
     - BS
-    - CS
   command: dvbv5-zap -a 2 -c /app-config/isdb.conf -r -P <channel>
   dvbDevicePath: /dev/dvb/adapter2/dvr0
   decoder: arib-b25-stream
   isDisabled: false
-
 - name: MaxM4
   types:
     - GR
     - BS
-    - CS
   command: dvbv5-zap -a 3 -c /app-config/isdb.conf -r -P <channel>
   dvbDevicePath: /dev/dvb/adapter3/dvr0
   decoder: arib-b25-stream

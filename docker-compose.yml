@@ -20,6 +20,8 @@ services:
       - ./mirakurun/config/:/app-config/
       - ./mirakurun/data/:/app-data/
     restart: always
+    ports:
+      - "40772:40772"
     logging:
       driver: json-file
       options:
