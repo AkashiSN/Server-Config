@@ -108,7 +108,7 @@ stream:
               -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
               -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
               -threads 0 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_qsv -flags +cgop
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=640:-1 -b:v 1500k
+              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=640:-1 -b:v 1000k
               -preset veryfast -y -f mpegts pipe:1'
 
       webm: []
