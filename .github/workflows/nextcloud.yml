@@ -6,10 +6,9 @@ on:
       - 'nextcloud/**'
       - '!nextcloud/**.md'
       - '.github/workflows/nextcloud.yml'
-  workflow_dispatch:
 
 jobs:
-  buildx:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,7 +39,12 @@ jobs:
           file: ./nextcloud/Dockerfile
           tags: |
             ghcr.io/akashisn/nextcloud
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64/v8
           push: true
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      - name: Move cache # https://github.com/docker/build-push-action/issues/252
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
