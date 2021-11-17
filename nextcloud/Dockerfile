@@ -1,4 +1,4 @@
-FROM nextcloud:22.2.1-fpm
+FROM nextcloud:22.2.3-fpm
 
 ENV DEBIAN_FRONTEND noninteractive
 
