@@ -46,7 +46,7 @@ services:
         max-file: "3"
 
   epgstation:
-    image: ghcr.io/akashisn/dvb-docker/epgstation:4.4-qsv
+    image: ghcr.io/akashisn/dvb-docker/epgstation:4.4.1-qsv
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./epgstation/config:/app/config
