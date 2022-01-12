@@ -16,7 +16,7 @@ export WIREGUARD_DIR=/etc/wireguard
 wg genkey | sudo tee ${WIREGUARD_DIR}/server.key
 
 # Generate public key
-sudo cat ${WIREGUARD_DIR}/clients/server.key | wg pubkey | sudo tee ${WIREGUARD_DIR}/server.pub
+sudo cat ${WIREGUARD_DIR}/server.key | wg pubkey | sudo tee ${WIREGUARD_DIR}/server.pub
 
 # Generate preshared key
 wg genpsk | sudo tee ${WIREGUARD_DIR}/preshared.key
@@ -34,7 +34,7 @@ export WIREGUARD_IP=10.254.0.1/24
 # Create wireguard interface config.
 cat << EOS | sudo tee ${WIREGUARD_DIR}/wg0.conf
 [Interface]
-PrivateKey = $(cat ${WIREGUARD_DIR}/server.key)
+PrivateKey = $(sudo cat ${WIREGUARD_DIR}/server.key)
 Address = ${WIREGUARD_IP}
 ListenPort = 443
 PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE; iptables -A FORWARD -i eth0 -j ACCEPT; iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
@@ -53,6 +53,11 @@ cat ${WIREGUARD_DIR}/wireguard.sh
 #!/bin/bash
 set -eu
 
+WIREGUARD_DIR=/etc/wireguard
+START_IP=10.254.0.2
+ENDPOINT=host:443
+CLIENTS=("MacBookPro13")
+
 mkdir -p ${WIREGUARD_DIR}/clients
 
 for CLIENT in "${CLIENTS[@]}"; do
@@ -60,10 +65,11 @@ for CLIENT in "${CLIENTS[@]}"; do
 	cat ${WIREGUARD_DIR}/clients/${CLIENT}-private.key | wg pubkey | tee ${WIREGUARD_DIR}/clients/${CLIENT}-public.key
 	chmod 600 ${WIREGUARD_DIR}/clients/${CLIENT}-private.key ${WIREGUARD_DIR}/clients/${CLIENT}-public.key
 
+
 	cat << EOS > ${WIREGUARD_DIR}/clients/${CLIENT}.conf
 [Interface]
 PrivateKey = $(cat ${WIREGUARD_DIR}/clients/${CLIENT}-private.key)
-Address = ${CLIENT_START_IP}/32
+Address = ${START_IP}/32
 
 [Peer]
 PublicKey = $(cat ${WIREGUARD_DIR}/server.pub)
@@ -77,21 +83,16 @@ EOS
 # ${CLIENT}
 PublicKey = $(cat ${WIREGUARD_DIR}/clients/${CLIENT}-public.key)
 PresharedKey = $(cat ${WIREGUARD_DIR}/preshared.key)
-AllowedIPs = ${CLIENT_START_IP}/32
+AllowedIPs = ${START_IP}/32
 PersistentKeepalive = 25
 
 EOS
 
-	CLIENT_START_IP=$(echo $CLIENT_START_IP | awk -F "." '{print $1"."$2"."$3"."$4+1}')
+	START_IP=$(echo $START_IP | awk -F "." '{print $1"."$2"."$3"."$4+1}')
 done
 ```
 
 ```bash
-# Set env.
-export CLIENT_START_IP=10.254.2.2
-export ENDPOINT=host:443
-export CLIENTS=("MacBookPro13" "Pixel3XL" "iPadPro11" "iPhone7" "Nexus5X")
-
 # Run script.
 sudo /bin/bash ${WIREGUARD_DIR}/wireguard.sh
 ```
@@ -104,4 +105,19 @@ sudo wg-quick up wg0
 
 # Stop wireguard.
 sudo wg-quick down wg0
+```
+
+## Service
+
+```bash
+sudo systemctl start wg-quick@wg0
+sudo systemctl enable wg-quick@wg0
+```
+
+## Packet forward
+
+`/etc/sysctl.conf`
+
+```
+net.ipv4.ip_forward = 1
 ```
