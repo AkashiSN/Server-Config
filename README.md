@@ -61,8 +61,11 @@ sudo usermod -a -G user www-data
 
 ### Nextcloud
 
+https://developers.cloudflare.com/cache/about/default-cache-behavior#customization-options-and-limitations
+
 ```
 docker-compose exec -u www-data nextcloud php /var/www/html/occ config:system:set default_phone_region --value=JP
+docker-compose exec -u www-data nextcloud php /var/www/html/occ config:app:set files max_chunk_size --value 104857600
 ```
 
 ## コンテナの起動
