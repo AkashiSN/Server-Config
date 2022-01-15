@@ -16,7 +16,9 @@ RUN apt-get update && \
     echo '[global]' > /usr/local/etc/php-fpm.d/request-terminate-timeout.conf && \
     echo 'request_terminate_timeout=86400' >> /usr/local/etc/php-fpm.d/request-terminate-timeout.conf && \
     echo 'request_terminate_timeout=86400' > /usr/local/etc/php/conf.d/request-terminate-timeout.ini && \
-    echo 'max_execution_time=86400' > /usr/local/etc/php/conf.d/max-execution-time.ini
+    echo 'max_execution_time=86400' > /usr/local/etc/php/conf.d/max-execution-time.ini && \
+    echo 'upload_tmp_dir=/tmp/upload' > /usr/local/etc/php/conf.d/upload-tmp-dir.ini && \
+    echo 'output_buffering=0' >> /usr/local/etc/php/conf.d/upload-tmp-dir.ini
 
 COPY supervisord.conf /etc/
 COPY *.sh /usr/local/bin/

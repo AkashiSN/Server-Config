@@ -54,6 +54,7 @@ server{
     # set max upload size
     client_body_buffer_size 100m;
     client_max_body_size 100m;
+    client_body_temp_path /tmp/upload;
 
     fastcgi_buffer_size 32k;
     fastcgi_buffers 64 64K;
