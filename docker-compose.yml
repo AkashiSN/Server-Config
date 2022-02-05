@@ -29,7 +29,7 @@ services:
         max-size: 10m
 
   mariadb_epgstation:
-    image: mariadb:10.5
+    image: mariadb:10.6
     volumes:
       - mariadb_epgstation:/var/lib/mysql
     environment:
@@ -38,7 +38,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_EPGSTATION_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_EPGSTATION_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_EPGSTATION_DATABASE}
-    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --performance-schema=false --expire_logs_days=1
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --performance-schema=false --expire_logs_days=1
     restart: always
     logging:
       options:
@@ -46,7 +46,7 @@ services:
         max-file: "3"
 
   epgstation:
-    image: ghcr.io/akashisn/dvb-docker/epgstation:4.4.1-qsv
+    image: ghcr.io/akashisn/dvb-docker/epgstation:5.0-qsv
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./epgstation/config:/app/config
@@ -83,7 +83,7 @@ services:
   #
 
   mariadb_nextcloud:
-    image: mariadb:10.5
+    image: mariadb:10.6
     volumes:
       - mariadb_nextcloud:/var/lib/mysql
     environment:
