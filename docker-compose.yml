@@ -83,7 +83,7 @@ services:
   #
 
   mariadb_nextcloud:
-    image: mariadb:10.6
+    image: mariadb:10.5
     volumes:
       - mariadb_nextcloud:/var/lib/mysql
     environment:
