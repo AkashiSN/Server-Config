@@ -6,6 +6,7 @@ map $http_upgrade $connection_upgrade {
 server{
     listen 443 ssl http2;
     server_name ${TV_SUBDOMAIN}.${DOMAIN};
+    server_name v6.${TV_SUBDOMAIN}.${DOMAIN};
     server_name ${TV_SUBDOMAIN}-local.${DOMAIN};
 
     access_log /var/promtail/nginx/${TV_SUBDOMAIN}.access.log main;
