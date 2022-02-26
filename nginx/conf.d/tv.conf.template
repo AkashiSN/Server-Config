@@ -47,6 +47,6 @@ server{
     proxy_read_timeout 86400;
 
     location / {
-        proxy_pass http://epgstation:8080/;
+        proxy_pass http://localhost:8888/;
     }
 }

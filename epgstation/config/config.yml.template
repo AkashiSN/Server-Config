@@ -1,7 +1,7 @@
-port: 8080
-socketioPort: 8080
+port: 8888
+socketioPort: 8888
 clientSocketioPort: 443
-mirakurunPath: http://mirakurun:40772/
+mirakurunPath: unix:///var/run/socket/mirakurun.sock
 apiServers:
   - https://${TV_SUBDOMAIN}.${DOMAIN}
   - https://${TV_SUBDOMAIN}-v6.${DOMAIN}
@@ -9,8 +9,7 @@ apiServers:
 
 dbtype: mysql
 mysql:
-  host: mariadb_epgstation
-  port: 3306
+  host: unix:///var/run/mysqld/mysqld.sock
   user: ${MYSQL_USER}
   password: ${MYSQL_PASSWORD}
   database: ${MYSQL_DATABASE}
