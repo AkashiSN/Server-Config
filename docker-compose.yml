@@ -30,13 +30,15 @@ services:
     image: mariadb:10.6
     volumes:
       - mariadb_epgstation:/var/lib/mysql
-      - mariadb_epgstation_socket:/var/run/mysqld/
     environment:
       TZ: "Asia/Tokyo"
       MYSQL_USER: ${MYSQL_EPGSTATION_USER}
       MYSQL_PASSWORD: ${MYSQL_EPGSTATION_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_EPGSTATION_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_EPGSTATION_DATABASE}
+    expose:
+      - "3306"
+    network_mode: "host"
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --performance-schema=false --expire_logs_days=1
     restart: always
     logging:
@@ -53,7 +55,6 @@ services:
       - ${RECODED_PATH}:/app/recorded
       - log_volume:/var/promtail
       - mirakurun_socket:/var/run/mirakurun/
-      - mariadb_epgstation_socket:/var/run/mysqld/
     devices:
       - /dev/dri:/dev/dri
     environment:
@@ -245,7 +246,5 @@ volumes:
   phpfpm_socket:
     driver: local
   mirakurun_socket:
-    driver: local
-  mariadb_epgstation_socket:
     driver: local
 
