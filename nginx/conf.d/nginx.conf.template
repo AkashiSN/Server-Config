@@ -1,4 +1,4 @@
-user             nginx;
+user             www-data;
 worker_processes auto;
 
 error_log /var/promtail/nginx/error.log warn;
