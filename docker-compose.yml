@@ -114,6 +114,7 @@ services:
       - nextcloud:/var/www/html
       - ${NAS_PATH}:/mnt
       - log_volume:/var/promtail
+      - phpfpm_socket:/var/run/socket/
     environment:
       TZ: "Asia/Tokyo"
       MYSQL_USER: ${MYSQL_NEXTCLOUD_USER}
@@ -150,6 +151,7 @@ services:
       - nextcloud:/var/www/html
       - ./nginx/conf.d:/etc/nginx/conf.d
       - log_volume:/var/promtail
+      - phpfpm_socket:/var/run/socket/phpfpm
     environment:
       TZ: "Asia/Tokyo"
       TV_SUBDOMAIN: ${TV_SUBDOMAIN}
@@ -158,8 +160,9 @@ services:
     depends_on:
       - epgstation
       - nextcloud
-    ports:
-      - "443:443"
+    # ports:
+    #   - "443:443"
+    network_mode: "host"
     command: >
       /bin/sh -c
         "mkdir -p /var/promtail/nginx \
@@ -234,4 +237,6 @@ volumes:
   nextcloud:
     driver: local
   log_volume:
+    driver: local
+  phpfpm_socket:
     driver: local

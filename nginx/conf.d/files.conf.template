@@ -1,5 +1,5 @@
 upstream php-handler {
-    server nextcloud:9000;
+    server unix:/var/run/socket/phpfpm/php-fpm.sock;
 }
 
 server{
