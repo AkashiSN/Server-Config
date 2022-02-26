@@ -16,7 +16,6 @@ services:
       - /dev/bus:/dev/bus
       - /dev/dvb:/dev/dvb
     volumes:
-      - ./mirakurun/run/:/var/run/
       - ./mirakurun/config/:/app-config/
       - ./mirakurun/data/:/app-data/
       - mirakurun_socket:/var/run/
