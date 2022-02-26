@@ -1,7 +1,7 @@
 port: 8888
 socketioPort: 8888
 clientSocketioPort: 443
-mirakurunPath: unix:///var/run/mirakurun.sock
+mirakurunPath: unix:///var/run/mirakurun/mirakurun.sock
 apiServers:
   - https://${TV_SUBDOMAIN}.${DOMAIN}
   - https://${TV_SUBDOMAIN}-v6.${DOMAIN}
