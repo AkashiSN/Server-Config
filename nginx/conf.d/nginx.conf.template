@@ -25,6 +25,7 @@ http {
 
     server {
         listen 443 ssl default_server;
+        listen [::]:443 ssl default_server;
         server_name _;
 
         access_log /var/promtail/nginx/default.access.log main;

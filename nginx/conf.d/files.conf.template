@@ -4,6 +4,7 @@ upstream php-handler {
 
 server{
     listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name ${FILES_SUBDOMAIN}.${DOMAIN};
     server_name ${FILES_SUBDOMAIN}-v6.${DOMAIN};
     server_name ${FILES_SUBDOMAIN}-local.${DOMAIN};
