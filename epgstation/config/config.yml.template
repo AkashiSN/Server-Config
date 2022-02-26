@@ -4,6 +4,7 @@ clientSocketioPort: 443
 mirakurunPath: http://mirakurun:40772/
 apiServers:
   - https://${TV_SUBDOMAIN}.${DOMAIN}
+  - https://v6.${TV_SUBDOMAIN}.${DOMAIN}
   - https://${TV_SUBDOMAIN}-local.${DOMAIN}
 
 dbtype: mysql
