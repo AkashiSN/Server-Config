@@ -301,32 +301,41 @@ cloudflared service install
 systemctl enable cloudflared.service
 ```
 
-### DD Max m4 driver
-Many thanks : https://note.spage.jp/archives/712
+### DKMS Setting
 
 ```bash
 # Install the prerequisites:
 sudo apt install -y dkms build-essential unzip
 
-# Create work directory
-mkdir ~/work
-cd ~/work
+# Set up to use your own driver instead of the OS standard one.
+sudo mkdir -p /etc/depmod.d
+echo 'search extra updates built-in' | sudo tee /etc/depmod.d/extra.conf
+sudo depmod -a
+
+reboot
+```
+
+### DD Max m4 driver
+Many thanks : https://note.spage.jp/archives/712
+
+```bash
+DDDVB_VERSION=0.9.37
 
 # Download dddvb source
-wget https://github.com/DigitalDevices/dddvb/archive/0.9.37.zip
-unzip 0.9.37.zip
-cd dddvb-0.9.37
+wget https://github.com/DigitalDevices/dddvb/archive/${DDDVB_VERSION}.zip
+unzip ${DDDVB_VERSION}.zip
+cd dddvb-${DDDVB_VERSION}
 
 # Make once
 make
 
 # Generate dkms.conf
-cat <<'EOF' | tee dkms.conf
+cat <<EOF | tee dkms.conf
 PACKAGE_NAME=dddvb
-PACKAGE_VERSION=0.9.37
+PACKAGE_VERSION=${DDDVB_VERSION}
 AUTOINSTALL="yes"
 CHECK_MODULE_VERSION="no"
-MAKE="'make' all KVER=${kernelver}"
+MAKE="'make' all KVER=\${kernelver}"
 CLEAN="make clean"
 EOF
 
@@ -347,24 +356,44 @@ sed -i -e 's/shell uname -r/KVER/g' Makefile
 
 # Copy sorce to dkms dir
 cd ..
-sudo cp -r dddvb-0.9.37 /usr/src/
+sudo mv dddvb-${DDDVB_VERSION} /usr/src/
 
-# Registration to DKMS
-sudo dkms add -m dddvb -v 0.9.37
-
-# Install present kernel driver
-sudo dkms install -m dddvb -v 0.9.37
-
-# Check DKMS status
+sudo dkms add -m dddvb -v ${DDDVB_VERSION}
+sudo dkms build -m dddvb -v ${DDDVB_VERSION}
+sudo dkms install -m dddvb -v ${DDDVB_VERSION}
 dkms status
+```
 
-# Set up to use your own driver instead of the OS standard one.
-sudo mkdir -p /etc/depmod.d
-echo 'search extra updates built-in' | sudo tee /etc/depmod.d/extra.conf
-sudo depmod -a
+### r8125 driver
+Many thanks: https://qiita.com/hugashy/items/0150e10aea2cf9621ba8
 
-# restart
-sudo reboot
+Download from: https://www.realtek.com/en/component/zoo/category/network-interface-controllers-10-100-1000m-gigabit-ethernet-pci-express-software
+
+```bash
+R8125_VERSION="9.008.00"
+
+tar xvf r8125-${R8125_VERSION}.tar.bz2
+sudo mv r8125-${R8125_VERSION} /usr/src
+
+# Update Makefile
+sed -i -e 's/shell uname -r/KVER/g' /usr/src/r8125-${R8125_VERSION}/src/Makefile
+
+# Generate dkms.conf
+cat <<EOF | tee /usr/src/r8125-${R8125_VERSION}/dkms.conf
+PACKAGE_NAME="r8125"
+PACKAGE_VERSION="${R8125_VERSION}"
+BUILT_MODULE_LOCATION[0]="src"
+BUILT_MODULE_NAME[0]="r8125"
+MAKE[0]="'make' KVER=\${kernelver} modules"
+CLEAN="'make' clean KVER=\${kernelver}"
+DEST_MODULE_LOCATION[0]="/updates/dkms"
+AUTOINSTALL="yes"
+EOF
+
+sudo dkms add -m r8125 -v ${R8125_VERSION}
+sudo dkms build -m r8125 -v ${R8125_VERSION}
+sudo dkms install -m r8125 -v ${R8125_VERSION}
+dkms status
 ```
 
 ### Serve setting
