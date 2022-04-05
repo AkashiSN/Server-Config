@@ -23,7 +23,7 @@ server{
     # Remove X-Powered-By, which is an information leak
     fastcgi_hide_header X-Powered-By;
 
-    location {
+    location / {
         root /public;
     }
 }
