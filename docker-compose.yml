@@ -153,6 +153,7 @@ services:
     image: ghcr.io/akashisn/nginx
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
+      - ${NAS_PATH}/public:/public
       - nextcloud:/var/www/html
       - ./nginx/conf.d:/etc/nginx/conf.d
       - log_volume:/var/promtail
@@ -179,6 +180,10 @@ services:
           '$$FILES_SUBDOMAIN $$DOMAIN' \
           < /etc/nginx/conf.d/files.conf.template \
           > /etc/nginx/conf.d/files.conf \
+        && envsubst \
+          '$$DOMAIN' \
+          < /etc/nginx/conf.d/static.conf.template \
+          > /etc/nginx/conf.d/static.conf \
         && envsubst \
           '$$DOMAIN' \
           < /etc/nginx/conf.d/nginx.conf.template \
