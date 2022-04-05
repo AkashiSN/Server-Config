@@ -2,7 +2,6 @@ server{
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
     server_name static.${DOMAIN};
-    server_name static-v6.${DOMAIN};
 
     access_log /var/promtail/nginx/static.access.log main;
     error_log /var/promtail/nginx/static.error.log warn;
