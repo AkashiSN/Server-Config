@@ -6,10 +6,20 @@
 ```bash
 # Update the apt package index
 sudo apt update
+
 # Upgrade outdated packages
 sudo apt upgrade -y
+
 # Install git, wget, curl
 sudo apt install -y git wget curl
+
+# Install the prerequisites:
+sudo apt-get install -y \
+   apt-transport-https \
+   ca-certificates \
+   curl \
+   gnupg \
+   lsb-release
 ```
 
 ### Timezone
@@ -55,6 +65,60 @@ sudo apt -y install cuda-drivers
 sudo reboot
 ```
 
+### Bazel
+```bash
+# Add Bazel’s official GPG key
+curl -fsSL https://bazel.build/bazel-release.pub.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/bazel.gpg
+
+# Set up the stable repository
+echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+
+# Update the apt package index
+sudo apt update
+
+# Install the latest version of bazel
+sudo apt install -y bazel
+```
+
+### Docker
+```bash
+# Add Docker’s official GPG key
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+# Set up the stable repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
+
+# Update the apt package index
+sudo apt update
+
+# Install the latest version of Docker Engine and containerd
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+
+# Create plugin dir
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+```
+
+### Docker Compose
+
+```bash
+# Download docker compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
+
+# Apply executable permissions to the binary:
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+```
+
+### kind
+```bash
+# Download kind
+sudo curl -L $(curl -sL https://api.github.com/repos/kubernetes-sigs/kind/releases | grep -E 'browser_download_url' | grep -E 'linux-amd64' | grep -v 'sum' | sort --version-sort | tail -1 | cut -d '"' -f 4) -o /usr/local/bin/kind
+
+# Apply executable permissions to the binary:
+sudo chmod +x /usr/local/bin/kind
+```
+
 ### MicroK8s
 
 ```bash
@@ -81,11 +145,33 @@ ln -s $HOME/.kube/microk8s-config $HOME/.kube/config
 ### kubectl
 
 ```bash
-# Download latest kubectl
+# Download kubectl
 sudo curl -L "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl
 
 # Apply executable permissions to the binary
 sudo chmod +x /usr/local/bin/kubectl
+```
+
+### istioctl
+
+```bash
+# Download istio
+curl -L https://istio.io/downloadIstio | sh -
+
+# Move to opt
+sudo mv istio-* /opt/istio
+
+# Create symlink
+sudo ln -s /opt/istio/bin/istioctl /usr/local/bin/istioctl
+```
+
+### skaffold
+```bash
+# Download skaffold
+sudo curl -L https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 -o /usr/local/bin/skaffold
+
+# Apply executable permissions to the binary
+sudo chmod +x /usr/local/bin/skaffold
 ```
 
 ### Knative
@@ -93,11 +179,6 @@ sudo chmod +x /usr/local/bin/kubectl
 ```bash
 # Enable load balancer
 echo '192.168.100.1-192.168.100.254' | sudo microk8s enable metallb
-
-# Download istio
-curl -L https://istio.io/downloadIstio | sh -
-sudo mv istio-* /opt/istio
-sudo ln -s /opt/istio/bin/istioctl /usr/local/bin/istioctl
 
 # Install istio service
 istioctl install
@@ -140,45 +221,6 @@ sudo curl -L $(curl -sL https://api.github.com/repos/knative/client/releases | g
 
 # Apply executable permissions to the binary
 sudo chmod +x /usr/local/bin/kn
-```
-
-### Docker
-
-```bash
-# Install the prerequisites:
-sudo apt install -y \
-    apt-transport-https \
-    ca-certificates \
-    gnupg-agent \
-    software-properties-common
-
-# Add Docker’s official GPG key
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-# Set up the stable repository
-sudo add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-   $(lsb_release -cs) \
-   stable"
-
-# Update the apt package index
-sudo apt update
-
-# Install the latest version of Docker Engine and containerd
-sudo apt install -y docker-ce docker-ce-cli containerd.io
-```
-
-#### Docker Compose
-
-```bash
-# Download docker compose
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-
-# Apply executable permissions to the binary:
-sudo chmod +x /usr/local/bin/docker-compose
-
-# Create a symbolic link to /usr/bin
-sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
 #### Buildkit
