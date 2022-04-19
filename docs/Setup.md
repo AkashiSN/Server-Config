@@ -77,7 +77,13 @@ echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" |
 sudo apt update
 
 # Install the latest version of bazel
-sudo apt install -y bazel
+sudo apt install -y build-essential bazel
+
+# Download buildtools
+sudo curl -L $(curl -sL https://api.github.com/repos/bazelbuild/buildtools/releases | grep -E 'browser_download_url' | grep -E 'linux-amd64' | grep -E 'buildifier' | sort --version-sort | tail -1 | cut -d '"' -f 4) -o /usr/local/bin/buildifier
+
+# Apply executable permissions to the binary:
+sudo chmod +x /usr/local/bin/buildifier
 ```
 
 ### Docker
