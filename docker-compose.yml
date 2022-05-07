@@ -53,6 +53,7 @@ services:
       - ./epgstation/config:/app/config
       - ./epgstation/thumbnail:/app/thumbnail
       - ${RECODED_PATH}:/app/recorded
+      - ${NAS_PATH}/backup/epgstation:/mnt/backup/epgstation
       - log_volume:/var/promtail
       - mirakurun_socket:/var/run/mirakurun/
     devices:
