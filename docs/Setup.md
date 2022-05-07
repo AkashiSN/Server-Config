@@ -311,7 +311,7 @@ exit
 
 ```bash
 # Download cloudflared
-curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest | grep -E 'browser_download_url' | grep linux-amd64 | cut -d '"' -f 4 | xargs -n1 sudo curl -L -o /usr/local/bin/cloudflared
+curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest | grep -E 'browser_download_url' | grep linux-amd64 | grep -v 'fips' | grep -v 'deb' | cut -d '"' -f 4 | xargs -n1 sudo curl -L -o /usr/local/bin/cloudflared
 
 # Apply executable permissions to the binary:
 sudo chmod +x /usr/local/bin/cloudflared
@@ -330,7 +330,10 @@ export TV_SUBDOMAIN=
 export DOMAIN=
 
 # Create tunnel
-TUNNEL_ID=$(cloudflared tunnel create -o yaml ${TV_SUBDOMAIN} | grep id | cut -d " " -f 2)
+cloudflared tunnel create -o yaml ${TV_SUBDOMAIN}
+
+# Get tunnel id
+TUNNEL_ID=$(cloudflared tunnel info tv | cut -d " " -f 3)
 
 # Set up dns for tunnel
 cloudflared tunnel route dns ${TV_SUBDOMAIN} ${TV_SUBDOMAIN}.${DOMAIN}
@@ -342,11 +345,17 @@ tunnel: ${TUNNEL_ID}
 credentials-file: /root/.cloudflared/${TUNNEL_ID}.json
 EOS
 
+# add etc hosts
+echo "127.0.0.1 ${TV_SUBDOMAIN}.${DOMAIN}" >> /etc/hosts
+
 # Install cloudflared as service
 cloudflared service install
 
 # Run on boot
-systemctl enable cloudflared.service
+systemctl enable cloudflared
+
+# Exit root
+exit
 ```
 
 ### DKMS Setting
@@ -360,7 +369,8 @@ sudo mkdir -p /etc/depmod.d
 echo 'search extra updates built-in' | sudo tee /etc/depmod.d/extra.conf
 sudo depmod -a
 
-reboot
+# reboot
+sudo reboot
 ```
 
 ### DD Max m4 driver
