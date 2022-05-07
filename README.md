@@ -49,7 +49,7 @@ LOCAL_IP=192.168.1.1
 コンテナのビルドを行う
 
 ```bash
-sudo docker-compose build --pull
+sudo docker compose build --pull
 ```
 
 現在のユーザーをグループwww-dataに追加する
@@ -64,13 +64,13 @@ sudo usermod -a -G user www-data
 https://developers.cloudflare.com/cache/about/default-cache-behavior#customization-options-and-limitations
 
 ```
-docker-compose exec -u www-data nextcloud php /var/www/html/occ config:system:set default_phone_region --value=JP
-docker-compose exec -u www-data nextcloud php /var/www/html/occ config:app:set files max_chunk_size --value 104857600
-docker-compose exec -u www-data nextcloud php /var/www/html/occ log:file --file=/var/promtail/nextcloud/nextcloud.log
+docker compose exec -u www-data nextcloud php /var/www/html/occ config:system:set default_phone_region --value=JP
+docker compose exec -u www-data nextcloud php /var/www/html/occ config:app:set files max_chunk_size --value 104857600
+docker compose exec -u www-data nextcloud php /var/www/html/occ log:file --file=/var/promtail/nextcloud/nextcloud.log
 ```
 
 ## コンテナの起動
 
 ```bash
-sudo docker-compose up -d
+sudo docker compose up -d
 ```
