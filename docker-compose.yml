@@ -77,10 +77,7 @@ services:
         "mkdir -p /var/promtail/epgstation
         rm -rf /app/logs
         ln -snf /var/promtail/epgstation /app/logs
-        envsubst \
-          '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE $$TV_SUBDOMAIN $$DOMAIN' \
-          < /app/config/config.yml.template \
-          > /app/config/config.yml
+        envsubst '$$MYSQL_USER $$MYSQL_PASSWORD $$MYSQL_DATABASE $$TV_SUBDOMAIN $$DOMAIN' < /app/config/config.yml.template > /app/config/config.yml
         npm start"
     restart: always
 
@@ -173,22 +170,10 @@ services:
     command: >
       /bin/sh -c
         "mkdir -p /var/promtail/nginx
-        envsubst \
-          '$$TV_SUBDOMAIN $$DOMAIN' \
-          < /etc/nginx/conf.d/tv.conf.template \
-          > /etc/nginx/conf.d/tv.conf
-        envsubst \
-          '$$FILES_SUBDOMAIN $$DOMAIN' \
-          < /etc/nginx/conf.d/files.conf.template \
-          > /etc/nginx/conf.d/files.conf
-        envsubst \
-          '$$DOMAIN' \
-          < /etc/nginx/conf.d/static.conf.template \
-          > /etc/nginx/conf.d/static.conf
-        envsubst \
-          '$$DOMAIN' \
-          < /etc/nginx/conf.d/nginx.conf.template \
-          > /etc/nginx/nginx.conf
+        envsubst '$$TV_SUBDOMAIN $$DOMAIN' < /etc/nginx/conf.d/tv.conf.template > /etc/nginx/conf.d/tv.conf
+        envsubst '$$FILES_SUBDOMAIN $$DOMAIN' < /etc/nginx/conf.d/files.conf.template > /etc/nginx/conf.d/files.conf
+        envsubst '$$DOMAIN' < /etc/nginx/conf.d/static.conf.template > /etc/nginx/conf.d/static.conf
+        envsubst '$$DOMAIN' < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/nginx.conf
         /usr/bin/supervisord -c /etc/supervisord.conf"
     restart: always
 
