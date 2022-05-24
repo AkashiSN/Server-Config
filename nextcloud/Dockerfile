@@ -18,7 +18,7 @@ apt-get install -y \
   libmagickwand-dev \
   libsmbclient-dev \
   smbclient \
-  supervisor \
+  supervisor
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
