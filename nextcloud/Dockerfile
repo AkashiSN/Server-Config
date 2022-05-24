@@ -2,6 +2,7 @@
 
 FROM nextcloud:24.0.1-fpm
 
+SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 
 COPY ./supervisord.conf /etc/
@@ -13,7 +14,7 @@ apt-get install -y \
   default-mysql-client \
   imagemagick \
   iproute2 \
-  jq
+  jq \
   libmagickwand-dev \
   libsmbclient-dev \
   smbclient \
