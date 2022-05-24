@@ -1,20 +1,31 @@
 # syntax=docker.io/docker/dockerfile:1.4.2-labs
 
-FROM nextcloud:24.0.0-fpm
+FROM nextcloud:24.0.1-fpm
 
 ENV DEBIAN_FRONTEND noninteractive
 
+COPY ./supervisord.conf /etc/
+COPY ./*.sh /usr/local/bin/
+
 RUN <<EOT
 apt-get update
-apt-get install -y imagemagick libmagickwand-dev libsmbclient-dev smbclient iproute2 supervisor default-mysql-client jq
+apt-get install -y \
+  default-mysql-client \
+  imagemagick \
+  iproute2 \
+  jq
+  libmagickwand-dev \
+  libsmbclient-dev \
+  smbclient \
+  supervisor \
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
-\
+
 pecl install smbclient
 docker-php-ext-enable smbclient
-\
+
 echo '0 4 * * *  /bin/bash /usr/local/bin/backup.sh' >> /var/spool/cron/crontabs/www-data
-\
+
 sed -i -e 's?access.log = /proc/self/fd/2?access.log = /proc/self/fd/1?' /usr/local/etc/php-fpm.d/docker.conf
 sed -i -e 's?pm.max_children = 5?pm.max_children = 100?' /usr/local/etc/php-fpm.d/www.conf
 sed -i -e 's?listen = 127.0.0.1:9000?listen = /var/run/socket/php-fpm.sock?' /usr/local/etc/php-fpm.d/www.conf
@@ -27,13 +38,10 @@ echo 'upload_tmp_dir=/tmp/upload' > /usr/local/etc/php/conf.d/upload-tmp-dir.ini
 echo 'output_buffering=0' >> /usr/local/etc/php/conf.d/upload-tmp-dir.ini
 echo '[global]' > /usr/local/etc/php-fpm.d/zz-docker.conf
 echo 'daemonize = no' >> /usr/local/etc/php-fpm.d/zz-docker.conf
-\
+
 mkdir -p /tmp/upload
 chown www-data:www-data -R /tmp/upload
+chmod +x /usr/local/bin/*.sh
 EOT
-
-COPY supervisord.conf /etc/
-COPY *.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/*.sh
 
 ENV NEXTCLOUD_UPDATE=1
