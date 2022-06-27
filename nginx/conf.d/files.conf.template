@@ -54,22 +54,12 @@ server{
     }
 
     # set max upload size
-    client_body_buffer_size 700m;
-    client_max_body_size 600m;
+    client_body_buffer_size 2000m;
+    client_max_body_size 0;
     client_body_temp_path /tmp/upload;
 
-    fastcgi_buffer_size 128k;
-    fastcgi_buffers 128 256k;
-    fastcgi_busy_buffers_size 256k;
-    fastcgi_temp_file_write_size 256k;
-
-    proxy_buffer_size 128k;
-    proxy_buffers 128 256k;
-    proxy_busy_buffers_size 256k;
-
-    proxy_connect_timeout 86400;
-    proxy_send_timeout 86400;
-    proxy_read_timeout 86400;
+    fastcgi_buffering off;
+    fastcgi_request_buffering off;
 
     # Enable gzip but do not remove ETag headers
     gzip on;
