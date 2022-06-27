@@ -27,18 +27,40 @@ docker-php-ext-enable smbclient
 
 echo '0 4 * * *  /bin/bash /usr/local/bin/backup.sh' >> /var/spool/cron/crontabs/www-data
 
-sed -i -e 's?access.log = /proc/self/fd/2?access.log = /proc/self/fd/1?' /usr/local/etc/php-fpm.d/docker.conf
-sed -i -e 's?pm.max_children = 5?pm.max_children = 100?' /usr/local/etc/php-fpm.d/www.conf
-sed -i -e 's?listen = 127.0.0.1:9000?listen = /var/run/socket/php-fpm.sock?' /usr/local/etc/php-fpm.d/www.conf
-sed -i -e 's?;listen.owner = www-data?listen.owner = www-data?' /usr/local/etc/php-fpm.d/www.conf
-sed -i -e 's?;listen.group = www-data?listen.group = www-data?' /usr/local/etc/php-fpm.d/www.conf
-sed -i -e 's?;listen.mode = 0660?listen.mode = 0660?' /usr/local/etc/php-fpm.d/www.conf
-echo 'request_terminate_timeout=86400' > /usr/local/etc/php/conf.d/request-terminate-timeout.ini
-echo 'max_execution_time=86400' > /usr/local/etc/php/conf.d/max-execution-time.ini
-echo 'upload_tmp_dir=/tmp/upload' > /usr/local/etc/php/conf.d/upload-tmp-dir.ini
-echo 'output_buffering=0' >> /usr/local/etc/php/conf.d/upload-tmp-dir.ini
-echo '[global]' > /usr/local/etc/php-fpm.d/zz-docker.conf
-echo 'daemonize = no' >> /usr/local/etc/php-fpm.d/zz-docker.conf
+cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+
+cat << EOF > /usr/local/etc/php-fpm.d/zz-docker.conf
+[global]
+daemonize = no
+
+[www]
+user  = www-data
+group = www-data
+
+listen = /var/run/socket/php-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+listen.mode  = 0660
+
+access.log = /proc/self/fd/1
+
+pm.max_children      = 163
+pm.start_servers     = 40
+pm.min_spare_servers = 40
+pm.max_spare_servers = 122
+EOF
+
+cat << EOF > /usr/local/etc/php/conf.d/nextcloud.ini
+memory_limit = 30G
+
+upload_max_filesize=500M
+upload_tmp_dir=/tmp/upload
+post_max_size=600M
+
+request_terminate_timeout=86400
+max_execution_time=86400
+output_buffering=0
+EOF
 
 mkdir -p /tmp/upload
 chown www-data:www-data -R /tmp/upload
