@@ -131,15 +131,17 @@ sudo chmod +x /usr/local/bin/kind
 # Install microk8s with snap
 sudo snap install microk8s --classic
 
-# Turn on the dns, storage services
-sudo microk8s enable dns
-sudo microk8s enable storage
-
 # Set alias
 sudo snap alias microk8s.kubectl mk
 
 # Create config dir
 mkdir -p $HOME/.kube
+
+# Add group to microk8s
+sudo usermod -a -G microk8s ${USER}
+
+# Turn on the dns services
+microk8s enable dns
 
 # Export config
 microk8s.config > $HOME/.kube/microk8s-config
@@ -156,6 +158,19 @@ sudo curl -L "https://storage.googleapis.com/kubernetes-release/release/$(curl -
 
 # Apply executable permissions to the binary
 sudo chmod +x /usr/local/bin/kubectl
+```
+
+### krew
+```bash
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+  KREW="krew-${OS}_${ARCH}" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+  tar zxvf "${KREW}.tar.gz" &&
+  ./"${KREW}" install krew
+)
 ```
 
 ### istioctl
@@ -286,15 +301,14 @@ unset HISTFILE
 # Set Email and domain to environment variable
 export EMAIL=
 export DOMAIN=
-export CLOUDFLARE_API=
+export CLOUDFLARE_API_TOKEN=
 
 # Create secret directory
 mkdir -p /root/.secrets/certbot/
 
 # Create cloudflare setting file
 cat << EOS > /root/.secrets/certbot/cloudflare.ini
-dns_cloudflare_email = ${EMAIL}
-dns_cloudflare_api_key = ${CLOUDFLARE_API}
+dns_cloudflare_api_token = ${CLOUDFLARE_API_TOKEN}
 EOS
 
 # Change permission
@@ -302,6 +316,16 @@ chmod 640 /root/.secrets/certbot/cloudflare.ini
 
 # Obtain ssl certificate
 certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/certbot/cloudflare.ini --dns-cloudflare-propagation-seconds 60 --server https://acme-v02.api.letsencrypt.org/directory -d ${DOMAIN} -d "*.${DOMAIN}" -m ${EMAIL}
+
+# Nginx reload script
+cat <<\EOF | tee /etc/letsencrypt/renewal-hooks/deploy/nginx-reload.sh
+#!/bin/sh
+
+NGINX_CONTAINER_ID=$(docker ps --filter name=server-config-nginx --format {{.ID}})
+if [[ -n ${NGINX_CONTAINER_ID} ]]; then
+	docker exec server-config-nginx-1 nginx -s reload
+fi
+EOF
 
 # Exit root
 exit
