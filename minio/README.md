@@ -25,7 +25,49 @@ echo "UUID=$(lsblk -no UUID /dev/sdc1) /mnt/xfs3 xfs defaults 0 2" | sudo tee -a
 echo "UUID=$(lsblk -no UUID /dev/sdd1) /mnt/xfs4 xfs defaults 0 2" | sudo tee -a /etc/fstab
 ```
 
-# NDProxy
+## Let's Encrypt
+
+```bash
+sudo snap install core
+sudo snap refresh core
+
+sudo snap install --classic certbot
+sudo snap set certbot trust-plugin-with-root=ok
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+sudo snap install certbot-dns-cloudflare
+sudo snap connect certbot:plugin certbot-dns-cloudflare
+
+sudo -i
+
+unset HISTFILE
+
+export EMAIL=
+export DOMAIN=
+export CLOUDFLARE_API_TOKEN=
+
+mkdir -p /root/.secrets/certbot/
+
+cat << EOS > /root/.secrets/certbot/cloudflare.ini
+dns_cloudflare_api_token = ${CLOUDFLARE_API_TOKEN}
+EOS
+
+chmod 640 /root/.secrets/certbot/cloudflare.ini
+
+certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/certbot/cloudflare.ini --dns-cloudflare-propagation-seconds 60 --server https://acme-v02.api.letsencrypt.org/directory -d ${DOMAIN} -d console.${DOMAIN} -m ${EMAIL}
+
+cat <<\EOF | tee /etc/letsencrypt/renewal-hooks/deploy/nginx-reload.sh
+#!/bin/sh
+
+NGINX_CONTAINER_ID=$(docker ps --filter name=minio-nginx --format {{.ID}})
+if [[ -n ${NGINX_CONTAINER_ID} ]]; then
+	docker exec minio-nginx-1 nginx -s reload
+fi
+EOF
+
+exit
+```
+
+## NDProxy
 
 Add NDProxy for IPv6 access to the container and add an IPv6 subnet with `docker network create`.
 
