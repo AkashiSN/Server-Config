@@ -1,19 +1,18 @@
 port: 8888
 socketioPort: 8888
 clientSocketioPort: 443
-mirakurunPath: http+unix://%2Fvar%2Frun%2Fmirakurun%2Fmirakurun.sock
+mirakurunPath: http://mirakurun:40772
 apiServers:
-  - https://${TV_SUBDOMAIN}.${DOMAIN}
-  - https://${TV_SUBDOMAIN}-v6.${DOMAIN}
-  - https://${TV_SUBDOMAIN}-local.${DOMAIN}
+  - https://tv.${DOMAIN}
+  - https://tv-local.${DOMAIN}
 
 dbtype: mysql
 mysql:
-  host: 127.0.0.1
+  host: mariadb_epgstation
   port: 3306
-  user: ${MYSQL_USER}
+  user: epgstation
   password: ${MYSQL_PASSWORD}
-  database: ${MYSQL_DATABASE}
+  database: epgstation
   charset: utf8mb4
 
 epgUpdateIntervalTime: 10

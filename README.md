@@ -9,41 +9,32 @@ SSH keyでログインできる状態
 ## コンテナの準備
 
 `.env`を以下のように作成
-```env
+```bash
 # mysql-epgstation
-MYSQL_EPGSTATION_USER="epgstation"
-MYSQL_EPGSTATION_PASSWORD="epgstation"
-MYSQL_EPGSTATION_ROOT_PASSWORD="epgstation"
-MYSQL_EPGSTATION_DATABASE="epgstation"
-
-# epgstation
-RECODED_PATH="/mnt/recorded/"
+MYSQL_EPGSTATION_PASSWORD=""
+MYSQL_EPGSTATION_ROOT_PASSWORD=""
 
 # mysql-nextcloud
-MYSQL_NEXTCLOUD_USER="nextcloud"
-MYSQL_NEXTCLOUD_PASSWORD="nextcloud"
-MYSQL_NEXTCLOUD_ROOT_PASSWORD="nextcloud"
-MYSQL_NEXTCLOUD_DATABASE="nextcloud"
+MYSQL_NEXTCLOUD_PASSWORD=""
+MYSQL_NEXTCLOUD_ROOT_PASSWORD=""
 
 # redis
-REDIS_HOST_PASSWORD="redis"
+REDIS_HOST_PASSWORD=""
 
 # nextcloud
-NEXTCLOUD_ADMIN_USER="admin"
-NEXTCLOUD_ADMIN_PASSWORD="pass"
-NAS_PATH="/mnt"
+NEXTCLOUD_ADMIN_USER=""
+NEXTCLOUD_ADMIN_PASSWORD=""
 
 # samba
-SAMBA_PASSWORD="samba"
-SAMBA_PATH="/mnt/samba"
+SAMBA_PASSWORD=""
 
 # Domain
-DOMAIN="akashisn.info"
-TV_SUBDOMAIN="tv"
-FILES_SUBDOMAIN="files"
+DOMAIN=""
 
 # IP
-LOCAL_IP=192.168.1.1
+LOCAL_IP=""
+DOCKER_IPV6_SUBNET=""
+
 ```
 
 コンテナのビルドを行う

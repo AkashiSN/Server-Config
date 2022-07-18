@@ -37,7 +37,7 @@ daemonize = no
 user  = www-data
 group = www-data
 
-listen = /var/run/socket/php-fpm.sock
+listen = 0.0.0.0:9000
 listen.owner = www-data
 listen.group = www-data
 listen.mode  = 0660

@@ -34,7 +34,7 @@ cat << EOS > /etc/samba/smb.conf
   map to guest = Bad User
 
 [nas]
-  path = ${SAMBA_PATH}
+  path = /mnt/samba
   guest ok = no
   read only = no
   case sensitive = yes
