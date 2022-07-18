@@ -1,0 +1,56 @@
+version: "3.9"
+services:
+  minio:
+    image: quay.io/minio/minio
+    volumes:
+      - /mnt:/mnt
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BROWSER_REDIRECT_URL: https://console.${DOMAIN}
+      MINIO_SERVER_URL: https://${DOMAIN}
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    expose:
+      - "9000"
+      - "9001"
+    networks:
+      internal:
+    command: server /mnt/xfs{1...4} --console-address :9001
+    restart: always
+
+  nginx:
+    image: nginx:mainline
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./nginx:/run/nginx/
+    environment:
+      TZ: "Asia/Tokyo"
+      DOMAIN: ${DOMAIN}
+    depends_on:
+      - minio
+    expose:
+      - "443"
+    ports:
+      - "443:443"
+    networks:
+      internal:
+      ipv6net:
+        ipv6_address: ${DOCKER_IPV6_SUBNET}::3
+    command: >
+      /bin/sh -c
+        "rm -rf /etc/nginx/conf.d/*
+        envsubst '$$DOMAIN' < /run/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+        envsubst '$$DOMAIN' < /run/nginx/minio.conf.template > /etc/nginx/conf.d/minio.conf
+        envsubst '$$DOMAIN' < /run/nginx/minio-console.conf.template > /etc/nginx/conf.d/minio-console.conf
+        nginx -g 'daemon off;'"
+    restart: always
+
+networks:
+  internal:
+    name: internal
+  ipv6net:
+    name: ipv6net
+    external: true
