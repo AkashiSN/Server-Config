@@ -5,6 +5,7 @@ on:
     paths:
       - 'nginx/**'
       - '!nginx/**.md'
+      - '!nginx/conf.d/**'
       - '.github/workflows/nginx.yml'
   workflow_dispatch:
 

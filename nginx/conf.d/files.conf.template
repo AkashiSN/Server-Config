@@ -1,5 +1,5 @@
 upstream php-handler {
-    server http://nextcloud:9000;
+    server nextcloud:9000;
 }
 
 server{
