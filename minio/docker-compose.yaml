@@ -3,7 +3,7 @@ services:
   minio:
     image: quay.io/minio/minio
     volumes:
-      - /mnt:/mnt
+      - /mnt:/data
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -18,7 +18,7 @@ services:
       - "9001"
     networks:
       internal:
-    command: server /mnt/xfs{1...4} --console-address :9001
+    command: server /data/xfs{1...4} --console-address :9001
     restart: always
 
   nginx:
