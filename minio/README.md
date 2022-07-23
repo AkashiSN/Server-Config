@@ -108,3 +108,12 @@ sudo systemctl daemon-reload
 sudo systemctl enable ndppd.service
 sudo systemctl restart ndppd.service
 ```
+
+## MinIO Client
+
+```bash
+sudo curl -L https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+sudo chmod +x /usr/local/bin/mc
+
+mc alias set myminio https://DOMAIN
+```
