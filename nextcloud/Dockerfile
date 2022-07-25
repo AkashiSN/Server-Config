@@ -23,8 +23,8 @@ apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 pecl install smbclient
-
-docker-php-ext-enable smbclient bz2
+docker-php-ext-enable smbclient
+docker-php-ext-install bz2
 
 rm -r /tmp/pear
 
