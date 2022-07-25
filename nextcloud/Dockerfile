@@ -22,8 +22,12 @@ apt-get install -y \
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-pecl install smbclient bz2
+pecl install bz2
+pecl install smbclient
+
 docker-php-ext-enable smbclient bz2
+
+rm -r /tmp/pear
 
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
