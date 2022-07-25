@@ -5,7 +5,8 @@ FROM nextcloud:24.0.3-fpm
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 
-COPY ./supervisord.conf /etc/
+COPY supervisord.conf /etc/
+COPY *.sh /
 
 RUN <<EOT
 apt-get update
@@ -13,6 +14,7 @@ apt-get install -y \
   imagemagick \
   iproute2 \
   jq \
+  libbz2-dev \
   libmagickwand-dev \
   libsmbclient-dev \
   smbclient \
@@ -20,8 +22,8 @@ apt-get install -y \
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-pecl install smbclient
-docker-php-ext-enable smbclient
+pecl install smbclient bz2
+docker-php-ext-enable smbclient bz2
 
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
@@ -63,3 +65,5 @@ chown www-data:www-data -R /tmp/upload
 EOT
 
 ENV NEXTCLOUD_UPDATE=1
+
+ENTRYPOINT ["/entrypoint.sh", "/custom-entrypoint.sh"]
