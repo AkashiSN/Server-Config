@@ -6,12 +6,10 @@ SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 
 COPY ./supervisord.conf /etc/
-COPY ./*.sh /usr/local/bin/
 
 RUN <<EOT
 apt-get update
 apt-get install -y \
-  default-mysql-client \
   imagemagick \
   iproute2 \
   jq \
@@ -24,8 +22,6 @@ rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 pecl install smbclient
 docker-php-ext-enable smbclient
-
-echo '0 4 * * *  /bin/bash /usr/local/bin/backup.sh' >> /var/spool/cron/crontabs/www-data
 
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
