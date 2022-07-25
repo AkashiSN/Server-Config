@@ -60,7 +60,6 @@ EOF
 
 mkdir -p /tmp/upload
 chown www-data:www-data -R /tmp/upload
-chmod +x /usr/local/bin/*.sh
 EOT
 
 ENV NEXTCLOUD_UPDATE=1
