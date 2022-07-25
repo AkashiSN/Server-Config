@@ -22,7 +22,6 @@ apt-get install -y \
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-pecl install bz2
 pecl install smbclient
 
 docker-php-ext-enable smbclient bz2
