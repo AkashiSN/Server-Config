@@ -93,6 +93,11 @@ services:
       STOP_SERVER_ANNOUNCE_DELAY: 20
     ports:
       - 25565:25565
+    healthcheck:
+      test: mc-health
+      start_period: 1m
+      interval: 5s
+      retries: 20
     restart: always
 
   #
