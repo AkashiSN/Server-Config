@@ -74,6 +74,28 @@ services:
     restart: always
 
   #
+  # Minecraft
+  #
+
+  mc:
+    image: itzg/minecraft-server
+    volumes:
+      - mc:/data
+    environment:
+      TZ: "Asia/Tokyo"
+      EULA: TRUE
+      MEMORY: 4G
+      OVERRIDE_SERVER_PROPERTIES: TRUE
+      ENABLE_WHITELIST: TRUE
+      ENFORCE_WHITELIST: TRUE
+      OVERRIDE_WHITELIST: TRUE
+      WHITELIST: ${MC_WHITELIST}
+      STOP_SERVER_ANNOUNCE_DELAY: 20
+    ports:
+      - 25565:25565
+    restart: always
+
+  #
   # MinIO
   #
 
@@ -240,6 +262,8 @@ services:
 
 volumes:
   mariadb_epgstation:
+    driver: local
+  mc:
     driver: local
   postgres_nextcloud:
     driver: local
