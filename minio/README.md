@@ -67,48 +67,6 @@ EOF
 exit
 ```
 
-## NDProxy
-
-Add NDProxy for IPv6 access to the container and add an IPv6 subnet with `docker network create`.
-
-```bash
-sudo apt install ndppd
-
-cat <<EOF | sudo tee /etc/systemd/system/ndppd.service
-[Unit]
-Description=NDP Proxy Daemon
-Wants=network-online.target
-After=network-online.target
-
-[Service]
-ExecStart=/usr/sbin/ndppd -d -p /run/ndppd.pid
-Type=forking
-PIDFile=/run/ndppd.pid
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-DEFAULT_INTERFACE=$(ip route | grep -oP 'default .* dev \K[^ ]+')
-IPV6_ADDRESS=$(ip -6 addr show dev ${DEFAULT_INTERFACE} | grep global | grep -oP 'inet6 \K[^ ]+')
-IPV6_PREFIX=$(echo $IPV6_ADDRESS | grep -oP '.+?:.+?:.+?:.+?:')
-DOCKER_IPV6_SUBNET=${IPV6_PREFIX}100
-
-docker network create --driver bridge --ipam-driver default --ipv6 --subnet ${DOCKER_IPV6_SUBNET}::/80 --gateway ${DOCKER_IPV6_SUBNET}::1 ipv6net
-
-cat <<EOF | sudo tee /etc/ndppd.conf
-proxy ${DEFAULT_INTERFACE} {
-    rule ${DOCKER_IPV6_SUBNET}::/80 {
-        static
-    }
-}
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable ndppd.service
-sudo systemctl restart ndppd.service
-```
-
 ## MinIO Client
 
 ```bash

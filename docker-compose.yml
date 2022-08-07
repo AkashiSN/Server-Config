@@ -120,6 +120,10 @@ services:
       STOP_SERVER_ANNOUNCE_DELAY: 20
     ports:
       - 25565:25565
+    networks:
+      internal:
+      external:
+        ipv6_address: ${DOCKER_IPV6_SUBNET}::2
     healthcheck:
       test: mc-health
       start_period: 1m
@@ -131,9 +135,10 @@ services:
     image: itzg/mc-backup
     volumes:
       - mc:/data:ro
+      - mc-backups:/backups
     environment:
       TZ: "Asia/Tokyo"
-      BACKUP_INTERVAL: "2h"
+      BACKUP_INTERVAL: 2h
       RCON_HOST: mc
       RCON_PASSWORD: ${MC_RCON_PASSWORD}
       BACKUP_METHOD: restic
@@ -141,9 +146,12 @@ services:
       RESTIC_PASSWORD: ${RESTIC_PASSWORD}
       AWS_ACCESS_KEY_ID: ${MINIO_RESTIC_ACCESS_KEY}
       AWS_SECRET_ACCESS_KEY: ${MINIO_RESTIC_SECRET_ACCESS_KEY}
+    networks:
+      internal:
     depends_on:
+      - mc
       - minio
-    network_mode: "service:mc"
+    restart: always
 
   #
   # Nextcloud
@@ -236,7 +244,7 @@ services:
       - "443:443"
     networks:
       internal:
-      ipv6net:
+      external:
         ipv6_address: ${DOCKER_IPV6_SUBNET}::3
     depends_on:
       - epgstation
@@ -289,6 +297,8 @@ volumes:
     driver: local
   mc:
     driver: local
+  mc-backups:
+    driver: local
   postgres_nextcloud:
     driver: local
   redis_nextcloud:
@@ -300,7 +310,6 @@ volumes:
 
 networks:
   internal:
-    name: internal
-  ipv6net:
-    name: ipv6net
+    internal: true
+  external:
     external: true

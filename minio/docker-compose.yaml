@@ -37,7 +37,7 @@ services:
       - "443:443"
     networks:
       internal:
-      ipv6net:
+      external:
         ipv6_address: ${DOCKER_IPV6_SUBNET}::3
     command: >
       /bin/sh -c
@@ -50,7 +50,6 @@ services:
 
 networks:
   internal:
-    name: internal
-  ipv6net:
-    name: ipv6net
+    internal: true
+  external:
     external: true

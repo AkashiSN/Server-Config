@@ -14,6 +14,16 @@ SSH keyでログインできる状態
 MYSQL_EPGSTATION_PASSWORD=""
 MYSQL_EPGSTATION_ROOT_PASSWORD=""
 
+# minecraft
+MC_WHITELIST=""
+MC_RCON_PASSWORD=""
+
+# restic
+RESTIC_REPOSITORY=""
+RESTIC_PASSWORD=""
+MINIO_RESTIC_ACCESS_KEY=""
+MINIO_RESTIC_SECRET_ACCESS_KEY=""
+
 # postgres-nextcloud
 POSTGRES_NEXTCLOUD_PASSWORD=""
 
@@ -22,7 +32,7 @@ REDIS_HOST_PASSWORD=""
 
 # nextcloud
 NEXTCLOUD_ADMIN_USER=""
-NEXTCLOUD_ADMIN_PASSWORD="v"
+NEXTCLOUD_ADMIN_PASSWORD=""
 NEXTCLOUD_SMTP_USER=""
 NEXTCLOUD_SMTP_PASSWORD=""
 
@@ -32,9 +42,6 @@ MINIO_ROOT_PASSWORD=""
 OBJECTSTORE_S3_KEY=""
 OBJECTSTORE_S3_SECRET=""
 
-# samba
-SAMBA_PASSWORD=""
-
 # Domain
 DOMAIN=""
 
@@ -43,10 +50,8 @@ LOCAL_IP=
 DOCKER_IPV6_SUBNET=
 ```
 
-コンテナのビルドを行う
-
 ```bash
-sudo docker compose build --pull
+sudo docker compose pull
 ```
 
 現在のユーザーをグループwww-dataに追加する
@@ -61,8 +66,6 @@ sudo usermod -a -G user www-data
 https://developers.cloudflare.com/cache/about/default-cache-behavior#customization-options-and-limitations
 
 ```
-docker compose exec -u www-data nextcloud php /var/www/html/occ config:system:set default_phone_region --value=JP
-docker compose exec -u www-data nextcloud php /var/www/html/occ config:app:set files max_chunk_size --value 1048576000
 docker compose exec -u www-data nextcloud php /var/www/html/occ log:file --file=/var/promtail/nextcloud/nextcloud.log
 ```
 
