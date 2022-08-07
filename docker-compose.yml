@@ -2,6 +2,32 @@ version: "3.8"
 
 services:
   #
+  # MinIO
+  #
+
+  minio:
+    image: quay.io/minio/minio
+    volumes:
+      - /mnt:/data
+    environment:
+      TZ: "Asia/Tokyo"
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BROWSER_REDIRECT_URL: https://console.s3.${DOMAIN}
+      MINIO_SERVER_URL: https://s3.${DOMAIN}
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    expose:
+      - "9000"
+      - "9001"
+    networks:
+      internal:
+    command: server /data/xfs{1...4} --console-address :9001
+    restart: always
+
+  #
   # TV
   #
 
@@ -84,7 +110,8 @@ services:
     environment:
       TZ: "Asia/Tokyo"
       EULA: TRUE
-      MEMORY: 4G
+      MEMORY: 8G
+      RCON_PASSWORD: ${MC_RCON_PASSWORD}
       OVERRIDE_SERVER_PROPERTIES: TRUE
       ENABLE_WHITELIST: TRUE
       ENFORCE_WHITELIST: TRUE
@@ -100,31 +127,23 @@ services:
       retries: 20
     restart: always
 
-  #
-  # MinIO
-  #
-
-  minio:
-    image: quay.io/minio/minio
+  mc-backups:
+    image: itzg/mc-backup
     volumes:
-      - /mnt:/data
+      - mc:/data:ro
     environment:
       TZ: "Asia/Tokyo"
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BROWSER_REDIRECT_URL: https://console.s3.${DOMAIN}
-      MINIO_SERVER_URL: https://s3.${DOMAIN}
-    ulimits:
-      nofile:
-        soft: 1048576
-        hard: 1048576
-    expose:
-      - "9000"
-      - "9001"
-    networks:
-      internal:
-    command: server /data/xfs{1...4} --console-address :9001
-    restart: always
+      BACKUP_INTERVAL: "2h"
+      RCON_HOST: mc
+      RCON_PASSWORD: ${MC_RCON_PASSWORD}
+      BACKUP_METHOD: restic
+      RESTIC_REPOSITORY: ${RESTIC_REPOSITORY}
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      AWS_ACCESS_KEY_ID: ${MINIO_RESTIC_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_RESTIC_SECRET_ACCESS_KEY}
+    depends_on:
+      - minio
+    network_mode: "service:mc"
 
   #
   # Nextcloud
