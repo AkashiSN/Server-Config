@@ -232,8 +232,8 @@ services:
   nginx:
     image: ghcr.io/akashisn/nginx
     volumes:
+      - ./nginx/conf.d:/run/nginx:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ./nginx/conf.d:/run/nginx
       - nextcloud:/var/www/html
       - log_volume:/var/promtail
     environment:
@@ -282,16 +282,17 @@ services:
   ddclient:
     image: ghcr.io/akashisn/ddclient
     volumes:
-      - ./ddclient/ddclient.template:/run/ddclient.conf.template:ro
+      - ./ddclient:/run/ddclient:ro
     environment:
       TZ: "Asia/Tokyo"
       ZONE: ${DOMAIN}
+      CLOUDFLARE_TOKEN: ${CLOUDFLARE_TOKEN}
       TARGET_RECORDS: "tv.${DOMAIN},files.${DOMAIN},s3.${DOMAIN},console.s3.${DOMAIN},mc.${DOMAIN},vpn.${DOMAIN}"
     networks:
       internal:
     command: >
       /bin/sh -c
-        "envsubst '$$ZONE $$CLOUDFLARE_TOKEN $$TARGET_RECORDS' < /run/ddclient.conf.template > /etc/ddclient/ddclient.conf
+        "envsubst '$$ZONE $$CLOUDFLARE_TOKEN $$TARGET_RECORDS' < /run/ddclient/ddclient.conf.template > /etc/ddclient/ddclient.conf
         /usr/bin/crond"
     restart: always
 

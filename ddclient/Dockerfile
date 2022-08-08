@@ -44,5 +44,5 @@ mkdir -p /var/cache/ddclient
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 mkdir -p /var/spool/cron/crontabs
-echo "0 * * * *   root   /usr/bin/ddclient retry"> /var/spool/cron/crontabs/root
+echo "*/10 * * * *   root   /usr/bin/ddclient retry"> /var/spool/cron/crontabs/root
 EOT
