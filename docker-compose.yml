@@ -287,9 +287,9 @@ services:
       TZ: "Asia/Tokyo"
       ZONE: ${DOMAIN}
       CLOUDFLARE_TOKEN: ${CLOUDFLARE_TOKEN}
-      TARGET_RECORDS: "tv.${DOMAIN},files.${DOMAIN},s3.${DOMAIN},console.s3.${DOMAIN},mc.${DOMAIN},vpn.${DOMAIN}"
+      TARGET_RECORDS: "files.${DOMAIN},s3.${DOMAIN},console.s3.${DOMAIN},mc.${DOMAIN},vpn.${DOMAIN}"
     networks:
-      internal:
+      external:
     command: >
       /bin/sh -c
         "envsubst '$$ZONE $$CLOUDFLARE_TOKEN $$TARGET_RECORDS' < /run/ddclient/ddclient.conf.template > /etc/ddclient/ddclient.conf
