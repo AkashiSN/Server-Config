@@ -291,7 +291,7 @@ services:
       internal:
     command: >
       /bin/sh -c
-        "envsubst '$$ZONE' '$$CLOUDFLARE_TOKEN' '$$TARGET_RECORDS' < /run/ddclient.conf.template > /etc/ddclient/ddclient.conf
+        "envsubst '$$ZONE $$CLOUDFLARE_TOKEN $$TARGET_RECORDS' < /run/ddclient.conf.template > /etc/ddclient/ddclient.conf
         /usr/bin/crond"
     restart: always
 
