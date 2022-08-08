@@ -111,6 +111,7 @@ services:
       TZ: "Asia/Tokyo"
       EULA: TRUE
       MEMORY: 8G
+      DIFFICULTY: normal
       RCON_PASSWORD: ${MC_RCON_PASSWORD}
       OVERRIDE_SERVER_PROPERTIES: TRUE
       ENABLE_WHITELIST: TRUE

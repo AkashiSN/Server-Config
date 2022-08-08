@@ -26,7 +26,7 @@ IPV6_PREFIX="$(echo "${IPV6_ADDRESS}" | grep -oP '.+?:.+?:.+?:.+?:')"
 IPV4_ADDRESS_SUFIX="$(ip addr show dev "${DEFAULT_INTERFACE}" | grep -oP 'inet \K[^ ]+' | grep -oP '[0-9]+.[0-9]+.\K[0-9]+')"
 DOCKER_IPV6_SUBNET="${IPV6_PREFIX}$((${IPV4_ADDRESS_SUFIX}+1))"
 
-DOCKER_NETWORK_INTERFACE="$(sudo docker network ls --format 'table {{.Name}} {{.ID}}' | grep -oP 'external \K.*')"
+DOCKER_NETWORK_INTERFACE="$(sudo docker network ls --format 'table {{.Name}} {{.ID}}' | grep -oP 'external \K.*')" || true
 if [ -n "${DOCKER_NETWORK_INTERFACE}" ]; then
   if [[ ! "$(sudo docker network inspect ${DOCKER_NETWORK_INTERFACE} | jq '.[0].IPAM.Config[1].Subnet')" =~ "${DOCKER_IPV6_SUBNET}" ]]; then
     sudo docker network rm "${DOCKER_NETWORK_INTERFACE}"
