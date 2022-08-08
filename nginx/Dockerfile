@@ -5,10 +5,6 @@ FROM nginx:mainline
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 
-COPY supervisord.conf /etc/
-COPY logrotate.conf /etc/
-COPY crond /usr/bin/
-
 RUN <<EOT
 apt-get update
 apt-get install -y \
@@ -23,6 +19,7 @@ echo '*/15 * * * * logrotate -v /etc/logrotate.conf' > /var/spool/cron/crontabs/
 
 mkdir -p /tmp/upload
 chown www-data:www-data -R /tmp/upload
-
-chmod 644 /etc/logrotate.conf
 EOT
+
+COPY ./*.conf /etc/
+COPY ./crond /usr/bin/
