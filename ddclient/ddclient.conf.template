@@ -1,0 +1,6 @@
+protocol=cloudflare
+use=cmd, cmd="dig -4 @one.one.one.one whoami.cloudflare TXT CH +short"
+zone=${ZONE}
+ttl=1
+password=${CLOUDFLARE_TOKEN}
+${TARGET_RECORDS}
