@@ -128,7 +128,7 @@ services:
     networks:
       internal:
       external:
-        ipv6_address: ${DOCKER_IPV6_SUBNET}::2
+        ipv6_address: ${DOCKER_IPV6_SUBNET}::22
     healthcheck:
       test: mc-health
       start_period: 1m
@@ -145,7 +145,7 @@ services:
       - mc-backups:/backups
     environment:
       TZ: "Asia/Tokyo"
-      BACKUP_INTERVAL: 2h
+      BACKUP_INTERVAL: 1h
       RCON_HOST: mc
       RCON_PASSWORD_FILE: /run/secrets/mc_rcon_password
       BACKUP_METHOD: restic
@@ -154,7 +154,7 @@ services:
       AWS_ACCESS_KEY_ID: ${MINIO_RESTIC_ACCESS_KEY}
       AWS_SECRET_ACCESS_KEY: ${MINIO_RESTIC_SECRET_ACCESS_KEY}
     networks:
-      internal:
+      external:
     depends_on:
       - mc
       - minio
@@ -262,7 +262,7 @@ services:
     networks:
       internal:
       external:
-        ipv6_address: ${DOCKER_IPV6_SUBNET}::3
+        ipv6_address: ${DOCKER_IPV6_SUBNET}::33
     depends_on:
       - epgstation
       - minio
