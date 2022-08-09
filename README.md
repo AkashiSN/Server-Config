@@ -8,7 +8,17 @@ SSH keyでログインできる状態
 
 ## コンテナの準備
 
-`.env`を以下のように作成
+1. `.screts/`に以下のファイルを作成
+- `.secrets/minio_access_key`
+- `.secrets/minio_secret_key`
+- `.secrets/mc_rcon_password`
+- `.secrets/restic_password`
+- `.secrets/postgres_nextcloud_password`
+- `.secrets/nextcloud_admin_user`
+- `.secrets/nextcloud_admin_password`
+- `.secrets/nextcloud_smtp_password`
+
+2. `.env`を以下のように作成
 ```bash
 # mysql-epgstation
 MYSQL_EPGSTATION_PASSWORD=""
@@ -16,34 +26,23 @@ MYSQL_EPGSTATION_ROOT_PASSWORD=""
 
 # minecraft
 MC_WHITELIST=""
-MC_RCON_PASSWORD=""
 
 # restic
 RESTIC_REPOSITORY=""
-RESTIC_PASSWORD=""
 MINIO_RESTIC_ACCESS_KEY=""
 MINIO_RESTIC_SECRET_ACCESS_KEY=""
-
-# postgres-nextcloud
-POSTGRES_NEXTCLOUD_PASSWORD=""
 
 # redis
 REDIS_HOST_PASSWORD=""
 
 # nextcloud
-NEXTCLOUD_ADMIN_USER=""
-NEXTCLOUD_ADMIN_PASSWORD=""
 NEXTCLOUD_SMTP_USER=""
-NEXTCLOUD_SMTP_PASSWORD=""
-
-# minio
-MINIO_ROOT_USER=""
-MINIO_ROOT_PASSWORD=""
-OBJECTSTORE_S3_KEY=""
-OBJECTSTORE_S3_SECRET=""
 
 # Domain
 DOMAIN=""
+
+# ddclient
+CLOUDFLARE_TOKEN=""
 
 # IP
 LOCAL_IP=

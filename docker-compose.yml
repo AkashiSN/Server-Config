@@ -11,8 +11,8 @@ services:
       - /mnt:/data
     environment:
       TZ: "Asia/Tokyo"
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ROOT_USER_FILE: /run/secrets/minio_access_key
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/minio_secret_key
       MINIO_BROWSER_REDIRECT_URL: https://console.s3.${DOMAIN}
       MINIO_SERVER_URL: https://s3.${DOMAIN}
     ulimits:
@@ -24,7 +24,11 @@ services:
       - "9001"
     networks:
       internal:
+      external:
     command: server /data/xfs{1...4} --console-address :9001
+    secrets:
+      - minio_access_key
+      - minio_secret_key
     restart: always
 
   #
@@ -110,9 +114,9 @@ services:
     environment:
       TZ: "Asia/Tokyo"
       EULA: TRUE
-      MEMORY: 8G
+      MEMORY: 16G
       DIFFICULTY: normal
-      RCON_PASSWORD: ${MC_RCON_PASSWORD}
+      RCON_PASSWORD_FILE: /run/secrets/mc_rcon_password
       OVERRIDE_SERVER_PROPERTIES: TRUE
       ENABLE_WHITELIST: TRUE
       ENFORCE_WHITELIST: TRUE
@@ -130,6 +134,8 @@ services:
       start_period: 1m
       interval: 5s
       retries: 20
+    secrets:
+      - mc_rcon_password
     restart: always
 
   mc-backups:
@@ -141,10 +147,10 @@ services:
       TZ: "Asia/Tokyo"
       BACKUP_INTERVAL: 2h
       RCON_HOST: mc
-      RCON_PASSWORD: ${MC_RCON_PASSWORD}
+      RCON_PASSWORD_FILE: /run/secrets/mc_rcon_password
       BACKUP_METHOD: restic
       RESTIC_REPOSITORY: ${RESTIC_REPOSITORY}
-      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      RESTIC_PASSWORD_FILE: /run/secrets/restic_password
       AWS_ACCESS_KEY_ID: ${MINIO_RESTIC_ACCESS_KEY}
       AWS_SECRET_ACCESS_KEY: ${MINIO_RESTIC_SECRET_ACCESS_KEY}
     networks:
@@ -152,6 +158,9 @@ services:
     depends_on:
       - mc
       - minio
+    secrets:
+      - mc_rcon_password
+      - restic_password
     restart: always
 
   #
@@ -164,13 +173,15 @@ services:
       - postgres_nextcloud:/var/lib/postgresql/data
     environment:
         TZ: "Asia/Tokyo"
-        POSTGRES_PASSWORD: ${POSTGRES_NEXTCLOUD_PASSWORD}
+        POSTGRES_PASSWORD_FILE: /run/secrets/postgres_nextcloud_password
         POSTGRES_DB: nextcloud
         POSTGRES_USER: nextcloud
     expose:
       - "5432"
     networks:
       internal:
+    secrets:
+      - postgres_nextcloud_password
     restart: always
 
   redis_nextcloud:
@@ -193,15 +204,15 @@ services:
       - log_volume:/var/promtail
     environment:
       TZ: "Asia/Tokyo"
-      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER}
-      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD}
+      NEXTCLOUD_ADMIN_USER_FILE: /run/secrets/nextcloud_admin_user
+      NEXTCLOUD_ADMIN_PASSWORD_FILE: /run/secrets/nextcloud_admin_password
       NEXTCLOUD_TRUSTED_DOMAINS: "files.${DOMAIN} files-local.${DOMAIN}"
       OVERWRITEPROTOCOL: https
       TRUSTED_PROXIES: nginx
       POSTGRES_HOST: postgres_nextcloud
       POSTGRES_DB: nextcloud
       POSTGRES_USER: nextcloud
-      POSTGRES_PASSWORD: ${POSTGRES_NEXTCLOUD_PASSWORD}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_nextcloud_password
       REDIS_HOST: redis_nextcloud
       REDIS_HOST_PASSWORD: ${REDIS_HOST_PASSWORD}
       SMTP_HOST: smtp.gmail.com
@@ -210,7 +221,7 @@ services:
       SMTP_NAME: ${NEXTCLOUD_SMTP_USER}
       MAIL_FROM_ADDRESS: no-reply
       MAIL_DOMAIN: files.${DOMAIN}
-      SMTP_PASSWORD: ${NEXTCLOUD_SMTP_PASSWORD}
+      SMTP_PASSWORD_FILE: /run/secrets/nextcloud_smtp_password
     expose:
       - "9000"
     networks:
@@ -223,6 +234,11 @@ services:
       /bin/sh -c
         "mkdir -p /var/promtail/nextcloud
         /usr/bin/supervisord -c /etc/supervisord.conf"
+    secrets:
+      - nextcloud_admin_user
+      - nextcloud_admin_password
+      - postgres_nextcloud_password
+      - nextcloud_smtp_password
     restart: always
 
   #
@@ -329,6 +345,24 @@ volumes:
     driver: local
   log_volume:
     driver: local
+
+secrets:
+  minio_access_key:
+    file: ./.secrets/minio_access_key
+  minio_secret_key:
+    file: ./.secrets/minio_secret_key
+  mc_rcon_password:
+    file: ./.secrets/mc_rcon_password
+  restic_password:
+    file: ./.secrets/restic_password
+  postgres_nextcloud_password:
+    file: ./.secrets/postgres_nextcloud_password
+  nextcloud_admin_user:
+    file: ./.secrets/nextcloud_admin_user
+  nextcloud_admin_password:
+    file: ./.secrets/nextcloud_admin_password
+  nextcloud_smtp_password:
+    file: ./.secrets/nextcloud_smtp_password
 
 networks:
   internal:
