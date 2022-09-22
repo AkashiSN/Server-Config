@@ -37,8 +37,8 @@ jobs:
       - name: Build and push - nginx
         uses: docker/build-push-action@v2
         with:
-          context: ./nginx
-          file: ./nginx/Dockerfile
+          context: ./compose/nginx
+          file: ./compose/nginx/Dockerfile
           tags: |
             ghcr.io/akashisn/nginx
           platforms: linux/amd64

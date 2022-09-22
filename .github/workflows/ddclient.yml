@@ -27,8 +27,8 @@ jobs:
       - name: Build and push - ddclient
         uses: docker/build-push-action@v2
         with:
-          context: ./ddclient
-          file: ./ddclient/Dockerfile
+          context: ./compose/ddclient
+          file: ./compose/ddclient/Dockerfile
           tags: |
             ghcr.io/akashisn/ddclient
           platforms: linux/amd64
