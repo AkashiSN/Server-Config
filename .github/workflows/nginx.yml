@@ -3,9 +3,9 @@ name: nginx
 on:
   push:
     paths:
-      - 'nginx/**'
-      - '!nginx/**.md'
-      - '!nginx/conf.d/**'
+      - 'compose/nginx/**'
+      - '!compose/nginx/**.md'
+      - '!compose/nginx/conf.d/**'
       - '.github/workflows/nginx.yml'
   workflow_dispatch:
 

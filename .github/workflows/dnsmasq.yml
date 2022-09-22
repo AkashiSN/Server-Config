@@ -3,8 +3,8 @@ name: dnsmasq
 on:
   push:
     paths:
-      - 'dnsmasq/**'
-      - '!dnsmasq/**.md'
+      - 'compose/dnsmasq/**'
+      - '!compose/dnsmasq/**.md'
       - '.github/workflows/dnsmasq.yml'
   workflow_dispatch:
 

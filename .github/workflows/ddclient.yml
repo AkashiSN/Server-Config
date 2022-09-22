@@ -3,8 +3,8 @@ name: ddclient
 on:
   push:
     paths:
-      - 'ddclient/**'
-      - '!ddclient/**.md'
+      - 'compose/ddclient/**'
+      - '!compose/ddclient/**.md'
       - '.github/workflows/ddclient.yml'
 
 jobs:
