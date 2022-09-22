@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mc-pv
+  namespace: mc
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/volumes/mc
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mc-env
+  namespace: mc
+data:
+  TZ: "Asia/Tokyo"
+  EULA: "TRUE"
+  MEMORY: "16G"
+  MOTD: "A §l§cVanilla§r Minecraft server powered by §nKubernetes§r"
+  DIFFICULTY: "normal"
+  RCON_PASSWORD_FILE: "/secrets/mc_rcon_password"
+  OVERRIDE_SERVER_PROPERTIES: "TRUE"
+  ENABLE_WHITELIST: "TRUE"
+  ENFORCE_WHITELIST: "TRUE"
+  OVERRIDE_WHITELIST: "TRUE"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: mc-vanilla
+  name: mc-vanilla
+  namespace: mc
+spec:
+  replicas: 1
+  serviceName: mc-vanilla
+  selector:
+    matchLabels:
+      app: mc-vanilla
+  template:
+    metadata:
+      labels:
+        app: mc-vanilla
+    spec:
+      containers:
+        - name: mc
+          image: itzg/minecraft-server
+          ports:
+          - containerPort: 25565
+            name: mc
+          envFrom:
+          - configMapRef:
+              name: mc-env
+          env:
+          - name: WHITELIST
+            valueFrom:
+              secretKeyRef:
+                name: mc-whitelist
+                key: mc_whitelist
+          volumeMounts:
+            - mountPath: /data
+              name: mc-data
+            - mountPath: /secrets
+              name: mc-secret
+          readinessProbe:
+            exec:
+              command: [ "/usr/local/bin/mc-monitor", "status", "--host", "localhost" ]
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            failureThreshold: 20
+          livenessProbe:
+            exec:
+              command: ["/usr/local/bin/mc-monitor", "status", "--host", "localhost"]
+            initialDelaySeconds: 120
+            periodSeconds: 60
+        # - name: backup
+        #   image: itzg/mc-backup
+        #   securityContext:
+        #     runAsUser: 1000
+        #   env:
+        #     - name: BACKUP_INTERVAL
+        #       value: "60"
+        #     - name: INITIAL_DELAY
+        #       value: "10"
+        #   volumeMounts:
+        #     - mountPath: /data
+        #       name: mc-data
+        #       readOnly: true
+        #     - mountPath: /backups
+        #       name: backups
+      volumes:
+        - name: mc-secret
+          secret:
+            secretName: mc-secret
+  volumeClaimTemplates:
+  - metadata:
+      name: mc-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: local-storage
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: mc-vanilla
+  name: mc-vanilla
+  namespace: mc
+spec:
+  type: NodePort
+  ports:
+  - port: 25565
+    nodePort: 30000
+    name: mc
+  selector:
+    app: mc-vanilla
