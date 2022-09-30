@@ -2,24 +2,22 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: mc-pv
-  namespace: mc
 spec:
   capacity:
-    storage: 10Gi
+    storage: 30Gi
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: local-storage
-  local:
-    path: /mnt/volumes/mc
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - worker-node
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: mc
+    name: data-mc-vanilla-0
+  iscsi:
+    targetPortal: 172.16.255.2:3260
+    iqn: iqn.2005-10.org.freenas.ctl:minecraft
+    lun: 0
+    fsType: xfs
+    readOnly: false
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -73,7 +71,7 @@ spec:
                 key: mc_whitelist
           volumeMounts:
             - mountPath: /data
-              name: mc-data
+              name: data
             - mountPath: /secrets
               name: mc-secret
           readinessProbe:
@@ -98,7 +96,7 @@ spec:
         #       value: "10"
         #   volumeMounts:
         #     - mountPath: /data
-        #       name: mc-data
+        #       name: data
         #       readOnly: true
         #     - mountPath: /backups
         #       name: backups
@@ -108,14 +106,14 @@ spec:
             secretName: mc-secret
   volumeClaimTemplates:
   - metadata:
-      name: mc-data
+      name: data
     spec:
       accessModes:
       - ReadWriteOnce
-      storageClassName: local-storage
+      storageClassName: iscsi-ssd-storage
       resources:
         requests:
-          storage: 10Gi
+          storage: 30Gi
 ---
 apiVersion: v1
 kind: Service
@@ -125,10 +123,10 @@ metadata:
   name: mc-vanilla
   namespace: mc
 spec:
-  type: NodePort
+  type: LoadBalancer
+  loadBalancerIP: 172.16.254.25
   ports:
   - port: 25565
-    nodePort: 30000
     name: mc
   selector:
     app: mc-vanilla
