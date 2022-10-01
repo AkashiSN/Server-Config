@@ -1,0 +1,156 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-env
+  namespace: nextcloud
+data:
+  TZ: "Asia/Tokyo"
+  NEXTCLOUD_ADMIN_USER_FILE: /secrets/nextcloud_admin_user
+  NEXTCLOUD_ADMIN_PASSWORD_FILE: /secrets/nextcloud_admin_password
+  NEXTCLOUD_DATA_DIR: /mnt/nextcloud
+  OVERWRITEPROTOCOL: https
+  TRUSTED_PROXIES: nextcloud
+  NEXTCLOUD_TRUSTED_DOMAINS: files.akashisn.info
+  POSTGRES_HOST: nextcloud-psql
+  POSTGRES_DB: nextcloud
+  POSTGRES_USER: nextcloud
+  POSTGRES_PASSWORD_FILE: /secrets/nextcloud_psql_password
+  REDIS_HOST: nextcloud-redis
+  REDIS_HOST_PASSWORD_FILE: /secrets/nextcloud_redis_password
+  SMTP_HOST: smtp.gmail.com
+  SMTP_PORT: "587"
+  SMTP_SECURE: tls
+  MAIL_FROM_ADDRESS: no-reply
+  MAIL_DOMAIN: files.localhost
+  SMTP_PASSWORD_FILE: /secrets/nextcloud_smtp_password
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: nextcloud
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  replicas: 1
+  serviceName: nextcloud
+  selector:
+    matchLabels:
+      app: nextcloud
+  template:
+    metadata:
+      labels:
+        app: nextcloud
+    spec:
+      securityContext:
+        fsGroup: 33
+      initContainers:
+        - name: change-volume-permission
+          image: busybox
+          command: ["sh", "-c", "chmod 0770 /mnt/nextcloud"]
+          volumeMounts:
+            - name: app
+              mountPath: /var/www/html
+            - name: data
+              mountPath: /mnt/nextcloud
+      containers:
+        - name: nextcloud
+          image: nextcloud:24.0.5-fpm
+          envFrom:
+            - configMapRef:
+                name: nextcloud-env
+          env:
+            - name: SMTP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-secrets
+                  key: nextcloud_smtp_user
+          volumeMounts:
+            - name: app
+              mountPath: /var/www/html
+            - name: data
+              mountPath: /mnt/nextcloud
+            - name: nextcloud-secrets
+              mountPath: /secrets
+        - name: nginx
+          image: nginx:mainline
+          ports:
+            - containerPort: 80
+              name: nginx
+          volumeMounts:
+            - name: app
+              mountPath: /var/www/html
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/nextcloud.conf
+              subPath: nextcloud.conf
+              readOnly: true
+      volumes:
+        - name: nextcloud-secrets
+          secret:
+            secretName: nextcloud-secrets
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+  volumeClaimTemplates:
+    - metadata:
+        name: app
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-hdd-storage
+        resources:
+          requests:
+            storage: 8Ti
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: nextcloud
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: nginx
+  selector:
+    app: nextcloud
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nextcloud
+  namespace: nextcloud
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - files.akashisn.info
+      secretName: letsencrypt-cert
+  rules:
+    - host: files.akashisn.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nextcloud
+                port:
+                  name: http

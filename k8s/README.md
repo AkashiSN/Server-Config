@@ -143,9 +143,60 @@ helm repo add nginx-stable https://helm.nginx.com/stable
 helm repo update
 
 export NGINX_INGRESS_VERSION="0.14.1"
-helm install nginx-ingress nginx-stable/nginx-ingress --version ${NGINX_INGRESS_VERSION} --namespace ingress-nginx --create-namespace
+helm install nginx-ingress nginx-stable/nginx-ingress \
+  --version ${NGINX_INGRESS_VERSION} --namespace ingress-nginx --create-namespace
 
 watch kubectl get pod -n ingress-nginx
+
+# cert manager
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+
+export CERT_MANAGER_VERSION="v1.9.1"
+helm install cert-manager jetstack/cert-manager \
+  --version ${CERT_MANAGER_VERSION} --namespace cert-manager \
+  --create-namespace --set installCRDs=true
+
+watch kubectl get deploy,svc,pod -n cert-manager
+
+# reflector
+helm repo add emberstack https://emberstack.github.io/helm-charts
+helm repo update
+
+helm install reflector emberstack/reflector
+
+# ACME
+export HISTFILESIZE=0
+EMAIL=""
+TOKEN=""
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudflare-api-token-secret
+  namespace: cert-manager
+type: Opaque
+stringData:
+  api-token: ${TOKEN}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ${EMAIL}
+    privateKeySecretRef:
+      name: acme-client-letsencrypt
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token-secret
+              key: api-token
+EOF
+
 
 # stackgres
 helm repo add stackgres-charts https://stackgres.io/downloads/stackgres-k8s/stackgres/helm/
@@ -194,6 +245,8 @@ kubectl apply -f minecraft.yml
 - nextcloud_admin_password
 - nextcloud_psql_password
 - nextcloud_redis_password
+- nextcloud_smtp_user
+- nextcloud_smtp_password
 
 ```bash
 kubectl create namespace nextcloud
@@ -208,14 +261,20 @@ kubectl create secret generic --namespace nextcloud \
   --from-file=./.secrets/nextcloud_admin_password \
   --from-file=./.secrets/nextcloud_psql_password \
   --from-file=./.secrets/nextcloud_redis_password \
+  --from-file=./.secrets/nextcloud_smtp_user \
+  --from-file=./.secrets/nextcloud_smtp_password \
   nextcloud-secrets
 
-kubectl apply -f nextcloud-pv.yml
-kubectl apply -f nextcloud-redis.yml
-kubectl apply -f nextcloud-psql.yml
-kubectl apply -f nextcloud.yml
+kubectl apply -f nextcloud/persistent-volume.yml
+kubectl apply -f nextcloud/redis.yml
+kubectl apply -f nextcloud/postgresql.yml
+kubectl apply -f nextcloud/nginx-conf.yml
+
+watch kubectl get -n nextcloud pod
+
+kubectl apply -f nextcloud/nextcloud.yml
 
 kubectl get -n nextcloud pod
-kubectl logs -f -n nextcloud nextcloud-0
+kubectl logs -f -n nextcloud nextcloud-0 -c nextcloud
 kubectl exec -it -n nextcloud nextcloud-0 -- bash
 ```
