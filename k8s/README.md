@@ -74,6 +74,14 @@ update-grub
 # Install iscsi-initiator
 apt-get install -y open-iscsi
 
+# Install helm
+curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
+
+apt-get update
+apt-get install -y helm
+
 # reboot
 reboot
 ```
@@ -92,24 +100,20 @@ kubectl get nodes
 
 ```bash
 # Calico
+helm repo add projectcalico https://projectcalico.docs.tigera.io/charts
+helm repo update
+
 export CALICO_VERSION="v3.24.1"
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/tigera-operator.yaml
-
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/custom-resources.yaml
-
-watch kubectl get tigerastatus
+helm install calico projectcalico/tigera-operator --version ${CALICO_VERSION} --namespace tigera-operator --create-namespace
 
 watch kubectl get pods -n calico-system
 
-## download calicoctl
-sudo curl -L https://github.com/projectcalico/calico/releases/download/${CALICO_VERSION}/calicoctl-linux-amd64 -o /usr/local/bin/calicoctl
-sudo chmod +x /usr/local/bin/calicoctl
-
 # metallb
-kubectl get configmap kube-proxy -n kube-system -o yaml | sed -e 's/mode: ""/mode: "ipvs"/' | sed -e "s/strictARP: false/strictARP: true/" | kubectl apply -f - -n kube-system
+helm repo add metallb https://metallb.github.io/metallb
+helm repo update
 
-export METALLB_VERSION="v0.13.5"
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/${METALLB_VERSION}/config/manifests/metallb-native.yaml
+export METALLB_VERSION="0.13.5"
+helm install metallb metallb/metallb --version ${METALLB_VERSION} --namespace metallb-system --create-namespace
 
 watch kubectl get pod -n metallb-system
 
@@ -133,47 +137,24 @@ metadata:
 EOF
 
 # nginx-ingress
-export NGINX_INGRESS_VERSION="v1.3.1"
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-${NGINX_INGRESS_VERSION}/deploy/static/provider/baremetal/deploy.yaml
+helm repo add nginx-stable https://helm.nginx.com/stable
+helm repo update
+
+export NGINX_INGRESS_VERSION="0.14.1"
+helm install nginx-ingress nginx-stable/nginx-ingress --version ${NGINX_INGRESS_VERSION} --namespace ingress-nginx --create-namespace
 
 watch kubectl get pod -n ingress-nginx
 
-# Stackgres
-kubectl apply -f 'https://sgres.io/install'
+# stackgres
+helm repo add stackgres-charts https://stackgres.io/downloads/stackgres-k8s/stackgres/helm/
+helm repo update
 
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  namespace: stackgres
-  name: stackgres-restapi
-  annotations:
-    meta.helm.sh/release-name: stackgres-operator
-    meta.helm.sh/release-namespace: stackgres
-  labels:
-    app.kubernetes.io/managed-by: Helm
-spec:
-  type: LoadBalancer
-  loadBalancerIP: 172.16.254.20
-  selector:
-    app: stackgres-restapi
-  ports:
-    - name: https
-      protocol: TCP
-      port: 443
-      targetPort: https
-EOF
+helm install --namespace stackgres stackgres-operator \
+    --set-string adminui.service.type=LoadBalancer \
+    --set-string adminui.service.loadBalancerIP="172.16.254.20" \
+stackgres-charts/stackgres-operator --create-namespace
 
-watch kubectl get deploy,pod,svc -n stackgres
-
-export HISTFILESIZE=0
-NEW_USER=""
-NEW_PASSWORD=""
-kubectl create secret generic -n stackgres stackgres-restapi --dry-run=client -o json \
-  --from-literal=k8sUsername="$NEW_USER" \
-  --from-literal=password="$(echo -n "${NEW_USER}${NEW_PASSWORD}"| sha256sum | awk '{ print $1 }' )" > password.patch
-
-kubectl patch secret -n stackgres stackgres-restapi -p "$(cat password.patch)" && rm password.patch
+watch kubectl get deployment -n stackgres
 
 kubectl patch secrets --namespace stackgres stackgres-restapi --type json -p '[{"op":"remove","path":"/data/clearPassword"}]'
 ```
@@ -198,4 +179,3 @@ kubectl apply -f minecraft.yml
 kubectl create namespace nextcloud
 
 ```
-
