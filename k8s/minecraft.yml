@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mc-pv
+  name: minecraft-pv
 spec:
   capacity:
     storage: 30Gi
@@ -10,8 +10,8 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: iscsi-ssd-storage
   claimRef:
-    namespace: mc
-    name: data-mc-vanilla-0
+    namespace: minecraft
+    name: data-minecraft-vanilla-0
   iscsi:
     targetPortal: 172.16.255.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:minecraft
@@ -22,15 +22,15 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mc-env
-  namespace: mc
+  name: minecraft-env
+  namespace: minecraft
 data:
   TZ: "Asia/Tokyo"
   EULA: "TRUE"
   MEMORY: "16G"
   MOTD: "A §l§cVanilla§r Minecraft server powered by §nKubernetes§r"
   DIFFICULTY: "normal"
-  RCON_PASSWORD_FILE: "/secrets/mc_rcon_password"
+  RCON_PASSWORD_FILE: "/secrets/minecraft_rcon_password"
   OVERRIDE_SERVER_PROPERTIES: "TRUE"
   ENABLE_WHITELIST: "TRUE"
   ENFORCE_WHITELIST: "TRUE"
@@ -40,40 +40,40 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    app: mc-vanilla
-  name: mc-vanilla
+    app: minecraft-vanilla
+  name: minecraft-vanilla
   namespace: mc
 spec:
   replicas: 1
-  serviceName: mc-vanilla
+  serviceName: minecraft-vanilla
   selector:
     matchLabels:
-      app: mc-vanilla
+      app: minecraft-vanilla
   template:
     metadata:
       labels:
-        app: mc-vanilla
+        app: minecraft-vanilla
     spec:
       containers:
-        - name: mc
+        - name: minecraft
           image: itzg/minecraft-server
           ports:
           - containerPort: 25565
-            name: mc
+            name: minecraft
           envFrom:
           - configMapRef:
-              name: mc-env
+              name: minecraft-env
           env:
           - name: WHITELIST
             valueFrom:
               secretKeyRef:
-                name: mc-whitelist
-                key: mc_whitelist
+                name: minecraft-whitelist
+                key: minecraft_whitelist
           volumeMounts:
             - mountPath: /data
               name: data
             - mountPath: /secrets
-              name: mc-secret
+              name: minecraft-secrets
           readinessProbe:
             exec:
               command: [ "/usr/local/bin/mc-monitor", "status", "--host", "localhost" ]
@@ -101,9 +101,9 @@ spec:
         #     - mountPath: /backups
         #       name: backups
       volumes:
-        - name: mc-secret
+        - name: minecraft-secrets
           secret:
-            secretName: mc-secret
+            secretName: minecraft-secrets
   volumeClaimTemplates:
   - metadata:
       name: data
@@ -119,14 +119,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: mc-vanilla
-  name: mc-vanilla
-  namespace: mc
+    service: minecraft-vanilla
+  name: minecraft-vanilla
+  namespace: minecraft
 spec:
   type: LoadBalancer
   loadBalancerIP: 172.16.254.25
   ports:
   - port: 25565
-    name: mc
+    name: minecraft
   selector:
-    app: mc-vanilla
+    app: minecraft-vanilla
