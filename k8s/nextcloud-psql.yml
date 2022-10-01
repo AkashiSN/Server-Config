@@ -1,0 +1,45 @@
+apiVersion: stackgres.io/v1
+kind: SGInstanceProfile
+metadata:
+  namespace: nextcloud
+  name: size-normal
+spec:
+  cpu: "8"
+  memory: 16Gi
+---
+apiVersion: stackgres.io/v1
+kind: SGScript
+metadata:
+  name: init-script
+  namespace: nextcloud
+spec:
+  managedVersions: true
+  continueOnError: false
+  scripts:
+  - name: create-database-user
+    scriptFrom:
+      secretKeyRef:
+        name: create-database-user
+        key: nextcloud_psql_create_user.sql
+  - name: create-nextcloud-database
+    script: |
+      CREATE DATABASE nextcloud WITH OWNER nextcloud;
+---
+apiVersion: stackgres.io/v1
+kind: SGCluster
+metadata:
+  name: nextcloud-psql
+  namespace: nextcloud
+spec:
+  instances: 1
+  sgInstanceProfile: size-normal
+  postgres:
+    version: "14.5"
+  pods:
+    persistentVolume:
+      size: 30Gi
+      storageClass: iscsi-ssd-storage
+  managedSql:
+    scripts: 
+      - sgScript: init-script
+

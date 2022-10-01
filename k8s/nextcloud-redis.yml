@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud-redis
+  namespace: nextcloud
+spec:
+  selector:
+    matchLabels:
+      app: nextcloud-redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nextcloud-redis
+    spec:
+      containers:
+        - name: nextcloud-redis
+          image: redis:alpine
+          ports:
+            - containerPort: 6379
+              name: nextcloud-redis
+          env:
+            - name: REDIS_HOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-secrets
+                  key: nextcloud_redis_password
+          args: ["redis-server", "--requirepass", "$(REDIS_HOST_PASSWORD)"]
+          resources:
+            limits:
+              cpu: "4"
+              memory: "4Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: nextcloud-redis
+  name: nextcloud-redis
+  namespace: nextcloud
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      name: nextcloud-redis
+  selector:
+    app: nextcloud-redis

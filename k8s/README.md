@@ -99,6 +99,10 @@ kubectl get nodes
 ```
 
 ```bash
+# helm
+helm repo add stable https://charts.helm.sh/stable
+helm repo update
+
 # Calico
 helm repo add projectcalico https://projectcalico.docs.tigera.io/charts
 helm repo update
@@ -125,10 +129,8 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 172.16.254.20-172.16.254.50
-EOF
-
-kubectl apply -f - <<EOF
+  - 172.16.254.20-172.16.254.100
+---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
@@ -151,31 +153,69 @@ helm repo update
 
 helm install --namespace stackgres stackgres-operator \
     --set-string adminui.service.type=LoadBalancer \
-    --set-string adminui.service.loadBalancerIP="172.16.254.20" \
+    --set-string adminui.service.loadBalancerIP="172.16.254.21" \
 stackgres-charts/stackgres-operator --create-namespace
 
 watch kubectl get deployment -n stackgres
 
+kubectl get secret -n stackgres stackgres-restapi --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
+
 kubectl patch secrets --namespace stackgres stackgres-restapi --type json -p '[{"op":"remove","path":"/data/clearPassword"}]'
+
+# Restart coredns
+kubectl -n kube-system rollout restart deployment coredns
 ```
 
 ## Local manifests
 
 ```bash
-kubectl apply -f sc.yml
+kubectl apply -f storage-class.yml
 ```
 
 ### Minecraft
+
+- minecraft_rcon_password
+- minecraft_whitelist
+
 ```bash
 kubectl create namespace minecraft
 
-kubectl create secret generic --namespace minecraft --from-file=./.secrets/minecraft_rcon_password minecraft-secrets
-kubectl create secret generic --namespace minecraft --from-file=./.secrets/minecraft_whitelist minecraft-whitelist
+kubectl create secret generic --namespace minecraft \
+  --from-file=./.secrets/minecraft_rcon_password minecraft-secrets
+kubectl create secret generic --namespace minecraft \
+  --from-file=./.secrets/minecraft_whitelist minecraft-whitelist
+
 kubectl apply -f minecraft.yml
 ```
 
 ### Nextcloud
+
+- nextcloud_admin_user
+- nextcloud_admin_password
+- nextcloud_psql_password
+- nextcloud_redis_password
+
 ```bash
 kubectl create namespace nextcloud
 
+echo -n "create user nextcloud password '$(cat ./.secrets/nextcloud_psql_password)';" > ./.secrets/nextcloud_psql_create_user.sql
+
+kubectl create secret generic --namespace nextcloud \
+  --from-file=./.secrets/nextcloud_psql_create_user.sql create-database-user
+
+kubectl create secret generic --namespace nextcloud \
+  --from-file=./.secrets/nextcloud_admin_user \
+  --from-file=./.secrets/nextcloud_admin_password \
+  --from-file=./.secrets/nextcloud_psql_password \
+  --from-file=./.secrets/nextcloud_redis_password \
+  nextcloud-secrets
+
+kubectl apply -f nextcloud-pv.yml
+kubectl apply -f nextcloud-redis.yml
+kubectl apply -f nextcloud-psql.yml
+kubectl apply -f nextcloud.yml
+
+kubectl get -n nextcloud pod
+kubectl logs -f -n nextcloud nextcloud-0
+kubectl exec -it -n nextcloud nextcloud-0 -- bash
 ```

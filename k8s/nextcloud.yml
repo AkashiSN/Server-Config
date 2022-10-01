@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-env
+  namespace: nextcloud
+data:
+  TZ: "Asia/Tokyo"
+  NEXTCLOUD_ADMIN_USER_FILE: /secrets/nextcloud_admin_user
+  NEXTCLOUD_ADMIN_PASSWORD_FILE: /secrets/nextcloud_admin_password
+  NEXTCLOUD_DATA_DIR: /mnt/nextcloud
+  OVERWRITEPROTOCOL: http
+  TRUSTED_PROXIES: nextcloud
+  NEXTCLOUD_TRUSTED_DOMAINS: "172.16.254.30"
+  POSTGRES_HOST: nextcloud-psql
+  POSTGRES_DB: nextcloud
+  POSTGRES_USER: nextcloud
+  POSTGRES_PASSWORD_FILE: /secrets/nextcloud_psql_password
+  REDIS_HOST: nextcloud-redis
+  REDIS_HOST_PASSWORD_FILE: /secrets/nextcloud_redis_password
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: nextcloud
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  replicas: 1
+  serviceName: nextcloud
+  selector:
+    matchLabels:
+      app: nextcloud
+  template:
+    metadata:
+      labels:
+        app: nextcloud
+    spec:
+      securityContext:
+        fsGroup: 33
+      initContainers:
+        - name: change-volume-permission
+          image: busybox
+          command: ["sh", "-c", "chmod 0770 /mnt/nextcloud && rm -rf /mnt/nextcloud/* && rm -rf /var/www/html/*"]
+          volumeMounts:
+            - mountPath: /mnt/nextcloud
+              name: data
+            - mountPath: /var/www/html
+              name: app
+      containers:
+        - name: nextcloud
+          image: nextcloud:24.0.5
+          ports:
+            - containerPort: 80
+              name: nextcloud
+          envFrom:
+            - configMapRef:
+                name: nextcloud-env
+          volumeMounts:
+            - mountPath: /var/www/html
+              name: app
+            - mountPath: /mnt/nextcloud
+              name: data
+            - mountPath: /secrets
+              name: nextcloud-secrets
+      volumes:
+        - name: nextcloud-secrets
+          secret:
+            secretName: nextcloud-secrets
+  volumeClaimTemplates:
+    - metadata:
+        name: app
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-hdd-storage
+        resources:
+          requests:
+            storage: 8Ti
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: nextcloud
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 172.16.254.30
+  ports:
+    - port: 80
+      name: nextcloud
+  selector:
+    app: nextcloud

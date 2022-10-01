@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-pv
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: nextcloud
+    name: app-nextcloud-0
+  iscsi:
+    targetPortal: 172.16.255.2:3260
+    iqn: iqn.2005-10.org.freenas.ctl:nextcloud
+    lun: 0
+    fsType: xfs
+    readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-data-pv
+spec:
+  capacity:
+    storage: 8Ti
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-hdd-storage
+  claimRef:
+    namespace: nextcloud
+    name: data-nextcloud-0
+  iscsi:
+    targetPortal: 172.16.255.2:3260
+    iqn: iqn.2005-10.org.freenas.ctl:nextcloud-data
+    lun: 0
+    fsType: xfs
+    readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-psql-pv
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: nextcloud
+    name: nextcloud-psql-data-nextcloud-psql-0
+  iscsi:
+    targetPortal: 172.16.255.2:3260
+    iqn: iqn.2005-10.org.freenas.ctl:nextcloud-postgresql
+    lun: 0
+    fsType: xfs
+    readOnly: false
