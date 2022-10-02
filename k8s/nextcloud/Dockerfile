@@ -51,8 +51,8 @@ EOF
 cat << 'EOF' > /usr/local/etc/php/conf.d/nextcloud.ini
 memory_limit = 30G
 
-upload_max_filesize=2000M
-post_max_size=2000M
+upload_max_filesize=10G
+post_max_size=10G
 
 request_terminate_timeout=86400
 max_execution_time=86400
