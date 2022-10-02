@@ -47,6 +47,7 @@ spec:
       containers:
         - name: nextcloud
           image: ghcr.io/akashisn/nextcloud
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: nextcloud-env
