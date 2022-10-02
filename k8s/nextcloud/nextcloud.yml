@@ -10,7 +10,7 @@ data:
   NEXTCLOUD_DATA_DIR: /mnt/nextcloud
   OVERWRITEPROTOCOL: https
   TRUSTED_PROXIES: nextcloud
-  NEXTCLOUD_TRUSTED_DOMAINS: "files.akashisn.info files-local.akashisn.info"
+  NEXTCLOUD_TRUSTED_DOMAINS: "files.akashisn.info"
   POSTGRES_HOST: nextcloud-psql
   POSTGRES_DB: nextcloud
   POSTGRES_USER: nextcloud
@@ -77,8 +77,8 @@ spec:
               subPath: nginx.conf
               readOnly: true
             - name: nginx-conf
-              mountPath: /etc/nginx/conf.d/cloudflare.conf
-              subPath: cloudflare.conf
+              mountPath: /etc/nginx/conf.d/real_ip.conf
+              subPath: real_ip.conf
               readOnly: true
             - name: nginx-conf
               mountPath: /etc/nginx/conf.d/nextcloud.conf
@@ -141,20 +141,9 @@ spec:
   tls:
     - hosts:
         - files.akashisn.info
-        - files-local.akashisn.info
       secretName: letsencrypt-cert
   rules:
     - host: files.akashisn.info
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: nextcloud
-                port:
-                  name: http
-    - host: files-local.akashisn.info
       http:
         paths:
           - path: /
