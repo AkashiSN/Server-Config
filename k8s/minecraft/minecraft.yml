@@ -1,25 +1,4 @@
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: minecraft-pv
-spec:
-  capacity:
-    storage: 30Gi
-  accessModes:
-  - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: iscsi-ssd-storage
-  claimRef:
-    namespace: minecraft
-    name: data-minecraft-vanilla-0
-  iscsi:
-    targetPortal: 172.16.255.2:3260
-    iqn: iqn.2005-10.org.freenas.ctl:minecraft
-    lun: 0
-    fsType: xfs
-    readOnly: false
----
-apiVersion: v1
 kind: ConfigMap
 metadata:
   name: minecraft-env
@@ -42,7 +21,7 @@ metadata:
   labels:
     app: minecraft-vanilla
   name: minecraft-vanilla
-  namespace: mc
+  namespace: minecraft
 spec:
   replicas: 1
   serviceName: minecraft-vanilla
@@ -57,6 +36,7 @@ spec:
       containers:
         - name: minecraft
           image: itzg/minecraft-server
+          imagePullPolicy: Always
           ports:
           - containerPort: 25565
             name: minecraft

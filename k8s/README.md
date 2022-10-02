@@ -234,7 +234,8 @@ kubectl create namespace minecraft
 kubectl create secret generic --namespace minecraft --from-file=./.secrets/minecraft_rcon_password minecraft-secrets
 kubectl create secret generic --namespace minecraft --from-file=./.secrets/minecraft_whitelist minecraft-whitelist
 
-kubectl apply -f minecraft.yml
+kubectl apply -f minecraft/persistent-volume.yml
+kubectl apply -f minecraft/minecraft.yml
 ```
 
 ### Nextcloud
