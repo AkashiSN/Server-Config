@@ -29,18 +29,18 @@ cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 cat << 'EOF' > /usr/local/etc/php-fpm.d/zz-docker.conf
 [global]
 daemonize = no
+error_log = /proc/self/fd/2
 
 [www]
 user  = www-data
 group = www-data
 
 listen = 0.0.0.0:9000
-listen.owner = www-data
-listen.group = www-data
 
+log_limit = 8192
+
+access.log = /proc/self/fd/2
 access.format = "%{REMOTE_ADDR}e - %u %t \"%m %{REQUEST_URI}e\" %s"
-
-access.log = /proc/self/fd/1
 
 pm.max_children      = 163
 pm.start_servers     = 40
