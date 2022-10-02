@@ -7,6 +7,12 @@
 # become root
 sudo su
 
+# time
+timedatectl set-timezone Asia/Tokyo
+sed -i 's/#NTP=/NTP=ntp.nict.jp/g' /etc/systemd/timesyncd.conf
+timedatectl set-ntp true
+systemctl restart systemd-timesyncd.service
+
 # disable swap
 swapoff -a
 sed -i '/swap/s/^/# /g' /etc/fstab
