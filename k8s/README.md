@@ -276,5 +276,5 @@ kubectl apply -f nextcloud/nextcloud.yml
 
 kubectl get -n nextcloud pod
 kubectl logs -f -n nextcloud nextcloud-0 -c nextcloud
-kubectl exec -it -n nextcloud nextcloud-0 -- bash
+kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- bash
 ```
