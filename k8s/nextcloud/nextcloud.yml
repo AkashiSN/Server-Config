@@ -133,6 +133,8 @@ metadata:
   namespace: nextcloud
   annotations:
     nginx.org/redirect-to-https: "True"
+    nginx.org/client-max-body-size: "0"
+    nginx.org/proxy-request-buffering: "off"
     cert-manager.io/cluster-issuer: letsencrypt-issuer
 spec:
   ingressClassName: nginx

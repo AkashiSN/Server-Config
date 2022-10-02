@@ -50,8 +50,8 @@ EOF
 cat << 'EOF' > /usr/local/etc/php/conf.d/nextcloud.ini
 memory_limit = 30G
 
-upload_max_filesize=10G
-post_max_size=10G
+upload_max_filesize=500M
+post_max_size=500M
 
 request_terminate_timeout=86400
 max_execution_time=86400
@@ -85,6 +85,8 @@ run_as 'php /var/www/html/occ app:enable files_external'
 run_as 'php /var/www/html/occ app:enable twofactor_totp'
 
 run_as 'php /var/www/html/occ config:system:set default_phone_region --value=JP'
+
+run_as 'php /var/www/html/occ config:app:set files max_chunk_size 104857600' # 100MiB
 
 exec "$@"
 EOF
