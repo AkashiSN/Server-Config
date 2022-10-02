@@ -231,10 +231,8 @@ kubectl apply -f storage-class.yml
 ```bash
 kubectl create namespace minecraft
 
-kubectl create secret generic --namespace minecraft \
-  --from-file=./.secrets/minecraft_rcon_password minecraft-secrets
-kubectl create secret generic --namespace minecraft \
-  --from-file=./.secrets/minecraft_whitelist minecraft-whitelist
+kubectl create secret generic --namespace minecraft --from-file=./.secrets/minecraft_rcon_password minecraft-secrets
+kubectl create secret generic --namespace minecraft --from-file=./.secrets/minecraft_whitelist minecraft-whitelist
 
 kubectl apply -f minecraft.yml
 ```
@@ -253,8 +251,7 @@ kubectl create namespace nextcloud
 
 echo -n "create user nextcloud password '$(cat ./.secrets/nextcloud_psql_password)';" > ./.secrets/nextcloud_psql_create_user.sql
 
-kubectl create secret generic --namespace nextcloud \
-  --from-file=./.secrets/nextcloud_psql_create_user.sql create-database-user
+kubectl create secret generic --namespace nextcloud --from-file=./.secrets/nextcloud_psql_create_user.sql create-database-user
 
 kubectl create secret generic --namespace nextcloud \
   --from-file=./.secrets/nextcloud_admin_user \

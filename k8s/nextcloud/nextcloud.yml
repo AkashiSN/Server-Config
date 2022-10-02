@@ -44,18 +44,9 @@ spec:
     spec:
       securityContext:
         fsGroup: 33
-      initContainers:
-        - name: change-volume-permission
-          image: busybox
-          command: ["sh", "-c", "chmod 0770 /mnt/nextcloud"]
-          volumeMounts:
-            - name: app
-              mountPath: /var/www/html
-            - name: data
-              mountPath: /mnt/nextcloud
       containers:
         - name: nextcloud
-          image: nextcloud:24.0.5-fpm
+          image: ghcr.io/akashisn/nextcloud
           envFrom:
             - configMapRef:
                 name: nextcloud-env
