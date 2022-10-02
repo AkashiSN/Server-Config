@@ -150,6 +150,7 @@ helm repo update
 
 export NGINX_INGRESS_VERSION="0.14.1"
 helm install nginx-ingress nginx-stable/nginx-ingress \
+  --set controller.service.loadBalancerIP="172.16.254.20" \
   --version ${NGINX_INGRESS_VERSION} --namespace ingress-nginx --create-namespace
 
 watch kubectl get pod -n ingress-nginx
@@ -164,12 +165,6 @@ helm install cert-manager jetstack/cert-manager \
   --create-namespace --set installCRDs=true
 
 watch kubectl get deploy,svc,pod -n cert-manager
-
-# reflector
-helm repo add emberstack https://emberstack.github.io/helm-charts
-helm repo update
-
-helm install reflector emberstack/reflector
 
 # ACME
 export HISTFILESIZE=0
