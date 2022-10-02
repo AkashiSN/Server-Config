@@ -203,22 +203,6 @@ spec:
               key: api-token
 EOF
 
-
-# stackgres
-helm repo add stackgres-charts https://stackgres.io/downloads/stackgres-k8s/stackgres/helm/
-helm repo update
-
-helm install --namespace stackgres stackgres-operator \
-    --set-string adminui.service.type=LoadBalancer \
-    --set-string adminui.service.loadBalancerIP="172.16.254.21" \
-stackgres-charts/stackgres-operator --create-namespace
-
-watch kubectl get deployment -n stackgres
-
-kubectl get secret -n stackgres stackgres-restapi --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
-
-kubectl patch secrets --namespace stackgres stackgres-restapi --type json -p '[{"op":"remove","path":"/data/clearPassword"}]'
-
 # Restart coredns
 kubectl -n kube-system rollout restart deployment coredns
 ```
@@ -273,9 +257,6 @@ kubectl apply -f nextcloud/persistent-volume.yml
 kubectl apply -f nextcloud/redis.yml
 kubectl apply -f nextcloud/postgresql.yml
 kubectl apply -f nextcloud/nginx-conf.yml
-
-watch kubectl get -n nextcloud pod
-
 kubectl apply -f nextcloud/nextcloud.yml
 
 kubectl get -n nextcloud pod

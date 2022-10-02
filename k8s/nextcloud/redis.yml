@@ -27,9 +27,12 @@ spec:
                   key: nextcloud_redis_password
           args: ["redis-server", "--requirepass", "$(REDIS_HOST_PASSWORD)"]
           resources:
+            requests:
+              cpu: 500m
+              memory: 500Mi
             limits:
-              cpu: "4"
-              memory: "4Gi"
+              cpu: "1"
+              memory: 1Gi
 ---
 apiVersion: v1
 kind: Service

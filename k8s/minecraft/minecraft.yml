@@ -65,6 +65,11 @@ spec:
               command: ["/usr/local/bin/mc-monitor", "status", "--host", "localhost"]
             initialDelaySeconds: 120
             periodSeconds: 60
+          resources:
+            requests:
+              memory: 16Gi
+            limits:
+              memory: 18Gi
         # - name: backup
         #   image: itzg/mc-backup
         #   securityContext:

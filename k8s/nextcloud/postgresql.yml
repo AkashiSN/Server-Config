@@ -1,45 +1,75 @@
-apiVersion: stackgres.io/v1
-kind: SGInstanceProfile
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  namespace: nextcloud
-  name: size-normal
-spec:
-  cpu: "8"
-  memory: 16Gi
----
-apiVersion: stackgres.io/v1
-kind: SGScript
-metadata:
-  name: init-script
-  namespace: nextcloud
-spec:
-  managedVersions: true
-  continueOnError: false
-  scripts:
-  - name: create-database-user
-    scriptFrom:
-      secretKeyRef:
-        name: create-database-user
-        key: nextcloud_psql_create_user.sql
-  - name: create-nextcloud-database
-    script: |
-      CREATE DATABASE nextcloud WITH OWNER nextcloud;
----
-apiVersion: stackgres.io/v1
-kind: SGCluster
-metadata:
+  labels:
+    app: nextcloud-psql
   name: nextcloud-psql
   namespace: nextcloud
 spec:
-  instances: 1
-  sgInstanceProfile: size-normal
-  postgres:
-    version: "14.5"
-  pods:
-    persistentVolume:
-      size: 30Gi
-      storageClass: iscsi-ssd-storage
-  managedSql:
-    scripts: 
-      - sgScript: init-script
-
+  replicas: 1
+  serviceName: nextcloud-psql
+  selector:
+    matchLabels:
+      app: nextcloud-psql
+  template:
+    metadata:
+      labels:
+        app: nextcloud-psql
+    spec:
+      containers:
+        - name: postgresql
+          image: postgres:alpine
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+              name: postgresql
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+            - name: POSTGRES_PASSWORD_FILE
+              value: /secrets/nextcloud_psql_password
+            - name: POSTGRES_DB
+              value: nextcloud
+            - name: POSTGRES_USER
+              value: nextcloud
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: nextcloud-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: "2"
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 4Gi
+      volumes:
+        - name: nextcloud-secrets
+          secret:
+            secretName: nextcloud-secrets
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: nextcloud-psql
+  name: nextcloud-psql
+  namespace: nextcloud
+spec:
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: postgresql
+  selector:
+    app: nextcloud-psql

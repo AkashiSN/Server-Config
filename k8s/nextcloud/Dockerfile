@@ -48,7 +48,7 @@ pm.max_spare_servers = 122
 EOF
 
 cat << 'EOF' > /usr/local/etc/php/conf.d/nextcloud.ini
-memory_limit = 30G
+memory_limit = 20G
 
 upload_max_filesize=500M
 post_max_size=500M

@@ -53,7 +53,7 @@ spec:
   storageClassName: iscsi-ssd-storage
   claimRef:
     namespace: nextcloud
-    name: nextcloud-psql-data-nextcloud-psql-0
+    name: data-nextcloud-psql-0
   iscsi:
     targetPortal: 172.16.255.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:nextcloud-postgresql

@@ -64,8 +64,16 @@ spec:
               mountPath: /mnt/nextcloud
             - name: nextcloud-secrets
               mountPath: /secrets
+          resources:
+            requests:
+              cpu: "8"
+              memory: 20Gi
+            limits:
+              cpu: "16"
+              memory: 22Gi
         - name: nginx
           image: nginx:mainline
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: nginx
@@ -84,6 +92,13 @@ spec:
               mountPath: /etc/nginx/conf.d/nextcloud.conf
               subPath: nextcloud.conf
               readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
       volumes:
         - name: nextcloud-secrets
           secret:
