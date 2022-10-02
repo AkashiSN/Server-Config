@@ -86,7 +86,7 @@ run_as 'php /var/www/html/occ app:enable twofactor_totp'
 
 run_as 'php /var/www/html/occ config:system:set default_phone_region --value=JP'
 
-run_as 'php /var/www/html/occ config:app:set files max_chunk_size 104857600' # 100MiB
+run_as 'php /var/www/html/occ config:app:set files max_chunk_size --value 104857600' # 100MiB
 
 exec "$@"
 EOF
