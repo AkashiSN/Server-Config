@@ -258,13 +258,16 @@ kubectl create secret generic --namespace minecraft --from-file=./.secrets/minec
 
 kubectl apply -f minecraft/persistent-volume.yml
 kubectl apply -f minecraft/minecraft.yml
+
+kubectl get pod -n minecraft
 ```
 
 ### Nextcloud
 
 - nextcloud_admin_user
 - nextcloud_admin_password
-- nextcloud_psql_password
+- nextcloud_mariadb_root_password
+- nextcloud_mariadb_user_password
 - nextcloud_redis_password
 - nextcloud_smtp_user
 - nextcloud_smtp_password
@@ -272,11 +275,11 @@ kubectl apply -f minecraft/minecraft.yml
 ```bash
 kubectl create namespace nextcloud
 
-kubectl create secret generic --namespace nextcloud --from-file=./.secrets/nextcloud_admin_user --from-file=./.secrets/nextcloud_admin_password --from-file=./.secrets/nextcloud_psql_password --from-file=./.secrets/nextcloud_redis_password --from-file=./.secrets/nextcloud_smtp_user --from-file=./.secrets/nextcloud_smtp_password nextcloud-secrets
+kubectl create secret generic --namespace nextcloud --from-file=./.secrets/nextcloud_admin_user --from-file=./.secrets/nextcloud_admin_password --from-file=./.secrets/nextcloud_mariadb_root_password --from-file=./.secrets/nextcloud_mariadb_user_password --from-file=./.secrets/nextcloud_redis_password --from-file=./.secrets/nextcloud_smtp_user --from-file=./.secrets/nextcloud_smtp_password nextcloud-secrets
 
 kubectl apply -f nextcloud/persistent-volume.yml
 kubectl apply -f nextcloud/redis.yml
-kubectl apply -f nextcloud/postgresql.yml
+kubectl apply -f nextcloud/mariadb.yml
 kubectl apply -f nextcloud/nginx-conf.yml
 kubectl apply -f nextcloud/nextcloud.yml
 

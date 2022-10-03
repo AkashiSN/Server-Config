@@ -2,39 +2,42 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    app: nextcloud-psql
-  name: nextcloud-psql
+    app: nextcloud-mariadb
+  name: nextcloud-mariadb
   namespace: nextcloud
 spec:
   replicas: 1
-  serviceName: nextcloud-psql
+  serviceName: nextcloud-mariadb
   selector:
     matchLabels:
-      app: nextcloud-psql
+      app: nextcloud-mariadb
   template:
     metadata:
       labels:
-        app: nextcloud-psql
+        app: nextcloud-mariadb
     spec:
       containers:
-        - name: postgresql
-          image: postgres:alpine
+        - name: mariadb
+          image: mariadb:10.5
           imagePullPolicy: Always
           ports:
-            - containerPort: 5432
-              name: postgresql
+            - containerPort: 3306
+              name: mariadb
           env:
             - name: TZ
               value: Asia/Tokyo
-            - name: POSTGRES_PASSWORD_FILE
-              value: /secrets/nextcloud_psql_password
-            - name: POSTGRES_DB
+            - name: MARIADB_ROOT_PASSWORD_FILE
+              value: /secrets/nextcloud_mariadb_root_password
+            - name: MARIADB_USER
               value: nextcloud
-            - name: POSTGRES_USER
+            - name: MARIADB_PASSWORD_FILE
+              value: /secrets/nextcloud_mariadb_user_password
+            - name: MARIADB_DATABASE
               value: nextcloud
+          args: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
           volumeMounts:
             - name: data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/mysql
             - name: nextcloud-secrets
               mountPath: /secrets
           resources:
@@ -63,13 +66,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: nextcloud-psql
-  name: nextcloud-psql
+    service: nextcloud-mariadb
+  name: nextcloud-mariadb
   namespace: nextcloud
 spec:
   ports:
-    - name: postgresql
-      port: 5432
-      targetPort: postgresql
+    - name: mariadb
+      port: 3306
+      targetPort: mariadb
   selector:
-    app: nextcloud-psql
+    app: nextcloud-mariadb

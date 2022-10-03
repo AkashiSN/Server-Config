@@ -11,10 +11,10 @@ data:
   OVERWRITEPROTOCOL: https
   TRUSTED_PROXIES: nextcloud
   NEXTCLOUD_TRUSTED_DOMAINS: "files.akashisn.info"
-  POSTGRES_HOST: nextcloud-psql
-  POSTGRES_DB: nextcloud
-  POSTGRES_USER: nextcloud
-  POSTGRES_PASSWORD_FILE: /secrets/nextcloud_psql_password
+  MYSQL_HOST: nextcloud-mariadb
+  MYSQL_USER: nextcloud
+  MYSQL_DATABASE: nextcloud
+  MYSQL_PASSWORD_FILE: /secrets/nextcloud_mariadb_user_password
   REDIS_HOST: nextcloud-redis
   REDIS_HOST_PASSWORD_FILE: /secrets/nextcloud_redis_password
   SMTP_HOST: smtp.gmail.com
