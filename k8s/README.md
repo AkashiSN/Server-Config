@@ -110,6 +110,7 @@ networking:
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
 serverTLSBootstrap: true
+rotateCertificates: true
 EOF
 
 # k8s init
@@ -119,7 +120,12 @@ mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-kubectl get nodes
+pending_csr=($(kubectl get csr | grep Pending | cut -d " " -f 1))
+for csr in "${pending_csr[@]}" ; do
+  kubectl certificate approve "${csr}"
+done
+
+kubectl get nodes -o wide
 ```
 
 ```bash
@@ -171,7 +177,7 @@ helm install nginx-ingress nginx-stable/nginx-ingress \
   --set controller.service.loadBalancerIP="172.16.254.20" \
   --version ${NGINX_INGRESS_VERSION} --namespace ingress-nginx --create-namespace
 
-watch kubectl get pod -n ingress-nginx
+watch kubectl get pod,svc -n ingress-nginx
 
 # cert manager
 helm repo add jetstack https://charts.jetstack.io
@@ -223,6 +229,8 @@ helm repo update
 export METRICS_SERVER_VERSION="3.8.2"
 helm install metrics-server metrics-server/metrics-server \
   --version ${METRICS_SERVER_VERSION} --namespace kube-system
+
+kubectl top node
 
 # Restart coredns
 kubectl -n kube-system rollout restart deployment coredns

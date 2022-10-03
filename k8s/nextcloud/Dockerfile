@@ -89,6 +89,11 @@ exec "$@"
 EOF
 
 chmod +x /*.sh
+
+# Remove this patch when the release comes out.
+cd /usr/src/nextcloud/
+curl -O https://patch-diff.githubusercontent.com/raw/nextcloud/server/pull/34035.diff
+patch -p1 < 34035.diff
 EOT
 
 ENV NEXTCLOUD_UPDATE=1
