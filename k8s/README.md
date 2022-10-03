@@ -90,12 +90,30 @@ apt-get install -y helm
 
 # reboot
 reboot
+
+# upgrade
+sudo apt-get update
+sudo apt-get upgrade -y
+
+# reboot
+sudo reboot
 ```
 
 Only master-node
 ```bash
+cat <<EOF > config.yml
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+networking:
+  podSubnet: 192.168.0.0/16
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+serverTLSBootstrap: true
+EOF
+
 # k8s init
-sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+sudo kubeadm init --config=config.yml
 
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -198,8 +216,19 @@ spec:
               key: api-token
 EOF
 
+# Metrics Server
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+helm repo update
+
+export METRICS_SERVER_VERSION="3.8.2"
+helm install metrics-server metrics-server/metrics-server \
+  --version ${METRICS_SERVER_VERSION} --namespace kube-system
+
 # Restart coredns
 kubectl -n kube-system rollout restart deployment coredns
+
+# reboot
+sudo reboot
 ```
 
 ## Local manifests
@@ -235,18 +264,7 @@ kubectl apply -f minecraft/minecraft.yml
 ```bash
 kubectl create namespace nextcloud
 
-echo -n "create user nextcloud password '$(cat ./.secrets/nextcloud_psql_password)';" > ./.secrets/nextcloud_psql_create_user.sql
-
-kubectl create secret generic --namespace nextcloud --from-file=./.secrets/nextcloud_psql_create_user.sql create-database-user
-
-kubectl create secret generic --namespace nextcloud \
-  --from-file=./.secrets/nextcloud_admin_user \
-  --from-file=./.secrets/nextcloud_admin_password \
-  --from-file=./.secrets/nextcloud_psql_password \
-  --from-file=./.secrets/nextcloud_redis_password \
-  --from-file=./.secrets/nextcloud_smtp_user \
-  --from-file=./.secrets/nextcloud_smtp_password \
-  nextcloud-secrets
+kubectl create secret generic --namespace nextcloud --from-file=./.secrets/nextcloud_admin_user --from-file=./.secrets/nextcloud_admin_password --from-file=./.secrets/nextcloud_psql_password --from-file=./.secrets/nextcloud_redis_password --from-file=./.secrets/nextcloud_smtp_user --from-file=./.secrets/nextcloud_smtp_password nextcloud-secrets
 
 kubectl apply -f nextcloud/persistent-volume.yml
 kubectl apply -f nextcloud/redis.yml

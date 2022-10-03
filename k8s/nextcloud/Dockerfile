@@ -10,7 +10,6 @@ apt-get update
 apt-get install -y \
   imagemagick \
   iproute2 \
-  jq \
   libbz2-dev \
   libmagickwand-dev \
   libsmbclient-dev \
@@ -24,7 +23,7 @@ docker-php-ext-install bz2
 
 rm -r /tmp/pear
 
-cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
 
 cat << 'EOF' > /usr/local/etc/php-fpm.d/zz-docker.conf
 [global]
@@ -47,7 +46,7 @@ pm.min_spare_servers = 40
 pm.max_spare_servers = 122
 EOF
 
-cat << 'EOF' > /usr/local/etc/php/conf.d/nextcloud.ini
+cat << 'EOF' > ${PHP_INI_DIR}/conf.d/nextcloud.ini
 memory_limit = 20G
 
 upload_max_filesize=500M
@@ -66,8 +65,6 @@ chmod 0770 ${NEXTCLOUD_DATA_DIR}
 
 exec "$@"
 EOF
-
-chmod +x /init.sh
 
 cat << 'EOF' > /custom-entrypoint.sh
 #!/bin/sh
@@ -91,7 +88,7 @@ run_as 'php /var/www/html/occ config:app:set files max_chunk_size --value 104857
 exec "$@"
 EOF
 
-chmod +x /custom-entrypoint.sh
+chmod +x /*.sh
 EOT
 
 ENV NEXTCLOUD_UPDATE=1
