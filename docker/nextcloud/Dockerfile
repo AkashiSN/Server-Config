@@ -5,8 +5,6 @@ SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 ENV NEXTCLOUD_UPDATE=1
 
-COPY --chmod="+X" scripts/*.sh /
-
 RUN <<EOT
 apt-get update
 apt-get install -y \
@@ -32,6 +30,7 @@ curl -O https://patch-diff.githubusercontent.com/raw/nextcloud/server/pull/34035
 patch -p1 < 34035.diff
 EOT
 
+COPY --chmod=755 scripts/*.sh /
 COPY config/zz-docker.conf /usr/local/etc/php-fpm.d/
 COPY config/nextcloud.ini /usr/local/etc/php/conf.d/
 
