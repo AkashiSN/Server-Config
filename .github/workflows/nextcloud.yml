@@ -3,7 +3,7 @@ name: nextcloud
 on:
   push:
     paths:
-      - 'k8s/nextcloud/Dockerfile'
+      - 'docker/nextcloud/**'
       - '.github/workflows/nextcloud.yml'
 
 jobs:
@@ -26,8 +26,8 @@ jobs:
       - name: Build and push - nextcloud
         uses: docker/build-push-action@v2
         with:
-          context: ./k8s/nextcloud
-          file: ./k8s/nextcloud/Dockerfile
+          context: ./docker/nextcloud
+          file: ./docker/nextcloud/Dockerfile
           tags: |
             ghcr.io/akashisn/nextcloud
           platforms: linux/amd64
