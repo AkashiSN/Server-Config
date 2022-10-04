@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: nextcloud-exec
+  namespace: nextcloud
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+subjects:
+  - kind: ServiceAccount
+    name: nextcloud
+    namespace: nextcloud
+roleRef:
+  kind: Role
+  name: nextcloud-exec
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nextcloud-cronjob
+  namespace: nextcloud
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccount: nextcloud
+          containers:
+            - name: kubectl
+              image: ghcr.io/akashisn/kubectl
+              imagePullPolicy: IfNotPresent
+              args:
+                [
+                  "exec",
+                  "-n",
+                  "nextcloud",
+                  "nextcloud-0",
+                  "-c",
+                  "nextcloud",
+                  "--",
+                  "/bin/sh",
+                  "-c",
+                  'su www-data --shel=/bin/sh --command="/usr/local/bin/php -f /var/www/html/cron.php"',
+                ]
+          restartPolicy: Never
