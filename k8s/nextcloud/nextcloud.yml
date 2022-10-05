@@ -8,6 +8,7 @@ data:
   NEXTCLOUD_ADMIN_USER_FILE: /secrets/nextcloud_admin_user
   NEXTCLOUD_ADMIN_PASSWORD_FILE: /secrets/nextcloud_admin_password
   NEXTCLOUD_DATA_DIR: /mnt/nextcloud
+  EXTERNAL_DIR: /mnt/static
   OVERWRITEPROTOCOL: https
   TRUSTED_PROXIES: nextcloud
   NEXTCLOUD_TRUSTED_DOMAINS: "files.akashisn.info"
@@ -62,6 +63,8 @@ spec:
               mountPath: /var/www/html
             - name: data
               mountPath: /mnt/nextcloud
+            - name: static
+              mountPath: /mnt/static
             - name: nextcloud-secrets
               mountPath: /secrets
           resources:
@@ -76,10 +79,14 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 80
-              name: nginx
+              name: nginx-nextcloud
+            - containerPort: 8080
+              name: nginx-static
           volumeMounts:
             - name: app
               mountPath: /var/www/html
+            - name: static
+              mountPath: /mnt/static
             - name: nginx-conf
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
@@ -91,6 +98,10 @@ spec:
             - name: nginx-conf
               mountPath: /etc/nginx/conf.d/nextcloud.conf
               subPath: nextcloud.conf
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/static.conf
+              subPath: static.conf
               readOnly: true
           resources:
             requests:
@@ -117,6 +128,15 @@ spec:
           requests:
             storage: 30Gi
     - metadata:
+        name: static
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+    - metadata:
         name: data
       spec:
         accessModes:
@@ -135,9 +155,12 @@ metadata:
   namespace: nextcloud
 spec:
   ports:
-    - name: http
+    - name: nginx-nextcloud
       port: 80
-      targetPort: nginx
+      targetPort: nginx-nextcloud
+    - name: nginx-static
+      port: 8080
+      targetPort: nginx-static
   selector:
     app: nextcloud
 ---
@@ -156,6 +179,7 @@ spec:
   tls:
     - hosts:
         - files.akashisn.info
+        - static.akashisn.info
       secretName: letsencrypt-cert
   rules:
     - host: files.akashisn.info
@@ -167,4 +191,14 @@ spec:
               service:
                 name: nextcloud
                 port:
-                  name: http
+                  name: nginx-nextcloud
+    - host: static.akashisn.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nextcloud
+                port:
+                  name: nginx-static

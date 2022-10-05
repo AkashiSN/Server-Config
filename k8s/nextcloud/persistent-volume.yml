@@ -60,3 +60,24 @@ spec:
     lun: 0
     fsType: xfs
     readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-static-pv
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: nextcloud
+    name: static-nextcloud-0
+  iscsi:
+    targetPortal: 172.16.255.2:3260
+    iqn: iqn.2005-10.org.freenas.ctl:static-files
+    lun: 0
+    fsType: xfs
+    readOnly: false

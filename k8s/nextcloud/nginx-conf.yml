@@ -37,6 +37,7 @@ data:
       keepalive_timeout 65;
 
       include           /etc/nginx/conf.d/nextcloud.conf;
+      include           /etc/nginx/conf.d/static.conf;
     }
   real_ip.conf: |
     # Cloudflare network
@@ -79,7 +80,7 @@ data:
       default "immutable";
     }
 
-    server{
+    server {
       listen 80;
       server_name nextcloud;
 
@@ -126,7 +127,7 @@ data:
       add_header X-Permitted-Cross-Domain-Policies    "none"          always;
       add_header X-Robots-Tag                         "none"          always;
       add_header X-XSS-Protection                     "1; mode=block" always;
-      
+
       # Remove X-Powered-By, which is an information leak
       fastcgi_hide_header X-Powered-By;
 
@@ -176,7 +177,7 @@ data:
         # requests by passing them to the front-end controller.
         return 301 $http_x_forwarded_proto://$http_host/index.php$request_uri;
       }
-      
+
       # Rules borrowed from `.htaccess` to hide certain paths from clients
       location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)(?:$|/)  { return 404; }
       location ~ ^/(?:\.|autotest|occ|issue|indie|db_|console)                { return 404; }
@@ -198,7 +199,7 @@ data:
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param PATH_INFO $path_info;
         fastcgi_param HTTPS on;
-        
+
         fastcgi_param REMOTE_ADDR $client_ip;
 
         fastcgi_param modHeadersAvailable true;         # Avoid sending the security headers twice
@@ -210,7 +211,7 @@ data:
 
         fastcgi_max_temp_file_size 0;
       }
-      
+
       location ~ \.(?:css|js|svg|gif|png|jpg|ico|wasm|tflite|map)$ {
         try_files $uri /index.php$request_uri;
         add_header Cache-Control "public, max-age=15778463, $asset_immutable";
@@ -234,5 +235,45 @@ data:
 
       location / {
         try_files $uri $uri/ /index.php$request_uri;
+      }
+    }
+  static.conf: |
+    server {
+      listen 8080;
+      server_name static;
+
+      access_log /var/log/nginx/access.log main;
+      error_log /var/log/nginx/error.log warn;
+
+      # Prevent nginx HTTP Server Detection
+      server_tokens off;
+
+      # HSTS settings
+      # WARNING: Only add the preload option once you read about
+      # the consequences in https://hstspreload.org/. This option
+      # will add the domain to a hardcoded list that is shipped
+      # in all major browsers and getting removed from this list
+      # could take several months.
+      add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;" always;
+
+      # Enable gzip but do not remove ETag headers
+      gzip on;
+      gzip_vary on;
+      gzip_comp_level 4;
+      gzip_min_length 256;
+      gzip_proxied expired no-cache no-store private no_last_modified no_etag auth;
+      gzip_types application/atom+xml application/javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/wasm application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy;
+
+      # HTTP response headers borrowed from Nextcloud `.htaccess`
+      add_header Referrer-Policy                      "no-referrer"   always;
+      add_header X-Content-Type-Options               "nosniff"       always;
+      add_header X-Download-Options                   "noopen"        always;
+      add_header X-Frame-Options                      "SAMEORIGIN"    always;
+      add_header X-Permitted-Cross-Domain-Policies    "none"          always;
+      add_header X-Robots-Tag                         "none"          always;
+      add_header X-XSS-Protection                     "1; mode=block" always;
+
+      location / {
+        root /mnt/static;
       }
     }
