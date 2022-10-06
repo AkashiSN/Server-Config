@@ -260,6 +260,8 @@ kubectl apply -f minecraft/persistent-volume.yml
 kubectl apply -f minecraft/minecraft.yml
 
 kubectl get pod -n minecraft
+kubectl logs -f -n minecraft minecraft-vanilla-0
+kubectl exec -it -n minecraft minecraft-vanilla-0 -- bash
 ```
 
 ### Nextcloud
@@ -282,6 +284,7 @@ kubectl apply -f nextcloud/redis.yml
 kubectl apply -f nextcloud/mariadb.yml
 kubectl apply -f nextcloud/nginx-conf.yml
 kubectl apply -f nextcloud/nextcloud.yml
+kubectl apply -f nextcloud/cronjob.yml
 
 kubectl get -n nextcloud pod
 kubectl logs -f -n nextcloud nextcloud-0 -c nextcloud
