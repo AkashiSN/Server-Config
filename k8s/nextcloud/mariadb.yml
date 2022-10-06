@@ -42,10 +42,10 @@ spec:
               mountPath: /secrets
           resources:
             requests:
-              cpu: "2"
+              cpu: 2000m
               memory: 2Gi
             limits:
-              cpu: "4"
+              cpu: 4000m
               memory: 4Gi
       volumes:
         - name: nextcloud-secrets
