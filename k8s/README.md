@@ -245,6 +245,20 @@ sudo reboot
 kubectl apply -f storage-class.yml
 ```
 
+### Grafana
+
+- grafana_admin_password
+```bash
+kubectl create namespace grafana
+
+kubectl create secret generic --namespace grafana --from-file=./.secrets/grafana_admin_password grafana-secrets
+
+kubectl apply -f grafana/persistent-volume.yml
+kubectl apply -f grafana/grafana.yml
+
+kubectl get pod -n grafana
+```
+
 ### Minecraft
 
 - minecraft_rcon_password
