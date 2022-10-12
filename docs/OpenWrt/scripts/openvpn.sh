@@ -6,16 +6,14 @@ cd "${OPENVPN_DIR}"
 
 source ${OPENVPN_DIR}/.openvpn.env
 
-FQDN="${FQDN}"
-CLIENTS=(${CLIENTS})
-
-CATOP="${OPENVPN_DIR}/CA"
+CATOP="${OPENVPN_DIR}/demoCA"
 SERVER_CERT_DIR="${OPENVPN_DIR}/server"
 CLIENT_CERT_DIR="${OPENVPN_DIR}/client"
 ROOT_CA_PASS_FILE="${OPENVPN_DIR}/root_ca_pass_phrase"
 
 function clean() {
 	# clean
+	rm -f req.pem
 	rm -rf "${CATOP}"
 	rm -rf "${SERVER_CERT_DIR}"
 	rm -rf "${CLIENT_CERT_DIR}"
@@ -41,24 +39,23 @@ function generate_rootCA() {
 	echo "Making Root CA certificate ..."
 	echo
 
-  cd "${CATOP}"
-
 	# Generate private key
-	openssl ecparam -genkey -name prime256v1 -noout -out private/ca_key.pem
+	openssl ecparam -genkey -name prime256v1 -noout -out "${CATOP}/private/cakey.pem"
 
   # Add pass phrase to private key
-	openssl ec -in private/ca_key.pem -passout "file:${ROOT_CA_PASS_FILE}" -out private/ca_key_enc.pem -aes256
+	openssl ec -in "${CATOP}/private/cakey.pem" -passout "file:${ROOT_CA_PASS_FILE}" -out "${CATOP}/private/cakey_enc.pem" -aes256
 
   # Overwrite plain key by encrypted key
-	mv private/ca_key_enc.pem private/ca_key.pem
+	mv "${CATOP}/private/cakey_enc.pem" "${CATOP}/private/cakey.pem"
 
 	# Create a certificate request
-	openssl req -new -key private/ca_key.pem -passin "file:${ROOT_CA_PASS_FILE}" -sha256 -out ca_req.pem -subj "/CN=${FQDN}"
+	openssl req -new -key "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -sha256 -out req.pem -subj "/CN=root"
 
 	# Create self sign certificate
-	openssl ca -batch -policy policy_anything -create_serial -out ca_cert.pem -days 1095 -keyfile private/ca_key.pem -passin "file:${ROOT_CA_PASS_FILE}" -selfsign -extensions v3_ca -infiles ca_req.pem
+	openssl ca -batch -policy policy_anything -create_serial -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${CATOP}/cacert.pem" -days 1095 -selfsign -extensions v3_ca -infiles req.pem
+	rm -f req.pem
 
-	echo "Root CA certificate is in ${CATOP}/ca_cert.pem,ca_key.pem"
+	echo "Root CA certificate is in ${CATOP}/cacert.pem,cakey.pem"
 }
 
 #
@@ -69,16 +66,15 @@ function generate_server() {
 	echo "Making Server certificate ..."
 	echo
 
-	cd "${SERVER_CERT_DIR}"
-
 	# Generate private key
-	openssl ecparam -genkey -name prime256v1 -noout -out server_key.pem
+	openssl ecparam -genkey -name prime256v1 -noout -out "${SERVER_CERT_DIR}/server_key.pem"
 
 	# Create a certificate request
-	openssl req -new -key server_key.pem -sha256 -out cert_req.pem -subj "/CN=$FQDN"
+	openssl req -new -key "${SERVER_CERT_DIR}/server_key.pem" -sha256 -out req.pem -subj "/CN=$FQDN"
 
 	# Sign a certificate request
-	openssl ca -batch -policy policy_anything -passin "file:${ROOT_CA_PASS_FILE}" -out server_cert.pem -days 1095 -infiles cert_req.pem
+	openssl ca -batch -policy policy_anything -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${SERVER_CERT_DIR}/server_cert.pem" -days 1095 -infiles req.pem
+	rm -f req.pem
 
 	echo "Server certificate is in ${SERVER_CERT_DIR}/server_cert.pem,server_key.pem"
 }
@@ -88,17 +84,15 @@ function generate_keys() {
 	echo "Generate key ..."
 	echo
 
-	cd "${SERVER_CERT_DIR}"
-
 	#
 	# Diffie-Hellman (DH) key
 	#
-	openssl dhparam -out dh.pem -2 4096
+	openssl dhparam -out "${SERVER_CERT_DIR}/dh.pem" -2 4096
 
 	#
 	# TLS-Crypt key
 	#
-	openvpn --genkey --secret tls_crypt.key
+	openvpn --genkey secret "${SERVER_CERT_DIR}/tls_crypt.key"
 
 	echo "DH key and TLS-Crypt key is in ${SERVER_CERT_DIR}/dh.pem,tls_crypt.pem"
 }
@@ -111,16 +105,17 @@ function generate_client() {
 	echo "Client $1 certificate"
 	echo
 
-	cd "${CLIENT_CERT_DIR}"
-
 	# Generate private key
-	openssl ecparam -genkey -name prime256v1 -noout -out "${1}_key.pem"
+	openssl ecparam -genkey -name prime256v1 -noout -out "${CLIENT_CERT_DIR}/${1}_key.pem"
 
 	# Create a certificate request
-	openssl req -new -key "${1}_key.pem" -sha256 -out cert_req.pem -subj "/CN=$1"
+	openssl req -new -key "${CLIENT_CERT_DIR}/${1}_key.pem" -sha256 -out req.pem -subj "/CN=$1"
 
 	# Sign a certificate request
-	openssl ca -batch -policy policy_anything -passin "file:${ROOT_CA_PASS_FILE}" -out "${1}_cert.pem" -days 1095 -infiles cert_req.pem
+	openssl ca -batch -policy policy_anything -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${CLIENT_CERT_DIR}/${1}_cert.pem" -days 1095 -infiles req.pem
+	rm -f req.pem
+
+	echo "Client $1 certificate is in ${CLIENT_CERT_DIR}/${1}_cert.pem,${1}_key.pem"
 }
 
 function generate_clients() {
@@ -136,13 +131,13 @@ function generate_clients() {
 	done
 }
 
-if [ $1 == "add_client" ]; then
+if [ "$1" = "add_client" ]; then
 	CLIENTS="${CLIENTS} $2"
 	cat << EOS > ${OPENVPN_DIR}/.openvpn.env
 FQDN="${FQDN}"
 CLIENTS="${CLIENTS}"
 EOS
-	generate_client $2
+	generate_client "$2"
 else
 	clean
 	generate_rootCA
