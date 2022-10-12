@@ -1,5 +1,5 @@
 #!/bin/ash
-set -e -c
+set -e
 
 OPENVPN_DIR=/etc/openvpn
 cd "${OPENVPN_DIR}"
