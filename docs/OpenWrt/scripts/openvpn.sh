@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ash
 set -e -c
 
 OPENVPN_DIR=/etc/openvpn
@@ -127,16 +127,20 @@ function generate_clients() {
 	echo
 	echo "Making client certificate ..."
 	echo
-	for CLIENT in "${CLIENTS[@]}"; do
-		generate_client ${CLIENT}
+
+	LENGTH=`echo ${CLIENTS} | tr ' ' '\n' | wc -l`
+	for i in `seq ${LENGTH}`
+	do
+		CLIENT=`echo ${CLIENTS} | cut -d ' ' -f $i`
+		generate_client "${CLIENT}"
 	done
 }
 
 if [ $1 == "add_client" ]; then
-	CLIENTS+=("$2")
+	CLIENTS="${CLIENTS} $2"
 	cat << EOS > ${OPENVPN_DIR}/.openvpn.env
 FQDN="${FQDN}"
-CLIENTS="${CLIENTS[@]}"
+CLIENTS="${CLIENTS}"
 EOS
 	generate_client $2
 else
