@@ -1,3 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dnsdist-conf
+  namespace: dns
+data:
+  dnsdist.conf: |
+    setACL("0.0.0.0/0")
+    newServer("172.16.254.30")
+    addDOHLocal("0.0.0.0:5300", nil, nil, "/", { reusePort=true })
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,6 +31,11 @@ spec:
           ports:
             - containerPort: 5300
               name: dnsdist
+          volumeMounts:
+            - name: dnsdist-conf
+              mountPath: /etc/dnsdist.conf
+              subPath: dnsdist.conf
+              readOnly: true
           resources:
             requests:
               cpu: 100m
@@ -27,6 +43,10 @@ spec:
             limits:
               cpu: 500m
               memory: 500Mi
+      volumes:
+        - name: dnsdist-conf
+          configMap:
+            name: dnsdist-conf
 ---
 apiVersion: v1
 kind: Service

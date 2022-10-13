@@ -37,7 +37,8 @@ metadata:
   name: dnsmasq
   namespace: dns
 spec:
-  type: ClusterIP
+  type: LoadBalancer
+  loadBalancerIP: 172.16.254.30
   ports:
     - port: 53
       protocol: UDP
