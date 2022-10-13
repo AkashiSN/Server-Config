@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dns
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dnsdist
+  namespace: dns
+spec:
+  selector:
+    matchLabels:
+      app: dnsdist
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dnsdist
+    spec:
+      containers:
+        - name: dnsdist
+          image: ghcr.io/akashisn/dnsdist
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5300
+              name: dnsdist
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: dnsdist
+  name: dnsdist
+  namespace: dns
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5300
+      name: dnsdist
+  selector:
+    app: dnsdist
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-dnsdist
+  namespace: dns
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - dns.akashisn.info
+      secretName: letsencrypt-cert
+  rules:
+    - host: dns.akashisn.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dnsdist
+                port:
+                  name: dnsdist

@@ -24,6 +24,7 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 53
+              protocol: UDP
               name: dnsmasq
           resources:
             requests:
@@ -41,10 +42,10 @@ metadata:
   name: dnsmasq
   namespace: dnsmasq
 spec:
-  type: LoadBalancer
-  loadBalancerIP: 172.16.254.30
+  type: ClusterIP
   ports:
     - port: 53
+      protocol: UDP
       name: dnsmasq
   selector:
     app: dnsmasq
