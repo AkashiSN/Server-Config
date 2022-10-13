@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.4
-FROM nextcloud:24.0.5-fpm
+FROM nextcloud:24.0.6-fpm
 
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
@@ -23,11 +23,6 @@ docker-php-ext-install bz2
 rm -r /tmp/pear
 
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-
-# Remove this patch when the release comes out.
-cd /usr/src/nextcloud/
-curl -O https://patch-diff.githubusercontent.com/raw/nextcloud/server/pull/34035.diff
-patch -p1 < 34035.diff
 EOT
 
 COPY --chmod=755 scripts/*.sh /
