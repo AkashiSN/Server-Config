@@ -5,4 +5,5 @@ RUN apk -U add dnsmasq curl && \
 
 ADD dnsmasq.conf /etc/dnsmasq.conf
 
-ENTRYPOINT ["dnsmasq", "-k", "-b", "-B", "0.0.0.0", "-C", "/etc/dnsmasq.conf", "--cache-size=1500"]
+ENTRYPOINT ["/usr/sbin/dnsmasq"]
+CMD ["--keep-in-foreground", "--conf-file=/etc/dnsmasq.conf"]
