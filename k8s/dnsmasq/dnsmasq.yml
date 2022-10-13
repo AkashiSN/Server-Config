@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dnsmasq
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dnsmasq
+  namespace: dnsmasq
+spec:
+  selector:
+    matchLabels:
+      app: dnsmasq
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: dnsmasq
+    spec:
+      containers:
+        - name: dnsmasq
+          image: ghcr.io/akashisn/dnsmasq
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 53
+              name: dnsmasq
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: dnsmasq
+  name: dnsmasq
+  namespace: dnsmasq
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 172.16.254.30
+  ports:
+    - port: 53
+      name: dnsmasq
+  selector:
+    app: dnsmasq

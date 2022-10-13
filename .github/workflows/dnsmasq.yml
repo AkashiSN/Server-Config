@@ -3,8 +3,7 @@ name: dnsmasq
 on:
   push:
     paths:
-      - 'compose/dnsmasq/**'
-      - '!compose/dnsmasq/**.md'
+      - 'docker/dnsmasq/**'
       - '.github/workflows/dnsmasq.yml'
   workflow_dispatch:
 
@@ -28,8 +27,8 @@ jobs:
       - name: Build and push - dnsmasq
         uses: docker/build-push-action@v2
         with:
-          context: ./compose/dnsmasq
-          file: ./compose/dnsmasq/Dockerfile
+          context: ./docker/dnsmasq
+          file: ./docker/dnsmasq/Dockerfile
           tags: |
             ghcr.io/akashisn/dnsmasq
           platforms: linux/amd64
