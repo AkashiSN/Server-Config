@@ -245,6 +245,14 @@ sudo reboot
 kubectl apply -f storage-class.yml
 ```
 
+### DNS
+```bash
+kubectl create namespace dns
+
+kubectl apply -f dns/dnsmasq.yml
+kubectl apply -f dns/dnsdist.yml
+```
+
 ### Grafana
 
 - grafana_admin_password
