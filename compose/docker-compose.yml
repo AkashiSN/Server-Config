@@ -106,20 +106,6 @@ services:
     restart: always
 
   #
-  # DNS
-  #
-
-  dnsmasq:
-    image: ghcr.io/akashisn/dnsmasq
-    expose:
-      - "53"
-    networks:
-      external:
-    ports:
-      - "${LOCAL_IP}:53:53/udp"
-    restart: always
-
-  #
   # ddclient
   #
 
