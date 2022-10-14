@@ -211,6 +211,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
+    preferredChain: ISRG Root X1
     email: ${EMAIL}
     privateKeySecretRef:
       name: acme-client-letsencrypt
@@ -249,8 +250,7 @@ kubectl apply -f storage-class.yml
 ```bash
 kubectl create namespace dns
 
-kubectl apply -f dns/dnsmasq.yml
-kubectl apply -f dns/dnsdist.yml
+kubectl apply -f dns/dns.yml
 ```
 
 ### Grafana
