@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.4
-FROM nextcloud:24.0.6-fpm
+FROM nextcloud:25.0.0-fpm
 
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
@@ -11,10 +11,9 @@ apt-get install -y \
   imagemagick \
   iproute2 \
   libbz2-dev \
-  libmagickwand-dev \
   libsmbclient-dev \
   smbclient
-apt-get clean
+apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 pecl install smbclient
