@@ -55,7 +55,7 @@ function generate_rootCA() {
 	openssl ca -batch -policy policy_anything -create_serial -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${CATOP}/cacert.pem" -days 1095 -selfsign -extensions v3_ca -infiles req.pem
 	rm -f req.pem
 
-	echo "Root CA certificate is in ${CATOP}/cacert.pem,cakey.pem"
+	echo "Root CA certificate is in ${CATOP}/cacert.pem,${CATOP}/private/cakey.pem"
 }
 
 #
@@ -109,13 +109,39 @@ function generate_client() {
 	openssl ecparam -genkey -name prime256v1 -noout -out "${CLIENT_CERT_DIR}/${1}_key.pem"
 
 	# Create a certificate request
-	openssl req -new -key "${CLIENT_CERT_DIR}/${1}_key.pem" -sha256 -out req.pem -subj "/CN=$1"
+	openssl req -new -key "${CLIENT_CERT_DIR}/${1}_key.pem" -sha256 -out req.pem -subj "/CN=${1}"
 
 	# Sign a certificate request
 	openssl ca -batch -policy policy_anything -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${CLIENT_CERT_DIR}/${1}_cert.pem" -days 1095 -infiles req.pem
 	rm -f req.pem
 
-	echo "Client $1 certificate is in ${CLIENT_CERT_DIR}/${1}_cert.pem,${1}_key.pem"
+  cat << EOS > ${CLIENT_CERT_DIR}/${1}.ovpn
+client
+nobind
+dev tun
+remote-cert-tls server
+remote ${FQDN} 1194 udp
+redirect-gateway def1
+
+auth SHA256
+cipher AES-256-GCM
+key-direction 1
+
+<key>
+$(cat ${CLIENT_CERT_DIR}/${1}_key.pem)
+</key>
+<cert>
+$(openssl x509 -in ${CLIENT_CERT_DIR}/${1}_cert.pem)
+</cert>
+<ca>
+$(openssl x509 -in ${CATOP}/cacert.pem)
+</ca>
+<tls-crypt>
+$(cat ${SERVER_CERT_DIR}/tls_crypt.key)
+</tls-crypt>
+EOS
+
+	echo "Client $1 certificate and config is in ${CLIENT_CERT_DIR}/${1}_cert.pem,${1}_key.pem,${1}.ovpn"
 }
 
 function generate_clients() {
