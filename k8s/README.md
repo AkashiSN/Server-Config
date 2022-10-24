@@ -57,7 +57,7 @@ apt-get update
 
 # Install CRI-O
 export OS="xUbuntu_22.04"
-export K8S_MAJOR_VERSION="1.24"
+export K8S_MAJOR_VERSION="1.25"
 
 echo "deb [signed-by=/usr/share/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/${OS}/ /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
 echo "deb [signed-by=/usr/share/keyrings/libcontainers-crio-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/${K8S_MAJOR_VERSION}/${OS}/ /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:${K8S_MAJOR_VERSION}.list
@@ -144,7 +144,8 @@ helm repo update
 helm repo add projectcalico https://projectcalico.docs.tigera.io/charts
 helm repo update
 
-export CALICO_VERSION="v3.24.1"
+# https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
+export CALICO_VERSION="v3.24.3"
 helm install calico projectcalico/tigera-operator --version ${CALICO_VERSION} --namespace tigera-operator --create-namespace
 
 watch kubectl get pods -n calico-system
@@ -153,7 +154,8 @@ watch kubectl get pods -n calico-system
 helm repo add metallb https://metallb.github.io/metallb
 helm repo update
 
-export METALLB_VERSION="0.13.5"
+# https://github.com/metallb/metallb/releases
+export METALLB_VERSION="0.13.7"
 helm install metallb metallb/metallb --version ${METALLB_VERSION} --namespace metallb-system --create-namespace
 
 watch kubectl get pod -n metallb-system
@@ -179,7 +181,8 @@ EOF
 helm repo add nginx-stable https://helm.nginx.com/stable
 helm repo update
 
-export NGINX_INGRESS_VERSION="0.14.1"
+# https://docs.nginx.com/nginx-ingress-controller/technical-specifications/
+export NGINX_INGRESS_VERSION="0.15.1"
 helm install nginx-ingress nginx-stable/nginx-ingress \
   --set controller.service.loadBalancerIP="172.16.254.20" \
   --version ${NGINX_INGRESS_VERSION} --namespace ingress-nginx --create-namespace
@@ -190,7 +193,8 @@ watch kubectl get pod,svc -n ingress-nginx
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
 
-export CERT_MANAGER_VERSION="v1.9.1"
+# https://artifacthub.io/packages/helm/cert-manager/cert-manager
+export CERT_MANAGER_VERSION="v1.10.0"
 helm install cert-manager jetstack/cert-manager \
   --version ${CERT_MANAGER_VERSION} --namespace cert-manager \
   --create-namespace --set installCRDs=true
@@ -234,6 +238,7 @@ EOF
 helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
 helm repo update
 
+# https://github.com/kubernetes-sigs/metrics-server/releases
 export METRICS_SERVER_VERSION="3.8.2"
 helm install metrics-server metrics-server/metrics-server \
   --version ${METRICS_SERVER_VERSION} --namespace kube-system
