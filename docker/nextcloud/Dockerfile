@@ -11,6 +11,7 @@ apt-get install -y \
   imagemagick \
   iproute2 \
   libbz2-dev \
+  libmagickwand-dev \
   libsmbclient-dev \
   smbclient
 apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false

@@ -20,13 +20,6 @@ spec:
           ports:
             - containerPort: 6379
               name: nextcloud-redis
-          env:
-            - name: REDIS_HOST_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: nextcloud-secrets
-                  key: nextcloud_redis_password
-          args: ["redis-server", "--requirepass", "$(REDIS_HOST_PASSWORD)"]
           resources:
             requests:
               cpu: 500m

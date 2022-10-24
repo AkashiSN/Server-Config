@@ -17,7 +17,6 @@ data:
   MYSQL_DATABASE: nextcloud
   MYSQL_PASSWORD_FILE: /secrets/nextcloud_mariadb_user_password
   REDIS_HOST: nextcloud-redis
-  REDIS_HOST_PASSWORD_FILE: /secrets/nextcloud_redis_password
   SMTP_HOST: smtp.gmail.com
   SMTP_PORT: "587"
   SMTP_SECURE: tls

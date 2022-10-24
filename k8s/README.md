@@ -17,6 +17,13 @@ systemctl restart systemd-timesyncd.service
 swapoff -a
 sed -i '/swap/s/^/# /g' /etc/fstab
 
+# logrotate
+sed -i 's/weekly/daily/g' /etc/logrotate.conf
+sed -i 's/weeks/days/g' /etc/logrotate.conf
+sed -i 's/#dateext/dateext/g' /etc/logrotate.conf
+sed -i 's/#compress/compress/g' /etc/logrotate.conf
+service logrotate restart
+
 # kernel module
 cat <<EOF > /etc/modules-load.d/crio.conf
 overlay
@@ -292,14 +299,13 @@ kubectl exec -it -n minecraft minecraft-vanilla-0 -- bash
 - nextcloud_admin_password
 - nextcloud_mariadb_root_password
 - nextcloud_mariadb_user_password
-- nextcloud_redis_password
 - nextcloud_smtp_user
 - nextcloud_smtp_password
 
 ```bash
 kubectl create namespace nextcloud
 
-kubectl create secret generic --namespace nextcloud --from-file=./.secrets/nextcloud_admin_user --from-file=./.secrets/nextcloud_admin_password --from-file=./.secrets/nextcloud_mariadb_root_password --from-file=./.secrets/nextcloud_mariadb_user_password --from-file=./.secrets/nextcloud_redis_password --from-file=./.secrets/nextcloud_smtp_user --from-file=./.secrets/nextcloud_smtp_password nextcloud-secrets
+kubectl create secret generic --namespace nextcloud --from-file=./.secrets/nextcloud_admin_user --from-file=./.secrets/nextcloud_admin_password --from-file=./.secrets/nextcloud_mariadb_root_password --from-file=./.secrets/nextcloud_mariadb_user_password --from-file=./.secrets/nextcloud_smtp_user --from-file=./.secrets/nextcloud_smtp_password nextcloud-secrets
 
 kubectl apply -f nextcloud/persistent-volume.yml
 kubectl apply -f nextcloud/redis.yml
@@ -311,4 +317,5 @@ kubectl apply -f nextcloud/cronjob.yml
 kubectl get -n nextcloud pod
 kubectl logs -f -n nextcloud nextcloud-0 -c nextcloud
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- bash
+kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- /bin/sh -c 'su www-data --shel=/bin/sh --command="/usr/local/bin/php occ <command>"'
 ```
