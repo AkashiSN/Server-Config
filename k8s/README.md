@@ -22,6 +22,37 @@ sed -i 's/weekly/daily/g' /etc/logrotate.conf
 sed -i 's/weeks/days/g' /etc/logrotate.conf
 sed -i 's/#dateext/dateext/g' /etc/logrotate.conf
 sed -i 's/#compress/compress/g' /etc/logrotate.conf
+
+cat <<EOF > /etc/logrotate.d/rsyslog
+/var/log/syslog
+/var/log/mail.info
+/var/log/mail.warn
+/var/log/mail.err
+/var/log/mail.log
+/var/log/daemon.log
+/var/log/kern.log
+/var/log/auth.log
+/var/log/user.log
+/var/log/lpr.log
+/var/log/cron.log
+/var/log/debug
+/var/log/messages
+{
+	rotate 4
+	daily
+  dateext
+  dateformat _%Y-%m-%d
+	missingok
+	notifempty
+	compress
+	delaycompress
+	sharedscripts
+	postrotate
+		/usr/lib/rsyslog/rsyslog-rotate
+	endscript
+}
+EOF
+
 service logrotate restart
 
 # kernel module
@@ -245,6 +276,26 @@ helm install metrics-server metrics-server/metrics-server \
 
 kubectl top node
 
+# Prometheus operator
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+cat .secrets/grafana_admin_password
+
+export PROMETHEUS_STACK_VERSION="41.6.1"
+helm install prometheus-stack prometheus-community/kube-prometheus-stack  \
+  --version ${PROMETHEUS_STACK_VERSION} --namespace monitoring \
+  --create-namespace \
+  --set "grafana.adminPassword=$(cat .secrets/grafana_admin_password)" \
+  --set "grafana.ingress.enabled=true" \
+  --set "grafana.ingress.ingressClassName=nginx" \
+  --set "grafana.ingress.annotations.cert-manager\.io/cluster-issuer=letsencrypt-issuer" \
+  --set "grafana.ingress.hosts[0]=dash.akashisn.info" \
+  --set "grafana.ingress.tls[0].secretName=letsencrypt-cert" \
+  --set "grafana.ingress.tls[0].hosts[0]=dash.akashisn.info"
+
+kubectl -n monitoring get pods,svc,ing
+
 # Restart coredns
 kubectl -n kube-system rollout restart deployment coredns
 
@@ -263,20 +314,6 @@ kubectl apply -f storage-class.yml
 kubectl create namespace dns
 
 kubectl apply -f dns/dns.yml
-```
-
-### Grafana
-
-- grafana_admin_password
-```bash
-kubectl create namespace grafana
-
-kubectl create secret generic --namespace grafana --from-file=./.secrets/grafana_admin_password grafana-secrets
-
-kubectl apply -f grafana/persistent-volume.yml
-kubectl apply -f grafana/grafana.yml
-
-kubectl get pod -n grafana
 ```
 
 ### Minecraft
