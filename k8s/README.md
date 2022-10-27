@@ -361,3 +361,20 @@ kubectl logs -f -n nextcloud nextcloud-0 -c nextcloud
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- bash
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- /bin/sh -c 'su www-data --shel=/bin/sh --command="/usr/local/bin/php occ <command>"'
 ```
+
+### Buiildkit
+
+```bash
+cd buildkit
+
+./create-certs.sh buildkitd.buildkitd.svc 127.0.0.1 172.16.254.26
+
+kubectl create namespace buildkitd
+
+kubectl apply -f .certs/buildkit-daemon-certs.yml
+kubectl apply -f buildkitd.yml
+
+kubectl get pod,svc -n buildkitd
+
+cd ..
+```
