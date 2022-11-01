@@ -16,8 +16,6 @@ apt-get install -y \
   libudev-dev \
   systemd \
   udev
-apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 curl -L -o /tmp/v4l-utils-1.22.1.tar.bz2 https://linuxtv.org/downloads/v4l-utils/v4l-utils-1.22.1.tar.bz2
 tar xf /tmp/v4l-utils-1.22.1.tar.bz2 -C /tmp/

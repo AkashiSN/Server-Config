@@ -12,8 +12,6 @@ apt-get install -y \
   cmake \
   curl \
   libpcsclite-dev
-apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 curl -L -o /tmp/libarib25-master.tar.gz https://github.com/stz2012/libarib25/archive/master.tar.gz
 tar xf /tmp/libarib25-master.tar.gz -C /tmp/
