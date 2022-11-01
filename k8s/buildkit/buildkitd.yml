@@ -21,6 +21,9 @@ spec:
       containers:
         - name: buildkitd
           image: moby/buildkit:master-rootless
+          ports:
+            - containerPort: 1234
+              name: buildkitd
           args:
             - --addr
             - unix:///run/user/1000/buildkit/buildkitd.sock
@@ -58,8 +61,13 @@ spec:
             # To change UID/GID, you need to rebuild the image
             runAsUser: 1000
             runAsGroup: 1000
-          ports:
-            - containerPort: 1234
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1Gi
+            limits:
+              cpu: 8000m
+              memory: 8Gi
           volumeMounts:
             - name: certs
               readOnly: true
@@ -90,6 +98,6 @@ spec:
   loadBalancerIP: 172.16.254.26
   ports:
     - port: 1234
-      protocol: TCP
+      name: buildkitd
   selector:
     app: buildkitd
