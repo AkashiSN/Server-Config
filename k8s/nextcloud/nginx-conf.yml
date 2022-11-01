@@ -107,6 +107,11 @@ data:
       client_body_timeout 3600s;
       fastcgi_buffering off;
 
+      # php execution timeout:
+      fastcgi_connect_timeout 3600s;
+      fastcgi_send_timeout 3600s;
+      fastcgi_read_timeout 3600s;
+
       # Enable gzip but do not remove ETag headers
       gzip on;
       gzip_vary on;

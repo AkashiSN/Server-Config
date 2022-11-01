@@ -22,11 +22,11 @@ spec:
               name: nextcloud-redis
           resources:
             requests:
-              cpu: 500m
-              memory: 500Mi
+              cpu: 50m
+              memory: 10Mi
             limits:
-              cpu: 1000m
-              memory: 1Gi
+              cpu: 100m
+              memory: 50Mi
 ---
 apiVersion: v1
 kind: Service

@@ -45,7 +45,6 @@ cat <<EOF > /etc/logrotate.d/rsyslog
 	missingok
 	notifempty
 	compress
-	delaycompress
 	sharedscripts
 	postrotate
 		/usr/lib/rsyslog/rsyslog-rotate

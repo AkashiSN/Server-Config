@@ -67,9 +67,11 @@ spec:
             periodSeconds: 60
           resources:
             requests:
-              memory: 16Gi
+              cpu: 1000m
+              memory: 8Gi
             limits:
-              memory: 18Gi
+              cpu: 2000m
+              memory: 16Gi
         # - name: backup
         #   image: itzg/mc-backup
         #   securityContext:
