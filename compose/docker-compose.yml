@@ -76,7 +76,7 @@ services:
   nginx:
     image: nginx:mainline
     volumes:
-      - ./nginx/docker-entrypoint.d:/docker-entrypoint.d:ro
+      - ./nginx/conf.d:/run/nginx:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
     environment:
       TZ: "Asia/Tokyo"
@@ -90,6 +90,12 @@ services:
         ipv6_address: ${DOCKER_IPV6_SUBNET}::33
     depends_on:
       - epgstation
+    command: >
+      /bin/sh -c
+        "cp /run/nginx/nginx.conf /etc/nginx/nginx.conf
+        cp /run/nginx/real_ip.conf /etc/nginx/conf.d/real_ip.conf
+        cp /run/nginx/tv.conf /etc/nginx/conf.d/tv.conf
+        nginx -g 'daemon off;'"
     restart: always
 
 volumes:
