@@ -1,0 +1,34 @@
+name: libarib25
+
+on:
+  push:
+    paths:
+      - 'docker/libarib25/**'
+      - '.github/workflows/libarib25.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: akashisn
+          password: ${{ github.token }}
+
+      - name: Build and push - libarib25
+        uses: docker/build-push-action@v3
+        with:
+          context: ./docker/libarib25
+          file: ./docker/libarib25/Dockerfile
+          tags: |
+            ghcr.io/akashisn/libarib25
+          platforms: linux/amd64
+          push: true

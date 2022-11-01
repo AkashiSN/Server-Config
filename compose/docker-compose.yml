@@ -6,7 +6,7 @@ services:
   #
 
   mirakurun:
-    image: ghcr.io/akashisn/dvb-docker/mirakurun
+    image: ghcr.io/akashisn/mirakurun
     cap_add:
       - SYS_ADMIN
       - SYS_NICE
@@ -43,7 +43,7 @@ services:
     restart: always
 
   epgstation:
-    image: ghcr.io/akashisn/dvb-docker/epgstation:5.0-qsv
+    image: ghcr.io/akashisn/epgstation
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./epgstation/config:/app/config
