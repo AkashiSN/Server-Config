@@ -19,7 +19,7 @@ apt-get install -y \
 apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-curl -o /tmp/v4l-utils-1.22.1.tar.bz2 https://linuxtv.org/downloads/v4l-utils/v4l-utils-1.22.1.tar.bz2
+curl -L -o /tmp/v4l-utils-1.22.1.tar.bz2 https://linuxtv.org/downloads/v4l-utils/v4l-utils-1.22.1.tar.bz2
 tar xf /tmp/v4l-utils-1.22.1.tar.bz2 -C /tmp/
 patch -u -d /tmp/v4l-utils-1.22.1 -p 1 < /tmp/v4l-utils-1.22.1.patch
 
