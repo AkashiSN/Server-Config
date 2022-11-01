@@ -49,7 +49,6 @@ services:
       - ./epgstation/config:/app/config
       - ./epgstation/thumbnail:/app/thumbnail
       - /media/recorded:/app/recorded
-      - log_volume:/var/promtail
     devices:
       - /dev/dri:/dev/dri
     environment:
@@ -66,10 +65,7 @@ services:
       - mariadb_epgstation
     command: >
       /bin/sh -c
-        "mkdir -p /var/promtail/epgstation
-        rm -rf /app/logs
-        ln -snf /var/promtail/epgstation /app/logs
-        envsubst '$$MYSQL_PASSWORD $$DOMAIN' < /app/config/config.yml.template > /app/config/config.yml
+        "envsubst '$$MYSQL_PASSWORD $$DOMAIN' < /app/config/config.yml.template > /app/config/config.yml
         npm start"
     restart: always
 
@@ -78,14 +74,12 @@ services:
   #
 
   nginx:
-    image: ghcr.io/akashisn/nginx
+    image: nginx:mainline
     volumes:
-      - ./nginx/conf.d:/run/nginx:ro
+      - ./nginx/docker-entrypoint.d:/docker-entrypoint.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - log_volume:/var/promtail
     environment:
       TZ: "Asia/Tokyo"
-      DOMAIN: ${DOMAIN}
     expose:
       - "443"
     ports:
@@ -96,34 +90,6 @@ services:
         ipv6_address: ${DOCKER_IPV6_SUBNET}::33
     depends_on:
       - epgstation
-    command: >
-      /bin/sh -c
-        "mkdir -p /var/promtail/nginx
-        rm -rf /etc/nginx/conf.d/*
-        envsubst '$$DOMAIN' < /run/nginx/nginx.conf.template > /etc/nginx/nginx.conf
-        envsubst '$$DOMAIN' < /run/nginx/tv.conf.template > /etc/nginx/conf.d/tv.conf
-        /usr/bin/supervisord -c /etc/supervisord.conf"
-    restart: always
-
-  #
-  # ddclient
-  #
-
-  ddclient:
-    image: ghcr.io/akashisn/ddclient
-    volumes:
-      - ./ddclient:/run/ddclient:ro
-    environment:
-      TZ: "Asia/Tokyo"
-      ZONE: ${DOMAIN}
-      CLOUDFLARE_TOKEN: ${CLOUDFLARE_TOKEN}
-      TARGET_RECORDS: "vpn.${DOMAIN}"
-    networks:
-      external:
-    command: >
-      /bin/sh -c
-        "envsubst '$$ZONE $$CLOUDFLARE_TOKEN $$TARGET_RECORDS' < /run/ddclient/ddclient.conf.template > /etc/ddclient/ddclient.conf
-        /usr/bin/crond"
     restart: always
 
 volumes:

@@ -43,9 +43,9 @@ categories:
     appenders:
       - stream
       - stdout
-    level: debug
+    level: info
   encode:
     appenders:
       - encode
       - stdout
-    level: debug
+    level: info

@@ -1,7 +1,0 @@
-protocol=cloudflare
-use=cmd, cmd="dig -4 @one.one.one.one whoami.cloudflare TXT CH +short"
-zone=${ZONE}
-ttl=1
-cache=/var/cache/ddclient/ddclient.cache
-password=${CLOUDFLARE_TOKEN}
-${TARGET_RECORDS}
