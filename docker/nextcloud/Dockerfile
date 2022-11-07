@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.4
-FROM nextcloud:25.0.0-fpm
+FROM nextcloud:25.0.1-fpm
 
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
