@@ -125,6 +125,12 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.
 apt-get update
 apt-get install -y helm
 
+# Disable DNS stub resolve
+sed -i -e "s/.*DNSStubListener=yes/DNSStubListener=no/" /etc/systemd/resolved.conf
+cd /etc
+ln -sf ../run/systemd/resolve/resolv.conf resolv.conf
+systemctl restart systemd-resolved.service
+
 # reboot
 reboot
 

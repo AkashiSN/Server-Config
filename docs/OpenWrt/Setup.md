@@ -33,6 +33,9 @@ opkg install luci-i18n-openvpn-ja openvpn-openssl kmod-ovpn-dco openssl-util
 # Install DDNS
 opkg install luci-i18n-ddns-ja ddns-scripts-cloudflare
 
+# Install Wake on Lan
+opkg install luci-i18n-wol-ja
+
 # reboot
 reboot
 ```
