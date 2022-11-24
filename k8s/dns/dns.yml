@@ -42,8 +42,8 @@ spec:
     spec:
       containers:
         - name: dnsmasq
-          image: ghcr.io/akashisn/dnsmasq
-          imagePullPolicy: Always
+          image: ghcr.io/akashisn/dnsmasq@sha256:75533dd4bf67695fdb548aba381cfe5ad781cb0dba41c785fa082cbf25027da7
+          imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: dnsmasq-conf
               mountPath: /etc/dnsmasq.d/dnsmasq.conf
@@ -57,8 +57,8 @@ spec:
               cpu: 500m
               memory: 500Mi
         - name: dnsdist
-          image: ghcr.io/akashisn/dnsdist
-          imagePullPolicy: Always
+          image: ghcr.io/akashisn/dnsdist@sha256:a0b9676aac6201a01f2ba950bb39e96e6d02b18bc97756f2fbb3c030a6ffd6f9
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 53
               protocol: UDP

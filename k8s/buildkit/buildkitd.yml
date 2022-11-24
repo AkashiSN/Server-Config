@@ -21,6 +21,7 @@ spec:
       containers:
         - name: buildkitd
           image: moby/buildkit:master-rootless
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 1234
               name: buildkitd

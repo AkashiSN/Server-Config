@@ -319,6 +319,8 @@ kubectl apply -f storage-class.yml
 kubectl create namespace dns
 
 kubectl apply -f dns/dns.yml
+
+kubectl get -n dns pod,svc
 ```
 
 ### Minecraft
@@ -362,6 +364,7 @@ kubectl apply -f nextcloud/nextcloud.yml
 kubectl apply -f nextcloud/cronjob.yml
 
 kubectl get -n nextcloud pod
+kubectl describe -n nextcloud pod nextcloud-0
 kubectl logs -f -n nextcloud nextcloud-0 -c nextcloud
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- bash
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- /bin/sh -c 'su www-data --shel=/bin/sh --command="/usr/local/bin/php occ <command>"'
@@ -382,4 +385,28 @@ kubectl apply -f buildkitd.yml
 kubectl get pod,svc -n buildkitd
 
 cd ..
+```
+
+
+# Upgrade kubelet
+
+```bash
+sudo su
+
+export K8S_MAJOR_VERSION="1.24"
+export K8S_APT_VERSION="$(apt-cache show kubelet | grep Version | grep ${K8S_MAJOR_VERSION} | head -n 1 | cut -d ' ' -f 2)"
+
+apt-mark unhold kubelet kubeadm kubectl
+
+apt-get install -y "kubelet=${K8S_APT_VERSION}" "kubeadm=${K8S_APT_VERSION}" "kubectl=${K8S_APT_VERSION}"
+
+apt-mark hold kubelet kubeadm kubectl
+
+```
+
+Only master-node
+```bash
+kubeadm upgrade plan
+
+kubeadm upgrade apply VERSION
 ```
