@@ -342,6 +342,16 @@ kubectl logs -f -n minecraft minecraft-vanilla-0
 kubectl exec -it -n minecraft minecraft-vanilla-0 -- bash
 ```
 
+- Stop
+```bash
+kubectl scale statefulset minecraft-vanilla -n minecraft --replicas=0
+```
+
+- Restart
+```bash
+kubectl scale statefulset minecraft-vanilla -n minecraft --replicas=1
+```
+
 ### Nextcloud
 
 - nextcloud_admin_user
@@ -368,6 +378,22 @@ kubectl describe -n nextcloud pod nextcloud-0
 kubectl logs -f -n nextcloud nextcloud-0 -c nextcloud
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- bash
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- /bin/sh -c 'su www-data --shel=/bin/sh --command="/usr/local/bin/php occ <command>"'
+```
+
+- Stop
+```bash
+kubectl patch cronjobs nextcloud-cronjob -n nextcloud -p "{\"spec\" : {\"suspend\" : true }}"
+kubectl scale statefulset nextcloud -n nextcloud --replicas=0
+kubectl scale statefulset nextcloud-mariadb -n nextcloud --replicas=0
+kubectl scale deployment nextcloud-redis -n nextcloud --replicas=0
+```
+
+- Restart
+```bash
+kubectl scale deployment nextcloud-redis -n nextcloud --replicas=1
+kubectl scale statefulset nextcloud-mariadb -n nextcloud --replicas=1
+kubectl scale statefulset nextcloud -n nextcloud --replicas=1
+kubectl patch cronjobs nextcloud-cronjob -n nextcloud -p "{\"spec\" : {\"suspend\" : false }}"
 ```
 
 ### Buiildkit
