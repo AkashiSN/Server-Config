@@ -30,6 +30,15 @@ opkg install luci-i18n-wireguard-ja qrencode
 # Install OpenVPN
 opkg install luci-i18n-openvpn-ja openvpn-openssl kmod-ovpn-dco openssl-util
 
+# Install SoftEther-VPN
+opkg install softethervpn5-server luci-app-softether
+
+# Install usb-net
+opkg install kmod-usb-net-rndis kmod-usb-net-cdc-ncm
+
+# Install usb-lan-driver
+opkg install kmod-usb-net-asix-ax88179
+
 # Install DDNS
 opkg install luci-i18n-ddns-ja ddns-scripts-cloudflare
 
