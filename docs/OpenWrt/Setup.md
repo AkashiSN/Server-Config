@@ -45,6 +45,27 @@ opkg install luci-i18n-ddns-ja ddns-scripts-cloudflare
 # Install Wake on Lan
 opkg install luci-i18n-wol-ja
 
+# Install Quemu Guest Agent
+opkg install qemu-ga
+
+# Install BGP & OSPF
+opkg install quagga quagga-zebra quagga-bgpd quagga-ospfd quagga-watchquagga quagga-vtysh
+
 # reboot
 reboot
+```
+
+
+sample bgp conf
+```conf
+router bgp 65000
+ bgp router-id 10.10.0.1
+ neighbor 10.10.0.10 remote-as 65000
+ neighbor 10.10.0.10 interface wg1
+ neighbor 10.10.0.10 route-reflector-client
+ neighbor 10.10.0.10 soft-reconfiguration inbound
+ neighbor 10.10.0.100 remote-as 65000
+ neighbor 10.10.0.100 interface wg1
+ neighbor 10.10.0.100 route-reflector-client
+ neighbor 10.10.0.100 soft-reconfiguration inbound
 ```

@@ -111,7 +111,9 @@ metadata:
   namespace: minecraft
 spec:
   type: LoadBalancer
-  loadBalancerIP: 172.16.254.25
+  externalTrafficPolicy: Local
+  externalIPs:
+    - 10.0.1.20
   ports:
   - port: 25565
     name: minecraft

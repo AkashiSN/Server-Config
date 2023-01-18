@@ -103,7 +103,9 @@ metadata:
   namespace: dns
 spec:
   type: LoadBalancer
-  loadBalancerIP: 172.16.254.30
+  externalTrafficPolicy: Local
+  externalIPs:
+    - 10.0.1.10
   ports:
     - port: 53
       protocol: UDP
@@ -127,7 +129,7 @@ spec:
   dnsNames:
     - dns.akashisn.info
   issuerRef:
-    name: letsencrypt-issuer
+    name: letsencrypt-cluster-issuer
     kind: ClusterIssuer
     group: cert-manager.io
 ---

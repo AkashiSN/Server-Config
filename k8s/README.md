@@ -87,7 +87,7 @@ apt-get update
 
 # Install CRI-O
 export OS="xUbuntu_22.04"
-export K8S_MAJOR_VERSION="1.25"
+export K8S_MAJOR_VERSION="1.26"
 
 echo "deb [signed-by=/usr/share/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/${OS}/ /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
 echo "deb [signed-by=/usr/share/keyrings/libcontainers-crio-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/${K8S_MAJOR_VERSION}/${OS}/ /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:${K8S_MAJOR_VERSION}.list
@@ -110,6 +110,13 @@ apt-get install -y "kubelet=${K8S_APT_VERSION}" "kubeadm=${K8S_APT_VERSION}" "ku
 
 apt-mark hold kubelet kubeadm kubectl
 
+# IF use Wireguard network
+export NODE_IP="$(ip a s dev wg0 | sed -nE -e 's/ *inet ([0-9.]*).*/\1/p')"
+echo "KUBELET_EXTRA_ARGS=\"--node-ip=${NODE_IP}\"" | tee /etc/default/kubelet
+
+systemctl daemon-reload
+systemctl restart kubelet
+
 # change cgroups settings
 sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=""/GRUB_CMDLINE_LINUX_DEFAULT="systemd.unified_cgroup_hierarchy=false"/g' /etc/default/grub
 update-grub
@@ -130,6 +137,11 @@ sed -i -e "s/.*DNSStubListener=yes/DNSStubListener=no/" /etc/systemd/resolved.co
 cd /etc
 ln -sf ../run/systemd/resolve/resolv.conf resolv.conf
 systemctl restart systemd-resolved.service
+cd
+
+# upgrade
+apt-get update
+apt-get upgrade -y
 
 # reboot
 reboot
@@ -144,11 +156,22 @@ sudo reboot
 
 Only master-node
 ```bash
+# IF use Wireguard network
+export NODE_IP="$(ip a s dev wg0 | sed -nE -e 's/ *inet ([0-9.]*).*/\1/p')"
+
 cat <<EOF > config.yml
 apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: "${NODE_IP}"
+  bindPort: 6443
+---
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
+controlPlaneEndpoint: "${NODE_IP}"
 networking:
-  podSubnet: 192.168.0.0/16
+  serviceSubnet: "10.96.0.0/16"
+  podSubnet: "10.244.0.0/16"
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
@@ -181,46 +204,74 @@ helm repo add projectcalico https://projectcalico.docs.tigera.io/charts
 helm repo update
 
 # https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
-export CALICO_VERSION="v3.24.3"
-helm install calico projectcalico/tigera-operator --version ${CALICO_VERSION} --namespace tigera-operator --create-namespace
-
-watch kubectl get pods -n calico-system
-
-# metallb
-helm repo add metallb https://metallb.github.io/metallb
-helm repo update
-
-# https://github.com/metallb/metallb/releases
-export METALLB_VERSION="0.13.7"
-helm install metallb metallb/metallb --version ${METALLB_VERSION} --namespace metallb-system --create-namespace
-
-watch kubectl get pod -n metallb-system
+export CALICO_VERSION="v3.25.0"
+helm install calico projectcalico/tigera-operator --version ${CALICO_VERSION} \
+  --set installation.enabled="false" --namespace tigera-operator --create-namespace
 
 kubectl apply -f - <<EOF
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
+apiVersion: operator.tigera.io/v1
+kind: Installation
 metadata:
-  name: ippool
-  namespace: metallb-system
+  name: default
 spec:
-  addresses:
-  - 172.16.254.20-172.16.254.100
----
-apiVersion: metallb.io/v1beta1
-kind: L2Advertisement
-metadata:
-  name: l2adv
-  namespace: metallb-system
+  calicoNetwork:
+    mtu: 1370
+    ipPools:
+    - blockSize: 26
+      cidr: 10.244.0.0/16
+      encapsulation: VXLANCrossSubnet
+      natOutgoing: Enabled
+      nodeSelector: all()
+# IF use Wireguard network
+    nodeAddressAutodetectionV4:
+      firstFound: false
+      cidrs:
+        - "10.10.0.0/24"
 EOF
+
+watch kubectl get pods -n calico-system
+kubectl get nodes -o wide
+
+# Install calicoctl
+curl -L https://github.com/projectcalico/calico/releases/download/${CALICO_VERSION}/calicoctl-linux-amd64 -o kubectl-calico
+curl -L https://github.com/projectcalico/calico/releases/download/${CALICO_VERSION}/calicoctl-linux-amd64 -o calicoctl
+chmod +x kubectl-calico calicoctl
+sudo mv kubectl-calico calicoctl /usr/local/bin/
+
+kubectl calico create -f - <<EOF
+apiVersion: projectcalico.org/v3
+kind: BGPConfiguration
+metadata:
+  name: default
+spec:
+  asNumber: 65000
+  nodeToNodeMeshEnabled: false
+  serviceExternalIPs:
+  - cidr: 10.0.1.0/24
+EOF
+
+kubectl calico create -f - <<EOF
+apiVersion: projectcalico.org/v3
+kind: BGPPeer
+metadata:
+  name: mainrouter
+spec:
+  asNumber: 65000
+  peerIP: 10.10.0.1
+EOF
+
+sudo calicoctl node status
 
 # nginx-ingress
 helm repo add nginx-stable https://helm.nginx.com/stable
 helm repo update
 
 # https://docs.nginx.com/nginx-ingress-controller/technical-specifications/
-export NGINX_INGRESS_VERSION="0.15.1"
+export NGINX_INGRESS_VERSION="0.16.0"
 helm install nginx-ingress nginx-stable/nginx-ingress \
-  --set controller.service.loadBalancerIP="172.16.254.20" \
+  --set "controller.service.type"="LoadBalancer" \
+  --set "controller.service.externalTrafficPolicy"="Local" \
+  --set "controller.service.externalIPs[0]"="10.0.1.100" \
   --version ${NGINX_INGRESS_VERSION} --namespace ingress-nginx --create-namespace
 
 watch kubectl get pod,svc -n ingress-nginx
@@ -230,7 +281,7 @@ helm repo add jetstack https://charts.jetstack.io
 helm repo update
 
 # https://artifacthub.io/packages/helm/cert-manager/cert-manager
-export CERT_MANAGER_VERSION="v1.10.0"
+export CERT_MANAGER_VERSION="v1.11.0"
 helm install cert-manager jetstack/cert-manager \
   --version ${CERT_MANAGER_VERSION} --namespace cert-manager \
   --create-namespace --set installCRDs=true
@@ -238,6 +289,7 @@ helm install cert-manager jetstack/cert-manager \
 watch kubectl get deploy,svc,pod -n cert-manager
 
 # ACME
+export HISTSIZE=0
 export HISTFILESIZE=0
 EMAIL=""
 TOKEN=""
@@ -254,7 +306,7 @@ stringData:
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-issuer
+  name: letsencrypt-cluster-issuer
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
@@ -275,7 +327,7 @@ helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
 helm repo update
 
 # https://github.com/kubernetes-sigs/metrics-server/releases
-export METRICS_SERVER_VERSION="3.8.2"
+export METRICS_SERVER_VERSION="3.8.3"
 helm install metrics-server metrics-server/metrics-server \
   --version ${METRICS_SERVER_VERSION} --namespace kube-system
 
@@ -287,14 +339,14 @@ helm repo update
 
 cat .secrets/grafana_admin_password
 
-export PROMETHEUS_STACK_VERSION="41.6.1"
+export PROMETHEUS_STACK_VERSION="44.2.1"
 helm install prometheus-stack prometheus-community/kube-prometheus-stack  \
   --version ${PROMETHEUS_STACK_VERSION} --namespace monitoring \
   --create-namespace \
   --set "grafana.adminPassword=$(cat .secrets/grafana_admin_password)" \
   --set "grafana.ingress.enabled=true" \
   --set "grafana.ingress.ingressClassName=nginx" \
-  --set "grafana.ingress.annotations.cert-manager\.io/cluster-issuer=letsencrypt-issuer" \
+  --set "grafana.ingress.annotations.cert-manager\.io/cluster-issuer=letsencrypt-cluster-issuer" \
   --set "grafana.ingress.hosts[0]=dash.akashisn.info" \
   --set "grafana.ingress.tls[0].secretName=letsencrypt-cert" \
   --set "grafana.ingress.tls[0].hosts[0]=dash.akashisn.info"
@@ -419,7 +471,7 @@ cd ..
 ```bash
 sudo su
 
-export K8S_MAJOR_VERSION="1.24"
+export K8S_MAJOR_VERSION="1.26"
 export K8S_APT_VERSION="$(apt-cache show kubelet | grep Version | grep ${K8S_MAJOR_VERSION} | head -n 1 | cut -d ' ' -f 2)"
 
 apt-mark unhold kubelet kubeadm kubectl

@@ -36,7 +36,7 @@ cat << EOS | sudo tee ${WIREGUARD_DIR}/wg0.conf
 [Interface]
 PrivateKey = $(sudo cat ${WIREGUARD_DIR}/server.key)
 Address = ${WIREGUARD_IP}
-ListenPort = 443
+ListenPort = 51820
 PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE; iptables -A FORWARD -i eth0 -j ACCEPT; iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
 PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE; iptables -D FORWARD -i eth0 -j ACCEPT; iptables -t nat -D POSTROUTING -o wg0 -j MASQUERADE
 
