@@ -9,6 +9,7 @@ run_as() {
   fi
 }
 
+run_as 'wp plugin install redis-cache --activate'
 run_as 'wp config set WP_REDIS_HOST wordpress-redis'
 
 exec "$@"

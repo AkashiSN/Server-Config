@@ -459,6 +459,7 @@ kubectl create secret generic --namespace wordpress --from-file=./.secrets/wordp
 
 kubectl apply -f wordpress/persistent-volume.yml
 kubectl apply -f wordpress/mariadb.yml
+kubectl apply -f wordpress/redis.yml
 kubectl apply -f wordpress/nginx-conf.yml
 kubectl apply -f wordpress/wordpress.yml
 
@@ -466,6 +467,7 @@ kubectl get -n wordpress pod
 kubectl describe -n wordpress pod wordpress-0
 kubectl logs -f -n wordpress wordpress-0 -c wordpress
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- bash
+kubectl exec -it -n wordpress wordpress-0 -c wordpress -- /bin/sh -c 'su www-data --shel=/bin/sh --command="wp <command>"'
 ```
 
 Clean up volume
