@@ -6,11 +6,16 @@ metadata:
 data:
   TZ: "Asia/Tokyo"
   HTTP_X_FORWARDED_PROTO: https,http
+  WORDPRESS_URL: blog.akashisn.info
+  WORDPRESS_TITLE: "akashisnの日記"
   WORDPRESS_DB_HOST: wordpress-mariadb:3306
   WORDPRESS_DB_USER: wordpress
   WORDPRESS_DB_NAME: wordpress
   WORDPRESS_TABLE_PREFIX: wp_
   WORDPRESS_DB_PASSWORD_FILE: /secrets/wordpress_mariadb_user_password
+  WORDPRESS_ADMIN_USER_FILE: /secrets/wordpress_admin_user
+  WORDPRESS_ADMIN_EMAIL_FILE: /secrets/wordpress_admin_email
+  WORDPRESS_ADMIN_PASSWORD_FILE: /secrets/wordpress_admin_password
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -34,7 +39,7 @@ spec:
         fsGroup: 33
       containers:
         - name: wordpress
-          image: ghcr.io/akashisn/wordpress@sha256:43ebb6aad55d3c46e94574418dcf9b9b2eb3f70f133fb3bc5f71b5379ad277e4
+          image: ghcr.io/akashisn/wordpress@sha256:8e567888d9ba4442919d61a2989146a1aa1976203ff7a336d861c431e786dc08
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:

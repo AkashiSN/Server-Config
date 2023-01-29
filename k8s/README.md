@@ -455,7 +455,7 @@ kubectl patch cronjobs nextcloud-cronjob -n nextcloud -p "{\"spec\" : {\"suspend
 ```bash
 kubectl create namespace wordpress
 
-kubectl create secret generic --namespace wordpress --from-file=./.secrets/wordpress_mariadb_root_password --from-file=./.secrets/wordpress_mariadb_user_password wordpress-secrets
+kubectl create secret generic --namespace wordpress --from-file=./.secrets/wordpress_mariadb_root_password --from-file=./.secrets/wordpress_mariadb_user_password --from-file=./.secrets/wordpress_admin_user --from-file=./.secrets/wordpress_admin_password --from-file=./.secrets/wordpress_admin_email wordpress-secrets
 
 kubectl apply -f wordpress/persistent-volume.yml
 kubectl apply -f wordpress/mariadb.yml
@@ -465,22 +465,10 @@ kubectl apply -f wordpress/wordpress.yml
 
 kubectl get -n wordpress pod
 kubectl describe -n wordpress pod wordpress-0
+kubectl logs -f -n wordpress wordpress-mariadb-0
 kubectl logs -f -n wordpress wordpress-0 -c wordpress
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- bash
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- /bin/sh -c 'su www-data --shel=/bin/sh --command="wp <command>"'
-```
-
-Clean up volume
-```bash
-kubectl delete -f wordpress/persistent-volume.yml
-kubectl apply -f wordpress/persistent-volume.yml
-
-kubectl apply -f wordpress/cleanup-pvc.yml
-kubectl get -n wordpress pvc,job,pod
-kubectl delete -f wordpress/cleanup-pvc.yml
-
-kubectl delete -f wordpress/persistent-volume.yml
-kubectl apply -f wordpress/persistent-volume.yml
 ```
 
 ### Buiildkit
