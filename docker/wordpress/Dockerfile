@@ -4,6 +4,8 @@ FROM wordpress:php8.2-fpm
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 
+COPY scripts/patch.sh /
+
 RUN <<EOT
 apt-get update
 apt-get install -y \
@@ -20,11 +22,15 @@ pecl install redis
 docker-php-ext-enable redis
 
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+
+# patch custom entrypoint
+sed -i '/exec "$@"/d' /usr/local/bin/docker-entrypoint.sh
+cat /patch.sh >> /usr/local/bin/docker-entrypoint.sh
+rm /patch.sh
 EOT
 
-COPY --chmod=755 scripts/*.sh /usr/local/bin/
 COPY config/zz-docker.conf /usr/local/etc/php-fpm.d/
 COPY config/wordpress.ini /usr/local/etc/php/conf.d/
 
-ENTRYPOINT ["docker-entrypoint.sh", "custom-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["php-fpm"]
