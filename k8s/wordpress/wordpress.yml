@@ -34,7 +34,7 @@ spec:
         fsGroup: 33
       containers:
         - name: wordpress
-          image: wordpress:php8.2-fpm
+          image: ghcr.io/akashisn/wordpress@sha256:43ebb6aad55d3c46e94574418dcf9b9b2eb3f70f133fb3bc5f71b5379ad277e4
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
