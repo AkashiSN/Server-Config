@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: wordpress-mariadb
+  name: wordpress-mariadb
+  namespace: wordpress
+spec:
+  replicas: 1
+  serviceName: wordpress-mariadb
+  selector:
+    matchLabels:
+      app: wordpress-mariadb
+  template:
+    metadata:
+      labels:
+        app: wordpress-mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:10.10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+              name: mariadb
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+            - name: MARIADB_ROOT_PASSWORD_FILE
+              value: /secrets/wordpress_mariadb_root_password
+            - name: MARIADB_USER
+              value: wordpress
+            - name: MARIADB_PASSWORD_FILE
+              value: /secrets/wordpress_mariadb_user_password
+            - name: MARIADB_DATABASE
+              value: wordpress
+          args: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: wordpress-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 100m
+              memory: 500Mi
+      volumes:
+        - name: wordpress-secrets
+          secret:
+            secretName: wordpress-secrets
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: wordpress-mariadb
+  name: wordpress-mariadb
+  namespace: wordpress
+spec:
+  ports:
+    - name: mariadb
+      port: 3306
+      targetPort: mariadb
+  selector:
+    app: wordpress-mariadb

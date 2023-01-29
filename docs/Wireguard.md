@@ -114,6 +114,10 @@ sudo systemctl start wg-quick@wg0
 sudo systemctl enable wg-quick@wg0
 ```
 
+```bash
+sudo service wg-quick@wg0 restart
+```
+
 ## Packet forward
 
 `/etc/sysctl.conf`

@@ -1,0 +1,144 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wordpress-env
+  namespace: wordpress
+data:
+  TZ: "Asia/Tokyo"
+  HTTP_X_FORWARDED_PROTO: https,http
+  WORDPRESS_DB_HOST: wordpress-mariadb:3306
+  WORDPRESS_DB_USER: wordpress
+  WORDPRESS_DB_NAME: wordpress
+  WORDPRESS_TABLE_PREFIX: wp_
+  WORDPRESS_DB_PASSWORD_FILE: /secrets/wordpress_mariadb_user_password
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: wordpress
+  name: wordpress
+  namespace: wordpress
+spec:
+  replicas: 1
+  serviceName: wordpress
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      securityContext:
+        fsGroup: 33
+      containers:
+        - name: wordpress
+          image: wordpress:php8.2-fpm
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: wordpress-env
+          volumeMounts:
+            - name: app
+              mountPath: /var/www/html
+            - name: wordpress-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 300m
+              memory: 200Mi
+            limits:
+              cpu: 500m
+              memory: 1000Mi
+        - name: nginx
+          image: nginx:mainline
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: nginx-wordpress
+          volumeMounts:
+            - name: app
+              mountPath: /var/www/html
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/real_ip.conf
+              subPath: real_ip.conf
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/wordpress.conf
+              subPath: wordpress.conf
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 1000Mi
+            limits:
+              cpu: 300m
+              memory: 2000Mi
+      volumes:
+        - name: wordpress-secrets
+          secret:
+            secretName: wordpress-secrets
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+  volumeClaimTemplates:
+    - metadata:
+        name: app
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: wordpress
+  name: wordpress
+  namespace: wordpress
+spec:
+  ports:
+    - name: nginx-wordpress
+      port: 80
+      targetPort: nginx-wordpress
+  selector:
+    app: wordpress
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-wordpress
+  namespace: wordpress
+  annotations:
+    nginx.org/redirect-to-https: "True"
+    nginx.org/client-max-body-size: "0"
+    nginx.org/proxy-request-buffering: "off"
+    nginx.org/proxy-connect-timeout: 3600s
+    nginx.org/proxy-send-timeout: 3600s
+    nginx.org/proxy-read-timeout: 3600s
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - blog.akashisn.info
+      secretName: letsencrypt-cert
+  rules:
+    - host: blog.akashisn.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wordpress
+                port:
+                  name: nginx-wordpress
