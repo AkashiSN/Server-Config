@@ -17,5 +17,5 @@ EOT
 COPY config/zz-docker.conf /usr/local/etc/php-fpm.d/
 COPY config/wordpress.ini /usr/local/etc/php/conf.d/
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["php-fpm"]
