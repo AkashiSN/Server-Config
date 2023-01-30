@@ -39,7 +39,7 @@ spec:
         fsGroup: 33
       containers:
         - name: wordpress
-          image: ghcr.io/akashisn/wordpress@sha256:32a7607b958cc98e0851d1db87467dd668063ab29f152973dddf64bca61d70c7
+          image: ghcr.io/akashisn/wordpress@sha256:cda2596f95c89415d3f82e70ab51ad0c6f7ca64b7ad0a277e4e7e0c313c8fc15
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
