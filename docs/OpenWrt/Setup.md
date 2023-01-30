@@ -20,6 +20,9 @@ opkg install luci-i18n-base-ja luci-i18n-firewall-ja luci-i18n-opkg-ja
 # Install curl
 opkg install curl
 
+# Install OpenSSH sftp
+opkg install openssh-sftp-server
+
 # Download & Install ipip6 package
 curl -L -o ./ipip6_0.1_all.ipk "https://drive.google.com/uc?export=download&id=1iWwjliIeP-Bud2Bje8w-yHe7DE9oWdtn"
 opkg install ./ipip6_0.1_all.ipk

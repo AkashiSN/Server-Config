@@ -118,14 +118,19 @@ function generate_client() {
   cat << EOS > ${CLIENT_CERT_DIR}/${1}.ovpn
 client
 nobind
-dev tun
-remote-cert-tls server
-remote ${FQDN} 1194 udp
+dev tun0
+remote ${FQDN} 1194 udp6
+resolv-retry infinite
+
 redirect-gateway def1
 
+remote-cert-tls server
+key-direction 1
+compress stub-v2
 auth SHA256
 cipher AES-256-GCM
-key-direction 1
+
+verb 5
 
 <key>
 $(cat ${CLIENT_CERT_DIR}/${1}_key.pem)
