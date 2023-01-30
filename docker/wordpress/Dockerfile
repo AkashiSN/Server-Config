@@ -23,7 +23,6 @@ cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
 # patch custom entrypoint
 sed -i '/exec "$@"/d' /usr/local/bin/docker-entrypoint.sh
-
 cat << 'EOS' >> /usr/local/bin/docker-entrypoint.sh
 su -p www-data -s /bin/sh << 'EOF'
 if ! wp core is-installed; then
@@ -31,11 +30,12 @@ if ! wp core is-installed; then
   wp core language install ja --activate
   wp option update timezone_string $(wp eval "echo _x( '0', 'default GMT offset or timezone string' );")
   wp option update date_format $(wp eval "echo __( 'M jS Y' );")
-  wp plugin install redis-cache --activate
-  wp plugin install wordfence-login-security --activate
-  wp config set WP_REDIS_HOST wordpress-redis
-  wp config set DISABLE_WP_CRON true
 fi
+
+wp plugin install redis-cache --activate
+wp plugin install wordfence-login-security --activate
+wp config set WP_REDIS_HOST wordpress-redis
+wp config set DISABLE_WP_CRON true
 EOF
 
 exec "$@"
