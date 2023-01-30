@@ -1,10 +1,8 @@
 # syntax = docker/dockerfile:1.4
-FROM wordpress:php8.2-fpm
+FROM wordpress:6.1.1-php8.2-fpm
 
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
-
-COPY scripts/patch.sh /
 
 RUN <<EOT
 apt-get update
@@ -25,8 +23,23 @@ cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
 # patch custom entrypoint
 sed -i '/exec "$@"/d' /usr/local/bin/docker-entrypoint.sh
-cat /patch.sh >> /usr/local/bin/docker-entrypoint.sh
-rm /patch.sh
+
+cat << 'EOS' >> /usr/local/bin/docker-entrypoint.sh
+su -p www-data -s /bin/sh << 'EOF'
+if ! wp core is-installed; then
+  wp core install --url=${WORDPRESS_URL} --locale=ja --title=${WORDPRESS_TITLE} --admin_user=$(cat ${WORDPRESS_ADMIN_USER_FILE}) --admin_email=$(cat ${WORDPRESS_ADMIN_EMAIL_FILE}) --prompt=admin_password < ${WORDPRESS_ADMIN_PASSWORD_FILE}
+  wp core language install ja --activate
+  wp option update timezone_string $(wp eval "echo _x( '0', 'default GMT offset or timezone string' );")
+  wp option update date_format $(wp eval "echo __( 'M jS Y' );")
+  wp plugin install redis-cache --activate
+  wp plugin install wordfence-login-security --activate
+  wp config set WP_REDIS_HOST wordpress-redis
+  wp config set DISABLE_WP_CRON true
+fi
+EOF
+
+exec "$@"
+EOS
 EOT
 
 COPY config/zz-docker.conf /usr/local/etc/php-fpm.d/

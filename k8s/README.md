@@ -451,6 +451,9 @@ kubectl patch cronjobs nextcloud-cronjob -n nextcloud -p "{\"spec\" : {\"suspend
 ### Wordpress
 - wordpress_mariadb_root_password
 - wordpress_mariadb_user_password
+- wordpress_admin_user
+- wordpress_admin_password
+- wordpress_admin_email
 
 ```bash
 kubectl create namespace wordpress
@@ -462,6 +465,7 @@ kubectl apply -f wordpress/mariadb.yml
 kubectl apply -f wordpress/redis.yml
 kubectl apply -f wordpress/nginx-conf.yml
 kubectl apply -f wordpress/wordpress.yml
+kubectl apply -f wordpress/cronjob.yml
 
 kubectl get -n wordpress pod
 kubectl describe -n wordpress pod wordpress-0
