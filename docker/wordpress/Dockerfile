@@ -34,6 +34,7 @@ fi
 
 wp plugin install redis-cache --activate
 wp plugin install wordfence-login-security --activate
+wp plugin install insert-headers-and-footers --activate
 wp config set WP_REDIS_HOST wordpress-redis
 wp config set DISABLE_WP_CRON true
 EOF
