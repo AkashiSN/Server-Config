@@ -34,7 +34,7 @@ spec:
   selector:
     matchLabels:
       app: dns-server
-  replicas: 3
+  replicas: 4
   template:
     metadata:
       labels:
