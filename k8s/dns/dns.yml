@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
         - name: dnsmasq
-          image: ghcr.io/akashisn/dnsmasq@sha256:75533dd4bf67695fdb548aba381cfe5ad781cb0dba41c785fa082cbf25027da7
+          image: ghcr.io/akashisn/dnsmasq@sha256:d83daf5b2cd6b58e3e38f320e1883c0d59297e41f10ea874b7f63f68ea212c6d
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: dnsmasq-conf
@@ -57,7 +57,7 @@ spec:
               cpu: 500m
               memory: 500Mi
         - name: dnsdist
-          image: ghcr.io/akashisn/dnsdist@sha256:a0b9676aac6201a01f2ba950bb39e96e6d02b18bc97756f2fbb3c030a6ffd6f9
+          image: ghcr.io/akashisn/dnsdist@sha256:3ae0e1f42c2eccfaaa236e494f9891a63bd0767193c4e1f38943dead35f587fc
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 53

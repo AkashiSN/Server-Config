@@ -46,7 +46,7 @@ spec:
           serviceAccount: wordpress
           containers:
             - name: kubectl
-              image: ghcr.io/akashisn/kubectl@sha256:61e0ffb91ffbf3fe3b04872b17759d137981c1e0eab5ddfe612430a01bf6b341
+              image: ghcr.io/akashisn/kubectl@sha256:dac53e4656962da663dd0ee5d6aad4e997109588d59e763604b5aa742bc41ac6
               imagePullPolicy: IfNotPresent
               args:
                 [
