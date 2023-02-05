@@ -25,7 +25,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build and push - dnsdist
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: ./docker/dnsdist
           file: ./docker/dnsdist/Dockerfile

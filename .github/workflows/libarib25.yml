@@ -24,7 +24,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build and push - libarib25
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: ./docker/libarib25
           file: ./docker/libarib25/Dockerfile

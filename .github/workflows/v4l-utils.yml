@@ -24,7 +24,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build and push - v4l-utils
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: ./docker/v4l-utils
           file: ./docker/v4l-utils/Dockerfile

@@ -24,7 +24,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build and push - kubectl
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: ./docker/kubectl
           file: ./docker/kubectl/Dockerfile
