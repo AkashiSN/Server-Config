@@ -478,18 +478,25 @@ kubectl exec -it -n wordpress wordpress-0 -c wordpress -- /bin/sh -c 'su www-dat
 ### Buiildkit
 
 ```bash
-cd buildkit
+kubectl create namespace buildkit
 
-./create-certs.sh buildkitd.buildkitd.svc 127.0.0.1 172.16.254.26
+cd buildkit/.certs/
+  $env:CAROOT=$(pwd)
+  mkcert -cert-file daemon/cert.pem -key-file daemon/key.pem build.akashisn.info
+  mkcert -client -cert-file client/cert.pem -key-file client/key.pem client
+  cp rootCA.pem daemon/ca.pem
+  cp rootCA.pem client/ca.pem
+  rm -fo rootCA.pem,rootCA-key.pem
 
-kubectl create namespace buildkitd
+  kubectl create secret generic --namespace buildkit --from-file=./daemon buildkit-daemon-certs
 
-kubectl apply -f .certs/buildkit-daemon-certs.yml
-kubectl apply -f buildkitd.yml
+  # docker biuldx
+  docker buildx create --name buildkit --driver remote  --driver-opt "cacert=$(pwd)/client/ca.pem,cert=$(pwd)/client/cert.pem,key=$(pwd)/client/key.pem,servername=build.akashisn.info" tcp://build.akashisn.info:2376 --use
+cd ../..
 
-kubectl get pod,svc -n buildkitd
+kubectl apply -f buildkit/buildkit.yml
 
-cd ..
+kubectl get pod,svc -n buildkit
 ```
 
 
