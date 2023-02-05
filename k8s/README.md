@@ -499,6 +499,22 @@ kubectl apply -f buildkit/buildkit.yml
 kubectl get pod,svc -n buildkit
 ```
 
+### Registry
+
+- registry_http_secrets
+- registry_htapasswd : `htpasswd -B -C 12 -c .htapasswd <user>`
+
+```bash
+kubectl create namespace registry
+
+kubectl create secret generic --namespace registry --from-file=./.secrets/registry_http_secrets --from-file=./.secrets/registry_htapasswd registry-secrets
+
+kubectl apply -f registry/persistent-volume.yml
+kubectl apply -f registry/registry.yml
+
+kubectl get -n registry pod,svc
+kubectl exec -it -n registry registry-0 --  registry garbage-collect /etc/docker/registry/config.yml
+```
 
 # Upgrade kubelet
 
