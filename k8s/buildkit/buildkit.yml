@@ -6,7 +6,7 @@ metadata:
   name: buildkit
   namespace: buildkit
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: buildkit
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: buildkit
-          image: moby/buildkit:master
+          image: moby/buildkit:v0.11.2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 2376
@@ -55,11 +55,11 @@ spec:
             privileged: true
           resources:
             requests:
-              cpu: 1000m
-              memory: 1Gi
-            limits:
               cpu: 8000m
               memory: 8Gi
+            limits:
+              cpu: 8000m
+              memory: 16Gi
           volumeMounts:
             - name: certs
               readOnly: true

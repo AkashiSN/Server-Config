@@ -54,8 +54,8 @@ spec:
               cpu: 100m
               memory: 100Mi
             limits:
-              cpu: 500m
-              memory: 500Mi
+              cpu: 200m
+              memory: 200Mi
         - name: dnsdist
           image: ghcr.io/akashisn/dnsdist@sha256:3ae0e1f42c2eccfaaa236e494f9891a63bd0767193c4e1f38943dead35f587fc
           imagePullPolicy: IfNotPresent
@@ -81,8 +81,8 @@ spec:
               cpu: 100m
               memory: 100Mi
             limits:
-              cpu: 500m
-              memory: 500Mi
+              cpu: 200m
+              memory: 200Mi
       volumes:
         - name: certs
           secret:
