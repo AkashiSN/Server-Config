@@ -511,6 +511,7 @@ kubectl create secret generic --namespace registry --from-file=./.secrets/regist
 
 kubectl apply -f registry/persistent-volume.yml
 kubectl apply -f registry/registry.yml
+kubectl apply -f registry/cronjob.yml
 
 kubectl get -n registry pod,svc
 kubectl exec -it -n registry registry-0 --  registry garbage-collect /etc/docker/registry/config.yml
