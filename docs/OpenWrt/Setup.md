@@ -54,6 +54,9 @@ opkg install qemu-ga
 # Install BGP & OSPF
 opkg install quagga quagga-zebra quagga-bgpd quagga-ospfd quagga-watchquagga quagga-vtysh
 
+# Install mwan3
+opkg install luci-app-mwan3 luci-i18n-mwan3-ja
+
 # reboot
 reboot
 ```
