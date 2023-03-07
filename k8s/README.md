@@ -64,7 +64,8 @@ EOF
 cat <<EOF > /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables  = 1
-net.ipv4.ip_forward                 = 1
+net.ipv4.conf.all.forwarding        = 1
+net.ipv6.conf.all.forwarding        = 1
 EOF
 
 # install legacy version
@@ -215,18 +216,17 @@ metadata:
   name: default
 spec:
   calicoNetwork:
-    mtu: 1370
+    mtu: 1450
     ipPools:
     - blockSize: 26
       cidr: 10.244.0.0/16
       encapsulation: VXLANCrossSubnet
       natOutgoing: Enabled
       nodeSelector: all()
-# IF use Wireguard network
     nodeAddressAutodetectionV4:
       firstFound: false
       cidrs:
-        - "10.10.0.0/24"
+        - "172.16.254.0/24"
 EOF
 
 watch kubectl get pods -n calico-system
@@ -257,7 +257,7 @@ metadata:
   name: mainrouter
 spec:
   asNumber: 65000
-  peerIP: 10.10.0.1
+  peerIP: 172.16.254.1
 EOF
 
 sudo calicoctl node status
@@ -267,7 +267,7 @@ helm repo add nginx-stable https://helm.nginx.com/stable
 helm repo update
 
 # https://docs.nginx.com/nginx-ingress-controller/technical-specifications/
-export NGINX_INGRESS_VERSION="0.16.0"
+export NGINX_INGRESS_VERSION="0.16.2"
 helm install nginx-ingress nginx-stable/nginx-ingress \
   --set "controller.service.type"="LoadBalancer" \
   --set "controller.service.externalTrafficPolicy"="Local" \
@@ -327,10 +327,11 @@ helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
 helm repo update
 
 # https://github.com/kubernetes-sigs/metrics-server/releases
-export METRICS_SERVER_VERSION="3.8.3"
+export METRICS_SERVER_VERSION="3.8.4"
 helm install metrics-server metrics-server/metrics-server \
   --version ${METRICS_SERVER_VERSION} --namespace kube-system
 
+watch kubectl get deploy,svc,pod -n kube-system
 kubectl top node
 
 # Prometheus operator
@@ -339,7 +340,7 @@ helm repo update
 
 cat .secrets/grafana_admin_password
 
-export PROMETHEUS_STACK_VERSION="44.2.1"
+export PROMETHEUS_STACK_VERSION="45.6.0"
 helm install prometheus-stack prometheus-community/kube-prometheus-stack  \
   --version ${PROMETHEUS_STACK_VERSION} --namespace monitoring \
   --create-namespace \
