@@ -45,7 +45,7 @@ spec:
               cpu: 100m
               memory: 200Mi
             limits:
-              cpu: 100m
+              cpu: 500m
               memory: 500Mi
       volumes:
         - name: nextcloud-secrets
