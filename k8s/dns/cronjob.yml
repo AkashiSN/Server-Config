@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: wordpress
-  namespace: wordpress
+  name: dns
+  namespace: dns
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: wordpress-exec
-  namespace: wordpress
+  name: dns-exec
+  namespace: dns
 rules:
   - apiGroups: [""]
     resources: ["pods", "pods/log"]
@@ -20,45 +20,40 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: wordpress
-  namespace: wordpress
+  name: dns
+  namespace: dns
 subjects:
   - kind: ServiceAccount
-    name: wordpress
-    namespace: wordpress
+    name: dns
+    namespace: dns
 roleRef:
   kind: Role
-  name: wordpress-exec
+  name: dns-exec
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: wordpress-cronjob
-  namespace: wordpress
+  name: dns-cronjob
+  namespace: dns
 spec:
   concurrencyPolicy: Forbid
-  schedule: "*/5 * * * *"
+  schedule: "0 3 */2 * *"
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccount: wordpress
+          serviceAccount: dns
           containers:
             - name: kubectl
               image: ghcr.io/akashisn/kubectl@sha256:73a49b52231a131a7b7781788d59160168c5686eb3f0701d67d2654339ac3534
               imagePullPolicy: IfNotPresent
               args:
                 [
-                  "exec",
+                  "rollout",
                   "-n",
-                  "wordpress",
-                  "wordpress-0",
-                  "-c",
-                  "wordpress",
-                  "--",
-                  "/bin/sh",
-                  "-c",
-                  'su www-data --shel=/bin/sh --command="/usr/local/bin/php -f /var/www/html/wp-cron.php"',
+                  "dns",
+                  "restart",
+                  "deployments/dns-server"
                 ]
           restartPolicy: Never

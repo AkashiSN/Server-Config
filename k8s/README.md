@@ -372,6 +372,7 @@ kubectl apply -f storage-class.yml
 kubectl create namespace dns
 
 kubectl apply -f dns/dns.yml
+kubectl apply -f dns/cronjob.yml
 
 kubectl get -n dns pod,svc
 ```

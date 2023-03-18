@@ -46,7 +46,7 @@ spec:
           serviceAccount: registry
           containers:
             - name: kubectl
-              image: ghcr.io/akashisn/kubectl@sha256:dac53e4656962da663dd0ee5d6aad4e997109588d59e763604b5aa742bc41ac6
+              image: ghcr.io/akashisn/kubectl@sha256:73a49b52231a131a7b7781788d59160168c5686eb3f0701d67d2654339ac3534
               imagePullPolicy: IfNotPresent
               args:
                 [
