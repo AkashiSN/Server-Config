@@ -107,13 +107,13 @@ kind: Service
 metadata:
   labels:
     service: minecraft-vanilla
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 172.16.254.120
   name: minecraft-vanilla
   namespace: minecraft
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
-  externalIPs:
-    - 10.0.1.20
   ports:
   - port: 25565
     name: minecraft

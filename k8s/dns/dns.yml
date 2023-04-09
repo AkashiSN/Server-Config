@@ -20,10 +20,14 @@ metadata:
 data:
   dnsdist.conf: |
     setACL("0.0.0.0/0")
+    addACL("::/0")
     newServer("127.0.0.1:10053")
     addLocal("0.0.0.0:53")
+    addLocal("[::]:53")
     addDOHLocal("0.0.0.0:443", "/certs/tls.crt", "/certs/tls.key", "/")
+    addDOHLocal("[::]:443", "/certs/tls.crt", "/certs/tls.key", "/")
     addTLSLocal("0.0.0.0:853", "/certs/tls.crt", "/certs/tls.key")
+    addTLSLocal("[::]:853", "/certs/tls.crt", "/certs/tls.key")
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -104,8 +108,10 @@ metadata:
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
-  externalIPs:
-    - 10.0.1.10
+  ipFamilies:
+    - IPv4
+    - IPv6
+  ipFamilyPolicy: RequireDualStack
   ports:
     - port: 53
       protocol: UDP

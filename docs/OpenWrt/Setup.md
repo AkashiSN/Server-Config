@@ -57,6 +57,9 @@ opkg install quagga quagga-zebra quagga-bgpd quagga-ospfd quagga-watchquagga qua
 # Install mwan3
 opkg install luci-app-mwan3 luci-i18n-mwan3-ja
 
+# Install Bird
+opkg install bird2 bird2c bird2cl
+
 # reboot
 reboot
 ```
@@ -74,4 +77,52 @@ router bgp 65000
  neighbor 10.10.0.100 interface wg1
  neighbor 10.10.0.100 route-reflector-client
  neighbor 10.10.0.100 soft-reconfiguration inbound
+```
+
+bird conf
+```
+cat /etc/bird.conf
+log syslog all;
+router id 172.16.254.100;
+
+protocol device {
+    scan time 10;
+}
+
+protocol direct direct1 {
+    ipv6;
+    interface "eth1";
+}
+
+protocol kernel {
+    scan time 10;
+    ipv6 {
+        import all;
+        export filter {
+            if proto = "direct1" then reject;
+            accept;
+        };
+    };
+}
+
+template bgp tor {
+    local 240b:251:23a3:1900::254:1 as 65000;
+    rr client;
+    direct;
+    interface "eth1";
+
+    ipv6 {
+        import all;
+        export none;
+    };
+}
+
+protocol bgp k8s_control_plane from tor {
+    neighbor 240b:251:23a3:1900::254:50 as 65000;
+}
+
+protocol bgp worker_node from tor {
+    neighbor 240b:251:23a3:1900::254:105 as 65000;
+}
+
 ```
