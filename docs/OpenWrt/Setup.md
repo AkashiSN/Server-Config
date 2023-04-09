@@ -106,7 +106,7 @@ protocol kernel {
 }
 
 template bgp tor {
-    local 240b:251:23a3:1900::254:1 as 65000;
+    local IPv6_PREFIX::254:1 as 65000;
     rr client;
     direct;
     interface "eth1";
@@ -118,11 +118,11 @@ template bgp tor {
 }
 
 protocol bgp k8s_control_plane from tor {
-    neighbor 240b:251:23a3:1900::254:50 as 65000;
+    neighbor IPv6_PREFIX::254:50 as 65000;
 }
 
 protocol bgp worker_node from tor {
-    neighbor 240b:251:23a3:1900::254:105 as 65000;
+    neighbor IPv6_PREFIX::254:105 as 65000;
 }
 
 ```
