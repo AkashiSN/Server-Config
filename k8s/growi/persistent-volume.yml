@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: growi-pv
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: growi
+    name: data-growi-0
+  iscsi:
+    targetPortal: 172.16.255.1:3260
+    iqn: iqn.2005-10.org.freenas.ctl:growi
+    lun: 0
+    fsType: xfs
+    readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: growi-elasticsearch-pv
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: growi
+    name: data-growi-elasticsearch-0
+  iscsi:
+    targetPortal: 172.16.255.1:3260
+    iqn: iqn.2005-10.org.freenas.ctl:growi-elasticsearch
+    lun: 0
+    fsType: xfs
+    readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: growi-mongodb-db-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: growi
+    name: db-growi-mongodb-0
+  iscsi:
+    targetPortal: 172.16.255.1:3260
+    iqn: iqn.2005-10.org.freenas.ctl:growi-mongodb-db
+    lun: 0
+    fsType: xfs
+    readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: growi-mongodb-configdb-pv
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: growi
+    name: configdb-growi-mongodb-0
+  iscsi:
+    targetPortal: 172.16.255.1:3260
+    iqn: iqn.2005-10.org.freenas.ctl:growi-mongodb-configdb
+    lun: 0
+    fsType: xfs
+    readOnly: false

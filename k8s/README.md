@@ -370,6 +370,34 @@ kubectl logs -f -n hackmd hackmd-mariadb-0
 kubectl logs -f -n hackmd hackmd-0
 ```
 
+### Growi
+
+- growi_mongodb_root_password
+- growi_mongodb_user_password
+- growi_mongodb_uri
+
+
+```bash
+cat <<EOF > .secrets/hackmd_mariadb_uri
+mongodb://growi:$(cat .secrets/growi_mongodb_root_password)@growi-mongodb:27017/growi
+EOF
+
+
+kubectl create namespace growi
+
+kubectl create secret generic --namespace growi --from-file=./.secrets/growi_mongodb_root_password --from-file=./.secrets/growi_mongodb_user_password --from-file=./.secrets/growi_mongodb_uri growi-secrets
+
+kubectl apply -f growi/persistent-volume.yml
+kubectl apply -f growi/redis.yml
+kubectl apply -f growi/elasticsearch.yml
+kubectl apply -f growi/mongodb.yml
+kubectl apply -f growi/plantuml.yml
+kubectl apply -f growi/growi.yml
+
+kubectl get -n growi pod,svc,ing
+```
+
+
 ### Buiildkit
 
 ```bash

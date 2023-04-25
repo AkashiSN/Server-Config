@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: growi-redis
+  namespace: growi
+spec:
+  selector:
+    matchLabels:
+      app: growi-redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: growi-redis
+    spec:
+      containers:
+        - name: growi-redis
+          image: redis:7
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              name: growi-redis
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: growi-redis
+  name: growi-redis
+  namespace: growi
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      name: growi-redis
+  selector:
+    app: growi-redis

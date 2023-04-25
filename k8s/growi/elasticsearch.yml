@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: growi-elasticsearch
+  name: growi-elasticsearch
+  namespace: growi
+spec:
+  replicas: 1
+  serviceName: growi-elasticsearch
+  selector:
+    matchLabels:
+      app: growi-elasticsearch
+  template:
+    metadata:
+      labels:
+        app: growi-elasticsearch
+    spec:
+      securityContext:
+        runAsUser: 1234
+        fsGroup: 1234
+      containers:
+        - name: elasticsearch
+          image: ghcr.io/akashisn/elasticsearch@sha256:ee5d958369d539e99218ac653ca260f1f070ba2db1d2be487f32824717cc5404
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9200
+              name: elasticsearch
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+            - name: ES_PORT
+              value: 0.0.0.0:9200
+            - name: bootstrap.memory_lock
+              value: "true"
+            - name: discovery.type
+              value: single-node
+            - name: ES_JAVA_OPTS
+              value: "-Xms5000m -Xmx5000m"
+            - name: LOG4J_FORMAT_MSG_NO_LOOKUPS
+              value: "true"
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/elasticsearch/data
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 5000Mi
+            limits:
+              cpu: 2000m
+              memory: 10000Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: growi-elasticsearch
+  name: growi-elasticsearch
+  namespace: growi
+spec:
+  ports:
+    - name: elasticsearch
+      port: 9200
+      targetPort: elasticsearch
+  selector:
+    app: growi-elasticsearch

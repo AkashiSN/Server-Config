@@ -60,6 +60,8 @@ net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables  = 1
 net.ipv4.conf.all.forwarding        = 1
 net.ipv6.conf.all.forwarding        = 1
+
+vm.max_map_count = 262144
 EOF
 
 # install legacy version
@@ -97,6 +99,9 @@ apt-get install -y cri-o cri-o-runc
 systemctl daemon-reload
 systemctl enable crio
 systemctl start crio
+
+# chane ulimit
+sed -ie 'N;s!# default_ulimits = \[!default_ulimits = \[\n"nofile=65536:65536",\n"memlock=-1:-1"\n\]!g' /etc/crio/crio.conf
 
 # Install kubelet kubeadm kubectl
 export K8S_APT_VERSION="$(apt-cache show kubelet | grep Version | grep ${K8S_MAJOR_VERSION} | head -n 1 | cut -d ' ' -f 2)"
