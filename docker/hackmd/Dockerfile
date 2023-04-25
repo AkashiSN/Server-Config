@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.4
-FROM hackmdio/hackmd:2.4.2-cjk
+FROM hackmdio/hackmd:1.3.0-alpine
 
 # copy script to apply GROWI agent
 COPY --chmod=755 apply-growi-agent.sh /codimd/apply-growi-agent.sh
