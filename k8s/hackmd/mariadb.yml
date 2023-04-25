@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: hackmd-mariadb
+  name: hackmd-mariadb
+  namespace: hackmd
+spec:
+  replicas: 1
+  serviceName: hackmd-mariadb
+  selector:
+    matchLabels:
+      app: hackmd-mariadb
+  template:
+    metadata:
+      labels:
+        app: hackmd-mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:10.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+              name: mariadb
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+            - name: MARIADB_ROOT_PASSWORD_FILE
+              value: /secrets/hackmd_mariadb_root_password
+            - name: MARIADB_USER
+              value: hackmd
+            - name: MARIADB_PASSWORD_FILE
+              value: /secrets/hackmd_mariadb_user_password
+            - name: MARIADB_DATABASE
+              value: hackmd
+          args: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+      volumes:
+        - name: secrets
+          secret:
+            secretName: hackmd-secrets
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: hackmd-mariadb
+  name: hackmd-mariadb
+  namespace: hackmd
+spec:
+  ports:
+    - name: mariadb
+      port: 3306
+      targetPort: mariadb
+  selector:
+    app: hackmd-mariadb
