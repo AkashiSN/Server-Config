@@ -70,6 +70,51 @@ services:
     restart: always
 
   #
+  # DNS
+  #
+
+  dnsmasq:
+    image: ghcr.io/akashisn/dnsmasq@sha256:e1125fba16d30716c9d0baf4dc3b01b67130e48541fc7caa11ed31818d5783b7
+    volumes:
+      - type: bind
+        source: ./dns/conf/dnsmasq.conf
+        target: /etc/dnsmasq.d/dnsmasq.conf
+        read_only: true
+    environment:
+      TZ: "Asia/Tokyo"
+    expose:
+      - "10053/udp"
+    networks:
+      internal:
+    restart: always
+
+  dnsdist:
+    image: ghcr.io/akashisn/dnsdist@sha256:3ae0e1f42c2eccfaaa236e494f9891a63bd0767193c4e1f38943dead35f587fc
+    volumes:
+      - type: bind
+        source: ./dns/conf/dnsdist.conf
+        target: /etc/dnsdist.conf
+        read_only: true
+      - type: bind
+        source: /etc/letsencrypt
+        target: /etc/letsencrypt
+        read_only: true
+    environment:
+      TZ: "Asia/Tokyo"
+    expose:
+      - "53/udp"
+      - "443/tcp"
+      - "853/tcp"
+    ports:
+      - "53:53/udp"
+      - "853:853/tcp"
+    networks:
+      internal:
+      external:
+        ipv6_address: ${DOCKER_IPV6_SUBNET}::50
+    restart: always
+
+  #
   # Nginx
   #
 

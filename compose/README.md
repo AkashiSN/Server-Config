@@ -61,7 +61,6 @@ unset HISTFILE
 # Set Email and domain to environment variable
 export EMAIL=
 export DOMAIN=
-export TV_SUBDOMAIN=
 export CLOUDFLARE_API_TOKEN=
 
 # Create secret directory
@@ -76,7 +75,7 @@ EOS
 chmod 640 /root/.secrets/certbot/cloudflare.ini
 
 # Obtain ssl certificate
-certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/certbot/cloudflare.ini --dns-cloudflare-propagation-seconds 60 --server https://acme-v02.api.letsencrypt.org/directory -d ${DOMAIN} -d ${TV_SUBDOMAIN}.${DOMAIN} -d ${TV_SUBDOMAIN}-local.${DOMAIN} -m ${EMAIL}
+certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/certbot/cloudflare.ini --dns-cloudflare-propagation-seconds 60 --server https://acme-v02.api.letsencrypt.org/directory -d ${DOMAIN} -d *.${DOMAIN} -m ${EMAIL}
 
 # Nginx reload script
 cat <<\EOF | tee /etc/letsencrypt/renewal-hooks/deploy/nginx-reload.sh
