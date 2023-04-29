@@ -86,6 +86,8 @@ services:
       - "10053/udp"
     networks:
       internal:
+        ipv4_address: "172.20.0.10"
+      external:
     restart: always
 
   dnsdist:
@@ -152,5 +154,9 @@ volumes:
 networks:
   internal:
     internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.20.0.0/24"
   external:
     external: true
