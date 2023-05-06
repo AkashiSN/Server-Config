@@ -46,7 +46,7 @@ spec:
         fsGroup: 33
       containers:
         - name: nextcloud
-          image: ghcr.io/akashisn/nextcloud@sha256:b16a617bbb91ff61b733d6d4770d78c37a9b4c0524ff13dc44a17ead90a05fa9
+          image: ghcr.io/akashisn/nextcloud@sha256:434281093a2d9f2916158dea1a07f0f172fa5e94ffca22219104c9ad9f90e3fd
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
