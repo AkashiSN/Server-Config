@@ -280,3 +280,12 @@ Ref : https://askubuntu.com/questions/47311/how-do-i-disable-my-system-from-goin
 ```bash
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 ```
+
+
+## NIC Offload setting
+
+https://jisaba.life/2022/02/05/e1000e-0000001f-6-eno1-detected-hardware-unit-hang/
+
+```bash
+echo 'ACTION=="add", SUBSYSTEM=="net", KERNEL=="eno1", RUN+="/sbin/ethtool --offload eno1 gso off gro off tso off rx off tx off rxvlan off txvlan off sg off"' | sudo tee /etc/udev/rules.d/50-eth.rules
+```
