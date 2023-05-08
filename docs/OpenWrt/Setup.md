@@ -5,7 +5,7 @@ https://www.jwtechtips.top/how-to-install-openwrt-in-proxmox/
 # Upgrade
 
 ```bash
-OPENWRT_VERSION=22.03.0
+OPENWRT_VERSION=22.03.5
 wget https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/x86/64/openwrt-${OPENWRT_VERSION}-x86-64-generic-squashfs-combined.img.gz
 
 sysupgrade -v ./openwrt-${OPENWRT_VERSION}-x86-64-generic-squashfs-combined.img.gz
@@ -19,6 +19,71 @@ opkg install luci-i18n-base-ja luci-i18n-firewall-ja luci-i18n-opkg-ja
 
 # Install curl
 opkg install curl
+
+# Install cloudflared
+curl -L --output /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64
+chmod +x /tmp/cloudflared
+mv /tmp/cloudflared /usr/bin/cloudflared
+
+export TOKEN=""
+cat <<EOF > /etc/init.d/cloudflared
+#!/bin/sh /etc/rc.common
+
+cmd="/usr/bin/cloudflared --pidfile /var/run/cloudflared.pid --autoupdate-freq 24h0m0s tunnel run --token $TOKEN"
+pid_file="/var/run/cloudflared.pid"
+
+# Timeout (in seconds) to wait for DNS
+DNS_TIMEOUT=60
+
+# Function to check if DNS is ready
+dns_ready() {
+    nslookup example.com > /dev/null 2>&1
+    return \$?
+}
+
+# Function to wait for DNS
+wait_for_dns() {
+    local retries=0
+    until dns_ready || [ \$retries -ge \$DNS_TIMEOUT ]
+    do
+        sleep 1
+        retries=\$((retries + 1))
+    done
+}
+
+START=99
+STOP=01
+
+start() {
+    if is_running; then
+        echo "Already started"
+    else
+        wait_for_dns
+        if dns_ready; then
+            echo "Starting cloudflared"
+            (\$cmd 2>&1 | logger -t cloudflared) &
+        else
+            echo "DNS not ready. Timeout reached."
+            exit 1
+        fi
+    fi
+}
+
+stop() {
+    if [ -f "\$pid_file" ]; then
+        pid=\$(cat "\$pid_file")
+        echo "Stopping cloudflared with PID \$pid"
+        kill "\$pid"
+        rm -f "\$pid_file"
+    else
+        echo "PID file not found. Cannot stop cloudflared."
+    fi
+}
+EOF
+
+chmod +x /etc/init.d/cloudflared
+/etc/init.d/cloudflared enable
+echo "/etc/init.d/cloudflared" >> /etc/sysupgrade.conf
 
 # Install OpenSSH sftp
 opkg install openssh-sftp-server
