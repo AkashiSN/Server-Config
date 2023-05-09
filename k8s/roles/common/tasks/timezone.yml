@@ -1,0 +1,21 @@
+---
+# file: roles/common/tasks/timezone.yml
+- name: Set timezone to Asia/Tokyo
+  ansible.builtin.timezone:
+    name: Asia/Tokyo
+  become: true
+
+- name: Enable and configure NTP
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/timesyncd.conf
+    regexp: '^#?NTP='
+    line: 'NTP=ntp.nict.jp'
+  become: true
+
+- name: Enable and start systemd-timesyncd service
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  become: true

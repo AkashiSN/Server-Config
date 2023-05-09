@@ -1,0 +1,21 @@
+---
+# file: roles/common/tasks/iptables.yml
+- name: Install legacy iptables packages
+  ansible.builtin.apt:
+    name:
+    - iptables
+    - arptables
+    - ebtables
+    state: present
+    update_cache: true
+  become: true
+
+- name: Set alternatives for legacy versions
+  ansible.builtin.command:
+    cmd: "update-alternatives --set {{ item.name }} {{ item.path }}"
+  loop:
+    - { name: iptables, path: /usr/sbin/iptables-legacy }
+    - { name: ip6tables, path: /usr/sbin/ip6tables-legacy }
+    - { name: arptables, path: /usr/sbin/arptables-legacy }
+    - { name: ebtables, path: /usr/sbin/ebtables-legacy }
+  become: true

@@ -1,0 +1,22 @@
+---
+# file: roles/common/tasks/dns.yml
+- name: Update DNSStubListener in /etc/systemd/resolved.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^.*DNSStubListener=yes'
+    line: 'DNSStubListener=no'
+    state: present
+  become: true
+
+- name: Create symlink for resolv.conf
+  ansible.builtin.file:
+    src: ../run/systemd/resolve/resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+  become: true
+
+- name: Restart systemd-resolved.service
+  ansible.builtin.systemd:
+    name: systemd-resolved.service
+    state: restarted
+  become: true

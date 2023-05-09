@@ -1,0 +1,67 @@
+---
+# file: roles/common/tasks/kubeadm.yml
+- name: Add Kubernetes archive keyring
+  ansible.builtin.get_url:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    dest: /usr/share/keyrings/kubernetes-archive-keyring.gpg
+    mode: 0644
+  become: true
+
+- name: Add Kubernetes apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+  become: true
+
+- name: Get K8S_APT_VERSION
+  ansible.builtin.shell:
+    cmd: "apt-cache show kubelet | grep Version | grep {{ k8s_major_version }} | head -n 1 | cut -d ' ' -f 2"
+  register: k8s_apt_version
+  changed_when: false
+
+- name: Install kubelet, kubeadm, and kubectl
+  ansible.builtin.apt:
+    name:
+      - "kubelet={{ k8s_apt_version.stdout }}"
+      - "kubeadm={{ k8s_apt_version.stdout }}"
+      - "kubectl={{ k8s_apt_version.stdout }}"
+    state: present
+    update_cache: true
+  become: true
+
+- name: Hold kubelet, kubeadm, and kubectl packages
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+  become: true
+
+- name: Set KUBELET_EXTRA_ARGS in /etc/default/kubelet
+  ansible.builtin.lineinfile:
+    path: /etc/default/kubelet
+    line: 'KUBELET_EXTRA_ARGS="--node-ip={{ node_ip.stdout }}"'
+    create: true
+  become: true
+
+- name: Reload and restart kubelet service
+  ansible.builtin.systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: true
+  become: true
+
+- name: Update GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="systemd.unified_cgroup_hierarchy=false"'
+    state: present
+  become: true
+
+- name: Update GRUB
+  ansible.builtin.command:
+    cmd: update-grub
+  become: true

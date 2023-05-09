@@ -1,0 +1,42 @@
+---
+# file: roles/common/tasks/main.yml
+- name: Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: true
+  become: true
+
+- name: Install a list of common packages
+  ansible.builtin.apt:
+    name:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - open-iscsi
+    - jq
+    state: present
+    update_cache: true
+  become: true
+
+- import_tasks: variable.yml
+- import_tasks: iptables.yml
+- import_tasks: dns.yml
+- import_tasks: helm.yml
+- import_tasks: timezone.yml
+- import_tasks: swap.yml
+- import_tasks: logrotate.yml
+- import_tasks: kernel.yml
+- import_tasks: crio.yml
+- import_tasks: kubeadm.yml
+
+- name: Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: true
+  become: true
+
+- name: Reboot
+  ansible.builtin.reboot:
+  become: true

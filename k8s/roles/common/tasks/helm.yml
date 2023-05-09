@@ -1,0 +1,21 @@
+---
+# file: roles/common/tasks/helm.yml
+- name: Add Helm repository key
+  ansible.builtin.get_url:
+    url: https://baltocdn.com/helm/signing.asc
+    dest: /usr/share/keyrings/helm.asc
+    mode: 0644
+  become: true
+
+- name: Add Helm repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ deb_architecture[ansible_architecture] }} signed-by=/usr/share/keyrings/helm.asc] https://baltocdn.com/helm/stable/debian/ all main"
+    state: present
+  become: true
+
+- name: Install Helm
+  ansible.builtin.apt:
+    name: helm
+    state: present
+    update_cache: true
+  become: true

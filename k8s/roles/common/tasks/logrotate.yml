@@ -1,0 +1,26 @@
+---
+# file: roles/common/tasks/logrotate.yml
+- name: Update logrotate.conf
+  ansible.builtin.replace:
+    path: /etc/logrotate.conf
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: "^weekly$", replace: "daily" }
+    - { regexp: "weeks", replace: "days" }
+    - { regexp: "^#dateext$", replace: "dateext" }
+    - { regexp: "^#compress$", replace: "compress" }
+  become: true
+
+- name: Copy rsyslog logrotate configuration
+  ansible.builtin.copy:
+    src: rsyslog
+    dest: /etc/logrotate.d/rsyslog
+    mode: 0644
+  become: true
+
+- name: Restart logrotate service
+  ansible.builtin.systemd:
+    name: logrotate
+    state: restarted
+  become: true

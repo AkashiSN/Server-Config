@@ -1,0 +1,55 @@
+---
+# file: roles/common/tasks/crio.yml
+- name: Add CRI-O archive keyrings
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
+  loop:
+    - url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ os }}/Release.key
+      dest: /usr/share/keyrings/libcontainers-archive-keyring.asc
+    - url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ k8s_major_version }}/{{ os }}/Release.key
+      dest: /usr/share/keyrings/libcontainers-crio-archive-keyring.asc
+  become: true
+
+- name: Add CRI-O repositories
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by={{ item.keyring }}] {{ item.url }} /"
+    filename: "{{ item.file }}"
+    state: present
+  loop:
+    - keyring: /usr/share/keyrings/libcontainers-archive-keyring.asc
+      url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ os }}
+      file: devel:kubic:libcontainers:stable.list
+    - keyring: /usr/share/keyrings/libcontainers-crio-archive-keyring.asc
+      url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ k8s_major_version }}/{{ os }}
+      file: "devel:kubic:libcontainers:stable:cri-o:{{ k8s_major_version }}.list"
+  become: true
+
+- name: Install CRI-O and dependencies
+  ansible.builtin.apt:
+    name:
+      - cri-o
+      - cri-o-runc
+    state: present
+    update_cache: true
+  become: true
+
+- name: Enable and start crio service
+  ansible.builtin.systemd:
+    name: crio
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true
+
+- name: Update ulimits in crio.conf
+  ansible.builtin.replace:
+    path: /etc/crio/crio.conf
+    regexp: '^# default_ulimits = \['
+    replace: |-
+      default_ulimits = [
+        "nofile=65536:65536",
+        "memlock=-1:-1"
+      ]
+  become: true
