@@ -1,0 +1,6 @@
+virtualmachines:
+  hosts:
+    master-node:
+      ansible_host: vm01
+    worker-node:
+      ansible_host: vm02

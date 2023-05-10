@@ -1,0 +1,35 @@
+---
+# file: roles/helm/tasks/nginx-ingress.yml
+- name: Add nginx-stable Helm charts repository
+  kubernetes.core.helm_repository:
+    name: nginx-stable
+    repo_url: https://helm.nginx.com/stable
+  become: false
+
+- name: Check if nginx-ingress Helm chart is installed
+  shell: helm list --all-namespaces --deployed --short | grep nginx-ingress
+  register: nginx_ingress_helm_chart_result
+  changed_when: nginx_ingress_helm_chart_result.rc != 0
+  ignore_errors: yes
+  become: false
+
+- name: Deploy nginx-ingress chart using set values on target
+  kubernetes.core.helm:
+    release_name: nginx-ingress
+    chart_ref: nginx-stable/nginx-ingress
+    release_namespace: nginx-ingress
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    release_values:
+      controller:
+        service:
+          type: LoadBalancer
+          externalTrafficPolicy: Local
+          annotations:
+            metallb.universe.tf/loadBalancerIPs: "172.16.254.100,{{ ipv6_prefix.stdout }}:ffff:fac:ade:100"
+          ipFamilyPolicy: RequireDualStack
+  register: nginx_ingress_helm_chart_install
+  when: nginx_ingress_helm_chart_result.rc != 0
+  become: false

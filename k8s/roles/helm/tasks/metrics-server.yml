@@ -1,0 +1,25 @@
+---
+# file: roles/helm/tasks/metrics-server.yml
+- name: Add metrics-server Helm charts repository
+  kubernetes.core.helm_repository:
+    name: metrics-server
+    repo_url: https://kubernetes-sigs.github.io/metrics-server/
+  become: false
+
+- name: Check if metrics-server Helm chart is installed
+  shell: helm list --all-namespaces --deployed --short | grep metrics-server
+  register: metrics_server_helm_chart_result
+  changed_when: metrics_server_helm_chart_result.rc != 0
+  ignore_errors: yes
+  become: false
+
+- name: Deploy metrics-server chart using set values on target
+  kubernetes.core.helm:
+    release_name: metrics-server
+    chart_ref: metrics-server/metrics-server
+    release_namespace: kube-system
+    update_repo_cache: true
+    wait: true
+    atomic: true
+  when: metrics_server_helm_chart_result.rc != 0
+  become: false

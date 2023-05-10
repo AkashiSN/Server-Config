@@ -78,11 +78,21 @@
 - name: Approve pending certificates
   block:
     - name: Get pending CSR names
-      shell: kubectl get csr | grep Pending | awk '{print $1}'
+      ansible.builtin.shell:
+        cmd: kubectl get csr | grep Pending | awk '{print $1}'
       register: pending_csr_result
 
     - name: Approve each pending CSR
-      shell: kubectl certificate approve {{ item }}
+      ansible.builtin.command:
+        cmd: kubectl certificate approve {{ item }}
       with_items: "{{ pending_csr_result.stdout_lines }}"
+  delegate_to: master-node
+  become: false
+
+- name: Fetch kube config to local
+  ansible.builtin.fetch:
+    src: "{{ ansible_env.HOME }}/.kube/config"
+    dest: "{{ lookup('ansible.builtin.env', 'HOME') }}/.kube/config"
+    flat: true
   delegate_to: master-node
   become: false

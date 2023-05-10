@@ -14,10 +14,18 @@
     - ca-certificates
     - curl
     - open-iscsi
+    - python3-pip
     - jq
     state: present
     update_cache: true
   become: true
+
+- name: install kubernetes pre-requisites
+  ansible.builtin.pip:
+    name:
+      - pyyaml
+      - kubernetes
+  become: false
 
 - import_tasks: variable.yml
 - import_tasks: iptables.yml

@@ -1,0 +1,60 @@
+---
+# file: roles/helm/tasks/cilium.yml
+- name: Add cilium Helm charts repository
+  kubernetes.core.helm_repository:
+    name: cilium
+    repo_url: https://helm.cilium.io/
+  become: false
+
+- name: Check if cilium Helm chart is installed
+  shell: helm list --all-namespaces --deployed --short | grep cilium
+  register: cilium_helm_chart_result
+  changed_when: cilium_helm_chart_result.rc != 0
+  ignore_errors: yes
+  become: false
+
+- name: Deploy cilium chart using set values on target
+  kubernetes.core.helm:
+    release_name: cilium
+    chart_ref: cilium/cilium
+    release_namespace: kube-system
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    release_values:
+      bpf:
+        masquerade: true
+      enableIPv6Masquerade: false
+      ipam:
+        mode: cluster-pool
+        operator:
+          clusterPoolIPv4PodCIDRList: "10.244.0.0/16"
+          clusterPoolIPv6PodCIDRList: "{{ ipv6_prefix.stdout }}:cafe:0::/96"
+          clusterPoolIPv4MaskSize: 24
+          clusterPoolIPv6MaskSize: 112
+      ipv4:
+        enabled: true
+      ipv6:
+        enabled: true
+      k8sServiceHost: "{{ node_ip.stdout }}"
+      k8sServicePort: 6443
+      kubeProxyReplacement: strict
+  register: cilium_helm_chart_install
+  when: cilium_helm_chart_result.rc != 0
+  become: false
+
+- name: Patch cilium-config ConfigMap
+  ansible.builtin.shell: >
+    kubectl -n kube-system patch configmap/cilium-config --type merge
+    -p "{\"data\":{\"enable-ipv6-ndp\": \"true\", \"ipv6-service-range\": \"{{ ipv6_prefix.stdout }}:cafe:1::/112\"}}"
+  when: cilium_helm_chart_install is changed
+  become: false
+
+- name: Restart cilium
+  ansible.builtin.command:
+    cmd: "kubectl -n kube-system rollout restart {{ item.target }}"
+  loop:
+    - target: deploy cilium-operator
+    - target: daemonset cilium
+  when: cilium_helm_chart_install is changed
+  become: false

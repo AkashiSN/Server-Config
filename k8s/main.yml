@@ -1,21 +1,17 @@
 ---
 # file: main.yml
-- hosts: all
-  vars:
-    deb_architecture: {
-      "armv6l": "armhf",
-      "armv7l": "armhf",
-      "aarch64": "arm64",
-      "x86_64": "amd64",
-      "i386": "i386"
-    }
+- hosts: virtualmachines
   roles:
     - role: common
       vars:
         os: "xUbuntu_22.04"
         k8s_major_version: "1.26"
 
-- hosts: all
+- hosts: virtualmachines
   roles:
     - kubeadm
+
+- hosts: master-node
+  roles:
+    - helm
 

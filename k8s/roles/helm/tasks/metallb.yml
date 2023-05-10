@@ -1,0 +1,58 @@
+---
+# file: roles/helm/tasks/metallb.yml
+- name: Add metallb Helm charts repository
+  kubernetes.core.helm_repository:
+    name: metallb
+    repo_url: https://metallb.github.io/metallb
+  become: false
+
+- name: Check if metallb Helm chart is installed
+  shell: helm list --all-namespaces --deployed --short | grep metallb
+  register: metallb_helm_chart_result
+  changed_when: metallb_helm_chart_result.rc != 0
+  ignore_errors: yes
+  become: false
+
+- name: Deploy metallb chart using set values on target
+  kubernetes.core.helm:
+    release_name: metallb
+    chart_ref: metallb/metallb
+    release_namespace: kube-system
+    update_repo_cache: true
+    wait: true
+    atomic: true
+  register: metallb_helm_chart_install
+  when: metallb_helm_chart_result.rc != 0
+  become: false
+
+- name: Create a metallb IPAddressPool config
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: IPAddressPool
+      metadata:
+        name: default-pool
+        namespace: kube-system
+      spec:
+        addresses:
+        - 172.16.254.100-172.16.254.150
+        - "{{ ipv6_prefix.stdout }}:ffff:fac:ade::/112"
+  when: metallb_helm_chart_install is changed
+  become: false
+
+- name: Create a metallb L2Advertisement config
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: L2Advertisement
+      metadata:
+        name: l2-ip
+        namespace: kube-system
+      spec:
+        ipAddressPools:
+        - default-pool
+  when: metallb_helm_chart_install is changed
+  become: false
+
