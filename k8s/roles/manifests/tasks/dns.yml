@@ -1,0 +1,31 @@
+---
+# file: roles/manifests/tasks/dns.yml
+- name: Create the 'dns' namespace
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    name: dns
+    kind: Namespace
+
+- name: Apply the dns config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/dns/dns.yml') | from_yaml_all }}"
+
+- name: Annotate the dns-server service
+  kubernetes.core.k8s:
+    state: present
+    namespace: dns
+    name: dns-server
+    kind: Service
+    merge_type:
+    - strategic-merge
+    definition:
+      metadata:
+        annotations:
+          metallb.universe.tf/loadBalancerIPs: "172.16.254.110,{{ ipv6_prefix.stdout }}:ffff:fac:ade:110"
+
+- name: Apply the dns cronjob config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/dns/cronjob.yml') | from_yaml_all }}"

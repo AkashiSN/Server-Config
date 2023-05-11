@@ -1,0 +1,6 @@
+---
+# file: manifest.yml
+- hosts: master-node
+  roles:
+    - variable
+    - manifests

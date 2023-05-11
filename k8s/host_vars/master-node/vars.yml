@@ -1,0 +1,22 @@
+# acme
+cloudflare_token: "{{ vault_cloudflare_token }}"
+email: "{{ vault_email }}"
+# grafana
+grafana_admin_password: "{{ vault_grafana_admin_password }}"
+grafana_host: "{{ vault_grafana_host }}"
+# minecraft
+minecraft_rcon_password: "{{ vault_minecraft_rcon_password }}"
+minecraft_whitelist: "{{ vault_minecraft_whitelist }}"
+# nextcloud
+nextcloud_admin_user: "{{ vault_nextcloud_admin_user }}"
+nextcloud_admin_password: "{{ vault_nextcloud_admin_password }}"
+nextcloud_mariadb_root_password: "{{ vault_nextcloud_mariadb_root_password }}"
+nextcloud_mariadb_user_password: "{{ vault_nextcloud_mariadb_user_password }}"
+nextcloud_smtp_user: "{{ vault_nextcloud_smtp_user }}"
+nextcloud_smtp_password: "{{ vault_nextcloud_smtp_password }}"
+# wordpress
+wordpress_mariadb_root_password: "{{ vault_wordpress_mariadb_root_password }}"
+wordpress_mariadb_user_password: "{{ vault_wordpress_mariadb_user_password }}"
+wordpress_admin_user: "{{ vault_wordpress_admin_user }}"
+wordpress_admin_password: "{{ vault_wordpress_admin_password }}"
+wordpress_admin_email: "{{ vault_wordpress_admin_email }}"

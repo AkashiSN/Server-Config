@@ -1,5 +1,5 @@
 ---
-# file: roles/common/tasks/variable.yml
+# file: roles/variable/tasks/main.yml
 - name: Get default network interface
   ansible.builtin.shell:
     cmd: "ip route show default | sed -nE -e 's/.*dev (\\w+).*/\\1/p'"

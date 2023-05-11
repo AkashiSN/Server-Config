@@ -1,0 +1,55 @@
+---
+# file: roles/manifests/tasks/nextcloud.yml
+- name: Create the 'nextcloud' namespace
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    name: nextcloud
+    kind: Namespace
+
+- name: Create nextcloud-secrets
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    namespace: nextcloud
+    name: nextcloud-secrets
+    kind: Secret
+    definition:
+      type: Opaque
+      data:
+        nextcloud_admin_user: "{{ nextcloud_admin_user | b64encode }}"
+        nextcloud_admin_password: "{{ nextcloud_admin_password | b64encode }}"
+        nextcloud_mariadb_root_password: "{{ nextcloud_mariadb_root_password | b64encode }}"
+        nextcloud_mariadb_user_password: "{{ nextcloud_mariadb_user_password | b64encode }}"
+        nextcloud_smtp_user: "{{ nextcloud_smtp_user | b64encode }}"
+        nextcloud_smtp_password: "{{ nextcloud_smtp_password | b64encode }}"
+
+- name: Apply the nextcloud persistent-volumes config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/nextcloud/persistent-volume.yml') | from_yaml_all }}"
+
+- name: Apply the nextcloud redis config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/nextcloud/redis.yml') | from_yaml_all }}"
+
+- name: Apply the nextcloud mariadb config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/nextcloud/mariadb.yml') | from_yaml_all }}"
+
+- name: Apply the nextcloud nginx-conf config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/nextcloud/nginx-conf.yml') | from_yaml_all }}"
+
+- name: Apply the nextcloud config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/nextcloud/nextcloud.yml') | from_yaml_all }}"
+
+- name: Apply the nextcloud cronjob config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/nextcloud/cronjob.yml') | from_yaml_all }}"

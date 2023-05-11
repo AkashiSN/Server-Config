@@ -27,7 +27,6 @@
       - kubernetes
   become: false
 
-- import_tasks: variable.yml
 - import_tasks: iptables.yml
 - import_tasks: dns.yml
 - import_tasks: helm.yml

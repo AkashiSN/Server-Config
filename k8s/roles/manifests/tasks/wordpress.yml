@@ -1,0 +1,54 @@
+---
+# file: roles/manifests/tasks/wordpress.yml
+- name: Create the 'wordpress' namespace
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    name: wordpress
+    kind: Namespace
+
+- name: Create wordpress-secrets
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    namespace: wordpress
+    name: wordpress-secrets
+    kind: Secret
+    definition:
+      type: Opaque
+      data:
+        wordpress_mariadb_root_password: "{{ wordpress_mariadb_root_password | b64encode }}"
+        wordpress_mariadb_user_password: "{{ wordpress_mariadb_user_password | b64encode }}"
+        wordpress_admin_user: "{{ wordpress_admin_user | b64encode }}"
+        wordpress_admin_password: "{{ wordpress_admin_password | b64encode }}"
+        wordpress_admin_email: "{{ wordpress_admin_email | b64encode }}"
+
+- name: Apply the wordpress persistent-volumes config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/wordpress/persistent-volume.yml') | from_yaml_all }}"
+
+- name: Apply the wordpress redis config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/wordpress/redis.yml') | from_yaml_all }}"
+
+- name: Apply the wordpress mariadb config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/wordpress/mariadb.yml') | from_yaml_all }}"
+
+- name: Apply the wordpress nginx-conf config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/wordpress/nginx-conf.yml') | from_yaml_all }}"
+
+- name: Apply the wordpress config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/wordpress/wordpress.yml') | from_yaml_all }}"
+
+- name: Apply the wordpress cronjob config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/wordpress/cronjob.yml') | from_yaml_all }}"

@@ -1,0 +1,11 @@
+---
+# file: roles/manifests/tasks/main.yml
+- name: Apply the storage class config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/storage-class.yml') | from_yaml_all }}"
+
+- import_tasks: dns.yml
+- import_tasks: minecraft.yml
+- import_tasks: nextcloud.yml
+- import_tasks: wordpress.yml

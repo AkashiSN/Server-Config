@@ -1,7 +1,8 @@
 ---
-# file: main.yml
+# file: setup.yml
 - hosts: virtualmachines
   roles:
+    - variable
     - role: common
       vars:
         os: "xUbuntu_22.04"
@@ -14,4 +15,4 @@
 - hosts: master-node
   roles:
     - helm
-
+    - manifests

@@ -1,0 +1,42 @@
+---
+# file: roles/manifests/tasks/minecraft.yml
+- name: Create the 'minecraft' namespace
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    name: minecraft
+    kind: Namespace
+
+- name: Create minecraft-secrets
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    namespace: minecraft
+    name: minecraft-secrets
+    kind: Secret
+    definition:
+      type: Opaque
+      data:
+        minecraft_rcon_password: "{{ minecraft_rcon_password | b64encode }}"
+
+- name: Create minecraft-whitelist
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    namespace: minecraft
+    name: minecraft-whitelist
+    kind: Secret
+    definition:
+      type: Opaque
+      data:
+        minecraft_rcon_password: "{{ minecraft_whitelist | b64encode }}"
+
+- name: Apply the minecraft persistent-volumes config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/minecraft/persistent-volume.yml') | from_yaml_all }}"
+
+- name: Apply the minecraft config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/minecraft/minecraft.yml') | from_yaml_all }}"
