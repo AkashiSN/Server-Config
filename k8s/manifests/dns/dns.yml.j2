@@ -101,6 +101,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "{{ dns_lb_v4_addr }},{{ ipv6_prefix.stdout }}:ffff:fac:ade:110"
   labels:
     service: dns-server
   name: dns-server
@@ -133,7 +135,7 @@ metadata:
 spec:
   secretName: dns-cert
   dnsNames:
-    - dns.akashisn.info
+    - "{{ dns_host }}"
   issuerRef:
     name: letsencrypt-cluster-issuer
     kind: ClusterIssuer
@@ -150,10 +152,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - dns.akashisn.info
+        - "{{ dns_host }}"
       secretName: dns-cert
   rules:
-    - host: dns.akashisn.info
+    - host: "{{ dns_host }}"
       http:
         paths:
           - path: /

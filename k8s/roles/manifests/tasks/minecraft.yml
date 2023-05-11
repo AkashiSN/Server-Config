@@ -39,4 +39,4 @@
 - name: Apply the minecraft config
   kubernetes.core.k8s:
     state: present
-    definition: "{{ lookup('file', 'manifests/minecraft/minecraft.yml') | from_yaml_all }}"
+    template: manifests/minecraft/minecraft.yml.j2

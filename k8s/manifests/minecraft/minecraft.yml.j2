@@ -108,7 +108,7 @@ metadata:
   labels:
     service: minecraft-vanilla
   annotations:
-    metallb.universe.tf/loadBalancerIPs: 172.16.254.120
+    metallb.universe.tf/loadBalancerIPs: "{{ minecraft_lb_v4_addr }}"
   name: minecraft-vanilla
   namespace: minecraft
 spec:

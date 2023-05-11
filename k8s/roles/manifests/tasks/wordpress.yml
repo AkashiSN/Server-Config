@@ -46,7 +46,7 @@
 - name: Apply the wordpress config
   kubernetes.core.k8s:
     state: present
-    definition: "{{ lookup('file', 'manifests/wordpress/wordpress.yml') | from_yaml_all }}"
+    template: manifests/wordpress/wordpress.yml.j2
 
 - name: Apply the wordpress cronjob config
   kubernetes.core.k8s:

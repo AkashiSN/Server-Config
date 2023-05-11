@@ -36,7 +36,7 @@
         namespace: kube-system
       spec:
         addresses:
-        - 172.16.254.100-172.16.254.150
+        - "{{ metallb_ip_range }}"
         - "{{ ipv6_prefix.stdout }}:ffff:fac:ade::/112"
   when: metallb_helm_chart_install is changed
   become: false

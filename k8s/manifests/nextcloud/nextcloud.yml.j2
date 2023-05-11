@@ -11,7 +11,7 @@ data:
   EXTERNAL_DIR: /mnt/static
   OVERWRITEPROTOCOL: https
   TRUSTED_PROXIES: nextcloud
-  NEXTCLOUD_TRUSTED_DOMAINS: "files.akashisn.info"
+  NEXTCLOUD_TRUSTED_DOMAINS: "{{ nextcloud_host }}"
   MYSQL_HOST: nextcloud-mariadb
   MYSQL_USER: nextcloud
   MYSQL_DATABASE: nextcloud
@@ -180,11 +180,11 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - files.akashisn.info
-        - static.akashisn.info
+        - "{{ nextcloud_host }}"
+        - "{{ nextcloud_static_host }}"
       secretName: letsencrypt-cert
   rules:
-    - host: files.akashisn.info
+    - host: "{{ nextcloud_host }}"
       http:
         paths:
           - path: /
@@ -194,7 +194,7 @@ spec:
                 name: nextcloud
                 port:
                   name: nginx-nextcloud
-    - host: static.akashisn.info
+    - host: "{{ nextcloud_static_host }}"
       http:
         paths:
           - path: /

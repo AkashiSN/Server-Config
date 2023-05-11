@@ -47,7 +47,7 @@
 - name: Apply the nextcloud config
   kubernetes.core.k8s:
     state: present
-    definition: "{{ lookup('file', 'manifests/nextcloud/nextcloud.yml') | from_yaml_all }}"
+    template: manifests/nextcloud/nextcloud.yml.j2
 
 - name: Apply the nextcloud cronjob config
   kubernetes.core.k8s:
