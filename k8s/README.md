@@ -70,58 +70,6 @@ kubectl exec -it -n wordpress wordpress-0 -c wordpress -- bash
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- /bin/sh -c 'su www-data --shel=/bin/sh --command="wp <command>"'
 ```
 
-### HackMD
-
-- hackmd_mariadb_root_password
-- hackmd_mariadb_user_password
-- hackmd_mariadb_uri
-
-```bash
-cat <<EOF > .secrets/hackmd_mariadb_uri
-mysql://hackmd:$(cat .secrets/hackmd_mariadb_user_password)@hackmd-mariadb:3306/hackmd
-EOF
-
-kubectl create namespace hackmd
-
-kubectl create secret generic --namespace hackmd --from-file=./.secrets/hackmd_mariadb_root_password --from-file=./.secrets/hackmd_mariadb_user_password --from-file=./.secrets/hackmd_mariadb_uri hackmd-secrets
-
-kubectl apply -f hackmd/persistent-volume.yml
-kubectl apply -f hackmd/mariadb.yml
-kubectl apply -f hackmd/hackmd.yml
-
-kubectl get -n hackmd pod,svc,ing
-kubectl logs -f -n hackmd hackmd-mariadb-0
-kubectl logs -f -n hackmd hackmd-0
-```
-
-### Growi
-
-- growi_mongodb_root_password
-- growi_mongodb_user_password
-- growi_mongodb_uri
-
-
-```bash
-cat <<EOF > .secrets/hackmd_mariadb_uri
-mongodb://growi:$(cat .secrets/growi_mongodb_root_password)@growi-mongodb:27017/growi
-EOF
-
-
-kubectl create namespace growi
-
-kubectl create secret generic --namespace growi --from-file=./.secrets/growi_mongodb_root_password --from-file=./.secrets/growi_mongodb_user_password --from-file=./.secrets/growi_mongodb_uri growi-secrets
-
-kubectl apply -f growi/persistent-volume.yml
-kubectl apply -f growi/redis.yml
-kubectl apply -f growi/elasticsearch.yml
-kubectl apply -f growi/mongodb.yml
-kubectl apply -f growi/plantuml.yml
-kubectl apply -f growi/growi.yml
-
-kubectl get -n growi pod,svc,ing
-```
-
-
 ### Buiildkit
 
 ```bash
