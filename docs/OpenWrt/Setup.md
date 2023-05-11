@@ -55,17 +55,13 @@ START=99
 STOP=01
 
 start() {
-    if is_running; then
-        echo "Already started"
+    wait_for_dns
+    if dns_ready; then
+        echo "Starting cloudflared"
+        (\$cmd 2>&1 | logger -t cloudflared) &
     else
-        wait_for_dns
-        if dns_ready; then
-            echo "Starting cloudflared"
-            (\$cmd 2>&1 | logger -t cloudflared) &
-        else
-            echo "DNS not ready. Timeout reached."
-            exit 1
-        fi
+        echo "DNS not ready. Timeout reached."
+        exit 1
     fi
 }
 
