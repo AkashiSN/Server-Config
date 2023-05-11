@@ -48,6 +48,13 @@
     state: present
     template: manifests/wordpress/wordpress.yml.j2
 
+- name: Wait for all pods to be ready
+  command: kubectl get pods -n wordpress -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
+  retries: 60
+  delay: 10
+
 - name: Apply the wordpress cronjob config
   kubernetes.core.k8s:
     state: present

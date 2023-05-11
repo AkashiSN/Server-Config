@@ -58,3 +58,10 @@
     - target: daemonset cilium
   when: cilium_helm_chart_install is changed
   become: false
+
+- name: Wait for all pods to be ready
+  command: kubectl get pods -n kube-system -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
+  retries: 60
+  delay: 10

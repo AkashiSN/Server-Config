@@ -19,7 +19,3 @@
   ansible.builtin.command:
     cmd: "kubectl -n kube-system rollout restart deployment coredns"
   become: false
-
-- name: Reboot
-  ansible.builtin.reboot:
-  become: true

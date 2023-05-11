@@ -5,47 +5,19 @@
 ## Install k8s
 
 ```bash
-ansible-playbook main.yml
+ansible-playbook setup.yml
 ```
 
 ## Local manifests
 
-```bash
-export INTERFACE_V6="$(ip -6 route show default | sed -nE -e 's/.*dev (\w+).*/\1/p')"
-export IPV6_PREFIX="$(ip -6 route show dev ${INTERFACE_V6} | sed -nE -e 's/(^[^(fe80)][0-9a-f:]+)::.+/\1/p')"
-```
-
-```bash
-kubectl apply -f storage-class.yml
-```
-
 ### DNS
 ```bash
-kubectl create namespace dns
-
-kubectl apply -f dns/dns.yml
-
-kubectl annotate -n dns svc dns-server "metallb.universe.tf/loadBalancerIPs=172.16.254.110,${IPV6_PREFIX}:ffff:fac:ade:110"
-
-kubectl apply -f dns/cronjob.yml
-
 kubectl get -n dns pod,svc
 ```
 
 ### Minecraft
 
-- minecraft_rcon_password
-- minecraft_whitelist
-
 ```bash
-kubectl create namespace minecraft
-
-kubectl create secret generic --namespace minecraft --from-file=./.secrets/minecraft_rcon_password minecraft-secrets
-kubectl create secret generic --namespace minecraft --from-file=./.secrets/minecraft_whitelist minecraft-whitelist
-
-kubectl apply -f minecraft/persistent-volume.yml
-kubectl apply -f minecraft/minecraft.yml
-
 kubectl get pod,svc -n minecraft
 kubectl logs -f -n minecraft minecraft-vanilla-0
 kubectl exec -it -n minecraft minecraft-vanilla-0 -- bash
@@ -63,25 +35,7 @@ kubectl scale statefulset minecraft-vanilla -n minecraft --replicas=1
 
 ### Nextcloud
 
-- nextcloud_admin_user
-- nextcloud_admin_password
-- nextcloud_mariadb_root_password
-- nextcloud_mariadb_user_password
-- nextcloud_smtp_user
-- nextcloud_smtp_password
-
 ```bash
-kubectl create namespace nextcloud
-
-kubectl create secret generic --namespace nextcloud --from-file=./.secrets/nextcloud_admin_user --from-file=./.secrets/nextcloud_admin_password --from-file=./.secrets/nextcloud_mariadb_root_password --from-file=./.secrets/nextcloud_mariadb_user_password --from-file=./.secrets/nextcloud_smtp_user --from-file=./.secrets/nextcloud_smtp_password nextcloud-secrets
-
-kubectl apply -f nextcloud/persistent-volume.yml
-kubectl apply -f nextcloud/redis.yml
-kubectl apply -f nextcloud/mariadb.yml
-kubectl apply -f nextcloud/nginx-conf.yml
-kubectl apply -f nextcloud/nextcloud.yml
-kubectl apply -f nextcloud/cronjob.yml
-
 kubectl get -n nextcloud pod
 kubectl describe -n nextcloud pod nextcloud-0
 kubectl logs -f -n nextcloud nextcloud-0 -c nextcloud
@@ -106,24 +60,8 @@ kubectl patch cronjobs nextcloud-cronjob -n nextcloud -p "{\"spec\" : {\"suspend
 ```
 
 ### Wordpress
-- wordpress_mariadb_root_password
-- wordpress_mariadb_user_password
-- wordpress_admin_user
-- wordpress_admin_password
-- wordpress_admin_email
 
 ```bash
-kubectl create namespace wordpress
-
-kubectl create secret generic --namespace wordpress --from-file=./.secrets/wordpress_mariadb_root_password --from-file=./.secrets/wordpress_mariadb_user_password --from-file=./.secrets/wordpress_admin_user --from-file=./.secrets/wordpress_admin_password --from-file=./.secrets/wordpress_admin_email wordpress-secrets
-
-kubectl apply -f wordpress/persistent-volume.yml
-kubectl apply -f wordpress/redis.yml
-kubectl apply -f wordpress/mariadb.yml
-kubectl apply -f wordpress/nginx-conf.yml
-kubectl apply -f wordpress/wordpress.yml
-kubectl apply -f wordpress/cronjob.yml
-
 kubectl get -n wordpress pod,svc
 kubectl describe -n wordpress pod wordpress-0
 kubectl logs -f -n wordpress wordpress-mariadb-0

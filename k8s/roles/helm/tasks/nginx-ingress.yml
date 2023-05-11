@@ -28,7 +28,7 @@
           type: LoadBalancer
           externalTrafficPolicy: Local
           annotations:
-            metallb.universe.tf/loadBalancerIPs: "{{ nginx_ingress_lb_v4_addr }},{{ ipv6_prefix.stdout }}:ffff:fac:ade:100"
+            metallb.universe.tf/loadBalancerIPs: "{{ nginx_ingress_lb_v4_addr }},{{ ipv6_prefix.stdout }}:{{ nginx_ingress_lb_v6_host_addr }}"
           ipFamilyPolicy: RequireDualStack
   register: nginx_ingress_helm_chart_install
   when: nginx_ingress_helm_chart_result.rc != 0

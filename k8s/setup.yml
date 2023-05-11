@@ -7,12 +7,15 @@
       vars:
         os: "xUbuntu_22.04"
         k8s_major_version: "1.26"
+    - reboot
 
 - hosts: virtualmachines
   roles:
+    - variable
     - kubeadm
+    - reboot
 
 - hosts: master-node
   roles:
+    - variable
     - helm
-    - manifests

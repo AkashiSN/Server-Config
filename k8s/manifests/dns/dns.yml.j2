@@ -102,7 +102,7 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    metallb.universe.tf/loadBalancerIPs: "{{ dns_lb_v4_addr }},{{ ipv6_prefix.stdout }}:ffff:fac:ade:110"
+    metallb.universe.tf/loadBalancerIPs: "{{ dns_lb_v4_addr }},{{ ipv6_prefix.stdout }}:{{ dns_lb_v6_host_addr }}"
   labels:
     service: dns-server
   name: dns-server

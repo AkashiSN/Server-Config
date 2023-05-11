@@ -1,0 +1,5 @@
+---
+# file: roles/reboot/tasks/main.yml
+- name: Reboot
+  ansible.builtin.reboot:
+  become: true
