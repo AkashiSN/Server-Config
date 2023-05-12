@@ -5,7 +5,7 @@
     src: kubeadm-config.yml.j2
     dest: /root/kubeadm-config.yml
     mode: 0644
-  delegate_to: master-node
+  when: inventory_hostname == "master-node"
   become: true
 
 - name: Check if Kubernetes is already initialized
@@ -13,7 +13,7 @@
     path: /etc/kubernetes/admin.conf
   register: kubernetes_initialized
   changed_when: false
-  delegate_to: master-node
+  when: inventory_hostname == "master-node"
   become: true
 
 - name: Run kubeadm init
@@ -21,7 +21,7 @@
     cmd: kubeadm init --skip-phases=addon/kube-proxy --config=/root/kubeadm-config.yml
   when: not kubernetes_initialized.stat.exists
   register: kubeadm_init_result
-  delegate_to: master-node
+  when: inventory_hostname == "master-node"
   become: true
 
 - name: Get kubeadm join command
@@ -29,7 +29,7 @@
     cmd: kubeadm token create --print-join-command
   register: join_command
   when: kubeadm_init_result is changed
-  delegate_to: master-node
+  when: inventory_hostname == "master-node"
   become: true
 
 - name: Join the cluster
@@ -37,14 +37,14 @@
     cmd: "{{ join_command.stdout }} --ignore-preflight-errors=all"
   register: join_result
   when: kubeadm_init_result is changed
-  delegate_to: worker-node
+  when: inventory_hostname == "worker-node"
   become: true
 
 - name: Create .kube directory in the user's home
   ansible.builtin.file:
     path: "{{ ansible_env.HOME }}/.kube"
     state: directory
-  delegate_to: master-node
+  when: inventory_hostname == "master-node"
   become: false
 
 - name: Copy admin.conf to user's tmp directory
@@ -55,7 +55,7 @@
     group: "{{ ansible_env.USER }}"
     mode: 0644
     remote_src: true
-  delegate_to: master-node
+  when: inventory_hostname == "master-node"
   become: true
 
 - name: Copy tmp to user's .kube directory
@@ -66,13 +66,14 @@
     group: "{{ ansible_env.USER }}"
     mode: 0644
     remote_src: true
-  delegate_to: master-node
+  when: inventory_hostname == "master-node"
   become: false
 
 - name: Remove tmp files
   ansible.builtin.file:
     path: /tmp/config
     state: absent
+  when: inventory_hostname == "master-node"
   become: true
 
 - name: Approve pending certificates
@@ -86,7 +87,7 @@
       ansible.builtin.command:
         cmd: kubectl certificate approve {{ item }}
       with_items: "{{ pending_csr_result.stdout_lines }}"
-  delegate_to: master-node
+  when: inventory_hostname == "master-node"
   become: false
 
 - name: Fetch kube config to local
@@ -94,5 +95,5 @@
     src: "{{ ansible_env.HOME }}/.kube/config"
     dest: "{{ lookup('ansible.builtin.env', 'HOME') }}/.kube/config"
     flat: true
-  delegate_to: master-node
+  when: inventory_hostname == "master-node"
   become: false
