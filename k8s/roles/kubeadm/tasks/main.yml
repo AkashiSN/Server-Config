@@ -19,25 +19,28 @@
 - name: Run kubeadm init
   ansible.builtin.command:
     cmd: kubeadm init --skip-phases=addon/kube-proxy --config=/root/kubeadm-config.yml
-  when: not kubernetes_initialized.stat.exists
+  when:
+    - inventory_hostname == "master-node"
+    - not kubernetes_initialized.stat.exists
   register: kubeadm_init_result
-  when: inventory_hostname == "master-node"
   become: true
 
 - name: Get kubeadm join command
   ansible.builtin.command:
     cmd: kubeadm token create --print-join-command
   register: join_command
-  when: kubeadm_init_result is changed
-  when: inventory_hostname == "master-node"
+  when:
+    - inventory_hostname == "master-node"
+    - kubeadm_init_result is changed
   become: true
 
 - name: Join the cluster
   ansible.builtin.command:
-    cmd: "{{ join_command.stdout }} --ignore-preflight-errors=all"
+    cmd: "{{ hostvars['master-node'].join_command.stdout }} --ignore-preflight-errors=all"
   register: join_result
-  when: kubeadm_init_result is changed
-  when: inventory_hostname == "worker-node"
+  when:
+    - inventory_hostname == "worker-node"
+    - hostvars['master-node'].kubeadm_init_result is changed
   become: true
 
 - name: Create .kube directory in the user's home
