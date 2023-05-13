@@ -1,5 +1,9 @@
+# k8s
+ipv6_pod_cider: "cafe:0::/96"
+ipv6_service_cider: "cafe:1::/112"
 # metallb
-metallb_ip_range: "172.16.254.100-172.16.254.150"
+metallb_ipv4_range: "172.16.254.100-172.16.254.150"
+metallb_ipv6_cider: "ffff:fac:ade::/112"
 # nginx-ingress
 nginx_ingress_lb_v4_addr: "172.16.254.100"
 nginx_ingress_lb_v6_host_addr: "ffff:fac:ade:100"

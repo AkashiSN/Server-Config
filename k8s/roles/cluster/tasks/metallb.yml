@@ -1,5 +1,5 @@
 ---
-# file: roles/helm/tasks/metallb.yml
+# file: roles/cluster/tasks/metallb.yml
 - name: Add metallb Helm charts repository
   kubernetes.core.helm_repository:
     name: metallb
@@ -36,8 +36,8 @@
         namespace: kube-system
       spec:
         addresses:
-        - "{{ metallb_ip_range }}"
-        - "{{ ipv6_prefix.stdout }}:ffff:fac:ade::/112"
+        - "{{ metallb_ipv4_range }}"
+        - "{{ ipv6_prefix.stdout }}:{{ metallb_ipv6_cider }}"
   when: metallb_helm_chart_install is changed
   become: false
 

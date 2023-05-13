@@ -6,6 +6,7 @@
     api_version: v1
     name: nextcloud
     kind: Namespace
+  become: false
 
 - name: Create nextcloud-secrets
   kubernetes.core.k8s:
@@ -23,31 +24,42 @@
         nextcloud_mariadb_user_password: "{{ nextcloud_mariadb_user_password | b64encode }}"
         nextcloud_smtp_user: "{{ nextcloud_smtp_user | b64encode }}"
         nextcloud_smtp_password: "{{ nextcloud_smtp_password | b64encode }}"
+  become: false
 
 - name: Apply the nextcloud persistent-volumes config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/persistent-volume.yml') | from_yaml_all }}"
+    force: false
+  become: false
 
 - name: Apply the nextcloud redis config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/redis.yml') | from_yaml_all }}"
+    force: true
+  become: false
 
 - name: Apply the nextcloud mariadb config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/mariadb.yml') | from_yaml_all }}"
+    force: true
+  become: false
 
 - name: Apply the nextcloud nginx-conf config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/nginx-conf.yml') | from_yaml_all }}"
+    force: true
+  become: false
 
 - name: Apply the nextcloud config
   kubernetes.core.k8s:
     state: present
     template: manifests/nextcloud/nextcloud.yml.j2
+    force: true
+  become: false
 
 - name: Wait for all pods to be ready
   command: kubectl get pods -n nextcloud -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
@@ -55,8 +67,11 @@
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
+  become: false
 
 - name: Apply the nextcloud cronjob config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/cronjob.yml') | from_yaml_all }}"
+    force: true
+  become: false

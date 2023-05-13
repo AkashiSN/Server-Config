@@ -6,6 +6,7 @@
     api_version: v1
     name: wordpress
     kind: Namespace
+  become: false
 
 - name: Create wordpress-secrets
   kubernetes.core.k8s:
@@ -22,31 +23,42 @@
         wordpress_admin_user: "{{ wordpress_admin_user | b64encode }}"
         wordpress_admin_password: "{{ wordpress_admin_password | b64encode }}"
         wordpress_admin_email: "{{ wordpress_admin_email | b64encode }}"
+  become: false
 
 - name: Apply the wordpress persistent-volumes config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/persistent-volume.yml') | from_yaml_all }}"
+    force: false
+  become: false
 
 - name: Apply the wordpress redis config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/redis.yml') | from_yaml_all }}"
+    force: true
+  become: false
 
 - name: Apply the wordpress mariadb config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/mariadb.yml') | from_yaml_all }}"
+    force: true
+  become: false
 
 - name: Apply the wordpress nginx-conf config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/nginx-conf.yml') | from_yaml_all }}"
+    force: true
+  become: false
 
 - name: Apply the wordpress config
   kubernetes.core.k8s:
     state: present
     template: manifests/wordpress/wordpress.yml.j2
+    force: true
+  become: false
 
 - name: Wait for all pods to be ready
   command: kubectl get pods -n wordpress -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
@@ -54,8 +66,11 @@
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
+  become: false
 
 - name: Apply the wordpress cronjob config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/cronjob.yml') | from_yaml_all }}"
+    force: true
+  become: false

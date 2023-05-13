@@ -1,5 +1,5 @@
 ---
-# file: manifest.yml
+# file: setup-app.yml
 - hosts: master-node
   roles:
     - variable

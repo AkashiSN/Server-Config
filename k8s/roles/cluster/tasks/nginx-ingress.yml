@@ -1,5 +1,5 @@
 ---
-# file: roles/helm/tasks/nginx-ingress.yml
+# file: roles/cluster/tasks/nginx-ingress.yml
 - name: Add nginx-stable Helm charts repository
   kubernetes.core.helm_repository:
     name: nginx-stable
@@ -24,6 +24,7 @@
     atomic: true
     release_values:
       controller:
+        enableSnippets: true
         service:
           type: LoadBalancer
           externalTrafficPolicy: Local

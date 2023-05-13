@@ -1,5 +1,5 @@
 ---
-# file: roles/helm/tasks/metrics-server.yml
+# file: roles/cluster/tasks/metrics-server.yml
 - name: Add metrics-server Helm charts repository
   kubernetes.core.helm_repository:
     name: metrics-server

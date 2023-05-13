@@ -1,6 +1,9 @@
 virtualmachines:
   hosts:
     master-node:
-      ansible_host: vm01
-    worker-node:
-      ansible_host: vm02
+      ansible_host: k8s-control-plane
+  children:
+    worker:
+      hosts:
+        worker-node01:
+          ansible_host: worker-node

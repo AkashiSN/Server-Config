@@ -1,5 +1,5 @@
 ---
-# file: roles/helm/tasks/cilium.yml
+# file: roles/cluster/tasks/cilium.yml
 - name: Add cilium Helm charts repository
   kubernetes.core.helm_repository:
     name: cilium
@@ -29,7 +29,7 @@
         mode: cluster-pool
         operator:
           clusterPoolIPv4PodCIDRList: "10.244.0.0/16"
-          clusterPoolIPv6PodCIDRList: "{{ ipv6_prefix.stdout }}:cafe:0::/96"
+          clusterPoolIPv6PodCIDRList: "{{ ipv6_prefix.stdout }}:{{ ipv6_pod_cider }}"
           clusterPoolIPv4MaskSize: 24
           clusterPoolIPv6MaskSize: 112
       ipv4:
@@ -46,7 +46,7 @@
 - name: Patch cilium-config ConfigMap
   ansible.builtin.shell: >
     kubectl -n kube-system patch configmap/cilium-config --type merge
-    -p "{\"data\":{\"enable-ipv6-ndp\": \"true\", \"ipv6-service-range\": \"{{ ipv6_prefix.stdout }}:cafe:1::/112\"}}"
+    -p "{\"data\":{\"enable-ipv6-ndp\": \"true\", \"ipv6-service-range\": \"{{ ipv6_prefix.stdout }}:{{ ipv6_service_cider }}\"}}"
   when: cilium_helm_chart_install is changed
   become: false
 
@@ -65,3 +65,4 @@
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
+  become: false

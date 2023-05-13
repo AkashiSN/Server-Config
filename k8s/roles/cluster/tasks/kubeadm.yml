@@ -1,5 +1,5 @@
 ---
-# file: roles/kubeadm/tasks/main.yml
+# file: roles/cluster/tasks/kubeadm.yml
 - name: Copy kubeadm-config.yml.j2 configuration template
   ansible.builtin.template:
     src: kubeadm-config.yml.j2
@@ -39,7 +39,7 @@
     cmd: "{{ hostvars['master-node'].join_command.stdout }} --ignore-preflight-errors=all"
   register: join_result
   when:
-    - inventory_hostname == "worker-node"
+    - inventory_hostname in groups["worker"]
     - hostvars['master-node'].kubeadm_init_result is changed
   become: true
 

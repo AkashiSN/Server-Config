@@ -1,5 +1,5 @@
 ---
-# file: roles/helm/tasks/cert-manager.yml
+# file: roles/cluster/tasks/cert-manager.yml
 - name: Add jetstack Helm charts repository
   kubernetes.core.helm_repository:
     name: jetstack
@@ -40,7 +40,6 @@
       type: Opaque
       stringData:
         api-token: "{{ cloudflare_token }}"
-  when: cert_manager_helm_chart_install is changed
   become: false
 
 - name: Create a cert-manager ClusterIssuer
@@ -53,7 +52,7 @@
         name: letsencrypt-cluster-issuer
       spec:
         acme:
-          server: https://acme-v02.api.letsencrypt.org/directory
+          server: "{{ acme_v2_url[target_env] }}"
           preferredChain: ISRG Root X1
           email: "{{ email }}"
           privateKeySecretRef:
@@ -64,5 +63,4 @@
                   apiTokenSecretRef:
                     name: cloudflare-api-token-secret
                     key: api-token
-  when: cert_manager_helm_chart_install is changed
   become: false

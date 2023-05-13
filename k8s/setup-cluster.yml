@@ -1,5 +1,5 @@
 ---
-# file: setup.yml
+# file: setup-cluster.yml
 - hosts: virtualmachines
   roles:
     - variable
@@ -12,10 +12,7 @@
 - hosts: virtualmachines
   roles:
     - variable
-    - kubeadm
+    - role: cluster
+      vars:
+        environment: "staging"
     - reboot
-
-- hosts: master-node
-  roles:
-    - variable
-    - helm

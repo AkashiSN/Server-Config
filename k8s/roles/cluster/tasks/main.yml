@@ -1,0 +1,24 @@
+---
+# file: roles/cluster/tasks/main.yml
+
+# kubeadm init
+- import_tasks: kubeadm.yml
+
+# helm
+- name: helm setup
+  block:
+    - import_tasks: helm.yml
+    - import_tasks: cilium.yml
+    - import_tasks: metallb.yml
+    - import_tasks: nginx-ingress.yml
+    - import_tasks: cert-manager.yml
+    - import_tasks: metrics-server.yml
+    - import_tasks: prometheus.yml
+  when: inventory_hostname == "master-node"
+  become: false
+
+- name: Restart coredns
+  ansible.builtin.command:
+    cmd: "kubectl -n kube-system rollout restart deployment coredns"
+  when: inventory_hostname == "master-node"
+  become: false

@@ -1,9 +1,18 @@
 ---
 # file: roles/manifests/tasks/main.yml
+- name: Wait for all pods to be ready
+  command: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
+  retries: 60
+  delay: 10
+  become: false
+
 - name: Apply the storage class config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/storage-class.yml') | from_yaml_all }}"
+  become: false
 
 - import_tasks: dns.yml
 - import_tasks: minecraft.yml
