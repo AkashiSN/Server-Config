@@ -23,11 +23,20 @@ docker-php-ext-install bz2
 rm -r /tmp/pear
 
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+
+sed -ie 's!exec "$@"!!g' /entrypoint.sh
+cat << 'EOF' >> /entrypoint.sh
+for script in $(ls /custom-entrypoint/*.sh | sort); do
+  /bin/sh "$script"
+done
+
+exec "$@"
+EOF
 EOT
 
 COPY --chmod=755 scripts/*.sh /
 COPY config/zz-docker.conf /usr/local/etc/php-fpm.d/
 COPY config/nextcloud.ini /usr/local/etc/php/conf.d/
 
-ENTRYPOINT ["/init.sh", "/entrypoint.sh", "/custom-entrypoint.sh"]
+ENTRYPOINT ["/init.sh", "/entrypoint.sh"]
 CMD ["php-fpm"]
