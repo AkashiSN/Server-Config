@@ -30,35 +30,46 @@
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/persistent-volume.yml') | from_yaml_all }}"
-    force: false
+  become: false
+
+- name: Check if nextcloud cronjob is deployed
+  shell: kubectl get -n nextcloud cronjob nextcloud-cronjob
+  register: nextcloud_cronjob_result
+  changed_when: false
+  ignore_errors: yes
+  become: false
+
+- name: Delete nextcloud cronjob
+  shell: kubectl delete -n nextcloud cronjob nextcloud-cronjob
+  when: nextcloud_cronjob_result.rc == 0
   become: false
 
 - name: Apply the nextcloud redis config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/redis.yml') | from_yaml_all }}"
-    force: true
+    wait: true
   become: false
 
 - name: Apply the nextcloud mariadb config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/mariadb.yml') | from_yaml_all }}"
-    force: true
+    wait: true
   become: false
 
 - name: Apply the nextcloud nginx-conf config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/nginx-conf.yml') | from_yaml_all }}"
-    force: true
+    wait: true
   become: false
 
 - name: Apply the nextcloud config
   kubernetes.core.k8s:
     state: present
     template: manifests/nextcloud/nextcloud.yml.j2
-    force: true
+    wait: true
   become: false
 
 - name: Wait for all pods to be ready
@@ -67,11 +78,11 @@
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
+  changed_when: false
   become: false
 
 - name: Apply the nextcloud cronjob config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/cronjob.yml') | from_yaml_all }}"
-    force: true
   become: false

@@ -70,10 +70,6 @@ spec:
               subPath: nginx.conf
               readOnly: true
             - name: nginx-conf
-              mountPath: /etc/nginx/conf.d/real_ip.conf
-              subPath: real_ip.conf
-              readOnly: true
-            - name: nginx-conf
               mountPath: /etc/nginx/conf.d/wordpress.conf
               subPath: wordpress.conf
               readOnly: true
@@ -123,12 +119,6 @@ metadata:
   name: ingress-wordpress
   namespace: wordpress
   annotations:
-    nginx.org/redirect-to-https: "True"
-    nginx.org/client-max-body-size: "0"
-    nginx.org/proxy-request-buffering: "off"
-    nginx.org/proxy-connect-timeout: 3600s
-    nginx.org/proxy-send-timeout: 3600s
-    nginx.org/proxy-read-timeout: 3600s
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
 spec:
   ingressClassName: nginx

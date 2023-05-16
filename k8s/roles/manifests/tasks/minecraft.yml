@@ -31,19 +31,26 @@
     definition:
       type: Opaque
       data:
-        minecraft_rcon_password: "{{ minecraft_whitelist | b64encode }}"
+        minecraft_whitelist: "{{ minecraft_whitelist | b64encode }}"
   become: false
 
 - name: Apply the minecraft persistent-volumes config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/minecraft/persistent-volume.yml') | from_yaml_all }}"
-    force: false
   become: false
 
 - name: Apply the minecraft config
   kubernetes.core.k8s:
     state: present
     template: manifests/minecraft/minecraft.yml.j2
-    force: true
+    wait: true
+  become: false
+
+- name: Wait for all pods to be ready
+  command: kubectl get pods -n minecraft -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
+  retries: 60
+  delay: 10
   become: false

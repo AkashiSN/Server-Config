@@ -13,21 +13,19 @@ data:
     pid /var/run/nginx.pid;
 
     events {
-      worker_connections 99560;
+      worker_connections 65536;
     }
 
     http {
       include           /etc/nginx/mime.types;
       default_type      application/octet-stream;
 
-      include /etc/nginx/conf.d/real_ip.conf;
+      set_real_ip_from 10.244.0.0/16;
 
-      map $http_cf_connecting_ip $client_ip {
-        ""      $remote_addr;
-        default $http_cf_connecting_ip;
-      }
+      real_ip_recursive on;
+      real_ip_header    X-Forwarded-For;
 
-      log_format main   '$client_ip $host $remote_user [$time_local] "$request" '
+      log_format main   '$remote_addr $host $remote_user [$time_local] "$request" '
                         '$status $body_bytes_sent "$http_referer" '
                         '"$http_user_agent"';
 
@@ -38,36 +36,6 @@ data:
 
       include           /etc/nginx/conf.d/wordpress.conf;
     }
-  real_ip.conf: |
-    # Cloudflare network
-    set_real_ip_from 173.245.48.0/20;
-    set_real_ip_from 103.21.244.0/22;
-    set_real_ip_from 103.22.200.0/22;
-    set_real_ip_from 103.31.4.0/22;
-    set_real_ip_from 141.101.64.0/18;
-    set_real_ip_from 108.162.192.0/18;
-    set_real_ip_from 190.93.240.0/20;
-    set_real_ip_from 188.114.96.0/20;
-    set_real_ip_from 197.234.240.0/22;
-    set_real_ip_from 198.41.128.0/17;
-    set_real_ip_from 162.158.0.0/15;
-    set_real_ip_from 104.16.0.0/13;
-    set_real_ip_from 104.24.0.0/14;
-    set_real_ip_from 172.64.0.0/13;
-    set_real_ip_from 131.0.72.0/22;
-    set_real_ip_from 2400:cb00::/32;
-    set_real_ip_from 2606:4700::/32;
-    set_real_ip_from 2803:f800::/32;
-    set_real_ip_from 2405:b500::/32;
-    set_real_ip_from 2405:8100::/32;
-    set_real_ip_from 2a06:98c0::/29;
-    set_real_ip_from 2c0f:f248::/32;
-
-    # Local k8s pod network
-    set_real_ip_from 10.244.0.0/16;
-
-    real_ip_recursive on;
-    real_ip_header X-Forwarded-For;
   wordpress.conf: |
     upstream php-handler {
       server 127.0.0.1:9000;
@@ -159,7 +127,8 @@ data:
         fastcgi_intercept_errors on;
         fastcgi_pass php-handler;
         # The following parameter can be also included in fastcgi_params file
-        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param REMOTE_ADDR $remote_addr;
       }
 
       location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {

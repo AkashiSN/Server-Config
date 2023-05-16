@@ -29,35 +29,46 @@
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/persistent-volume.yml') | from_yaml_all }}"
-    force: false
+  become: false
+
+- name: Check if wordpress cronjob is deployed
+  shell: kubectl get -n wordpress cronjob wordpress-cronjob
+  register: wordpress_cronjob_result
+  changed_when: false
+  ignore_errors: yes
+  become: false
+
+- name: Delete wordpress cronjob
+  shell: kubectl delete -n wordpress cronjob wordpress-cronjob
+  when: wordpress_cronjob_result.rc == 0
   become: false
 
 - name: Apply the wordpress redis config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/redis.yml') | from_yaml_all }}"
-    force: true
+    wait: true
   become: false
 
 - name: Apply the wordpress mariadb config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/mariadb.yml') | from_yaml_all }}"
-    force: true
+    wait: true
   become: false
 
 - name: Apply the wordpress nginx-conf config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/nginx-conf.yml') | from_yaml_all }}"
-    force: true
+    wait: true
   become: false
 
 - name: Apply the wordpress config
   kubernetes.core.k8s:
     state: present
     template: manifests/wordpress/wordpress.yml.j2
-    force: true
+    wait: true
   become: false
 
 - name: Wait for all pods to be ready
@@ -66,11 +77,11 @@
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
+  changed_when: false
   become: false
 
 - name: Apply the wordpress cronjob config
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/cronjob.yml') | from_yaml_all }}"
-    force: true
   become: false

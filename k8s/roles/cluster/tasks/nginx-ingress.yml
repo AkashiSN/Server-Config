@@ -13,6 +13,11 @@
   ignore_errors: yes
   become: false
 
+- name: concat cloudflare_ips strings
+  set_fact:
+    real_ip_from: "{{ cloudflare_ips | join(', ') }}, {{ local_ips | join(',') }}"
+  become: false
+
 - name: Deploy nginx-ingress chart using set values on target
   kubernetes.core.helm:
     release_name: nginx-ingress
@@ -31,6 +36,19 @@
           annotations:
             metallb.universe.tf/loadBalancerIPs: "{{ nginx_ingress_lb_v4_addr }},{{ ipv6_prefix.stdout }}:{{ nginx_ingress_lb_v6_host_addr }}"
           ipFamilyPolicy: RequireDualStack
+        config:
+          entries:
+            redirect-to-https: "True"
+            proxy-connect-timeout: 3600s
+            proxy-send-timeout: 3600s
+            proxy-read-timeout: 3600s
+            client-max-body-size: "0"
+            proxy-buffering: "True"
+            proxy-buffer-size: "64k"
+            proxy-buffers: "100 64k"
+            set-real-ip-from: "{{ real_ip_from }}"
+            real-ip-recursive: "True"
+            real-ip-header: "X-Forwarded-For"
   register: nginx_ingress_helm_chart_install
   when: nginx_ingress_helm_chart_result.rc != 0
   become: false

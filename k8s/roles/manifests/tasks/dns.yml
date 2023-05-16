@@ -8,11 +8,23 @@
     kind: Namespace
   become: false
 
+- name: Check if dns cronjob is deployed
+  shell: kubectl get -n dns cronjob dns-cronjob
+  register: dns_cronjob_result
+  changed_when: false
+  ignore_errors: yes
+  become: false
+
+- name: Delete dns cronjob
+  shell: kubectl delete -n dns cronjob dns-cronjob
+  when: dns_cronjob_result.rc == 0
+  become: false
+
 - name: Apply the dns config
   kubernetes.core.k8s:
     state: present
     template: manifests/dns/dns.yml.j2
-    force: true
+    wait: false # because of certificate acme challenge
   become: false
 
 - name: Wait for all pods to be ready
@@ -27,5 +39,4 @@
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/dns/cronjob.yml') | from_yaml_all }}"
-    force: true
   become: false

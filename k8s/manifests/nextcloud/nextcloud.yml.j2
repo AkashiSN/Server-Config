@@ -44,6 +44,8 @@ data:
 
     run_as 'php /var/www/html/occ app:enable files_external'
     run_as 'php /var/www/html/occ app:enable twofactor_totp'
+    run_as 'php /var/www/html/occ app:enable suspicious_login'
+    run_as 'php /var/www/html/occ app:enable admin_audit'
 
     run_as 'php /var/www/html/occ config:system:set default_phone_region --value=JP'
     run_as 'php /var/www/html/occ config:app:set files max_chunk_size --value 94371840' # 90MiB
@@ -117,10 +119,6 @@ spec:
             - name: nginx-conf
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
-              readOnly: true
-            - name: nginx-conf
-              mountPath: /etc/nginx/conf.d/real_ip.conf
-              subPath: real_ip.conf
               readOnly: true
             - name: nginx-conf
               mountPath: /etc/nginx/conf.d/nextcloud.conf
@@ -200,12 +198,6 @@ metadata:
   name: ingress-nextcloud
   namespace: nextcloud
   annotations:
-    nginx.org/redirect-to-https: "True"
-    nginx.org/client-max-body-size: "0"
-    nginx.org/proxy-request-buffering: "off"
-    nginx.org/proxy-connect-timeout: 3600s
-    nginx.org/proxy-send-timeout: 3600s
-    nginx.org/proxy-read-timeout: 3600s
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
 spec:
   ingressClassName: nginx

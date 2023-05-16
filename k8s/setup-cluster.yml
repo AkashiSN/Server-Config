@@ -14,5 +14,5 @@
     - variable
     - role: cluster
       vars:
-        environment: "staging"
+        target_env: "staging" # staging or production
     - reboot
