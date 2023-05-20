@@ -87,7 +87,11 @@ function generate_keys() {
 	#
 	# Diffie-Hellman (DH) key
 	#
-	openssl dhparam -out "${SERVER_CERT_DIR}/dh.pem" -2 4096
+	if [ -e "${OPENVPN_DIR}/dh.pem" ];then
+		mv "${OPENVPN_DIR}/dh.pem" "${SERVER_CERT_DIR}/dh.pem"
+	else
+		openssl dhparam -out "${SERVER_CERT_DIR}/dh.pem" -2 4096
+	fi
 
 	#
 	# TLS-Crypt key
@@ -119,8 +123,8 @@ function generate_client() {
 client
 nobind
 dev tun0
-remote ${FQDN} 1194 udp6
-resolv-retry infinite
+remote ${FQDN} 1194 udp
+resolv-retry 30
 
 redirect-gateway def1
 

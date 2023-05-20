@@ -7,7 +7,7 @@ Create pass phrase
 # Set env file
 cat <<EOF > /etc/openvpn/.openvpn.env
 FQDN="host"
-CLIENTS="MacBookPro13 Pixel6Pro"
+CLIENTS="MacBookPro13 Pixel6Pro iPadPro11 Xperia10IV"
 EOF
 ```
 
@@ -16,6 +16,8 @@ curl -o /etc/openvpn/openvpn.sh -L https://raw.githubusercontent.com/AkashiSN/Se
 chmod +x /etc/openvpn/openvpn.sh
 
 /etc/openvpn/openvpn.sh
+
+echo "/etc/openvpn/" >> /etc/sysupgrade.conf
 ```
 
 ## Add Client
@@ -28,22 +30,33 @@ chmod +x /etc/openvpn/openvpn.sh
 ```bash
 # Configure server.
 cat << EOS > /etc/config/openvpn
-config openvpn 'server'
-	option keepalive '10 60'
-	option verb '3'
-	option ca '/etc/openvpn/demoCA/cacert.pem'
+config openvpn 'server_udp'
+	option enabled '1'
+	option dev 'tun0'
+	option port '1194'
+	option compress 'stub-v2'
 	option dh '/etc/openvpn/server/dh.pem'
+	option ca '/etc/openvpn/demoCA/cacert.pem'
 	option cert '/etc/openvpn/server/server_cert.pem'
 	option key '/etc/openvpn/server/server_key.pem'
 	option tls_crypt '/etc/openvpn/server/tls_crypt.key'
-	option dev 'tun0'
-	option comp_lzo 'no'
 	option auth 'SHA256'
 	option cipher 'AES-256-GCM'
 	option key_direction '0'
-	option compress 'stub-v2'
-	option topology 'subnet'
-	option enabled '1'
+	option keepalive '10 60'
+	option persist_tun '1'
+	option persist_key '1'
+	option user 'nobody'
+	option group 'nogroup'
+	option verb '5'
 	option server '172.18.254.0 255.255.255.0'
-	option port '1194'
+	option topology 'subnet'
+	list push 'dhcp-option DNS 172.16.254.110'
+	list push 'route 172.16.0.0 255.255.255.0'
+	list push 'route 172.16.10.0 255.255.255.0'
+	list push 'route 172.16.100.0 255.255.255.0'
+	list push 'route 172.16.254.0 255.255.255.0'
+	list push 'block-ipv6'
+	list push 'persist-tun'
+	list push 'persist-key'
 ```

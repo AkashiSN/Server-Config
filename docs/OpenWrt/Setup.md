@@ -6,9 +6,11 @@ https://www.jwtechtips.top/how-to-install-openwrt-in-proxmox/
 
 ```bash
 OPENWRT_VERSION=22.03.5
-wget https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/x86/64/openwrt-${OPENWRT_VERSION}-x86-64-generic-squashfs-combined.img.gz
+wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/x86/64/openwrt-${OPENWRT_VERSION}-x86-64-generic-ext4-combined.img.gz
+wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/bcm27xx/bcm2711/openwrt-${OPENWRT_VERSION}-bcm27xx-bcm2711-rpi-4-ext4-sysupgrade.img.gz
+wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/rockchip/armv8/openwrt-${OPENWRT_VERSION}-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz
 
-sysupgrade -v ./openwrt-${OPENWRT_VERSION}-x86-64-generic-squashfs-combined.img.gz
+sysupgrade -v ./openwrt.img.gz
 ```
 
 ```sh
