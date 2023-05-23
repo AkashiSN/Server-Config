@@ -17,7 +17,7 @@ sysupgrade -v ./openwrt.img.gz
 opkg update
 
 # Install ja package
-opkg install luci-i18n-base-ja luci-i18n-firewall-ja luci-i18n-opkg-ja
+opkg install luci-i18n-base-ja luci-i18n-firewall-ja luci-i18n-opkg-ja luci-i18n-uhttpd-ja
 
 # Install curl
 opkg install curl
@@ -110,6 +110,9 @@ opkg install luci-i18n-ddns-ja ddns-scripts-cloudflare
 
 # Install Wake on Lan
 opkg install luci-i18n-wol-ja
+
+# Install ACME
+opkg install luci-i18n-acme-ja acme-dnsapi
 
 # Install Quemu Guest Agent
 opkg install qemu-ga

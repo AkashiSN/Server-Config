@@ -70,6 +70,22 @@ kubectl exec -it -n wordpress wordpress-0 -c wordpress -- bash
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- /bin/sh -c 'su www-data --shel=/bin/sh --command="wp <command>"'
 ```
 
+- Stop
+```bash
+kubectl patch cronjobs wordpress-cronjob -n wordpress -p "{\"spec\" : {\"suspend\" : true }}"
+kubectl scale statefulset wordpress -n wordpress --replicas=0
+kubectl scale statefulset wordpress-mariadb -n wordpress --replicas=0
+kubectl scale deployment wordpress-redis -n wordpress --replicas=0
+```
+
+- Restart
+```bash
+kubectl scale deployment wordpress-redis -n wordpress --replicas=1
+kubectl scale statefulset wordpress-mariadb -n wordpress --replicas=1
+kubectl scale statefulset wordpress -n wordpress --replicas=1
+kubectl patch cronjobs wordpress-cronjob -n wordpress -p "{\"spec\" : {\"suspend\" : false }}"
+```
+
 ### Buiildkit
 
 ```bash
