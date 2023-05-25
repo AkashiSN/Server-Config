@@ -13,7 +13,8 @@
     - import_tasks: nginx-ingress.yml
     - import_tasks: cert-manager.yml
     - import_tasks: metrics-server.yml
-    - import_tasks: prometheus.yml
+    - import_tasks: democratic-csi.yml
+    - import_tasks: monitoring.yml
   when: inventory_hostname == "master-node"
   become: false
 

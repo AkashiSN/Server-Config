@@ -13,7 +13,7 @@
   ignore_errors: yes
   become: false
 
-- name: Deploy metrics-server chart using set values on target
+- name: Deploy metrics-server chart on target
   kubernetes.core.helm:
     release_name: metrics-server
     chart_ref: metrics-server/metrics-server

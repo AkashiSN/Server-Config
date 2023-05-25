@@ -49,6 +49,21 @@
             set-real-ip-from: "{{ real_ip_from }}"
             real-ip-recursive: "True"
             real-ip-header: "X-Forwarded-For"
+            log-format: |
+              time=$time_iso8601
+              server_name=$server_name
+              remote_addr=$remote_addr
+              remote_port=$realip_remote_port
+              country=$http_cf_ipcountry
+              method=$request_method
+              uri="$request_uri"
+              proto=$server_protocol
+              status=$status
+              body_sent=$body_bytes_sent
+              referer="$http_referer"
+              forwarded_for=$http_x_forwarded_for
+              request_time=$request_time
+              user_agent="$http_user_agent"
   register: nginx_ingress_helm_chart_install
   when: nginx_ingress_helm_chart_result.rc != 0
   become: false

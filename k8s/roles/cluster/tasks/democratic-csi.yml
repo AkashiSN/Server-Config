@@ -1,0 +1,67 @@
+---
+# file: roles/cluster/tasks/democratic-csi.yml
+- name: Add democratic-csi Helm charts repository
+  kubernetes.core.helm_repository:
+    name: democratic-csi
+    repo_url: https://democratic-csi.github.io/charts/
+  become: false
+
+- name: Check if democratic-csi Helm chart is installed
+  shell: helm list --all-namespaces --deployed --short | grep democratic-csi
+  register: democratic_csi_helm_chart_result
+  changed_when: democratic_csi_helm_chart_result.rc != 0
+  ignore_errors: yes
+  become: false
+
+- name: Deploy democratic-csi chart using set values on target
+  kubernetes.core.helm:
+    release_name: democratic-csi
+    chart_ref: democratic-csi/democratic-csi
+    release_namespace: democratic-csi
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    release_values:
+      csiDriver:
+        name: "org.democratic-csi.nfs"
+      storageClasses:
+        - name: truenas-nfs-csi
+          defaultClass: false
+          reclaimPolicy: Retain
+          volumeBindingMode: WaitForFirstConsumer
+          allowVolumeExpansion: true
+          parameters:
+            fsType: nfs
+          mountOptions:
+            - noatime
+            - nfsvers=4
+      driver:
+        config:
+          driver: freenas-api-nfs
+          instance_id:
+          httpConnection:
+            protocol: https
+            host: "{{ truenas_host }}"
+            port: 443
+            apiKey: "{{ truenas_apikey }}"
+            apiVersion: 2
+          zfs:
+            datasetParentName: ssd/k8s/vols
+            detachedSnapshotsDatasetParentName: ssd/k8s/snaps
+            datasetEnableQuotas: true
+            datasetEnableReservation: false
+            datasetPermissionsMode: "0777"
+            datasetPermissionsUser: 0
+            datasetPermissionsGroup: 0
+          nfs:
+            shareHost: 172.16.255.1
+            shareAlldirs: false
+            shareAllowedHosts: []
+            shareAllowedNetworks: []
+            shareMaprootUser: root
+            shareMaprootGroup: wheel
+            shareMapallUser: ""
+            shareMapallGroup: ""
+  when: democratic_csi_helm_chart_result.rc != 0
+  become: false

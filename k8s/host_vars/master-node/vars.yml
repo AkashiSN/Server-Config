@@ -4,6 +4,9 @@ ipv6_service_cider: "cafe:1::/112"
 # metallb
 metallb_ipv4_range: "172.16.254.100-172.16.254.150"
 metallb_ipv6_cider: "ffff:fac:ade::/112"
+# truenas
+truenas_host: "{{ vault_truenas_host }}"
+truenas_apikey: "{{ vault_truenas_apikey }}"
 # nginx-ingress
 nginx_ingress_lb_v4_addr: "172.16.254.100"
 nginx_ingress_lb_v6_host_addr: "ffff:fac:ade:100"
@@ -11,6 +14,7 @@ nginx_ingress_lb_v6_host_addr: "ffff:fac:ade:100"
 cloudflare_token: "{{ vault_cloudflare_token }}"
 email: "{{ vault_email }}"
 # grafana
+grafana_admin_user: "admin"
 grafana_admin_password: "{{ vault_grafana_admin_password }}"
 grafana_host: "{{ vault_grafana_host }}"
 # dns
