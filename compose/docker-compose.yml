@@ -103,7 +103,7 @@ services:
       - "10053/udp"
     networks:
       internal:
-        ipv4_address: "172.20.0.10"
+        ipv4_address: "172.25.0.10"
       external:
     restart: always
 
