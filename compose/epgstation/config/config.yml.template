@@ -3,8 +3,8 @@ socketioPort: 8888
 clientSocketioPort: 443
 mirakurunPath: http://mirakurun:40772
 apiServers:
-  - https://tv.${DOMAIN}
-  - https://tv-local.${DOMAIN}
+  - https://tv.akashisn.info
+  - https://tv-local.akashisn.info
 
 dbtype: mysql
 mysql:

@@ -14,8 +14,14 @@ services:
       - /dev/bus:/dev/bus
       - /dev/dvb:/dev/dvb
     volumes:
-      - ./mirakurun/config/:/app-config/
-      - ./mirakurun/data/:/app-data/
+      - type: bind
+        source: ./mirakurun/config
+        target: /app-config
+        read_only: false
+      - type: bind
+        source: ./mirakurun/data
+        target: /app-data
+        read_only: false
     environment:
       TZ: Asia/Tokyo
       LOG_LEVEL: "3"
@@ -45,16 +51,27 @@ services:
   epgstation:
     image: ghcr.io/akashisn/epgstation
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./epgstation/config:/app/config
-      - ./epgstation/thumbnail:/app/thumbnail
-      - /media/recorded:/app/recorded
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+      - type: bind
+        source: ./epgstation/config
+        target: /app/config
+        read_only: false
+      - type: bind
+        source: ./epgstation/thumbnail
+        target: /app/thumbnail
+        read_only: false
+      - type: bind
+        source: /mnt/recorded
+        target: /app/recorded
+        read_only: false
     devices:
       - /dev/dri:/dev/dri
     environment:
       TZ: "Asia/Tokyo"
       HOME: /app
-      DOMAIN: ${DOMAIN}
       MYSQL_PASSWORD: ${MYSQL_EPGSTATION_PASSWORD}
     expose:
       - "8888"
@@ -65,7 +82,7 @@ services:
       - mariadb_epgstation
     command: >
       /bin/sh -c
-        "envsubst '$$MYSQL_PASSWORD $$DOMAIN' < /app/config/config.yml.template > /app/config/config.yml
+        "envsubst '$$MYSQL_PASSWORD' < /app/config/config.yml.template > /app/config/config.yml
         npm start"
     restart: always
 
@@ -98,8 +115,12 @@ services:
         target: /etc/dnsdist.conf
         read_only: true
       - type: bind
-        source: /etc/letsencrypt
-        target: /etc/letsencrypt
+        source: /etc/certificates/dns-akashisn-info.crt
+        target: /certs/tls.crt
+        read_only: true
+      - type: bind
+        source: /etc/certificates/dns-akashisn-info.key
+        target: /certs/tls.key
         read_only: true
     environment:
       TZ: "Asia/Tokyo"
@@ -113,7 +134,6 @@ services:
     networks:
       internal:
       external:
-        ipv6_address: ${DOCKER_IPV6_SUBNET}::50
     restart: always
 
   #
@@ -140,8 +160,20 @@ services:
         target: /etc/nginx/conf.d/dns.conf
         read_only: true
       - type: bind
-        source: /etc/letsencrypt
-        target: /etc/letsencrypt
+        source: /etc/certificates/tv-akashisn-info.crt
+        target: /etc/certificates/tv-akashisn-info.crt
+        read_only: true
+      - type: bind
+        source: /etc/certificates/tv-akashisn-info.key
+        target: /etc/certificates/tv-akashisn-info.key
+        read_only: true
+      - type: bind
+        source: /etc/certificates/dns-akashisn-info.crt
+        target: /etc/certificates/dns-akashisn-info.crt
+        read_only: true
+      - type: bind
+        source: /etc/certificates/dns-akashisn-info.key
+        target: /etc/certificates/dns-akashisn-info.key
         read_only: true
     environment:
       TZ: "Asia/Tokyo"
@@ -152,15 +184,13 @@ services:
     networks:
       internal:
       external:
-        ipv6_address: ${DOCKER_IPV6_SUBNET}::33
     depends_on:
+      - dnsdist
       - epgstation
     restart: always
 
 volumes:
   mariadb_epgstation:
-    driver: local
-  log_volume:
     driver: local
 
 networks:
@@ -169,6 +199,6 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: "172.20.0.0/24"
+        - subnet: "172.25.0.0/24"
   external:
-    external: true
+    internal: false

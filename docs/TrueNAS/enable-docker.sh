@@ -53,33 +53,6 @@ echo "Install latest docker"
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-## set the Docker storage-driver
-version="$(cut -c 1-5 </etc/version | tr -d .)"
-
-if ! [[ "${version}" =~ ^[0-9]+$ ]]; then
-  echo "version is not an integer: ${version}"
-  exit 1
-elif [ "${version}" -le 2204 ]; then
-  storage_driver='zfs'
-elif [ "${version}" -ge 2212 ]; then
-  storage_driver='overlay2'
-fi
-
-## HEREDOC: docker/daemon.json
-read -r -d '' JSON <<END_JSON
-{
-  "data-root": "${docker_dataset}",
-  "storage-driver": "${storage_driver}",
-  "bip": "172.20.0.254/24",
-  "exec-opts": [
-    "native.cgroupdriver=cgroupfs"
-  ]
-}
-END_JSON
-
-## path to docker daemon file
-docker_daemon='/etc/docker/daemon.json'
-
 if [ "$(systemctl is-enabled k3s)" == "enabled" ]; then
   echo "You can not use this script while k3s is enabled"
   exit 1
@@ -92,17 +65,39 @@ fi
 
 if ! zfs list "${docker_dataset}" &>/dev/null; then
   echo "Dataset not found: ${docker_dataset}"
-else
-  echo "Checking file: ${docker_daemon}"
-  if test "${JSON}" != "$(cat ${docker_daemon} 2>/dev/null)"; then
-    echo "Updating file: ${docker_daemon}"
-    jq -n "${JSON}" >${docker_daemon}
-    if [ "$(systemctl is-active docker)" == "active" ]; then
-      echo "Restarting Docker"
-      systemctl restart docker
-    elif [ "$(systemctl is-enabled docker)" != "enabled" ]; then
-      echo "Enable and starting Docker"
-      systemctl enable --now docker
-    fi
-  fi
+  exit 1
+fi
+
+echo "set the Docker storage-driver"
+version="$(cut -c 1-5 </etc/version | tr -d .)"
+
+if ! [[ "${version}" =~ ^[0-9]+$ ]]; then
+  echo "version is not an integer: ${version}"
+  exit 1
+elif [ "${version}" -le 2204 ]; then
+  storage_driver='zfs'
+elif [ "${version}" -ge 2212 ]; then
+  storage_driver='overlay2'
+fi
+
+echo "create daemon.json"
+cat <<EOF | tee /etc/docker/daemon.json
+{
+  "data-root": "${docker_dataset}",
+  "storage-driver": "${storage_driver}",
+  "bip": "172.20.0.254/24",
+  "exec-opts": [
+    "native.cgroupdriver=cgroupfs"
+  ]
+}
+EOF
+
+if [ "$(systemctl is-active docker)" == "active" ]; then
+  echo "Restarting Docker"
+  systemctl restart docker
+fi
+
+if [ "$(systemctl is-enabled docker)" != "enabled" ]; then
+  echo "Enable and starting Docker"
+  systemctl enable --now docker
 fi
