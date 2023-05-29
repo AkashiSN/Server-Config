@@ -7,6 +7,8 @@ services:
 
   mirakurun:
     image: ghcr.io/akashisn/mirakurun
+    profiles:
+      - tv
     cap_add:
       - SYS_ADMIN
       - SYS_NICE
@@ -32,6 +34,8 @@ services:
     restart: always
 
   mariadb_epgstation:
+    profiles:
+      - tv
     image: mariadb:10.8
     volumes:
       - mariadb_epgstation:/var/lib/mysql
@@ -50,6 +54,8 @@ services:
 
   epgstation:
     image: ghcr.io/akashisn/epgstation
+    profiles:
+      - tv
     volumes:
       - type: bind
         source: /etc/localtime
@@ -92,6 +98,8 @@ services:
 
   dnsmasq:
     image: ghcr.io/akashisn/dnsmasq@sha256:e1125fba16d30716c9d0baf4dc3b01b67130e48541fc7caa11ed31818d5783b7
+    profiles:
+      - dns
     volumes:
       - type: bind
         source: ./dns/conf/dnsmasq.conf
@@ -102,13 +110,14 @@ services:
     expose:
       - "10053/udp"
     networks:
-      internal:
-        ipv4_address: "172.25.0.10"
       external:
+        ipv4_address: "172.20.15.10"
     restart: always
 
   dnsdist:
     image: ghcr.io/akashisn/dnsdist@sha256:3ae0e1f42c2eccfaaa236e494f9891a63bd0767193c4e1f38943dead35f587fc
+    profiles:
+      - dns
     volumes:
       - type: bind
         source: ./dns/conf/dnsdist.conf
@@ -129,11 +138,13 @@ services:
       - "443/tcp"
       - "853/tcp"
     ports:
-      - "53:53/udp"
-      - "853:853/tcp"
+      - "172.16.10.20:53:53/udp"
+      - "172.16.10.20:853:853/tcp"
+      - "172.16.10.20:443:443/tcp"
     networks:
-      internal:
       external:
+    depends_on:
+      - dnsmasq
     restart: always
 
   #
@@ -142,6 +153,8 @@ services:
 
   nginx:
     image: nginx:mainline
+    profiles:
+      - tv
     volumes:
       - type: bind
         source: ./nginx/conf/nginx.conf
@@ -156,10 +169,6 @@ services:
         target: /etc/nginx/conf.d/tv.conf
         read_only: true
       - type: bind
-        source: ./nginx/conf/dns.conf
-        target: /etc/nginx/conf.d/dns.conf
-        read_only: true
-      - type: bind
         source: /etc/certificates/tv-akashisn-info.crt
         target: /etc/certificates/tv-akashisn-info.crt
         read_only: true
@@ -167,25 +176,16 @@ services:
         source: /etc/certificates/tv-akashisn-info.key
         target: /etc/certificates/tv-akashisn-info.key
         read_only: true
-      - type: bind
-        source: /etc/certificates/dns-akashisn-info.crt
-        target: /etc/certificates/dns-akashisn-info.crt
-        read_only: true
-      - type: bind
-        source: /etc/certificates/dns-akashisn-info.key
-        target: /etc/certificates/dns-akashisn-info.key
-        read_only: true
     environment:
       TZ: "Asia/Tokyo"
     expose:
-      - "443"
+      - "443/tcp"
     ports:
-      - "8443:443"
+      - "172.16.10.15:443:443/tcp"
     networks:
       internal:
       external:
     depends_on:
-      - dnsdist
       - epgstation
     restart: always
 
@@ -199,6 +199,10 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: "172.25.0.0/24"
+        - subnet: "172.20.10.0/24"
   external:
     internal: false
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.20.15.0/24"
