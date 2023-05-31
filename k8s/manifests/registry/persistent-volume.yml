@@ -13,7 +13,7 @@ spec:
     namespace: registry
     name: data-registry-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: "{{ truenas_addr }}:3260"
     iqn: iqn.2005-10.org.freenas.ctl:registry
     lun: 0
     fsType: xfs

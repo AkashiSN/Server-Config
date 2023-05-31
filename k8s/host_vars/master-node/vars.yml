@@ -5,6 +5,7 @@ ipv6_service_cider: "cafe:1::/112"
 metallb_ipv4_range: "172.16.254.100-172.16.254.150"
 metallb_ipv6_cider: "ffff:fac:ade::/112"
 # truenas
+truenas_addr: "172.16.255.1"
 truenas_host: "{{ vault_truenas_host }}"
 truenas_apikey: "{{ vault_truenas_apikey }}"
 # nginx-ingress
