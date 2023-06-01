@@ -37,7 +37,7 @@
 - name: Apply the minecraft persistent-volumes config
   kubernetes.core.k8s:
     state: present
-    definition: "{{ lookup('file', 'manifests/minecraft/persistent-volume.yml') | from_yaml_all }}"
+    template: manifests/minecraft/persistent-volume.yml.j2
   become: false
 
 - name: Apply the minecraft config
