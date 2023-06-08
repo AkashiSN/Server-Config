@@ -101,8 +101,8 @@ spec:
               cpu: 300m
               memory: 200Mi
             limits:
-              cpu: 500m
-              memory: 1000Mi
+              cpu: 1000m
+              memory: 2000Mi
         - name: nginx
           image: nginx:mainline
           imagePullPolicy: IfNotPresent
@@ -133,7 +133,7 @@ spec:
               cpu: 100m
               memory: 1000Mi
             limits:
-              cpu: 300m
+              cpu: 500m
               memory: 2000Mi
       volumes:
         - name: nextcloud-init
