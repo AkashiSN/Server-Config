@@ -35,14 +35,6 @@
     update_cache: true
   become: true
 
-- name: Enable and start crio service
-  ansible.builtin.systemd:
-    name: crio
-    state: started
-    enabled: true
-    daemon_reload: true
-  become: true
-
 - name: Update ulimits in crio.conf
   ansible.builtin.replace:
     path: /etc/crio/crio.conf
@@ -52,4 +44,12 @@
         "nofile=65536:65536",
         "memlock=-1:-1"
       ]
+  become: true
+
+- name: Enable and start crio service
+  ansible.builtin.systemd:
+    name: crio
+    state: restarted
+    enabled: true
+    daemon_reload: true
   become: true

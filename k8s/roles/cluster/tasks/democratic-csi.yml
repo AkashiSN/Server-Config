@@ -28,8 +28,8 @@
       storageClasses:
         - name: truenas-nfs-csi
           defaultClass: false
-          reclaimPolicy: Retain
-          volumeBindingMode: WaitForFirstConsumer
+          reclaimPolicy: Delete
+          volumeBindingMode: Immediate
           allowVolumeExpansion: true
           parameters:
             fsType: nfs

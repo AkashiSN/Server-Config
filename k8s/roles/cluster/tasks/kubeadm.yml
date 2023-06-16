@@ -67,7 +67,7 @@
     dest: "{{ ansible_env.HOME }}/.kube/config"
     owner: "{{ ansible_env.USER }}"
     group: "{{ ansible_env.USER }}"
-    mode: 0644
+    mode: 0600
     remote_src: true
   when: inventory_hostname == "master-node"
   become: false

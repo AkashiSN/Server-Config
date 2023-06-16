@@ -34,6 +34,7 @@
 - import_tasks: swap.yml
 - import_tasks: logrotate.yml
 - import_tasks: kernel.yml
+- import_tasks: watchdog.yml
 - import_tasks: crio.yml
 - import_tasks: kubeadm.yml
 

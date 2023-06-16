@@ -18,8 +18,11 @@
   when: inventory_hostname == "master-node"
   become: false
 
-- name: Restart coredns
-  ansible.builtin.command:
-    cmd: "kubectl -n kube-system rollout restart deployment coredns"
+- name: Wait for all pods to be ready
+  command: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
+  retries: 60
+  delay: 10
   when: inventory_hostname == "master-node"
   become: false
