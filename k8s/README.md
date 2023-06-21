@@ -65,7 +65,7 @@ kubectl scale statefulset minecraft-vanilla -n minecraft --replicas=1
 ```bash
 kubectl get -n nextcloud pod
 kubectl describe -n nextcloud pod nextcloud-0
-kubectl logs -f -n nextcloud nextcloud-0 -c nextcloud
+kubectl logs -f -n nextcloud nextcloud-0 --tail 10 -c nextcloud
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- bash
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- /bin/sh -c 'su www-data --shel=/bin/sh --command="/usr/local/bin/php occ <command>"'
 ```
@@ -83,8 +83,7 @@ kubectl patch cronjobs nextcloud-cronjob -n nextcloud -p '{"spec" : {"suspend" :
 ```bash
 kubectl get -n wordpress pod,svc
 kubectl describe -n wordpress pod wordpress-0
-kubectl logs -f -n wordpress wordpress-mariadb-0
-kubectl logs -f -n wordpress wordpress-0 -c wordpress
+kubectl logs -f -n wordpress wordpress-0 --tail 10 -c wordpress
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- bash
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- /bin/sh -c 'su www-data --shel=/bin/sh --command="wp <command>"'
 ```

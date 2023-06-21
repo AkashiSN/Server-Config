@@ -45,7 +45,6 @@ data:
     run_as 'php /var/www/html/occ app:enable files_external'
     run_as 'php /var/www/html/occ app:enable twofactor_totp'
     run_as 'php /var/www/html/occ app:enable suspicious_login'
-    run_as 'php /var/www/html/occ app:enable admin_audit'
 
     run_as 'php /var/www/html/occ config:system:set default_phone_region --value=JP'
     run_as 'php /var/www/html/occ config:app:set files max_chunk_size --value 94371840' # 90MiB
