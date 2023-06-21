@@ -1,0 +1,23 @@
+#!/bin/sh
+
+kc="/usr/bin/kubectl --kubeconfig=/etc/kubernetes/admin.conf"
+
+$kc patch daemonset loki-canary -n monitoring -p '{"spec": {"template": {"spec": {"nodeSelector": {"non-existing": "true"}}}}}'
+$kc patch daemonset prometheus-prometheus-node-exporter -n monitoring -p '{"spec": {"template": {"spec": {"nodeSelector": {"non-existing": "true"}}}}}'
+$kc patch daemonset promtail -n monitoring -p '{"spec": {"template": {"spec": {"nodeSelector": {"non-existing": "true"}}}}}'
+
+$kc scale deployment grafana -n monitoring --replicas=0
+$kc scale deployment loki-gateway -n monitoring --replicas=0
+$kc scale deployment loki-grafana-agent-operator -n monitoring --replicas=0
+$kc scale deployment prometheus-kube-state-metrics -n monitoring --replicas=0
+$kc scale deployment prometheus-prometheus-pushgateway -n monitoring --replicas=0
+$kc scale deployment prometheus-server -n monitoring --replicas=0
+
+$kc scale statefulset loki -n monitoring --replicas=0
+$kc scale statefulset prometheus-alertmanager -n monitoring --replicas=0
+
+$kc patch daemonset loki-logs -n monitoring -p '{"spec": {"template": {"spec": {"nodeSelector": {"non-existing": "true"}}}}}'
+
+/usr/bin/sleep 10
+
+$kc delete -n monitoring pod --grace-period=0 --force $($kc get -n monitoring pod -l app.kubernetes.io/name=grafana-agent --no-headers -o custom-columns=":metadata.name")

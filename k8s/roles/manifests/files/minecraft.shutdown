@@ -1,0 +1,5 @@
+#!/bin/sh
+
+kc="/usr/bin/kubectl --kubeconfig=/etc/kubernetes/admin.conf"
+
+$kc scale statefulset minecraft-vanilla -n minecraft --replicas=0

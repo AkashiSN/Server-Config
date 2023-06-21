@@ -1,0 +1,14 @@
+[Unit]
+Description=Stop pod at shutdown
+DefaultDependencies=no
+After=kubelet.service
+Before=shutdown.target reboot.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/bin/true
+ExecStop=/bin/bash -c 'for script in /usr/lib/systemd/kube-shutdown/*.shutdown; do $script; done'
+
+[Install]
+WantedBy=multi-user.target

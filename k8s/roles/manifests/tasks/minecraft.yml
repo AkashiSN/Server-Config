@@ -54,3 +54,10 @@
   retries: 60
   delay: 10
   become: false
+
+- name: Copy minecraft.shutdown script
+  ansible.builtin.copy:
+    src: minecraft.shutdown
+    dest: /usr/lib/systemd/kube-shutdown/minecraft.shutdown
+    mode: 0755
+  become: true

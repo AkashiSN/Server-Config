@@ -100,3 +100,28 @@
     flat: true
   when: inventory_hostname == "master-node"
   become: false
+
+- name: Copy kube-shutdown.service configuration
+  ansible.builtin.copy:
+    src: kube-shutdown.service
+    dest: /etc/systemd/system/kube-shutdown.service
+    mode: 0644
+  when: inventory_hostname == "master-node"
+  become: true
+
+- name: Create directory
+  ansible.builtin.file:
+    path: /usr/lib/systemd/kube-shutdown/
+    state: directory
+    mode: 0755
+  when: inventory_hostname == "master-node"
+  become: true
+
+- name: Enable and start kube-shutdown service
+  ansible.builtin.systemd:
+    name: kube-shutdown
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: inventory_hostname == "master-node"
+  become: true

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+kc="/usr/bin/kubectl --kubeconfig=/etc/kubernetes/admin.conf"
+
+$kc patch cronjobs dns-cronjob -n dns -p '{"spec" : {"suspend" : true }}'

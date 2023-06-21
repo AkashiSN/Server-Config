@@ -86,3 +86,10 @@
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/cronjob.yml') | from_yaml_all }}"
   become: false
+
+- name: Copy nextcloud.shutdown script
+  ansible.builtin.copy:
+    src: nextcloud.shutdown
+    dest: /usr/lib/systemd/kube-shutdown/nextcloud.shutdown
+    mode: 0755
+  become: true

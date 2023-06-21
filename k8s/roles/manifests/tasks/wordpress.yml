@@ -85,3 +85,10 @@
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/cronjob.yml') | from_yaml_all }}"
   become: false
+
+- name: Copy wordpress.shutdown script
+  ansible.builtin.copy:
+    src: wordpress.shutdown
+    dest: /usr/lib/systemd/kube-shutdown/wordpress.shutdown
+    mode: 0755
+  become: true

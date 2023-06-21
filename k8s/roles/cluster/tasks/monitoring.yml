@@ -164,3 +164,10 @@
             - "{{ grafana_host }}"
   when: grafana_helm_chart_result.rc != 0
   become: false
+
+- name: Copy monitoring.shutdown script
+  ansible.builtin.copy:
+    src: monitoring.shutdown
+    dest: /usr/lib/systemd/kube-shutdown/monitoring.shutdown
+    mode: 0755
+  become: true
