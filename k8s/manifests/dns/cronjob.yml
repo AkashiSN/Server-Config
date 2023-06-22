@@ -38,7 +38,7 @@ metadata:
   namespace: dns
 spec:
   concurrencyPolicy: Forbid
-  schedule: "0 3 */2 * *"
+  schedule: "0 3 * * *"
   jobTemplate:
     spec:
       template:
