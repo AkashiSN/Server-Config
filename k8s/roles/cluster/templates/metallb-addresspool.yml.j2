@@ -1,0 +1,20 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default-pool
+  namespace: kube-system
+spec:
+  addresses:
+    - {{ metallb_ipv4_range }}
+{% if default_interface_v6.stdout != "" %}
+    - {{ ipv6_prefix.stdout }}:{{ metallb_ipv6_cider }}
+{% endif %}
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: l2-ip
+  namespace: kube-system
+spec:
+  ipAddressPools:
+    - default-pool

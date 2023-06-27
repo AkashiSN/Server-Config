@@ -29,6 +29,7 @@ cloudflare_ips:
 local_ips:
   # k8s pod network
   - 10.244.0.0/16
+  - 10.1.0.0/16
   # Local network
   - 172.16.0.0/16
 

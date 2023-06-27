@@ -1,0 +1,40 @@
+controller:
+  enableSnippets: true
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+    annotations:
+{% if default_interface_v6.stdout != "" %}
+      metallb.universe.tf/loadBalancerIPs: "{{ nginx_ingress_lb_v4_addr }},{{ ipv6_prefix.stdout }}:{{ nginx_ingress_lb_v6_host_addr }}"
+    ipFamilyPolicy: RequireDualStack
+{% else %}
+      metallb.universe.tf/loadBalancerIPs: "{{ nginx_ingress_lb_v4_addr }}"
+{% endif %}
+  config:
+    entries:
+    redirect-to-https: "True"
+    proxy-connect-timeout: 3600s
+    proxy-send-timeout: 3600s
+    proxy-read-timeout: 3600s
+    client-max-body-size: "0"
+    proxy-buffering: "True"
+    proxy-buffer-size: "64k"
+    proxy-buffers: "100 64k"
+    set-real-ip-from: "{{ real_ip_from }}"
+    real-ip-recursive: "True"
+    real-ip-header: "X-Forwarded-For"
+    log-format: |
+      time=$time_iso8601
+      server_name=$server_name
+      remote_addr=$remote_addr
+      remote_port=$realip_remote_port
+      country=$http_cf_ipcountry
+      method=$request_method
+      uri="$request_uri"
+      proto=$server_protocol
+      status=$status
+      body_sent=$body_bytes_sent
+      referer="$http_referer"
+      forwarded_for=$http_x_forwarded_for
+      request_time=$request_time
+      user_agent="$http_user_agent"

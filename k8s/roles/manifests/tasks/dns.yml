@@ -12,7 +12,7 @@
   shell: kubectl get -n dns cronjob dns-cronjob
   register: dns_cronjob_result
   changed_when: false
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Delete dns cronjob
@@ -40,10 +40,3 @@
     state: present
     definition: "{{ lookup('file', 'manifests/dns/cronjob.yml') | from_yaml_all }}"
   become: false
-
-- name: Copy dns.shutdown script
-  ansible.builtin.copy:
-    src: dns.shutdown
-    dest: /usr/lib/systemd/kube-shutdown/dns.shutdown
-    mode: 0755
-  become: true

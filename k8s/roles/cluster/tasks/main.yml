@@ -1,35 +1,57 @@
 ---
 # file: roles/cluster/tasks/main.yml
 
-# kubeadm init
-- import_tasks: kubeadm.yml
+- name: kubeadm init
+  ansible.builtin.import_tasks:
+    file: kubeadm.yml
+  when: inventory_hostname != "microk8s"
 
 # helm
 - name: helm setup
   block:
-    - import_tasks: helm.yml
-    - import_tasks: cilium.yml
-    - import_tasks: metallb.yml
-    - import_tasks: nginx-ingress.yml
-    - import_tasks: cert-manager.yml
-    - import_tasks: metrics-server.yml
-    - import_tasks: democratic-csi.yml
-    - import_tasks: monitoring.yml
-  when: inventory_hostname == "master-node"
+    - name: helm
+      ansible.builtin.import_tasks:
+        file: helm.yml
+
+    - name: cilium
+      ansible.builtin.import_tasks:
+        file: cilium.yml
+      when: inventory_hostname != "microk8s"
+
+    - name: metallb
+      ansible.builtin.import_tasks:
+        file: metallb.yml
+
+    - name: nginx-ingress
+      ansible.builtin.import_tasks:
+        file: nginx-ingress.yml
+
+    - name: cert-manager
+      ansible.builtin.import_tasks:
+        file: cert-manager.yml
+
+    - name: metrics-server
+      ansible.builtin.import_tasks:
+        file: metrics-server.yml
+      when: inventory_hostname != "microk8s"
+
+    - name: democratic-csi
+      ansible.builtin.import_tasks:
+        file: democratic-csi.yml
+      when: inventory_hostname != "microk8s"
+
+    - name: monitoring
+      ansible.builtin.import_tasks:
+        file: monitoring.yml
+      when: inventory_hostname != "microk8s"
+  when: inventory_hostname in groups["master"]
   become: false
 
-- name: Wait until all pods are ready or completed
-  shell: |
-    kubectl get pods -A -o jsonpath='{range .items[*]}{.metadata.name}:{.status.phase}{"\n"}{end}'
-  register: pod_status
-  until: >
-    pod_status.stdout.splitlines() |
-    map('regex_search', ':(Running|Succeeded)$') |
-    select('defined') |
-    list |
-    length == pod_status.stdout.splitlines() | length
+- name: Wait for all pods to be ready
+  command: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
-  changed_when: false
-  when: inventory_hostname == "master-node"
+  when: inventory_hostname in groups["master"]
   become: false

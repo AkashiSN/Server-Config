@@ -1,0 +1,6 @@
+---
+# file: roles/delete/tasks/main.yml
+- import_tasks: dns.yml
+- import_tasks: minecraft.yml
+- import_tasks: nextcloud.yml
+- import_tasks: wordpress.yml

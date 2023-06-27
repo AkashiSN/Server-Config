@@ -1,6 +1,6 @@
 ---
-# file: setup-app.yml
+# file: delete-app.yml
 - hosts: master # master-node or microk8s
   roles:
     - variable
-    - manifests
+    - delete

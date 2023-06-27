@@ -38,6 +38,8 @@ metadata:
   namespace: dns
 spec:
   concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
   schedule: "0 3 * * *"
   jobTemplate:
     spec:

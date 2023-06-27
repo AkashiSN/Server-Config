@@ -1,18 +1,11 @@
 ---
 # file: roles/manifests/tasks/main.yml
-- name: Wait until all pods are ready or completed
-  shell: |
-    kubectl get pods -A -o jsonpath='{range .items[*]}{.metadata.name}:{.status.phase}{"\n"}{end}'
-  register: pod_status
-  until: >
-    pod_status.stdout.splitlines() |
-    map('regex_search', ':(Running|Succeeded)$') |
-    select('defined') |
-    list |
-    length == pod_status.stdout.splitlines() | length
+- name: Wait for all pods to be ready
+  command: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
-  changed_when: false
   become: false
 
 - name: Apply the storage class config

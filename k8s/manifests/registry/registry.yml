@@ -66,12 +66,14 @@ spec:
         - name: certs
           secret:
             secretName: registry-cert
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
   volumeClaimTemplates:
     - metadata:
         name: data
       spec:
         accessModes:
-          - ReadWriteOnce
+          - ReadWriteOncePod
         storageClassName: iscsi-ssd-storage
         resources:
           requests:

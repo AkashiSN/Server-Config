@@ -19,6 +19,10 @@
   register: k8s_apt_version
   changed_when: false
 
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Install kubelet, kubeadm, and kubectl
   ansible.builtin.apt:
     name:
@@ -27,6 +31,7 @@
       - "kubectl={{ k8s_apt_version.stdout }}"
     state: present
     update_cache: true
+  when: "'kubelet' not in ansible_facts.packages"
   become: true
 
 - name: Hold kubelet, kubeadm, and kubectl packages

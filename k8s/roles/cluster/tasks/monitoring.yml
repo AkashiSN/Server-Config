@@ -26,7 +26,7 @@
   shell: helm list -n monitoring --deployed --short | grep prometheus
   register: prometheus_helm_chart_result
   changed_when: prometheus_helm_chart_result.rc != 0
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Deploy prometheus chart using set values on target
@@ -53,7 +53,7 @@
   shell: helm list -n monitoring --deployed --short | grep loki
   register: loki_helm_chart_result
   changed_when: loki_helm_chart_result.rc != 0
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Deploy loki chart using set values on target
@@ -84,7 +84,7 @@
   shell: helm list -n monitoring --deployed --short | grep promtail
   register: promtail_helm_chart_result
   changed_when: promtail_helm_chart_result.rc != 0
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Deploy promtail chart on target
@@ -104,7 +104,7 @@
   shell: helm list -n monitoring --deployed --short | grep grafana
   register: grafana_helm_chart_result
   changed_when: grafana_helm_chart_result.rc != 0
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Create grafana-secrets
@@ -164,10 +164,3 @@
             - "{{ grafana_host }}"
   when: grafana_helm_chart_result.rc != 0
   become: false
-
-- name: Copy monitoring.shutdown script
-  ansible.builtin.copy:
-    src: monitoring.shutdown
-    dest: /usr/lib/systemd/kube-shutdown/monitoring.shutdown
-    mode: 0755
-  become: true

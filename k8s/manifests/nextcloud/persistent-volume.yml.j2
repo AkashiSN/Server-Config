@@ -6,7 +6,7 @@ spec:
   capacity:
     storage: 30Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOncePod
   persistentVolumeReclaimPolicy: Retain
   storageClassName: iscsi-ssd-storage
   claimRef:
@@ -27,7 +27,7 @@ spec:
   capacity:
     storage: 8Ti
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOncePod
   persistentVolumeReclaimPolicy: Retain
   storageClassName: iscsi-hdd-storage
   claimRef:
@@ -48,7 +48,7 @@ spec:
   capacity:
     storage: 30Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOncePod
   persistentVolumeReclaimPolicy: Retain
   storageClassName: iscsi-ssd-storage
   claimRef:
@@ -69,7 +69,7 @@ spec:
   capacity:
     storage: 30Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOncePod
   persistentVolumeReclaimPolicy: Retain
   storageClassName: iscsi-ssd-storage
   claimRef:

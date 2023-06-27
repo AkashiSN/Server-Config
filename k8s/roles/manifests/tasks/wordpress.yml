@@ -35,7 +35,7 @@
   shell: kubectl get -n wordpress cronjob wordpress-cronjob
   register: wordpress_cronjob_result
   changed_when: false
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Delete wordpress cronjob
@@ -85,10 +85,3 @@
     state: present
     definition: "{{ lookup('file', 'manifests/wordpress/cronjob.yml') | from_yaml_all }}"
   become: false
-
-- name: Copy wordpress.shutdown script
-  ansible.builtin.copy:
-    src: wordpress.shutdown
-    dest: /usr/lib/systemd/kube-shutdown/wordpress.shutdown
-    mode: 0755
-  become: true

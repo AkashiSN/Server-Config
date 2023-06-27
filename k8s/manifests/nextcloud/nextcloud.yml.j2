@@ -144,12 +144,14 @@ spec:
         - name: nginx-conf
           configMap:
             name: nginx-conf
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
   volumeClaimTemplates:
     - metadata:
         name: app
       spec:
         accessModes:
-          - ReadWriteOnce
+          - ReadWriteOncePod
         storageClassName: iscsi-ssd-storage
         resources:
           requests:
@@ -158,7 +160,7 @@ spec:
         name: static
       spec:
         accessModes:
-          - ReadWriteOnce
+          - ReadWriteOncePod
         storageClassName: iscsi-ssd-storage
         resources:
           requests:
@@ -167,7 +169,7 @@ spec:
         name: data
       spec:
         accessModes:
-          - ReadWriteOnce
+          - ReadWriteOncePod
         storageClassName: iscsi-hdd-storage
         resources:
           requests:

@@ -38,6 +38,8 @@ metadata:
   namespace: registry
 spec:
   concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
   schedule: "0 4 * * *"
   jobTemplate:
     spec:

@@ -2,49 +2,41 @@
 ## Environment
 - Ubuntu 22.04
 
-## Install k8s
+## Install k8s - kubeadm
 
 ```bash
-ansible-playbook setup.yml
+ansible-playbook setup-cluster.yml
+
+sudo reboot
+
+ansible-playbook -l master-node setup-app.yml
+```
+
+## Install k8s - microk8s
+
+```bash
+ansible-playbook setup-cluster.yml
+
+sudo reboot
+
+ansible-playbook -l microk8s setup-app.yml
 ```
 
 ## Before shutdown
 
 ```bash
-sudo service kube-shutdown stop
+ansible-playbook -l "master-node or microk8s" delete-app.yml
 ```
 
 ## After power on
-### Monitoring
 
-- Restart
 ```bash
-kubectl patch daemonset loki-canary -n monitoring --type json -p='[{"op": "remove", "path": "/spec/template/spec/nodeSelector/non-existing"}]'
-kubectl patch daemonset loki-logs -n monitoring --type json -p='[{"op": "remove", "path": "/spec/template/spec/nodeSelector/non-existing"}]'
-kubectl patch daemonset prometheus-prometheus-node-exporter -n monitoring --type json -p='[{"op": "remove", "path": "/spec/template/spec/nodeSelector/non-existing"}]'
-kubectl patch daemonset promtail -n monitoring --type json -p='[{"op": "remove", "path": "/spec/template/spec/nodeSelector/non-existing"}]'
-
-kubectl scale deployment grafana -n monitoring --replicas=1
-kubectl scale deployment loki-gateway -n monitoring --replicas=1
-kubectl scale deployment loki-grafana-agent-operator -n monitoring --replicas=1
-kubectl scale deployment prometheus-kube-state-metrics -n monitoring --replicas=1
-kubectl scale deployment prometheus-prometheus-pushgateway -n monitoring --replicas=1
-kubectl scale deployment prometheus-server -n monitoring --replicas=1
-
-kubectl scale statefulset loki -n monitoring --replicas=1
-kubectl scale statefulset prometheus-alertmanager -n monitoring --replicas=1
-
-kubectl get all -n monitoring
+ansible-playbook -l "master-node or microk8s" setup-app.yml
 ```
 
 ### DNS
 ```bash
 kubectl get -n dns pod,svc
-```
-
-- Restart
-```bash
-kubectl patch cronjobs dns-cronjob -n dns -p '{"spec" : {"suspend" : false }}'
 ```
 
 ### Minecraft
@@ -53,11 +45,6 @@ kubectl patch cronjobs dns-cronjob -n dns -p '{"spec" : {"suspend" : false }}'
 kubectl get pod,svc -n minecraft
 kubectl logs -f -n minecraft minecraft-vanilla-0
 kubectl exec -it -n minecraft minecraft-vanilla-0 -- bash
-```
-
-- Restart
-```bash
-kubectl scale statefulset minecraft-vanilla -n minecraft --replicas=1
 ```
 
 ### Nextcloud
@@ -70,14 +57,6 @@ kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- bash
 kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- /bin/sh -c 'su www-data --shel=/bin/sh --command="/usr/local/bin/php occ <command>"'
 ```
 
-- Restart
-```bash
-kubectl scale deployment nextcloud-redis -n nextcloud --replicas=1
-kubectl scale statefulset nextcloud-mariadb -n nextcloud --replicas=1
-kubectl scale statefulset nextcloud -n nextcloud --replicas=1
-kubectl patch cronjobs nextcloud-cronjob -n nextcloud -p '{"spec" : {"suspend" : false }}'
-```
-
 ### Wordpress
 
 ```bash
@@ -86,14 +65,6 @@ kubectl describe -n wordpress pod wordpress-0
 kubectl logs -f -n wordpress wordpress-0 --tail 10 -c wordpress
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- bash
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- /bin/sh -c 'su www-data --shel=/bin/sh --command="wp <command>"'
-```
-
-- Restart
-```bash
-kubectl scale deployment wordpress-redis -n wordpress --replicas=1
-kubectl scale statefulset wordpress-mariadb -n wordpress --replicas=1
-kubectl scale statefulset wordpress -n wordpress --replicas=1
-kubectl patch cronjobs wordpress-cronjob -n wordpress -p '{"spec" : {"suspend" : false }}'
 ```
 
 ### Buiildkit

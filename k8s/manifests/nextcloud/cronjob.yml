@@ -38,6 +38,8 @@ metadata:
   namespace: nextcloud
 spec:
   concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
   schedule: "*/5 * * * *"
   jobTemplate:
     spec:

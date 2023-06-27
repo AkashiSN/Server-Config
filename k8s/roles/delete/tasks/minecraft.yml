@@ -1,0 +1,14 @@
+---
+# file: roles/delete/tasks/minecraft.yml
+- name: Delete the minecraft config
+  kubernetes.core.k8s:
+    state: absent
+    template: manifests/minecraft/minecraft.yml.j2
+    wait: true
+  become: false
+
+- name: Delete the minecraft persistent-volumes config
+  kubernetes.core.k8s:
+    state: absent
+    template: manifests/minecraft/persistent-volume.yml.j2
+  become: false

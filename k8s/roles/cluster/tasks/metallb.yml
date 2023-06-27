@@ -10,7 +10,7 @@
   shell: helm list --all-namespaces --deployed --short | grep metallb
   register: metallb_helm_chart_result
   changed_when: metallb_helm_chart_result.rc != 0
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Deploy metallb chart using set values on target
@@ -25,34 +25,9 @@
   when: metallb_helm_chart_result.rc != 0
   become: false
 
-- name: Create a metallb IPAddressPool config
+- name: Create a metallb AddressPool config
   kubernetes.core.k8s:
     state: present
-    definition:
-      apiVersion: metallb.io/v1beta1
-      kind: IPAddressPool
-      metadata:
-        name: default-pool
-        namespace: kube-system
-      spec:
-        addresses:
-        - "{{ metallb_ipv4_range }}"
-        - "{{ ipv6_prefix.stdout }}:{{ metallb_ipv6_cider }}"
+    template: metallb-addresspool.yml.j2
   when: metallb_helm_chart_install is changed
   become: false
-
-- name: Create a metallb L2Advertisement config
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: metallb.io/v1beta1
-      kind: L2Advertisement
-      metadata:
-        name: l2-ip
-        namespace: kube-system
-      spec:
-        ipAddressPools:
-        - default-pool
-  when: metallb_helm_chart_install is changed
-  become: false
-

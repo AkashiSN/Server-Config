@@ -1,0 +1,56 @@
+---
+# file: roles/common/tasks/microk8s.yml
+- name: Install "microk8s" snap
+  ansible.builtin.command:
+    cmd: snap install microk8s --classic --channel={{ k8s_major_version }}
+  become: true
+
+- name: Install "kubectl" snap
+  ansible.builtin.command:
+    cmd: snap install kubectl --classic --channel={{ k8s_major_version }}
+  become: true
+
+- name: Install "helm" snap
+  ansible.builtin.command:
+    cmd: snap install helm --classic
+  become: true
+
+- name: Wait microk8s is ready
+  ansible.builtin.command:
+    cmd: microk8s status --wait-ready
+  become: true
+
+- name: Get microk8s kubectl config
+  ansible.builtin.command:
+    cmd: microk8s kubectl config view --raw
+  register: microk8s_config
+  become: true
+
+- name: Create .kube directory in the user's home
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+  become: false
+
+- name: Copy config to user's .kube directory
+  ansible.builtin.copy:
+    content: "{{ microk8s_config.stdout }}"
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+    mode: 0600
+    remote_src: true
+  become: false
+
+- name: Enable metrics-server
+  ansible.builtin.command:
+    cmd: microk8s enable metrics-server
+  become: true
+
+- name: Wait for all pods to be ready
+  command: kubectl get pods -n kube-system -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
+  retries: 60
+  delay: 10
+  become: false

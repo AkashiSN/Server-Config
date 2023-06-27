@@ -51,12 +51,14 @@ spec:
         - name: wordpress-secrets
           secret:
             secretName: wordpress-secrets
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
   volumeClaimTemplates:
     - metadata:
         name: data
       spec:
         accessModes:
-          - ReadWriteOnce
+          - ReadWriteOncePod
         storageClassName: iscsi-ssd-storage
         resources:
           requests:

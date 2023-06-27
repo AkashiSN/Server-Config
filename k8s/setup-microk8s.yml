@@ -1,18 +1,15 @@
 ---
-# file: setup-cluster.yml
-- hosts: virtualmachines
+# file: setup-microk8s.yml
+- hosts: microk8s
   roles:
     - variable
     - role: common
       vars:
-        os: "xUbuntu_22.04"
         k8s_major_version: "1.27"
-      when: inventory_hostname != "microk8s"
 
-- hosts: virtualmachines
+- hosts: microk8s
   roles:
     - variable
     - role: cluster
       vars:
         target_env: "staging" # staging or production
-      when: inventory_hostname != "microk8s"

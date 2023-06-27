@@ -1,0 +1,41 @@
+---
+# file: roles/delete/tasks/wordpress.yml
+- name: Delete the wordpress cronjob config
+  kubernetes.core.k8s:
+    state: absent
+    definition: "{{ lookup('file', 'manifests/wordpress/cronjob.yml') | from_yaml_all }}"
+  become: false
+
+- name: Delete the wordpress config
+  kubernetes.core.k8s:
+    state: absent
+    template: manifests/wordpress/wordpress.yml.j2
+    wait: true
+  become: false
+
+- name: Delete the wordpress redis config
+  kubernetes.core.k8s:
+    state: absent
+    definition: "{{ lookup('file', 'manifests/wordpress/redis.yml') | from_yaml_all }}"
+    wait: true
+  become: false
+
+- name: Delete the wordpress mariadb config
+  kubernetes.core.k8s:
+    state: absent
+    definition: "{{ lookup('file', 'manifests/wordpress/mariadb.yml') | from_yaml_all }}"
+    wait: true
+  become: false
+
+- name: Delete the wordpress nginx-conf config
+  kubernetes.core.k8s:
+    state: absent
+    definition: "{{ lookup('file', 'manifests/wordpress/nginx-conf.yml') | from_yaml_all }}"
+    wait: true
+  become: false
+
+- name: Delete the wordpress persistent-volumes config
+  kubernetes.core.k8s:
+    state: absent
+    template: manifests/wordpress/persistent-volume.yml.j2
+  become: false

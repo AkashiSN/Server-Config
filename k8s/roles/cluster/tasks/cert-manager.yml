@@ -10,7 +10,7 @@
   shell: helm list --all-namespaces --deployed --short | grep cert-manager
   register: cert_manager_helm_chart_result
   changed_when: cert_manager_helm_chart_result.rc != 0
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Deploy cert-manager chart using set values on target

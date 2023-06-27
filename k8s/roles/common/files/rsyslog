@@ -14,8 +14,8 @@
 {
 	rotate 4
 	daily
-  dateext
-  dateformat _%Y-%m-%d
+	dateext
+	dateformat _%Y-%m-%d
 	missingok
 	notifempty
 	compress

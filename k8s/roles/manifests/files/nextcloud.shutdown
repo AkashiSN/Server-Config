@@ -1,8 +1,0 @@
-#!/bin/sh
-
-kc="/usr/bin/kubectl --kubeconfig=/etc/kubernetes/admin.conf"
-
-$kc patch cronjobs nextcloud-cronjob -n nextcloud -p '{"spec" : {"suspend" : true }}'
-$kc scale statefulset nextcloud -n nextcloud --replicas=0
-$kc scale statefulset nextcloud-mariadb -n nextcloud --replicas=0
-$kc scale deployment nextcloud-redis -n nextcloud --replicas=0

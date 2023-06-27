@@ -28,16 +28,25 @@
       - kubernetes
   become: false
 
-- import_tasks: iptables.yml
 - import_tasks: dns.yml
-- import_tasks: helm.yml
 - import_tasks: timezone.yml
 - import_tasks: swap.yml
 - import_tasks: logrotate.yml
 - import_tasks: kernel.yml
 - import_tasks: watchdog.yml
-- import_tasks: crio.yml
-- import_tasks: kubeadm.yml
+
+- name: for kubeadm
+  block:
+    - import_tasks: iptables.yml
+    - import_tasks: helm.yml
+    - import_tasks: crio.yml
+    - import_tasks: kubeadm.yml
+  when: inventory_hostname != "microk8s"
+
+- name: for microk8s
+  ansible.builtin.import_tasks:
+    file: microk8s.yml
+  when: inventory_hostname == "microk8s"
 
 - name: Update all packages to their latest version
   ansible.builtin.apt:

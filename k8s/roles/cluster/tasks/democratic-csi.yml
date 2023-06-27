@@ -10,7 +10,7 @@
   shell: helm list --all-namespaces --deployed --short | grep democratic-csi
   register: democratic_csi_helm_chart_result
   changed_when: democratic_csi_helm_chart_result.rc != 0
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Deploy democratic-csi chart using set values on target

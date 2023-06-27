@@ -36,7 +36,7 @@
   shell: kubectl get -n nextcloud cronjob nextcloud-cronjob
   register: nextcloud_cronjob_result
   changed_when: false
-  ignore_errors: yes
+  ignore_errors: true
   become: false
 
 - name: Delete nextcloud cronjob
@@ -86,10 +86,3 @@
     state: present
     definition: "{{ lookup('file', 'manifests/nextcloud/cronjob.yml') | from_yaml_all }}"
   become: false
-
-- name: Copy nextcloud.shutdown script
-  ansible.builtin.copy:
-    src: nextcloud.shutdown
-    dest: /usr/lib/systemd/kube-shutdown/nextcloud.shutdown
-    mode: 0755
-  become: true
