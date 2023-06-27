@@ -104,9 +104,6 @@ metadata:
   annotations:
 {% if default_interface_v6.stdout != "" %}
     metallb.universe.tf/loadBalancerIPs: "{{ dns_lb_v4_addr }},{{ ipv6_prefix.stdout }}:{{ dns_lb_v6_host_addr }}"
-  ipFamilies:
-    - IPv4
-    - IPv6
   ipFamilyPolicy: RequireDualStack
 {% else %}
     metallb.universe.tf/loadBalancerIPs: "{{ dns_lb_v4_addr }}"

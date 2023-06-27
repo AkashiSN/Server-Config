@@ -15,7 +15,7 @@ ansible-playbook -l master-node setup-app.yml
 ## Install k8s - microk8s
 
 ```bash
-ansible-playbook setup-cluster.yml
+ansible-playbook setup-microk8s.yml
 
 sudo reboot
 
