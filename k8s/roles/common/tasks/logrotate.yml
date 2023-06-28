@@ -16,7 +16,7 @@
   ansible.builtin.copy:
     src: rsyslog
     dest: /etc/logrotate.d/rsyslog
-    mode: 0644
+    mode: "0644"
   become: true
 
 - name: Restart logrotate service

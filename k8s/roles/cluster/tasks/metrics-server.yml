@@ -7,7 +7,11 @@
   become: false
 
 - name: Check if metrics-server Helm chart is installed
-  shell: helm list --all-namespaces --deployed --short | grep metrics-server
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep metrics-server
+    executable: /bin/bash
   register: metrics_server_helm_chart_result
   changed_when: metrics_server_helm_chart_result.rc != 0
   ignore_errors: true

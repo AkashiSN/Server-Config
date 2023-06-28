@@ -4,7 +4,7 @@
   ansible.builtin.get_url:
     url: "{{ item.url }}"
     dest: "{{ item.dest }}"
-    mode: 0644
+    mode: "0644"
   loop:
     - url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ os }}/Release.key
       dest: /usr/share/keyrings/libcontainers-archive-keyring.asc

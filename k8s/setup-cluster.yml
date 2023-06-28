@@ -1,6 +1,7 @@
 ---
 # file: setup-cluster.yml
-- hosts: virtualmachines
+- name: Setup common for kubeadm
+  hosts: virtualmachines
   roles:
     - variable
     - role: common
@@ -9,7 +10,8 @@
         k8s_major_version: "1.27"
       when: inventory_hostname != "microk8s"
 
-- hosts: virtualmachines
+- name: Setup cluster by kubeadm
+  hosts: virtualmachines
   roles:
     - variable
     - role: cluster

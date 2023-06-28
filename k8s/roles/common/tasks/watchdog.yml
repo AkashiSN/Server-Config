@@ -66,4 +66,5 @@
 - name: Run sync
   ansible.builtin.command:
     cmd: sync
+  changed_when: false
   become: true

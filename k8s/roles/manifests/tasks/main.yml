@@ -1,11 +1,13 @@
 ---
 # file: roles/manifests/tasks/main.yml
 - name: Wait for all pods to be ready
-  command: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  ansible.builtin.command:
+    cmd: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
   register: result
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
+  changed_when: false
   become: false
 
 - name: Apply the storage class config
@@ -14,7 +16,20 @@
     definition: "{{ lookup('file', 'manifests/storage-class.yml') | from_yaml_all }}"
   become: false
 
-- import_tasks: dns.yml
-- import_tasks: minecraft.yml
-- import_tasks: nextcloud.yml
-- import_tasks: wordpress.yml
+- name: Apply manifests
+  block:
+    - name: Import dns.yml
+      ansible.builtin.import_tasks:
+        file: dns.yml
+
+    - name: Import minecraft.yml
+      ansible.builtin.import_tasks:
+        file: minecraft.yml
+
+    - name: Import nextcloud.yml
+      ansible.builtin.import_tasks:
+        file: nextcloud.yml
+
+    - name: Import wordpress.yml
+      ansible.builtin.import_tasks:
+        file: wordpress.yml

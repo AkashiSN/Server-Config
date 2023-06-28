@@ -33,15 +33,19 @@
   become: false
 
 - name: Check if nextcloud cronjob is deployed
-  shell: kubectl get -n nextcloud cronjob nextcloud-cronjob
+  ansible.builtin.command:
+    cmd: kubectl get -n nextcloud cronjob nextcloud-cronjob
   register: nextcloud_cronjob_result
   changed_when: false
   ignore_errors: true
   become: false
 
 - name: Delete nextcloud cronjob
-  shell: kubectl delete -n nextcloud cronjob nextcloud-cronjob
+  ansible.builtin.command:
+    cmd: kubectl delete -n nextcloud cronjob nextcloud-cronjob
+  register: result
   when: nextcloud_cronjob_result.rc == 0
+  changed_when: result is not skipped
   become: false
 
 - name: Apply the nextcloud redis config
@@ -73,7 +77,8 @@
   become: false
 
 - name: Wait for all pods to be ready
-  command: kubectl get pods -n nextcloud -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  ansible.builtin.command:
+    cmd: kubectl get pods -n nextcloud -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
   register: result
   until: result.stdout.find("False") == -1
   retries: 60

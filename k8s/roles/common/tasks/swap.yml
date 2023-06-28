@@ -3,6 +3,7 @@
 - name: Turn off swap
   ansible.builtin.command:
     cmd: swapoff -a
+  changed_when: false
   become: true
 
 - name: Comment out swap entries in /etc/fstab

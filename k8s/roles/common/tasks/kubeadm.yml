@@ -4,7 +4,7 @@
   ansible.builtin.get_url:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     dest: /usr/share/keyrings/kubernetes-archive-keyring.asc
-    mode: 0644
+    mode: "0644"
   become: true
 
 - name: Add Kubernetes apt repository
@@ -15,7 +15,10 @@
 
 - name: Get K8S_APT_VERSION
   ansible.builtin.shell:
-    cmd: "apt-cache show kubelet | grep Version | grep {{ k8s_major_version }} | head -n 1 | cut -d ' ' -f 2"
+    cmd: |
+      set -o pipefail
+      apt-cache show kubelet | grep Version | grep {{ k8s_major_version }} | head -n 1 | cut -d ' ' -f 2
+    executable: /bin/bash
   register: k8s_apt_version
   changed_when: false
 
@@ -48,6 +51,7 @@
   ansible.builtin.lineinfile:
     path: /etc/default/kubelet
     line: 'KUBELET_EXTRA_ARGS="--node-ip={{ node_ip.stdout }}"'
+    mode: "0644"
     create: true
   become: true
 
@@ -69,4 +73,5 @@
 - name: Update GRUB
   ansible.builtin.command:
     cmd: update-grub
+  changed_when: false
   become: true

@@ -7,7 +7,11 @@
   become: false
 
 - name: Check if metallb Helm chart is installed
-  shell: helm list --all-namespaces --deployed --short | grep metallb
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep metallb
+    executable: /bin/bash
   register: metallb_helm_chart_result
   changed_when: metallb_helm_chart_result.rc != 0
   ignore_errors: true
@@ -29,5 +33,7 @@
   kubernetes.core.k8s:
     state: present
     template: metallb-addresspool.yml.j2
-  when: metallb_helm_chart_install is changed
+  register: result
+  when: metallb_helm_chart_install is not skipped
+  changed_when: result is defined
   become: false

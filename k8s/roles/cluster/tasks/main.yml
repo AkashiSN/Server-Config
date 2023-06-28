@@ -1,57 +1,57 @@
 ---
 # file: roles/cluster/tasks/main.yml
 
-- name: kubeadm init
+- name: Import kubeadm init task
   ansible.builtin.import_tasks:
     file: kubeadm.yml
   when: inventory_hostname != "microk8s"
 
-# helm
-- name: helm setup
+- name: Setup helm
+  when: inventory_hostname in groups["master"]
+  become: false
   block:
-    - name: helm
+    - name: Import helm.yml
       ansible.builtin.import_tasks:
         file: helm.yml
 
-    - name: cilium
+    - name: Import cilium.yml
       ansible.builtin.import_tasks:
         file: cilium.yml
       when: inventory_hostname != "microk8s"
 
-    - name: metallb
+    - name: Import metallb.yml
       ansible.builtin.import_tasks:
         file: metallb.yml
 
-    - name: nginx-ingress
+    - name: Import nginx-ingress.yml
       ansible.builtin.import_tasks:
         file: nginx-ingress.yml
 
-    - name: cert-manager
+    - name: Import cert-manager.yml
       ansible.builtin.import_tasks:
         file: cert-manager.yml
 
-    - name: metrics-server
+    - name: Import metrics-server.yml
       ansible.builtin.import_tasks:
         file: metrics-server.yml
       when: inventory_hostname != "microk8s"
 
-    - name: democratic-csi
+    - name: Import democratic-csi.yml
       ansible.builtin.import_tasks:
         file: democratic-csi.yml
       when: inventory_hostname != "microk8s"
 
-    - name: monitoring
+    - name: Import monitoring.yml
       ansible.builtin.import_tasks:
         file: monitoring.yml
       when: inventory_hostname != "microk8s"
-  when: inventory_hostname in groups["master"]
-  become: false
 
 - name: Wait for all pods to be ready
-  command: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  ansible.builtin.command:
+    cmd: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
   register: result
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
-  when: inventory_hostname in groups["master"]
+  changed_when: false
   become: false

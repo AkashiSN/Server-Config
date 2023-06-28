@@ -4,7 +4,7 @@
   ansible.builtin.get_url:
     url: https://baltocdn.com/helm/signing.asc
     dest: /usr/share/keyrings/helm.asc
-    mode: 0644
+    mode: "0644"
   become: true
 
 - name: Add Helm repository

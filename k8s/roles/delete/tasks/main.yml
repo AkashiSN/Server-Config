@@ -1,6 +1,19 @@
 ---
 # file: roles/delete/tasks/main.yml
-- import_tasks: dns.yml
-- import_tasks: minecraft.yml
-- import_tasks: nextcloud.yml
-- import_tasks: wordpress.yml
+- name: Delete from manifests
+  block:
+    - name: Import dns.yml
+      ansible.builtin.import_tasks:
+        file: dns.yml
+
+    - name: Import minecraft.yml
+      ansible.builtin.import_tasks:
+        file: minecraft.yml
+
+    - name: Import nextcloud.yml
+      ansible.builtin.import_tasks:
+        file: nextcloud.yml
+
+    - name: Import wordpress.yml
+      ansible.builtin.import_tasks:
+        file: wordpress.yml

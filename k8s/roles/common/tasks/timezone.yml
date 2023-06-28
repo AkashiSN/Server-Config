@@ -1,7 +1,7 @@
 ---
 # file: roles/common/tasks/timezone.yml
 - name: Set timezone to Asia/Tokyo
-  ansible.builtin.timezone:
+  community.general.timezone:
     name: Asia/Tokyo
   become: true
 

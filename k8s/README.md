@@ -7,7 +7,8 @@
 ```bash
 ansible-playbook setup-cluster.yml
 
-sudo reboot
+$ sudo reboot
+$ watch kubectl get pod -A
 
 ansible-playbook -l master-node setup-app.yml
 ```
@@ -17,7 +18,8 @@ ansible-playbook -l master-node setup-app.yml
 ```bash
 ansible-playbook setup-microk8s.yml
 
-sudo reboot
+$ sudo reboot
+$ watch kubectl get pod -A
 
 ansible-playbook -l microk8s setup-app.yml
 ```

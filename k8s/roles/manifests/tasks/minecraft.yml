@@ -48,9 +48,11 @@
   become: false
 
 - name: Wait for all pods to be ready
-  command: kubectl get pods -n minecraft -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  ansible.builtin.command:
+    cmd: kubectl get pods -n minecraft -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
   register: result
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
+  changed_when: false
   become: false

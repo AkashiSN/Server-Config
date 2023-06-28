@@ -3,47 +3,78 @@
 - name: Update all packages to their latest version
   ansible.builtin.apt:
     name: "*"
-    state: latest
+    state: latest # noqa package-latest
     update_cache: true
   become: true
 
 - name: Install a list of common packages
   ansible.builtin.apt:
     name:
-    - apt-transport-https
-    - ca-certificates
-    - curl
-    - open-iscsi
-    - python3-pip
-    - jq
-    - sysstat
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - open-iscsi
+      - python3-pip
+      - jq
+      - sysstat
     state: present
     update_cache: true
   become: true
 
-- name: install kubernetes pre-requisites
+- name: Install kubernetes pre-requisites
   ansible.builtin.pip:
     name:
       - pyyaml
       - kubernetes
   become: false
 
-- import_tasks: dns.yml
-- import_tasks: timezone.yml
-- import_tasks: swap.yml
-- import_tasks: logrotate.yml
-- import_tasks: kernel.yml
-- import_tasks: watchdog.yml
-
-- name: for kubeadm
+- name: For common
   block:
-    - import_tasks: iptables.yml
-    - import_tasks: helm.yml
-    - import_tasks: crio.yml
-    - import_tasks: kubeadm.yml
-  when: inventory_hostname != "microk8s"
+    - name: Import dns.yml
+      ansible.builtin.import_tasks:
+        file: dns.yml
 
-- name: for microk8s
+    - name: Import timezone.yml
+      ansible.builtin.import_tasks:
+        file: timezone.yml
+
+    - name: Import swap.yml
+      ansible.builtin.import_tasks:
+        file: swap.yml
+
+    - name: Import logrotate.yml
+      ansible.builtin.import_tasks:
+        file: logrotate.yml
+
+    - name: Import kernel.yml
+      ansible.builtin.import_tasks:
+        file: kernel.yml
+
+    - name: Import watchdog.yml
+      ansible.builtin.import_tasks:
+        file: watchdog.yml
+
+- name: For kubeadm
+  when: inventory_hostname != "microk8s"
+  become: true
+  block:
+    - name: Import iptables.yml
+      ansible.builtin.import_tasks:
+        file: iptables.yml
+
+    - name: Import helm.yml
+      ansible.builtin.import_tasks:
+        file: helm.yml
+
+    - name: Import crio.yml
+      ansible.builtin.import_tasks:
+        file: crio.yml
+
+    - name: Import kubeadm.yml
+      ansible.builtin.import_tasks:
+        file: kubeadm.yml
+
+- name: For microk8s
   ansible.builtin.import_tasks:
     file: microk8s.yml
   when: inventory_hostname == "microk8s"
@@ -51,6 +82,6 @@
 - name: Update all packages to their latest version
   ansible.builtin.apt:
     name: "*"
-    state: latest
+    state: latest # noqa package-latest
     update_cache: true
   become: true

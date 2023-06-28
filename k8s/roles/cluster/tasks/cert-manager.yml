@@ -7,7 +7,11 @@
   become: false
 
 - name: Check if cert-manager Helm chart is installed
-  shell: helm list --all-namespaces --deployed --short | grep cert-manager
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep cert-manager
+    executable: /bin/bash
   register: cert_manager_helm_chart_result
   changed_when: cert_manager_helm_chart_result.rc != 0
   ignore_errors: true

@@ -3,11 +3,12 @@
 - name: Install legacy iptables packages
   ansible.builtin.apt:
     name:
-    - iptables
-    - arptables
-    - ebtables
+      - iptables
+      - arptables
+      - ebtables
     state: present
     update_cache: true
+  register: apt_iptables_result
   become: true
 
 - name: Set alternatives for legacy versions
@@ -18,4 +19,6 @@
     - { name: ip6tables, path: /usr/sbin/ip6tables-legacy }
     - { name: arptables, path: /usr/sbin/arptables-legacy }
     - { name: ebtables, path: /usr/sbin/ebtables-legacy }
+  register: result
+  changed_when: false
   become: true

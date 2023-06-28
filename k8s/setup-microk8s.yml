@@ -1,13 +1,15 @@
 ---
 # file: setup-microk8s.yml
-- hosts: microk8s
+- name: Setup common for microk8s
+  hosts: microk8s
   roles:
     - variable
     - role: common
       vars:
         k8s_major_version: "1.27"
 
-- hosts: microk8s
+- name: Setup cluster by microk8s
+  hosts: microk8s
   roles:
     - variable
     - role: cluster

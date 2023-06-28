@@ -1,34 +1,67 @@
 ---
 # file: roles/common/tasks/microk8s.yml
+- name: Check if microk8s is installed
+  ansible.builtin.command:
+    cmd: snap list microk8s
+  register: snap_check_microk8s
+  failed_when: snap_check_microk8s.rc != 0 and 'no matching snaps installed' not in snap_check_microk8s.stderr
+  changed_when: false
+
 - name: Install "microk8s" snap
   ansible.builtin.command:
     cmd: snap install microk8s --classic --channel={{ k8s_major_version }}
+  register: result
+  when: '"no matching snaps installed" in snap_check_microk8s.stderr'
+  changed_when: result is not skipped
   become: true
+
+- name: Check if kubectl is installed
+  ansible.builtin.command:
+    cmd: snap list kubectl
+  register: snap_check_kubectl
+  failed_when: snap_check_kubectl.rc != 0 and 'no matching snaps installed' not in snap_check_kubectl.stderr
+  changed_when: false
 
 - name: Install "kubectl" snap
   ansible.builtin.command:
     cmd: snap install kubectl --classic --channel={{ k8s_major_version }}
+  register: result
+  when: '"no matching snaps installed" in snap_check_kubectl.stderr'
+  changed_when: result is not skipped
   become: true
+
+- name: Check if helm is installed
+  ansible.builtin.command:
+    cmd: snap list helm
+  register: snap_check_helm
+  failed_when: snap_check_helm.rc != 0 and 'no matching snaps installed' not in snap_check_helm.stderr
+  changed_when: false
 
 - name: Install "helm" snap
   ansible.builtin.command:
     cmd: snap install helm --classic
+  register: result
+  when: '"no matching snaps installed" in snap_check_helm.stderr'
+  changed_when: result is not skipped
   become: true
 
 - name: Wait microk8s is ready
   ansible.builtin.command:
     cmd: microk8s status --wait-ready
+  changed_when: false
   become: true
 
 - name: Get microk8s kubectl config
   ansible.builtin.command:
     cmd: microk8s kubectl config view --raw
   register: microk8s_config
+  changed_when: false
   become: true
 
 - name: Create .kube directory in the user's home
   ansible.builtin.file:
     path: "{{ ansible_env.HOME }}/.kube"
+    mode: "0700"
     state: directory
   become: false
 
@@ -38,19 +71,31 @@
     dest: "{{ ansible_env.HOME }}/.kube/config"
     owner: "{{ ansible_env.USER }}"
     group: "{{ ansible_env.USER }}"
-    mode: 0600
+    mode: "0600"
     remote_src: true
   become: false
+
+- name: Check metrics-server add-on is enabled
+  ansible.builtin.command:
+    cmd: microk8s status -a metrics-server
+  register: microk8s_addon_metrics_server
+  changed_when: false
+  become: true
 
 - name: Enable metrics-server
   ansible.builtin.command:
     cmd: microk8s enable metrics-server
+  when: microk8s_addon_metrics_server.stdout != "enabled"
+  register: result
+  changed_when: result is not skipped
   become: true
 
 - name: Wait for all pods to be ready
-  command: kubectl get pods -n kube-system -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  ansible.builtin.command:
+    cmd: kubectl get pods -n kube-system -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
   register: result
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
+  changed_when: false
   become: false

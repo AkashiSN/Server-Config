@@ -7,7 +7,11 @@
   become: false
 
 - name: Check if democratic-csi Helm chart is installed
-  shell: helm list --all-namespaces --deployed --short | grep democratic-csi
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep democratic-csi
+    executable: /bin/bash
   register: democratic_csi_helm_chart_result
   changed_when: democratic_csi_helm_chart_result.rc != 0
   ignore_errors: true

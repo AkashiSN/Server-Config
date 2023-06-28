@@ -32,15 +32,19 @@
   become: false
 
 - name: Check if wordpress cronjob is deployed
-  shell: kubectl get -n wordpress cronjob wordpress-cronjob
+  ansible.builtin.command:
+    cmd: kubectl get -n wordpress cronjob wordpress-cronjob
   register: wordpress_cronjob_result
   changed_when: false
   ignore_errors: true
   become: false
 
 - name: Delete wordpress cronjob
-  shell: kubectl delete -n wordpress cronjob wordpress-cronjob
+  ansible.builtin.command:
+    cmd: kubectl delete -n wordpress cronjob wordpress-cronjob
+  register: result
   when: wordpress_cronjob_result.rc == 0
+  changed_when: result is not skipped
   become: false
 
 - name: Apply the wordpress redis config
@@ -72,7 +76,8 @@
   become: false
 
 - name: Wait for all pods to be ready
-  command: kubectl get pods -n wordpress -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  ansible.builtin.command:
+    cmd: kubectl get pods -n wordpress -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
   register: result
   until: result.stdout.find("False") == -1
   retries: 60

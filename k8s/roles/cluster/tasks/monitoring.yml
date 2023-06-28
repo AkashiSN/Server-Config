@@ -23,7 +23,11 @@
 
 # Prometheus
 - name: Check if prometheus Helm chart is installed
-  shell: helm list -n monitoring --deployed --short | grep prometheus
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep prometheus
+    executable: /bin/bash
   register: prometheus_helm_chart_result
   changed_when: prometheus_helm_chart_result.rc != 0
   ignore_errors: true
@@ -50,7 +54,11 @@
 
 # Loki
 - name: Check if loki Helm chart is installed
-  shell: helm list -n monitoring --deployed --short | grep loki
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep loki
+    executable: /bin/bash
   register: loki_helm_chart_result
   changed_when: loki_helm_chart_result.rc != 0
   ignore_errors: true
@@ -81,7 +89,11 @@
 
 # Promtail
 - name: Check if promtail Helm chart is installed
-  shell: helm list -n monitoring --deployed --short | grep promtail
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep promtail
+    executable: /bin/bash
   register: promtail_helm_chart_result
   changed_when: promtail_helm_chart_result.rc != 0
   ignore_errors: true
@@ -101,7 +113,11 @@
 
 # Grafana
 - name: Check if grafana Helm chart is installed
-  shell: helm list -n monitoring --deployed --short | grep grafana
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep grafana
+    executable: /bin/bash
   register: grafana_helm_chart_result
   changed_when: grafana_helm_chart_result.rc != 0
   ignore_errors: true
@@ -161,6 +177,6 @@
         tls:
           - secretName: letsencrypt-cert
             hosts:
-            - "{{ grafana_host }}"
+              - "{{ grafana_host }}"
   when: grafana_helm_chart_result.rc != 0
   become: false

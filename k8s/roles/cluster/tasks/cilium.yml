@@ -7,7 +7,11 @@
   become: false
 
 - name: Check if cilium Helm chart is installed
-  shell: helm list --all-namespaces --deployed --short | grep cilium
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep cilium
+    executable: /bin/bash
   register: cilium_helm_chart_result
   changed_when: cilium_helm_chart_result.rc != 0
   ignore_errors: true
@@ -47,7 +51,9 @@
   ansible.builtin.shell: >
     kubectl -n kube-system patch configmap/cilium-config --type merge
     -p "{\"data\":{\"enable-ipv6-ndp\": \"true\", \"ipv6-service-range\": \"{{ ipv6_prefix.stdout }}:{{ ipv6_service_cider }}\"}}"
-  when: cilium_helm_chart_install is changed
+  register: result
+  when: cilium_helm_chart_install is not skipped
+  changed_when: result is not skipped
   become: false
 
 - name: Restart cilium
@@ -56,13 +62,17 @@
   loop:
     - target: deploy cilium-operator
     - target: daemonset cilium
-  when: cilium_helm_chart_install is changed
+  register: result
+  when: cilium_helm_chart_install is not skipped
+  changed_when: result is not skipped
   become: false
 
 - name: Wait for all pods to be ready
-  command: kubectl get pods -n kube-system -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  ansible.builtin.command:
+    cmd: kubectl get pods -n kube-system -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
   register: result
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
+  changed_when: false
   become: false

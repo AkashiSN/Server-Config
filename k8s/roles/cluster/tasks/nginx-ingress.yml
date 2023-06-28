@@ -7,14 +7,18 @@
   become: false
 
 - name: Check if nginx-ingress Helm chart is installed
-  shell: helm list --all-namespaces --deployed --short | grep nginx-ingress
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep nginx-ingress
+    executable: /bin/bash
   register: nginx_ingress_helm_chart_result
   changed_when: nginx_ingress_helm_chart_result.rc != 0
   ignore_errors: true
   become: false
 
-- name: concat cloudflare_ips strings
-  set_fact:
+- name: Concat cloudflare_ips strings
+  ansible.builtin.set_fact:
     real_ip_from: "{{ cloudflare_ips | join(', ') }}, {{ local_ips | join(',') }}"
   become: false
 

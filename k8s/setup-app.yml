@@ -1,6 +1,7 @@
 ---
 # file: setup-app.yml
-- hosts: master # master-node or microk8s
+- name: Setup application
+  hosts: master # master-node or microk8s
   roles:
     - variable
     - manifests

@@ -1,6 +1,7 @@
 ---
 # file: delete-app.yml
-- hosts: master # master-node or microk8s
+- name: Delete application
+  hosts: master # master-node or microk8s
   roles:
     - variable
     - delete

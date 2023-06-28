@@ -2,24 +2,36 @@
 # file: roles/variable/tasks/main.yml
 - name: Get default network interface
   ansible.builtin.shell:
-    cmd: "ip route show default | sed -nE -e 's/.*dev (\\w+).*/\\1/p'"
+    cmd: |
+      set -o pipefail
+      ip route show default | sed -nE -e 's/.*dev (\w+).*/\1/p'
+    executable: /bin/bash
   register: default_interface
   changed_when: false
 
 - name: Get node IP
   ansible.builtin.shell:
-    cmd: "ip addr show dev {{ default_interface.stdout }} | sed -nE -e 's/.+inet ([0-9.]+).+/\\1/p'"
+    cmd: |
+      set -o pipefail
+      ip addr show dev {{ default_interface.stdout }} | sed -nE -e 's/.+inet ([0-9.]+).+/\1/p'
+    executable: /bin/bash
   register: node_ip
   changed_when: false
 
 - name: Get default v6 network interface
   ansible.builtin.shell:
-    cmd: "ip -6 route show default | sed -nE -e 's/.*dev (\\w+).*/\\1/p'"
+    cmd: |
+      set -o pipefail
+      ip -6 route show default | sed -nE -e 's/.*dev (\w+).*/\1/p'
+    executable: /bin/bash
   register: default_interface_v6
   changed_when: false
 
 - name: Get IPv6 prefix
   ansible.builtin.shell:
-    cmd: "ip -6 route show dev {{ default_interface_v6.stdout }} | sed -nE -e 's/(^[^(fe80)][0-9a-f:]+)::.+/\\1/p'"
+    cmd: |
+      set -o pipefail
+      ip -6 route show dev {{ default_interface_v6.stdout }} | sed -nE -e 's/(^[^(fe80)][0-9a-f:]+)::.+/\1/p' || true
+    executable: /bin/bash
   register: ipv6_prefix
   changed_when: false
