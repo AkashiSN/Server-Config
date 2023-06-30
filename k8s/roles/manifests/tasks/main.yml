@@ -22,9 +22,9 @@
       ansible.builtin.import_tasks:
         file: dns.yml
 
-    - name: Import minecraft.yml
-      ansible.builtin.import_tasks:
-        file: minecraft.yml
+    # - name: Import minecraft.yml
+    #   ansible.builtin.import_tasks:
+    #     file: minecraft.yml
 
     - name: Import nextcloud.yml
       ansible.builtin.import_tasks:

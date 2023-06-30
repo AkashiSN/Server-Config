@@ -14,3 +14,16 @@
     dest: /etc/sysctl.d/k8s.conf
     mode: "0644"
   become: true
+
+- name: Reload sysctl
+  ansible.builtin.command:
+    cmd: sysctl --system
+  changed_when: false
+  become: true
+
+- name: Reload and restart systemd-modules-load service
+  ansible.builtin.systemd:
+    name: systemd-modules-load
+    state: restarted
+    daemon_reload: true
+  become: true
