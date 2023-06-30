@@ -1,5 +1,10 @@
 # infra
 
+## Add snippets feature
+```bash
+pvesm set local --content vztmpl,snippets,iso,backup
+```
+
 ## Create template vm
 
 ```bash
@@ -33,6 +38,9 @@ pvesh create /access/users/terraform-prov@pve/token/terraform --privsep 0
 ```
 
 ## Plan and Apply
+
+Make sure you can login to the root of the pve node with `~/.ssh/id_ed25519`.
+Don't forget to set `PermitRootLogin prohibit-password` in `/etc/ssh/sshd_config`.
 
 ```bash
 terraform plan
