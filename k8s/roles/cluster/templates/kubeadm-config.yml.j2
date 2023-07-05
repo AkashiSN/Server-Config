@@ -12,8 +12,12 @@ networking:
   serviceSubnet: "10.96.0.0/16,{{ ipv6_prefix.stdout }}:{{ ipv6_service_cider }}"
 controllerManager:
   extraArgs:
+    bind-address: "{{ node_ip.stdout }}"
     node-cidr-mask-size-ipv4: "24"
     node-cidr-mask-size-ipv6: "112"
+scheduler:
+  extraArgs:
+    bind-address: "{{ node_ip.stdout }}"
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration

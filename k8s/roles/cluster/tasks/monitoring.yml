@@ -43,6 +43,10 @@
     wait: true
     atomic: true
     release_values:
+      serverFiles:
+        alerting_rules.yml: "{{ lookup('file', 'mixin/prometheus_alerts.yml') | from_yaml }}"
+        recording_rules.yml: "{{ lookup('file', 'mixin/prometheus_rules.yml') | from_yaml }}"
+        prometheus.yml: "{{ lookup('file', 'prometheus.yml') | from_yaml }}"
       server:
         persistentVolume:
           storageClass: truenas-nfs-csi
@@ -52,64 +56,64 @@
   when: prometheus_helm_chart_result.rc != 0
   become: false
 
-# Loki
-- name: Check if loki Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep loki
-    executable: /bin/bash
-  register: loki_helm_chart_result
-  changed_when: loki_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
+# # Loki
+# - name: Check if loki Helm chart is installed
+#   ansible.builtin.shell:
+#     cmd: |
+#       set -o pipefail
+#       helm list --all-namespaces --deployed --short | grep loki
+#     executable: /bin/bash
+#   register: loki_helm_chart_result
+#   changed_when: loki_helm_chart_result.rc != 0
+#   ignore_errors: true
+#   become: false
 
-- name: Deploy loki chart using set values on target
-  kubernetes.core.helm:
-    release_name: loki
-    chart_ref: grafana/loki
-    release_namespace: monitoring
-    create_namespace: true
-    update_repo_cache: true
-    wait: true
-    atomic: true
-    release_values:
-      loki:
-        auth_enabled: false
-        commonConfig:
-          replication_factor: 1
-        storage:
-          type: filesystem
-      singleBinary:
-        replicas: 1
-        persistence:
-          storageClass: truenas-nfs-csi
-  when: loki_helm_chart_result.rc != 0
-  become: false
+# - name: Deploy loki chart using set values on target
+#   kubernetes.core.helm:
+#     release_name: loki
+#     chart_ref: grafana/loki
+#     release_namespace: monitoring
+#     create_namespace: true
+#     update_repo_cache: true
+#     wait: true
+#     atomic: true
+#     release_values:
+#       loki:
+#         auth_enabled: false
+#         commonConfig:
+#           replication_factor: 1
+#         storage:
+#           type: filesystem
+#       singleBinary:
+#         replicas: 1
+#         persistence:
+#           storageClass: truenas-nfs-csi
+#   when: loki_helm_chart_result.rc != 0
+#   become: false
 
-# Promtail
-- name: Check if promtail Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep promtail
-    executable: /bin/bash
-  register: promtail_helm_chart_result
-  changed_when: promtail_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
+# # Promtail
+# - name: Check if promtail Helm chart is installed
+#   ansible.builtin.shell:
+#     cmd: |
+#       set -o pipefail
+#       helm list --all-namespaces --deployed --short | grep promtail
+#     executable: /bin/bash
+#   register: promtail_helm_chart_result
+#   changed_when: promtail_helm_chart_result.rc != 0
+#   ignore_errors: true
+#   become: false
 
-- name: Deploy promtail chart on target
-  kubernetes.core.helm:
-    release_name: promtail
-    chart_ref: grafana/promtail
-    release_namespace: monitoring
-    create_namespace: true
-    update_repo_cache: true
-    wait: true
-    atomic: true
-  when: promtail_helm_chart_result.rc != 0
-  become: false
+# - name: Deploy promtail chart on target
+#   kubernetes.core.helm:
+#     release_name: promtail
+#     chart_ref: grafana/promtail
+#     release_namespace: monitoring
+#     create_namespace: true
+#     update_repo_cache: true
+#     wait: true
+#     atomic: true
+#   when: promtail_helm_chart_result.rc != 0
+#   become: false
 
 # Grafana
 - name: Check if grafana Helm chart is installed
@@ -137,6 +141,28 @@
         admin-password: "{{ grafana_admin_password | b64encode }}"
   become: false
 
+- name: Find all .json files
+  ansible.builtin.find:
+    paths: 'mixin/dashboards'
+    patterns: '*.json'
+  delegate_to: localhost
+  register: dashboard_files
+
+- name: Create ConfigMap for each dashboard
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    kind: ConfigMap
+    namespace: monitoring
+    definition:
+      metadata:
+        name: "dashboard-{{ item.path | basename | regex_replace('.json$', '') }}"
+        labels:
+          grafana_dashboard: "1"
+      data: "{ '{{ item.path | basename }}' : {{ lookup('file', item.path) | to_nice_json }} }"
+  loop: "{{ dashboard_files.files }}"
+  become: false
+
 - name: Deploy grafana chart using set values on target
   kubernetes.core.helm:
     release_name: grafana
@@ -147,6 +173,9 @@
     wait: true
     atomic: true
     release_values:
+      sidecar:
+        dashboards:
+          enabled: true
       admin:
         existingSecret: grafana-secrets
       persistence:
@@ -161,12 +190,12 @@
               url: http://prometheus-server
               access: proxy
               isDefault: true
-            - name: Loki
-              type: loki
-              access: proxy
-              url: http://loki:3100
-              jsonData:
-                maxLines: 5000
+            # - name: Loki
+            #   type: loki
+            #   access: proxy
+            #   url: http://loki:3100
+            #   jsonData:
+            #     maxLines: 5000
       ingress:
         enabled: true
         ingressClassName: nginx

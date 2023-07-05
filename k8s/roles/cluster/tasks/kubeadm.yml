@@ -62,6 +62,7 @@
     group: "{{ ansible_env.USER }}"
     mode: "0644"
     remote_src: true
+  changed_when: false
   when: inventory_hostname == "master-node"
   become: true
 
@@ -80,6 +81,7 @@
   ansible.builtin.file:
     path: /tmp/config
     state: absent
+  changed_when: false
   when: inventory_hostname == "master-node"
   become: true
 
@@ -91,7 +93,7 @@
       ansible.builtin.shell:
         cmd: |
           set -o pipefail
-          kubectl get csr | grep Pending | awk '{print $1}'
+          kubectl get csr | grep Pending | awk '{print $1}' || true
         executable: /bin/bash
       changed_when: false
       register: pending_csr_result
@@ -107,5 +109,59 @@
     src: "{{ ansible_env.HOME }}/.kube/config"
     dest: "{{ lookup('ansible.builtin.env', 'HOME') }}/.kube/config"
     flat: true
+  when: inventory_hostname == "master-node"
+  become: false
+
+- name: Update annotations kube-controller-manager
+  ansible.builtin.replace:
+    path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+    regexp: |-
+      metadata:
+        creationTimestamp: null
+    replace: |-
+      metadata:
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "10257"
+          prometheus.io/scheme: "https"
+        creationTimestamp: null
+  when: inventory_hostname == "master-node"
+  become: true
+
+- name: Update annotations kube-scheduler
+  ansible.builtin.replace:
+    path: /etc/kubernetes/manifests/kube-scheduler.yaml
+    regexp: |-
+      metadata:
+        creationTimestamp: null
+    replace: |-
+      metadata:
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "10259"
+          prometheus.io/scheme: "https"
+        creationTimestamp: null
+  when: inventory_hostname == "master-node"
+  become: true
+
+- name: Wait for kube-scheduler pods to be ready
+  ansible.builtin.command:
+    cmd: kubectl get pods -n kube-system -l component="kube-scheduler" -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
+  retries: 60
+  delay: 10
+  changed_when: false
+  when: inventory_hostname == "master-node"
+  become: false
+
+- name: Wait for kube-controller-manager pods to be ready
+  ansible.builtin.command:
+    cmd: kubectl get pods -n kube-system -l component="kube-controller-manager" -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+  register: result
+  until: result.stdout.find("False") == -1
+  retries: 60
+  delay: 10
+  changed_when: false
   when: inventory_hostname == "master-node"
   become: false

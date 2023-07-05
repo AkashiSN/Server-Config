@@ -36,15 +36,15 @@
         file: metrics-server.yml
       when: inventory_hostname != "microk8s"
 
-    # - name: Import democratic-csi.yml
-    #   ansible.builtin.import_tasks:
-    #     file: democratic-csi.yml
-    #   when: inventory_hostname != "microk8s"
+    - name: Import democratic-csi.yml
+      ansible.builtin.import_tasks:
+        file: democratic-csi.yml
+      when: inventory_hostname != "microk8s"
 
-    # - name: Import monitoring.yml
-    #   ansible.builtin.import_tasks:
-    #     file: monitoring.yml
-    #   when: inventory_hostname != "microk8s"
+    - name: Import monitoring.yml
+      ansible.builtin.import_tasks:
+        file: monitoring.yml
+      when: inventory_hostname != "microk8s"
 
 - name: Wait for all pods to be ready
   ansible.builtin.command:
