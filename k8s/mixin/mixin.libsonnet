@@ -13,5 +13,6 @@ kubernetes {
     grafanaK8s+:: {
       grafanaTimezone: 'JST',
     },
-  },
+    datasourceName: 'Prometheus'
+  }
 }

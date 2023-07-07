@@ -1,12 +1,5 @@
 ---
 # file: roles/cluster/tasks/monitoring.yml
-- name: Create the 'monitoring' namespace
-  kubernetes.core.k8s:
-    state: present
-    api_version: v1
-    name: monitoring
-    kind: Namespace
-  become: false
 
 # Helm charts
 - name: Add grafana Helm charts repository
@@ -56,64 +49,74 @@
   when: prometheus_helm_chart_result.rc != 0
   become: false
 
-# # Loki
-# - name: Check if loki Helm chart is installed
-#   ansible.builtin.shell:
-#     cmd: |
-#       set -o pipefail
-#       helm list --all-namespaces --deployed --short | grep loki
-#     executable: /bin/bash
-#   register: loki_helm_chart_result
-#   changed_when: loki_helm_chart_result.rc != 0
-#   ignore_errors: true
-#   become: false
+# Loki
+- name: Check if loki Helm chart is installed
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep loki
+    executable: /bin/bash
+  register: loki_helm_chart_result
+  changed_when: loki_helm_chart_result.rc != 0
+  ignore_errors: true
+  become: false
 
-# - name: Deploy loki chart using set values on target
-#   kubernetes.core.helm:
-#     release_name: loki
-#     chart_ref: grafana/loki
-#     release_namespace: monitoring
-#     create_namespace: true
-#     update_repo_cache: true
-#     wait: true
-#     atomic: true
-#     release_values:
-#       loki:
-#         auth_enabled: false
-#         commonConfig:
-#           replication_factor: 1
-#         storage:
-#           type: filesystem
-#       singleBinary:
-#         replicas: 1
-#         persistence:
-#           storageClass: truenas-nfs-csi
-#   when: loki_helm_chart_result.rc != 0
-#   become: false
+- name: Deploy loki chart using set values on target
+  kubernetes.core.helm:
+    release_name: loki
+    chart_ref: grafana/loki
+    release_namespace: monitoring
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    release_values:
+      loki:
+        auth_enabled: false
+        commonConfig:
+          replication_factor: 1
+        ingester:
+          chunk_retain_period: 1m
+        server:
+          graceful_shutdown_timeout: 30s
+        storage:
+          type: filesystem
+        frontend:
+          graceful_shutdown_timeout: 30s
+      singleBinary:
+        replicas: 1
+        persistence:
+          storageClass: truenas-nfs-csi
+  when: loki_helm_chart_result.rc != 0
+  become: false
 
-# # Promtail
-# - name: Check if promtail Helm chart is installed
-#   ansible.builtin.shell:
-#     cmd: |
-#       set -o pipefail
-#       helm list --all-namespaces --deployed --short | grep promtail
-#     executable: /bin/bash
-#   register: promtail_helm_chart_result
-#   changed_when: promtail_helm_chart_result.rc != 0
-#   ignore_errors: true
-#   become: false
+# Promtail
+- name: Check if promtail Helm chart is installed
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep promtail
+    executable: /bin/bash
+  register: promtail_helm_chart_result
+  changed_when: promtail_helm_chart_result.rc != 0
+  ignore_errors: true
+  become: false
 
-# - name: Deploy promtail chart on target
-#   kubernetes.core.helm:
-#     release_name: promtail
-#     chart_ref: grafana/promtail
-#     release_namespace: monitoring
-#     create_namespace: true
-#     update_repo_cache: true
-#     wait: true
-#     atomic: true
-#   when: promtail_helm_chart_result.rc != 0
-#   become: false
+- name: Deploy promtail chart on target
+  kubernetes.core.helm:
+    release_name: promtail
+    chart_ref: grafana/promtail
+    release_namespace: monitoring
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    release_values:
+      config:
+        snippets:
+          pipelineStages: "{{ lookup('file', 'promtail-pipeline-stages.yml') | from_yaml }}"
+  when: promtail_helm_chart_result.rc != 0
+  become: false
 
 # Grafana
 - name: Check if grafana Helm chart is installed
@@ -143,8 +146,8 @@
 
 - name: Find all .json files
   ansible.builtin.find:
-    paths: 'mixin/dashboards'
-    patterns: '*.json'
+    paths: "mixin/dashboards"
+    patterns: "*.json"
   delegate_to: localhost
   register: dashboard_files
 
@@ -190,12 +193,12 @@
               url: http://prometheus-server
               access: proxy
               isDefault: true
-            # - name: Loki
-            #   type: loki
-            #   access: proxy
-            #   url: http://loki:3100
-            #   jsonData:
-            #     maxLines: 5000
+            - name: Loki
+              type: loki
+              access: proxy
+              url: http://loki:3100
+              jsonData:
+                maxLines: 5000
       ingress:
         enabled: true
         ingressClassName: nginx

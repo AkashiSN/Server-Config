@@ -6,18 +6,19 @@ localAPIEndpoint:
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
+clusterName: "k8s-cluster"
 controlPlaneEndpoint: "{{ node_ip.stdout }}"
 networking:
   podSubnet: "10.244.0.0/16,{{ ipv6_prefix.stdout }}:{{ ipv6_pod_cider }}"
   serviceSubnet: "10.96.0.0/16,{{ ipv6_prefix.stdout }}:{{ ipv6_service_cider }}"
 controllerManager:
   extraArgs:
-    bind-address: "{{ node_ip.stdout }}"
+    bind-address: "0.0.0.0"
     node-cidr-mask-size-ipv4: "24"
     node-cidr-mask-size-ipv6: "112"
 scheduler:
   extraArgs:
-    bind-address: "{{ node_ip.stdout }}"
+    bind-address: "0.0.0.0"
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration

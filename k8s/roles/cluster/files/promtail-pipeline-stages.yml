@@ -1,0 +1,20 @@
+- match:
+    selector: '{app="nginx-ingress"}'
+    stages:
+      - regex:
+          expression: 'time=(?P<time>\S+).*server_name=(?P<server_name>\S+).*remote_addr=(?P<remote_addr>\S+).*remote_port=(?P<remote_port>\S+).*country=(?P<country>\S+).*method=(?P<method>\S+).*uri="(?P<uri>[^"]+)".*proto=(?P<proto>\S+).*status=(?P<status>\S+).*body_sent=(?P<body_sent>\S+).*referer="(?P<referer>[^"]+)".*forwarded_for=(?P<forwarded_for>\S+).*request_time=(?P<request_time>\S+).*user_agent="(?P<user_agent>[^"]+)"'
+      - labels:
+          time:
+          server_name:
+          remote_addr:
+          remote_port:
+          country:
+          method:
+          uri:
+          proto:
+          status:
+          body_sent:
+          referer:
+          forwarded_for:
+          request_time:
+          user_agent:

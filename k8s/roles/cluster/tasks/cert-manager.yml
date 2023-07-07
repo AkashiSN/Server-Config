@@ -27,6 +27,8 @@
     wait: true
     atomic: true
     release_values:
+      prometheus:
+        enabled: true
       installCRDs: true
   register: cert_manager_helm_chart_install
   when: cert_manager_helm_chart_result.rc != 0

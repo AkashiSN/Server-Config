@@ -944,7 +944,7 @@
          {
             "current": {
                "text": "default",
-               "value": "default"
+               "value": "Prometheus"
             },
             "hide": 0,
             "label": "Data Source",

@@ -6,10 +6,18 @@
     file: kubeadm.yml
   when: inventory_hostname != "microk8s"
 
-- name: Setup helm
+- name: Setup cluster
   when: inventory_hostname in groups["master"]
   become: false
   block:
+    - name: Create the 'monitoring' namespace
+      kubernetes.core.k8s:
+        state: present
+        api_version: v1
+        name: monitoring
+        kind: Namespace
+      become: false
+
     - name: Import helm.yml
       ansible.builtin.import_tasks:
         file: helm.yml
