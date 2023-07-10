@@ -42,9 +42,11 @@
         prometheus.yml: "{{ lookup('file', 'prometheus.yml') | from_yaml }}"
       server:
         persistentVolume:
+          enabled: true
           storageClass: truenas-nfs-csi
       alertmanager:
         persistence:
+          enabled: true
           storageClass: truenas-nfs-csi
   when: prometheus_helm_chart_result.rc != 0
   become: false
@@ -86,7 +88,13 @@
       singleBinary:
         replicas: 1
         persistence:
+          enabled: true
           storageClass: truenas-nfs-csi
+      monitoring:
+        selfMonitoring:
+          enabled: false
+      test:
+        enabled: false
   when: loki_helm_chart_result.rc != 0
   become: false
 
