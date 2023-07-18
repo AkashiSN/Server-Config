@@ -30,6 +30,7 @@ sudo chmod 600 ${WIREGUARD_DIR}/server.key ${WIREGUARD_DIR}/server.pub ${WIREGUA
 ```bash
 # Set WIREGUARD_IP env.
 export WIREGUARD_IP=10.254.0.1/24
+export OUTBOUND_IF=eth0
 
 # Create wireguard interface config.
 cat << EOS | sudo tee ${WIREGUARD_DIR}/wg0.conf
@@ -37,8 +38,8 @@ cat << EOS | sudo tee ${WIREGUARD_DIR}/wg0.conf
 PrivateKey = $(sudo cat ${WIREGUARD_DIR}/server.key)
 Address = ${WIREGUARD_IP}
 ListenPort = 51820
-PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE; iptables -A FORWARD -i eth0 -j ACCEPT; iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
-PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE; iptables -D FORWARD -i eth0 -j ACCEPT; iptables -t nat -D POSTROUTING -o wg0 -j MASQUERADE
+PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o ${OUTBOUND_IF} -j MASQUERADE; iptables -A FORWARD -i ${OUTBOUND_IF} -j ACCEPT; iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o ${OUTBOUND_IF} -j MASQUERADE; iptables -D FORWARD -i ${OUTBOUND_IF} -j ACCEPT; iptables -t nat -D POSTROUTING -o wg0 -j MASQUERADE
 
 EOS
 ```
@@ -110,8 +111,7 @@ sudo wg-quick down wg0
 ## Service
 
 ```bash
-sudo systemctl start wg-quick@wg0
-sudo systemctl enable wg-quick@wg0
+sudo systemctl enable --now wg-quick@wg0
 ```
 
 ```bash

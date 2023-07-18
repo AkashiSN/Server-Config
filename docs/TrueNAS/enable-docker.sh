@@ -17,8 +17,8 @@ set -eu
 #   Click Add -> Type: Script and choose this script -> When: choose to run as Post Init
 
 if [ "$(id -u)" != "0" ]; then
-   echo "This script must be run as root" 1>&2
-   exit 1
+  echo "This script must be run as root" 1>&2
+  exit 1
 fi
 
 echo "This script is running as root."
@@ -26,7 +26,7 @@ echo "This script is running as root."
 ## set a path to your docker dataset
 docker_dataset='/mnt/ssd/docker'
 
-for file in /bin/apt*; do
+for file in /bin/{apt*,dpkg}; do
   if [ ! -x "$file" ]; then
     echo " $file not executable, fixing..."
     chmod +x "$file"

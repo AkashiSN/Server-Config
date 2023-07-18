@@ -8,7 +8,7 @@ fi
 
 echo "This script is running as root."
 
-for file in /bin/apt*; do
+for file in /bin/{apt*,dpkg}; do
   if [ ! -x "$file" ]; then
     echo " $file not executable, fixing..."
     chmod +x "$file"

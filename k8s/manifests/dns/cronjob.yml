@@ -18,7 +18,7 @@ rules:
     verbs: ["create"]
   - apiGroups: ["apps"]
     resources: ["deployments", "deployments/status"]
-    verbs: ["get", "list", "update"]
+    verbs: ["get", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
