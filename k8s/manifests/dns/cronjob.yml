@@ -43,6 +43,7 @@ spec:
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
+  timeZone: Asia/Tokyo
   schedule: "0 3 * * *"
   jobTemplate:
     spec:
