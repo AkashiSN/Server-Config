@@ -28,5 +28,5 @@ sudo cloudflared service install $TOKEN
 # Run
 
 ```bash
-docker compose up -d
+docker compose --profile tv up -d
 ```
