@@ -125,3 +125,9 @@ sudo service wg-quick@wg0 restart
 ```
 net.ipv4.ip_forward = 1
 ```
+
+
+```bash
+# Apply
+sysctl --system
+```
