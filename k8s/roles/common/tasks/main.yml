@@ -85,17 +85,3 @@
     state: latest # noqa package-latest
     update_cache: true
   become: true
-
-- name: Disable auto update
-  ansible.builtin.replace:
-    path: /etc/apt/apt.conf.d/20auto-upgrades
-    regexp: 'APT::Periodic::Update-Package-Lists "1";'
-    replace: 'APT::Periodic::Update-Package-Lists "0";'
-  become: true
-
-- name: Disable auto upgrade
-  ansible.builtin.replace:
-    path: /etc/apt/apt.conf.d/20auto-upgrades
-    regexp: 'APT::Periodic::Unattended-Upgrade "1";'
-    replace: 'APT::Periodic::Unattended-Upgrade "0";'
-  become: true
