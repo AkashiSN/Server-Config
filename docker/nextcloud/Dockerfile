@@ -24,7 +24,7 @@ rm -r /tmp/pear
 
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
-cat << 'EOF' >> /docker-entrypoint-hooks.d/{pre-installation,pre-upgrade}/change_permissions.sh
+cat << 'EOF' | tee /docker-entrypoint-hooks.d/{pre-installation,pre-upgrade}/change_permissions.sh
 #!/bin/bash
 set -eu
 chgrp www-data "${NEXTCLOUD_DATA_DIR}"
@@ -33,7 +33,7 @@ EOF
 
 chmod +x /docker-entrypoint-hooks.d/{pre-installation,pre-upgrade}/change_permissions.sh
 
-cat << 'EOF' >> /docker-entrypoint-hooks.d/before-starting/00change_permissions.sh
+cat << 'EOF' | tee /docker-entrypoint-hooks.d/before-starting/00change_permissions.sh
 #!/bin/bash
 set -e
 # EXTERNAL_DIRS is of the form "dir1,dir2,dir3".
