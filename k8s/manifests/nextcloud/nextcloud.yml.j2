@@ -8,7 +8,7 @@ data:
   NEXTCLOUD_ADMIN_USER_FILE: /secrets/nextcloud_admin_user
   NEXTCLOUD_ADMIN_PASSWORD_FILE: /secrets/nextcloud_admin_password
   NEXTCLOUD_DATA_DIR: /mnt/nextcloud
-  EXTERNAL_DIR: /mnt/static
+  EXTERNAL_DIRS: "/mnt/static,/mnt/musics"
   OVERWRITEPROTOCOL: https
   TRUSTED_PROXIES: nextcloud
   NEXTCLOUD_TRUSTED_DOMAINS: "{{ nextcloud_host }}"
@@ -35,11 +35,7 @@ data:
     set -eu
 
     run_as() {
-      if [ "$(id -u)" = 0 ]; then
-        su -p www-data -s /bin/sh -c "$1"
-      else
-        sh -c "$1"
-      fi
+      su -p $user -s /bin/sh -c "$1"
     }
 
     run_as 'php /var/www/html/occ app:enable files_external'
@@ -71,7 +67,7 @@ spec:
         fsGroup: 33
       containers:
         - name: nextcloud
-          image: ghcr.io/akashisn/nextcloud@sha256:aad5f7c145961354390a4c9516b6b066272279e2ec7ca75430bcd63ec22053be
+          image: ghcr.io/akashisn/nextcloud@sha256:6b01f5486d2475f446ae9e0fb12da369aaa25348d67eb144f8607f0e49c9e60e
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
@@ -89,8 +85,10 @@ spec:
               mountPath: /mnt/nextcloud
             - name: static
               mountPath: /mnt/static
+            - name: musics
+              mountPath: /mnt/musics
             - name: nextcloud-init
-              mountPath: /custom-entrypoint/config.sh
+              mountPath: /docker-entrypoint-hooks.d/before-starting/config.sh
               subPath: config.sh
               readOnly: true
             - name: nextcloud-secrets
@@ -174,6 +172,15 @@ spec:
         resources:
           requests:
             storage: 8Ti
+    - metadata:
+        name: musics
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: nfs-hdd-storage
+        resources:
+          requests:
+            storage: 500Gi
 ---
 apiVersion: v1
 kind: Service

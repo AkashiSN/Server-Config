@@ -81,3 +81,23 @@ spec:
     lun: 0
     fsType: xfs
     readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-musics-pv
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-hdd-storage
+  claimRef:
+    namespace: nextcloud
+    name: musics-nextcloud-0
+  nfs:
+    server: {{ truenas_addr }}
+    path: /mnt/hdd/musics
+  mountOptions:
+    - nfsvers=4.2
