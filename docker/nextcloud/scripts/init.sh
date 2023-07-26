@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -eu
 
 chmod 0770 "${NEXTCLOUD_DATA_DIR}"
