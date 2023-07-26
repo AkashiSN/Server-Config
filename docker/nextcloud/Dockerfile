@@ -49,8 +49,10 @@ EOF
 chmod +x /docker-entrypoint-hooks.d/before-starting/00change_permissions.sh
 EOT
 
+ADD https://raw.githubusercontent.com/AkashiSN/nextcloud-docker/master/docker-entrypoint.sh /docker-entrypoint.sh
+
 COPY config/zz-docker.conf /usr/local/etc/php-fpm.d/
 COPY config/nextcloud.ini /usr/local/etc/php/conf.d/
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/docker-entrypoint.sh"]
 CMD ["php-fpm"]
