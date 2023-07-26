@@ -24,19 +24,33 @@ rm -r /tmp/pear
 
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
-sed -ie 's!exec "$@"!!g' /entrypoint.sh
-cat << 'EOF' >> /entrypoint.sh
-for script in $(ls /custom-entrypoint/*.sh | sort); do
-  /bin/sh "$script"
-done
-
-exec "$@"
+cat << 'EOF' >> /docker-entrypoint-hooks.d/{pre-installation,pre-upgrade}/change_permissions.sh
+#!/bin/bash
+set -eu
+chgrp www-data "${NEXTCLOUD_DATA_DIR}"
+chmod 0770 "${NEXTCLOUD_DATA_DIR}"
 EOF
+
+chmod +x /docker-entrypoint-hooks.d/{pre-installation,pre-upgrade}/change_permissions.sh
+
+cat << 'EOF' >> /docker-entrypoint-hooks.d/before-starting/00change_permissions.sh
+#!/bin/bash
+set -e
+# EXTERNAL_DIRS is of the form "dir1,dir2,dir3".
+if [ -n "${EXTERNAL_DIRS}" ]; then
+  IFS=',' read -r -a EXTERNAL_DIRS_LIST <<< "$EXTERNAL_DIRS"
+  for dir in "${EXTERNAL_DIRS_LIST[@]}"; do
+    chgrp www-data "${dir}"
+    chmod 0770 "${dir}"
+  done
+fi
+EOF
+
+chmod +x /docker-entrypoint-hooks.d/before-starting/00change_permissions.sh
 EOT
 
-COPY --chmod=755 scripts/*.sh /
 COPY config/zz-docker.conf /usr/local/etc/php-fpm.d/
 COPY config/nextcloud.ini /usr/local/etc/php/conf.d/
 
-ENTRYPOINT ["/init.sh", "/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["php-fpm"]
