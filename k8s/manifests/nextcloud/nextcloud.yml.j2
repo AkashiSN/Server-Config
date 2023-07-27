@@ -8,7 +8,7 @@ data:
   NEXTCLOUD_ADMIN_USER_FILE: /secrets/nextcloud_admin_user
   NEXTCLOUD_ADMIN_PASSWORD_FILE: /secrets/nextcloud_admin_password
   NEXTCLOUD_DATA_DIR: /mnt/nextcloud
-  EXTERNAL_DIRS: "/mnt/static,/mnt/musics"
+  EXTERNAL_DIRS: "/mnt/static"
   OVERWRITEPROTOCOL: https
   TRUSTED_PROXIES: nextcloud
   NEXTCLOUD_TRUSTED_DOMAINS: "{{ nextcloud_host }}"
@@ -67,7 +67,7 @@ spec:
         fsGroup: 33
       containers:
         - name: nextcloud
-          image: ghcr.io/akashisn/nextcloud@sha256:6b01f5486d2475f446ae9e0fb12da369aaa25348d67eb144f8607f0e49c9e60e
+          image: ghcr.io/akashisn/nextcloud@sha256:8701da20597079833579b110b220ef656ed381b78de1b17c7133deadfa0f3847
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
