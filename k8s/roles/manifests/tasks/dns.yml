@@ -8,7 +8,7 @@
     kind: Namespace
   become: false
 
-- name: Check if dns cronjob is deployed
+- name: Check if the dns/cronjob is deployed
   ansible.builtin.command:
     cmd: kubectl get -n dns cronjob dns-cronjob
   register: dns_cronjob_result
@@ -16,7 +16,7 @@
   ignore_errors: true
   become: false
 
-- name: Delete dns cronjob
+- name: Delete the dns/cronjob
   ansible.builtin.command:
     cmd: kubectl delete -n dns cronjob dns-cronjob
   register: result
@@ -24,7 +24,7 @@
   changed_when: result is not skipped
   become: false
 
-- name: Apply the dns config
+- name: Apply the dns/dns manifest
   kubernetes.core.k8s:
     state: present
     template: manifests/dns/dns.yml.j2
@@ -41,7 +41,7 @@
   changed_when: false
   become: false
 
-- name: Apply the dns cronjob config
+- name: Apply the dns/cronjob manifest
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/dns/cronjob.yml') | from_yaml_all }}"

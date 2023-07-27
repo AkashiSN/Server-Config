@@ -24,27 +24,6 @@ data:
   MAIL_DOMAIN: files.localhost
   SMTP_PASSWORD_FILE: /secrets/nextcloud_smtp_password
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: nextcloud-init
-  namespace: nextcloud
-data:
-  config.sh: |
-    #!/bin/sh
-    set -eu
-
-    run_as() {
-      su -p $user -s /bin/sh -c "$1"
-    }
-
-    run_as 'php /var/www/html/occ app:enable files_external'
-    run_as 'php /var/www/html/occ app:enable twofactor_totp'
-    run_as 'php /var/www/html/occ app:enable suspicious_login'
-
-    run_as 'php /var/www/html/occ config:system:set default_phone_region --value=JP'
-    run_as 'php /var/www/html/occ config:app:set files max_chunk_size --value 94371840' # 90MiB
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -67,7 +46,7 @@ spec:
         fsGroup: 33
       containers:
         - name: nextcloud
-          image: ghcr.io/akashisn/nextcloud@sha256:8701da20597079833579b110b220ef656ed381b78de1b17c7133deadfa0f3847
+          image: ghcr.io/akashisn/nextcloud@sha256:261d56b3443b94d8cc0165da85a65021f1c84b1babc23aa35bce8eee6d5dbf0c
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
@@ -87,12 +66,32 @@ spec:
               mountPath: /mnt/static
             - name: musics
               mountPath: /mnt/musics
-            - name: nextcloud-init
+            - name: nextcloud-secrets
+              mountPath: /secrets
+            - name: nextcloud-conf
+              mountPath: /usr/local/etc/php-fpm.d/zz-docker.conf
+              subPath: zz-docker.conf
+              readOnly: true
+            - name: nextcloud-conf
+              mountPath: /usr/local/etc/php/conf.d/nextcloud.ini
+              subPath: nextcloud.ini
+              readOnly: true
+            - name: nextcloud-conf
+              mountPath: /docker-entrypoint-hooks.d/pre-installation/change_permissions.sh
+              subPath: change_permissions.sh
+              readOnly: true
+            - name: nextcloud-conf
+              mountPath: /docker-entrypoint-hooks.d/pre-upgrade/change_permissions.sh
+              subPath: change_permissions.sh
+              readOnly: true
+            - name: nextcloud-conf
+              mountPath: /docker-entrypoint-hooks.d/before-starting/00change_permissions.sh
+              subPath: 00change_permissions.sh
+              readOnly: true
+            - name: nextcloud-conf
               mountPath: /docker-entrypoint-hooks.d/before-starting/config.sh
               subPath: config.sh
               readOnly: true
-            - name: nextcloud-secrets
-              mountPath: /secrets
           resources:
             requests:
               cpu: 300m
@@ -133,9 +132,9 @@ spec:
               cpu: 500m
               memory: 2000Mi
       volumes:
-        - name: nextcloud-init
+        - name: nextcloud-conf
           configMap:
-            name: nextcloud-init
+            name: nextcloud-conf
         - name: nextcloud-secrets
           secret:
             secretName: nextcloud-secrets

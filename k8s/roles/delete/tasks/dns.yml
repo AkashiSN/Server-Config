@@ -1,12 +1,12 @@
 ---
 # file: roles/delete/tasks/dns.yml
-- name: Delete the dns cronjob config
+- name: Delete the dns/cronjob manifest
   kubernetes.core.k8s:
     state: absent
     definition: "{{ lookup('file', 'manifests/dns/cronjob.yml') | from_yaml_all }}"
   become: false
 
-- name: Delete the dns config
+- name: Delete the dns/dns manifest
   kubernetes.core.k8s:
     state: absent
     template: manifests/dns/dns.yml.j2

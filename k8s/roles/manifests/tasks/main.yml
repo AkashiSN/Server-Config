@@ -10,7 +10,7 @@
   changed_when: false
   become: false
 
-- name: Apply the storage class config
+- name: Apply the storage class manifest
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'manifests/storage-class.yml') | from_yaml_all }}"

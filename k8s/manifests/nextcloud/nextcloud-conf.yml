@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-conf
+  namespace: nextcloud
+data:
+  nextcloud.ini: |
+    memory_limit = 1G
+
+    upload_max_filesize=500M
+    post_max_size=500M
+
+    request_terminate_timeout=3600
+    max_execution_time=3600
+    output_buffering=0
+
+  zz-docker.conf: |
+    [global]
+    daemonize = no
+    log_limit = 8192
+    error_log = /proc/self/fd/2
+
+    [www]
+    user  = www-data
+    group = www-data
+
+    listen = 0.0.0.0:9000
+
+    access.log = /proc/self/fd/2
+    access.format = "%{REMOTE_ADDR}e - %u %t \"%m %{REQUEST_URI}e\" %s"
+
+    pm = static
+    pm.max_children = 2
+    pm.max_requests = 1500
+
+  change_permissions.sh: |
+    #!/bin/bash
+    set -eu
+    chgrp www-data "${NEXTCLOUD_DATA_DIR}"
+    chmod 0770 "${NEXTCLOUD_DATA_DIR}"
+
+  00change_permissions.sh: |
+    #!/bin/bash
+    set -e
+    # EXTERNAL_DIRS is of the form "dir1,dir2,dir3".
+    if [ -n "${EXTERNAL_DIRS}" ]; then
+      IFS=',' read -r -a EXTERNAL_DIRS_LIST <<< "$EXTERNAL_DIRS"
+      for dir in "${EXTERNAL_DIRS_LIST[@]}"; do
+        chgrp www-data "${dir}"
+        chmod 0770 "${dir}"
+      done
+    fi
+
+  config.sh: |
+    #!/bin/sh
+    set -eu
+
+    run_as() {
+      su -p $user -s /bin/sh -c "$1"
+    }
+
+    run_as 'php /var/www/html/occ app:enable files_external'
+    run_as 'php /var/www/html/occ app:enable twofactor_totp'
+    run_as 'php /var/www/html/occ app:enable suspicious_login'
+
+    run_as 'php /var/www/html/occ config:system:set default_phone_region --value=JP'
+    run_as 'php /var/www/html/occ config:app:set files max_chunk_size --value 94371840' # 90MiB

@@ -8,7 +8,7 @@
     kind: Namespace
   become: false
 
-- name: Create minecraft-secrets
+- name: Create minecraft/minecraft-secrets
   kubernetes.core.k8s:
     state: present
     api_version: v1
@@ -21,7 +21,7 @@
         minecraft_rcon_password: "{{ minecraft_rcon_password | b64encode }}"
   become: false
 
-- name: Create minecraft-whitelist
+- name: Create minecraft/minecraft-whitelist
   kubernetes.core.k8s:
     state: present
     api_version: v1
@@ -34,13 +34,13 @@
         minecraft_whitelist: "{{ minecraft_whitelist | b64encode }}"
   become: false
 
-- name: Apply the minecraft persistent-volumes config
+- name: Apply the minecraft/persistent-volumes manifest
   kubernetes.core.k8s:
     state: present
     template: manifests/minecraft/persistent-volume.yml.j2
   become: false
 
-- name: Apply the minecraft config
+- name: Apply the minecraft/minecraft manifest
   kubernetes.core.k8s:
     state: present
     template: manifests/minecraft/minecraft.yml.j2
