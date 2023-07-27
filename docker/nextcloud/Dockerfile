@@ -3,10 +3,7 @@ FROM nextcloud:27.0.1-fpm
 
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND noninteractive \
-    NEXTCLOUD_UPDATE 1 \
-    LANG en_US.UTF-8 \
-    LANGUAGE en_US:en \
-    LC_ALL en_US.UTF-8
+    NEXTCLOUD_UPDATE 1
 
 RUN <<EOT
 apt-get update
@@ -30,6 +27,10 @@ rm -r /tmp/pear
 
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 EOT
+
+ENV LANG en_US.UTF-8 \
+    LANGUAGE en_US:en \
+    LC_ALL en_US.UTF-8
 
 # nextcloud/docker#2039
 ADD https://raw.githubusercontent.com/AkashiSN/nextcloud-docker/master/docker-entrypoint.sh /docker-entrypoint.sh
