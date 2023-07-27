@@ -53,9 +53,9 @@ EOF
 chmod +x /docker-entrypoint-hooks.d/before-starting/00change_permissions.sh
 EOT
 
-ENV LANG en_US.UTF-8  
-ENV LANGUAGE en_US:en  
-ENV LC_ALL en_US.UTF-8     
+ENV LANG en_US.UTF-8 \
+    LANGUAGE en_US:en \
+    LC_ALL en_US.UTF-8
 
 ADD https://raw.githubusercontent.com/AkashiSN/nextcloud-docker/master/docker-entrypoint.sh /docker-entrypoint.sh
 
