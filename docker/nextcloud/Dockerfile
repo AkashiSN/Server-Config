@@ -10,12 +10,16 @@ apt-get update
 apt-get install -y \
   imagemagick \
   iproute2 \
+  locales \
   libbz2-dev \
   libmagickwand-dev \
   libsmbclient-dev \
   smbclient
 apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+
+sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen
+locale-gen
 
 pecl install smbclient
 docker-php-ext-enable smbclient
@@ -48,6 +52,10 @@ EOF
 
 chmod +x /docker-entrypoint-hooks.d/before-starting/00change_permissions.sh
 EOT
+
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8     
 
 ADD https://raw.githubusercontent.com/AkashiSN/nextcloud-docker/master/docker-entrypoint.sh /docker-entrypoint.sh
 
