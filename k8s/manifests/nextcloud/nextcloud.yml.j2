@@ -66,6 +66,8 @@ spec:
               mountPath: /mnt/static
             - name: musics
               mountPath: /mnt/musics
+            - name: musics-aac
+              mountPath: /mnt/musics_aac
             - name: nextcloud-secrets
               mountPath: /secrets
             - name: nextcloud-conf
@@ -173,6 +175,15 @@ spec:
             storage: 8Ti
     - metadata:
         name: musics
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: nfs-hdd-storage
+        resources:
+          requests:
+            storage: 500Gi
+    - metadata:
+        name: musics-aac
       spec:
         accessModes:
           - ReadWriteOncePod

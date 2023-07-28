@@ -101,3 +101,23 @@ spec:
     path: /mnt/hdd/musics
   mountOptions:
     - nfsvers=4.2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-musics-aac-pv
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-hdd-storage
+  claimRef:
+    namespace: nextcloud
+    name: musics-aac-nextcloud-0
+  nfs:
+    server: {{ truenas_addr }}
+    path: /mnt/hdd/musics-aac
+  mountOptions:
+    - nfsvers=4.2
