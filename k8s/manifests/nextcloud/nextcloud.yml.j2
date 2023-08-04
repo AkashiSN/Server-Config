@@ -8,7 +8,6 @@ data:
   NEXTCLOUD_ADMIN_USER_FILE: /secrets/nextcloud_admin_user
   NEXTCLOUD_ADMIN_PASSWORD_FILE: /secrets/nextcloud_admin_password
   NEXTCLOUD_DATA_DIR: /mnt/nextcloud
-  EXTERNAL_DIRS: "/mnt/static"
   OVERWRITEPROTOCOL: https
   TRUSTED_PROXIES: nextcloud
   NEXTCLOUD_TRUSTED_DOMAINS: "{{ nextcloud_host }}"
@@ -44,9 +43,10 @@ spec:
     spec:
       securityContext:
         fsGroup: 33
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: nextcloud
-          image: ghcr.io/akashisn/nextcloud@sha256:80e667b991331e036c154251c806884a7064271cff98d55f5bdc4485f1ddd232
+          image: ghcr.io/akashisn/nextcloud@sha256:21783591fabe5d06b91ca22453aab863012e982a6ce395c7815e73ce70726e35
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
@@ -80,19 +80,7 @@ spec:
               mountPath: /usr/local/etc/php/conf.d/nextcloud.ini
               subPath: nextcloud.ini
               readOnly: true
-            - name: nextcloud-conf
-              mountPath: /docker-entrypoint-hooks.d/pre-installation/change_permissions.sh
-              subPath: change_permissions.sh
-              readOnly: true
-            - name: nextcloud-conf
-              mountPath: /docker-entrypoint-hooks.d/pre-upgrade/change_permissions.sh
-              subPath: change_permissions.sh
-              readOnly: true
-            - name: nextcloud-conf
-              mountPath: /docker-entrypoint-hooks.d/before-starting/00change_permissions.sh
-              subPath: 00change_permissions.sh
-              readOnly: true
-            - name: nextcloud-conf
+            - name: nextcloud-hooks
               mountPath: /docker-entrypoint-hooks.d/before-starting/config.sh
               subPath: config.sh
               readOnly: true
@@ -139,6 +127,10 @@ spec:
         - name: nextcloud-conf
           configMap:
             name: nextcloud-conf
+        - name: nextcloud-hooks
+          configMap:
+            defaultMode: 504
+            name: nextcloud-hooks
         - name: nextcloud-secrets
           secret:
             secretName: nextcloud-secrets

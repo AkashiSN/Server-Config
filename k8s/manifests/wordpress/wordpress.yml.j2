@@ -37,6 +37,7 @@ spec:
     spec:
       securityContext:
         fsGroup: 33
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: wordpress
           image: ghcr.io/akashisn/wordpress@sha256:84aebdfbe8fd43aa4d7b32047447702459e9ffa13562ed63983251fd4ea73b5a

@@ -79,7 +79,7 @@ resource "proxmox_vm_qemu" "vm-microk8s" {
 
   cicustom = "user=local:snippets/cloud_init_microk8s_userdata.yml,network=local:snippets/cloud_init_microk8s_network.yml"
 
-  memory  = 40960
+  memory  = 20480
   cores   = 4
   qemu_os = "l26"
   agent   = 1

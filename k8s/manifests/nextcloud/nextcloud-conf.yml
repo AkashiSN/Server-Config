@@ -33,35 +33,20 @@ data:
     pm.max_children = 2
     pm.max_requests = 1500
 
-  change_permissions.sh: |
-    #!/bin/bash
-    set -eu
-    chgrp www-data "${NEXTCLOUD_DATA_DIR}"
-    chmod 0770 "${NEXTCLOUD_DATA_DIR}"
-
-  00change_permissions.sh: |
-    #!/bin/bash
-    set -e
-    # EXTERNAL_DIRS is of the form "dir1,dir2,dir3".
-    if [ -n "${EXTERNAL_DIRS}" ]; then
-      IFS=',' read -r -a EXTERNAL_DIRS_LIST <<< "$EXTERNAL_DIRS"
-      for dir in "${EXTERNAL_DIRS_LIST[@]}"; do
-        chgrp www-data "${dir}"
-        chmod 0770 "${dir}"
-      done
-    fi
-
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-hooks
+  namespace: nextcloud
+data:
   config.sh: |
     #!/bin/sh
     set -eu
 
-    run_as() {
-      su -p $user -s /bin/sh -c "$1"
-    }
+    php /var/www/html/occ app:enable files_external
+    php /var/www/html/occ app:enable twofactor_totp
+    php /var/www/html/occ app:enable suspicious_login
 
-    run_as 'php /var/www/html/occ app:enable files_external'
-    run_as 'php /var/www/html/occ app:enable twofactor_totp'
-    run_as 'php /var/www/html/occ app:enable suspicious_login'
-
-    run_as 'php /var/www/html/occ config:system:set default_phone_region --value=JP'
-    run_as 'php /var/www/html/occ config:app:set files max_chunk_size --value 94371840' # 90MiB
+    php /var/www/html/occ config:system:set default_phone_region --value=JP
+    php /var/www/html/occ config:app:set files max_chunk_size --value 94371840 # 90MiB
