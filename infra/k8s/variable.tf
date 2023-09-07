@@ -14,6 +14,9 @@ variable "github_id" {
 locals {
   k8s_control_plane = {
     vmid                 = 120
+    memory               = 8192
+    cores                = 6
+    onboot               = true
     proxmox_node         = "pve01"
     proxmox_address      = "172.16.254.5"
     hostname             = "k8s-control-plane"
@@ -23,6 +26,9 @@ locals {
   }
   worker_node_01 = {
     vmid                  = 125
+    memory                = 20480
+    cores                 = 16
+    onboot                = true
     proxmox_node          = "pve"
     proxmox_address       = "172.16.254.4"
     hostname              = "worker-node-01"

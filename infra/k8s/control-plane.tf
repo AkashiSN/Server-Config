@@ -81,11 +81,11 @@ resource "proxmox_vm_qemu" "vm-k8s_control_plane" {
 
   cicustom = "user=local:snippets/cloud_init_k8s_control_plane_userdata.yml,network=local:snippets/cloud_init_k8s_control_plane_network.yml"
 
-  memory  = 10240
-  cores   = 6
+  memory  = local.k8s_control_plane.memory
+  cores   = local.k8s_control_plane.cores
   qemu_os = "l26"
   agent   = 1
-  onboot  = true
+  onboot  = local.k8s_control_plane.onboot
 
   boot     = "order=scsi0"
   scsihw   = "virtio-scsi-pci"

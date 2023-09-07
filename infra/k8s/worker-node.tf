@@ -83,11 +83,11 @@ resource "proxmox_vm_qemu" "vm-worker_node_01" {
 
   cicustom = "user=local:snippets/cloud_init_worker_node_01_userdata.yml,network=local:snippets/cloud_init_worker_node_01_network.yml"
 
-  memory  = 20480
-  cores   = 16
+  memory  = local.worker_node_01.memory
+  cores   = local.worker_node_01.cores
   qemu_os = "l26"
   agent   = 1
-  onboot  = true
+  onboot  = local.worker_node_01.onboot
 
   boot     = "order=scsi0"
   scsihw   = "virtio-scsi-pci"

@@ -79,11 +79,11 @@ resource "proxmox_vm_qemu" "vm-microk8s" {
 
   cicustom = "user=local:snippets/cloud_init_microk8s_userdata.yml,network=local:snippets/cloud_init_microk8s_network.yml"
 
-  memory  = 20480
-  cores   = 4
+  memory  = local.microk8s.memory
+  cores   = local.microk8s.cores
   qemu_os = "l26"
   agent   = 1
-  onboot  = true
+  onboot  = local.microk8s.onboot
 
   boot     = "order=scsi0"
   scsihw   = "virtio-scsi-pci"

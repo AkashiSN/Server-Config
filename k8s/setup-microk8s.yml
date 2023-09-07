@@ -6,7 +6,7 @@
     - variable
     - role: common
       vars:
-        k8s_major_version: "1.27"
+        k8s_major_version: "1.28"
 
 - name: Setup cluster by microk8s
   hosts: microk8s
@@ -14,4 +14,4 @@
     - variable
     - role: cluster
       vars:
-        target_env: "staging" # staging or production
+        target_env: "production" # staging or production
