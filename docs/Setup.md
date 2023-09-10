@@ -45,15 +45,14 @@ $ sudo apt install -y zfsutils-linux
 
 ### Nvidia driver
 ```bash
-# Download setting file
-wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
-sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-
 # Add nvidia's official GPG key
-sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+sudo mkdir -p /usr/local/share/keyrings
+wget -O nvidia.pub https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub
+sudo gpg --no-default-keyring -o /usr/local/share/keyrings/nvidia.gpg --dearmor nvidia.pub
+rm nvidia.pub
 
 # Set up the stable repository
-sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
+echo "deb [signed-by=/usr/local/share/keyrings/nvidia.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/ /" | sudo tee /etc/apt/sources.list.d/nvidia-cuda.list
 
 # Update the apt package index
 sudo apt update
