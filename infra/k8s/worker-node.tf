@@ -109,11 +109,6 @@ resource "proxmox_vm_qemu" "vm-worker_node_01" {
     bridge = "vmbr1"
   }
 
-  network {
-    model  = "virtio"
-    bridge = "vmbr2"
-  }
-
   # Ignore changes to the network
   ## MAC address is generated on every apply, causing
   ## TF to think this needs to be rebuilt on every apply

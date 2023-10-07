@@ -1,6 +1,18 @@
 #cloud-config
 version: 2
 ethernets:
+%{ if nas_interface_address != "" ~}
+  ens16:
+    dhcp4: false
+    dhcp6: false
+    accept-ra: false
+    link-local: [ ]
+    addresses:
+      - ${nas_interface_address}
+    routes:
+      - to: ${nas_network_address}
+        via: ${nas_network_gateway}
+%{ endif ~}
   ens18:
     dhcp4: false
     dhcp6: false
@@ -18,15 +30,3 @@ ethernets:
   ens19:
     ipv6-privacy: false
     ipv6-address-token: "${ipv6_address_token}"
-%{ if nas_interface_address != "" ~}
-  ens20:
-    dhcp4: false
-    dhcp6: false
-    accept-ra: false
-    link-local: [ ]
-    addresses:
-      - ${nas_interface_address}
-    routes:
-      - to: ${nas_network_address}
-        via: ${nas_network_gateway}
-%{ endif ~}
