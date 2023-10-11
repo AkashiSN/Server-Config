@@ -1,6 +1,6 @@
 FROM alpine AS download
 
-ENV KUBE_VERSION="v1.27.1"
+ENV KUBE_VERSION="v1.28.2"
 
 RUN apk --update add curl && \
     curl -L "https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl" -o /kubectl && \
