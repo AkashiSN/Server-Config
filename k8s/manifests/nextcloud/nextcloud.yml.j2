@@ -124,6 +124,9 @@ spec:
               cpu: 500m
               memory: 2000Mi
       volumes:
+        - name: nextcloud-secrets
+          secret:
+            secretName: nextcloud-secrets
         - name: nextcloud-conf
           configMap:
             name: nextcloud-conf
@@ -131,9 +134,6 @@ spec:
           configMap:
             defaultMode: 504
             name: nextcloud-hooks
-        - name: nextcloud-secrets
-          secret:
-            secretName: nextcloud-secrets
         - name: nginx-conf
           configMap:
             name: nginx-conf

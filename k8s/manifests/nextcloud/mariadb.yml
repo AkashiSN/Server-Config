@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: mariadb
-          image: mariadb:10.5
+          image: mariadb:10.6.15
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3306
@@ -34,6 +34,10 @@ spec:
               value: /secrets/nextcloud_mariadb_user_password
             - name: MARIADB_DATABASE
               value: nextcloud
+            - name: MARIADB_AUTO_UPGRADE
+              value: "1"
+            - name: MARIADB_DISABLE_UPGRADE_BACKUP
+              value: "1"
           args: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
           volumeMounts:
             - name: data
