@@ -40,8 +40,11 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: wordpress
-          image: ghcr.io/akashisn/wordpress@sha256:84aebdfbe8fd43aa4d7b32047447702459e9ffa13562ed63983251fd4ea73b5a
+          image: ghcr.io/akashisn/wordpress@sha256:5693eb705bb372870592f48866454f048e38ba71cbe3772d2bebfe2f8edfd028
           imagePullPolicy: IfNotPresent
+          args:
+            - /docker-entrypoint-hooks.sh
+            - php-fpm
           envFrom:
             - configMapRef:
                 name: wordpress-env
@@ -50,13 +53,25 @@ spec:
               mountPath: /var/www/html
             - name: wordpress-secrets
               mountPath: /secrets
+            - name: wordpress-conf
+              mountPath: /usr/local/etc/php-fpm.d/zz-docker.conf
+              subPath: zz-docker.conf
+              readOnly: true
+            - name: wordpress-conf
+              mountPath: /usr/local/etc/php/conf.d/wordpress.ini
+              subPath: wordpress.ini
+              readOnly: true
+            - name: wordpress-hooks
+              mountPath: /docker-entrypoint-hooks.sh
+              subPath: hooks.sh
+              readOnly: true
           resources:
             requests:
               cpu: 300m
               memory: 200Mi
             limits:
-              cpu: 500m
-              memory: 1000Mi
+              cpu: 1000m
+              memory: 2000Mi
         - name: nginx
           image: nginx:mainline
           imagePullPolicy: IfNotPresent
@@ -85,6 +100,13 @@ spec:
         - name: wordpress-secrets
           secret:
             secretName: wordpress-secrets
+        - name: wordpress-conf
+          configMap:
+            name: wordpress-conf
+        - name: wordpress-hooks
+          configMap:
+            defaultMode: 504
+            name: wordpress-hooks
         - name: nginx-conf
           configMap:
             name: nginx-conf

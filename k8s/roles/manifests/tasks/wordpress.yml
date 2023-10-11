@@ -68,6 +68,13 @@
     wait: true
   become: false
 
+- name: Apply the wordpress/wordpress-conf manifest
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', 'manifests/wordpress/wordpress-conf.yml') | from_yaml_all }}"
+    wait: true
+  become: false
+
 - name: Apply the wordpress/wordpress manifest
   kubernetes.core.k8s:
     state: present
