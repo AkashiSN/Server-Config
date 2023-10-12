@@ -29,54 +29,39 @@ channels:
   - name: NHK総合
     type: GR
     channel: '24'
-  - name: BS朝日 151
+  # BS
+  - name: NHK BS1
+    type: BS
+    channel: BS15_0
+    services: [101]
+  - name: NHK BSプレミアム
+    type: BS
+    channel: BS03_1
+    services: [103]
+  - name: BS日テレ
+    type: BS
+    channel: BS13_0
+    services: [141]
+  - name: BS朝日
     type: BS
     channel: BS01_0
     services: [151]
-  - name: BS朝日 152
-    type: BS
-    channel: BS01_0
-    services: [152]
-  - name: BS朝日 153
-    type: BS
-    channel: BS01_0
-    services: [153]
-  - name: BS-TBS 161
+  - name: BS-TBS
     type: BS
     channel: BS01_1
     services: [161]
-  - name: BS-TBS 162
-    type: BS
-    channel: BS01_1
-    services: [162]
-  - name: BS-TBS 163
-    type: BS
-    channel: BS01_1
-    services: [163]
-  - name: BSテレ東 171
+  - name: BSテレ東
     type: BS
     channel: BS01_2
     services: [171]
-  - name: BSテレ東 172
+  - name: BSフジ
     type: BS
-    channel: BS01_2
-    services: [172]
-  - name: BSテレ東 173
-    type: BS
-    channel: BS01_2
-    services: [173]
+    channel: BS13_1
+    services: [181]
   - name: WOWOWプライム
     type: BS
     channel: BS03_0
     services: [191]
-  - name: NHKBSプレミアム 103
-    type: BS
-    channel: BS03_1
-    services: [103]
-  - name: NHKBSプレミアム 104
-    type: BS
-    channel: BS03_1
-    services: [104]
   - name: WOWOWライブ
     type: BS
     channel: BS05_0
@@ -85,82 +70,42 @@ channels:
     type: BS
     channel: BS05_1
     services: [193]
-  - name: BS11イレブン
-    type: BS
-    channel: BS09_0
-    services: [211]
-  - name: スターチャンネル1
+  - name: スター・チャンネル1
     type: BS
     channel: BS09_1
     services: [200]
-  - name: BS12トゥエルビ
+  - name: スター・チャンネル2
+    type: BS
+    channel: BS15_1
+    services: [201]
+  - name: スター・チャンネル3
+    type: BS
+    channel: BS15_1
+    services: [202]
+  - name: BS11
+    type: BS
+    channel: BS09_0
+    services: [211]
+  - name: TwellV
     type: BS
     channel: BS09_2
     services: [222]
-  - name: BSスカパー!
+  - name: 放送大学 BS1
     type: BS
     channel: BS11_0
-    services: [241]
-  - name: 放送大学ex
-    type: BS
-    channel: BS11_1
     services: [231]
-  - name: 放送大学on
+  - name: 放送大学 BS2
     type: BS
-    channel: BS11_1
+    channel: BS11_0
     services: [232]
-  - name: BS釣りビジョン
+  - name: グリーンチャンネル
     type: BS
-    channel: BS11_2
-    services: [251]
-  - name: BS日テレ 141
-    type: BS
-    channel: BS13_0
-    services: [141]
-  - name: BS日テレ 142
-    type: BS
-    channel: BS13_0
-    services: [142]
-  - name: BS日テレ 143
-    type: BS
-    channel: BS13_0
-    services: [143]
-  - name: BSフジ 181
-    type: BS
-    channel: BS13_1
-    services: [181]
-  - name: BSフジ 182
-    type: BS
-    channel: BS13_1
-    services: [182]
-  - name: BSフジ 183
-    type: BS
-    channel: BS13_1
-    services: [183]
+    channel: BS21_2
+    services: [234]
   - name: BSアニマックス
     type: BS
     channel: BS13_2
     services: [236]
-  - name: NHKBS 101
-    type: BS
-    channel: BS15_0
-    services: [101]
-  - name: NHKBS 102
-    type: BS
-    channel: BS15_0
-    services: [102]
-  - name: スターチャンネル2
-    type: BS
-    channel: BS15_1
-    services: [201]
-  - name: スターチャンネル3
-    type: BS
-    channel: BS15_1
-    services: [202]
-  - name: J SPORTS 4
-    type: BS
-    channel: BS19_0
-    services: [245]
   - name: J SPORTS 1
     type: BS
     channel: BS19_1
@@ -173,18 +118,38 @@ channels:
     type: BS
     channel: BS19_3
     services: [244]
+  - name: J SPORTS 4
+    type: BS
+    channel: BS19_0
+    services: [245]
+  - name: BS釣りビジョン
+    type: BS
+    channel: BS11_1
+    services: [251]
   - name: WOWOWプラス
     type: BS
     channel: BS21_0
     services: [252]
-  - name: 日本映画専門ch
+  - name: 日本映画専門チャンネル
     type: BS
     channel: BS21_1
     services: [255]
-  - name: グリーンチャンネル
+  - name: ディズニー・チャンネル
     type: BS
-    channel: BS21_2
-    services: [234]
+    channel: BS23_0
+    services: [256]
+  - name: BS松竹東急
+    type: BS
+    channel: BS23_3
+    services: [260]
+  - name: BSJapanext
+    type: BS
+    channel: BS23_2
+    services: [263]
+  - name: BSよしもと
+    type: BS
+    channel: BS23_1
+    services: [265]
 
 tuners:
   - name: DDMaxM4-0
