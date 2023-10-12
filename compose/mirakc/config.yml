@@ -1,0 +1,216 @@
+epg:
+  cache-dir: /var/lib/mirakc/epg
+
+server:
+  # Replace `localhost` with `0.0.0.0` (ipv4) or `::` (ipv6) if you like to
+  # connect from other hosts.
+  addrs:
+    - http: '0.0.0.0:40772'
+
+channels:
+  - name: ＮＨＫＥテレ
+    type: GR
+    channel: '13'
+  - name: 読売テレビ
+    type: GR
+    channel: '14'
+  - name: ＡＢＣテレビ
+    type: GR
+    channel: '15'
+  - name: ＭＢＳ毎日放送
+    type: GR
+    channel: '16'
+  - name: 関西テレビ
+    type: GR
+    channel: '17'
+  - name: テレビ大阪
+    type: GR
+    channel: '18'
+  - name: ＮＨＫ総合
+    type: GR
+    channel: '24'
+  - name: ＢＳ朝日１
+    type: BS
+    channel: BS01_0
+    services: [151]
+  - name: ＢＳ朝日２
+    type: BS
+    channel: BS01_0
+    services: [152]
+  - name: ＢＳ朝日３
+    type: BS
+    channel: BS01_0
+    services: [153]
+  - name: ＢＳ－ＴＢＳ
+    type: BS
+    channel: BS01_1
+    services: [161]
+  - name: ＢＳ－ＴＢＳ
+    type: BS
+    channel: BS01_1
+    services: [162]
+  - name: ＢＳ－ＴＢＳ
+    type: BS
+    channel: BS01_1
+    services: [163]
+  - name: ＢＳテレ東
+    type: BS
+    channel: BS01_2
+    services: [171]
+  - name: ＢＳテレ東２
+    type: BS
+    channel: BS01_2
+    services: [172]
+  - name: ＢＳテレ東３
+    type: BS
+    channel: BS01_2
+    services: [173]
+  - name: ＷＯＷＯＷプライム
+    type: BS
+    channel: BS03_0
+    services: [191]
+  - name: ＮＨＫＢＳプレミアム
+    type: BS
+    channel: BS03_1
+    services: [103]
+  - name: ＮＨＫＢＳプレミアム
+    type: BS
+    channel: BS03_1
+    services: [104]
+  - name: ＷＯＷＯＷライブ
+    type: BS
+    channel: BS05_0
+    services: [192]
+  - name: ＷＯＷＯＷシネマ
+    type: BS
+    channel: BS05_1
+    services: [193]
+  - name: ＢＳ１１イレブン
+    type: BS
+    channel: BS09_0
+    services: [211]
+  - name: スターチャンネル１
+    type: BS
+    channel: BS09_1
+    services: [200]
+  - name: ＢＳ１２トゥエルビ
+    type: BS
+    channel: BS09_2
+    services: [222]
+  - name: ＢＳスカパー！
+    type: BS
+    channel: BS11_0
+    services: [241]
+  - name: 放送大学ｅｘ
+    type: BS
+    channel: BS11_1
+    services: [231]
+  - name: 放送大学ｏｎ
+    type: BS
+    channel: BS11_1
+    services: [232]
+  - name: ＢＳ釣りビジョン
+    type: BS
+    channel: BS11_2
+    services: [251]
+  - name: ＢＳ日テレ
+    type: BS
+    channel: BS13_0
+    services: [141]
+  - name: ＢＳ日テレ
+    type: BS
+    channel: BS13_0
+    services: [142]
+  - name: ＢＳ日テレ
+    type: BS
+    channel: BS13_0
+    services: [143]
+  - name: ＢＳフジ・１８１
+    type: BS
+    channel: BS13_1
+    services: [181]
+  - name: ＢＳフジ・１８２
+    type: BS
+    channel: BS13_1
+    services: [182]
+  - name: ＢＳフジ・１８３
+    type: BS
+    channel: BS13_1
+    services: [183]
+  - name: ＢＳアニマックス
+    type: BS
+    channel: BS13_2
+    services: [236]
+  - name: ＮＨＫＢＳ１
+    type: BS
+    channel: BS15_0
+    services: [101]
+  - name: ＮＨＫＢＳ１
+    type: BS
+    channel: BS15_0
+    services: [102]
+  - name: スターチャンネル２
+    type: BS
+    channel: BS15_1
+    services: [201]
+  - name: スターチャンネル３
+    type: BS
+    channel: BS15_1
+    services: [202]
+  - name: Ｊ　ＳＰＯＲＴＳ　４
+    type: BS
+    channel: BS19_0
+    services: [245]
+  - name: Ｊ　ＳＰＯＲＴＳ　１
+    type: BS
+    channel: BS19_1
+    services: [242]
+  - name: Ｊ　ＳＰＯＲＴＳ　２
+    type: BS
+    channel: BS19_2
+    services: [243]
+  - name: Ｊ　ＳＰＯＲＴＳ　３
+    type: BS
+    channel: BS19_3
+    services: [244]
+  - name: ＷＯＷＯＷプラス
+    type: BS
+    channel: BS21_0
+    services: [252]
+  - name: 日本映画専門ｃｈ
+    type: BS
+    channel: BS21_1
+    services: [255]
+  - name: グリーンチャンネル
+    type: BS
+    channel: BS21_2
+    services: [234]
+
+tuners:
+  - name: MaxM4
+    types:
+      - GR
+      - BS
+    command: dvbv5-zap -a 0 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
+
+  - name: MaxM4
+    types:
+      - GR
+      - BS
+    command: dvbv5-zap -a 1 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
+
+  - name: MaxM4
+    types:
+      - GR
+      - BS
+    command: dvbv5-zap -a 2 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
+
+  - name: MaxM4
+    types:
+      - GR
+      - BS
+    command: dvbv5-zap -a 3 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
+
+filters:
+  decode-filter:
+    command: arib-b25-stream
