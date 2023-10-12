@@ -155,22 +155,26 @@ tuners:
   - name: DDMaxM4-0
     types:
       - GR
+      - BS
     command: dvbv5-zap -a 0 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
 
   - name: DDMaxM4-1
     types:
       - GR
+      - BS
     command: dvbv5-zap -a 1 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
 
   - name: DDMaxM4-2
     types:
+      - GR
       - BS
-    command: dvbv5-zap --lnbf=110BS -a 2 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
+    command: dvbv5-zap -a 2 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
 
   - name: DDMaxM4-3
     types:
+      - GR
       - BS
-    command: dvbv5-zap --lnbf=110BS -a 3 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
+    command: dvbv5-zap -a 3 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
 
 filters:
   decode-filter:

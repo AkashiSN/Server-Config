@@ -32,7 +32,7 @@ services:
       TZ: Asia/Tokyo
       # RUST_LOG: info,mirakc=debug
       # MIRAKC_DEBUG_CHILD_PROCESS: 1
-      # MIRAKC_ARIB_LOG: info,filter-service=debug,filter-program=debug
+      # MIRAKC_ARIB_LOG: debug
       # MIRAKC_ARIB_LOG_NO_TIMESTAMP: 1
     networks:
       external:
