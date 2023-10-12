@@ -1,4 +1,4 @@
-name: nextcloud
+name: wordpress
 
 on:
   push:
