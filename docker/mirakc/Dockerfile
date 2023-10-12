@@ -125,13 +125,18 @@ apt-get install -y \
   ca-certificates \
   curl \
   jq \
+  libccid \
   libpcsclite1 \
   libudev1 \
+  pcsc-tools \
+  pcscd \
   socat
 apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 EOT
 
+COPY --chmod=755 entrypoint.sh /
+
 EXPOSE 40772
-ENTRYPOINT ["/usr/local/bin/mirakc"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD []

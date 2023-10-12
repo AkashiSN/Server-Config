@@ -31,4 +31,6 @@ jobs:
           tags: |
             ghcr.io/akashisn/mirakc
           platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           push: true
