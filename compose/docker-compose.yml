@@ -86,7 +86,7 @@ services:
     networks:
       external:
     depends_on:
-      - mirakurun
+      - mirakc
       - mariadb_epgstation
     command: >
       /bin/sh -c

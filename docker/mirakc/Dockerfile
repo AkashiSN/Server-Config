@@ -102,8 +102,8 @@ mkdir -p /dist/usr/local/bin/
 cp ./target/release/mirakc /dist/usr/local/bin/
 cp ./run-mirakc-timeshift-fs /dist/usr/local/bin/
 cp ./target/release/mirakc-timeshift-fs /dist/usr/local/bin/
-mkdir -p /etc/mirakc/
-cp ./resources/strings.yml /etc/mirakc/strings.yml
+mkdir -p /dist/etc/mirakc/
+cp ./resources/strings.yml /dist/etc/mirakc/strings.yml
 EOT
 
 
