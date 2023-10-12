@@ -1,37 +1,39 @@
 # syntax = docker/dockerfile:1.4
-ARG FFMPEG_VERSION=5.0.1
-ARG EPGSTATION_VERSION=2.6.20
-
-FROM l3tnun/epgstation:v${EPGSTATION_VERSION}-debian AS epgstation-image
-FROM akashisn/ffmpeg:${FFMPEG_VERSION}-qsv AS ffmpeg-image
+FROM akashisn/ffmpeg:6.0 AS ffmpeg-image
 
 RUN <<EOT
-mkdir /build
-cp --archive --parents --no-dereference /usr/local/bin/ff* /build
-cp --archive --parents --no-dereference /usr/local/lib/*.so* /build
+mkdir -p /dist
+cp --archive --parents --no-dereference /usr/local/bin/ff* /dist
+cp --archive --parents --no-dereference /usr/local/lib/* /dist
 EOT
+
 
 FROM ubuntu:22.04
 
 SHELL ["/bin/bash", "-e", "-c"]
-ENV DEBIAN_FRONTEND=noninteractive
-ENV LIBVA_DRIVERS_PATH=/usr/local/lib
-ENV LIBVA_DRIVER_NAME=iHD
+ENV DEBIAN_FRONTEND=noninteractive \
+    LD_LIBRARY_PATH=/usr/local/lib \
+    LIBVA_DRIVERS_PATH=/usr/local/lib/dri \
+    LIBVA_DRIVER_NAME=iHD
 
-COPY --from=epgstation-image /app /app
-COPY --from=ffmpeg-image /build /
+COPY --from=l3tnun/epgstation:v2.7.1-debian /app /app
+COPY --from=ffmpeg-image /dist /
 
 RUN <<EOT
+# Install Nodejs
 apt-get update
 apt-get install -y \
+  ca-certificates \
   curl \
   gettext \
-  libdrm2
-curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+  gnupg
+mkdir -p /etc/apt/keyrings
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+apt-get update
 apt-get install -y nodejs
 apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
-ldconfig
 EOT
 
 EXPOSE 8888

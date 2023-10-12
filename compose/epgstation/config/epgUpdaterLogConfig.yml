@@ -1,22 +1,26 @@
 appenders:
   system:
-    type: dateFile
-    backups: 31
+    type: file
+    maxLogSize: 1048576
+    backups: 3
     filename: "%EPGUpdaterSystem%"
     pattern: "-yyyy-MM-dd"
   access:
-    type: dateFile
-    backups: 31
+    type: file
+    maxLogSize: 1048576
+    backups: 3
     filename: "%EPGUpdaterAccess%"
     pattern: "-yyyy-MM-dd"
   stream:
-    type: dateFile
-    backups: 31
+    type: file
+    maxLogSize: 1048576
+    backups: 3
     filename: "%EPGUpdaterStream%"
     pattern: "-yyyy-MM-dd"
   encode:
-    type: dateFile
-    backups: 31
+    type: file
+    maxLogSize: 1048576
+    backups: 3
     filename: "%EPGUpdaterEncode%"
     pattern: "-yyyy-MM-dd"
   console:

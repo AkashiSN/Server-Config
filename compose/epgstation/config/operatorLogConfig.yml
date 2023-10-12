@@ -1,25 +1,26 @@
 appenders:
   system:
-    type: dateFile
-    backups: 31
+    type: file
+    maxLogSize: 1048576
+    backups: 3
     filename: "%OperatorSystem%"
     pattern: "-yyyy-MM-dd"
   access:
-    type: dateFile
+    type: file
     maxLogSize: 1048576
-    backups: 31
+    backups: 3
     filename: "%OperatorAccess%"
     pattern: "-yyyy-MM-dd"
   stream:
-    type: dateFile
+    type: file
     maxLogSize: 1048576
-    backups: 31
+    backups: 3
     filename: "%OperatorStream%"
     pattern: "-yyyy-MM-dd"
   encode:
-    type: dateFile
+    type: file
     maxLogSize: 1048576
-    backups: 31
+    backups: 3
     filename: "%OperatorEncode%"
     pattern: "-yyyy-MM-dd"
   console:
