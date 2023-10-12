@@ -17,7 +17,7 @@ services:
       - /dev/bus:/dev/bus
       - /dev/dvb:/dev/dvb
     ports:
-      - 40772:40772
+      - 172.16.10.15:40772:40772
     volumes:
       - mirakc_epg:/var/lib/mirakc/epg
       - type: bind
@@ -30,7 +30,10 @@ services:
         read_only: true
     environment:
       TZ: Asia/Tokyo
-      RUST_LOG: info,mirakc=debug
+      # RUST_LOG: info,mirakc=debug
+      # MIRAKC_DEBUG_CHILD_PROCESS: 1
+      # MIRAKC_ARIB_LOG: info,filter-service=debug,filter-program=debug
+      # MIRAKC_ARIB_LOG_NO_TIMESTAMP: 1
     networks:
       external:
     restart: always
@@ -94,6 +97,44 @@ services:
         npm start"
     restart: always
 
+  nginx:
+    image: nginx:mainline
+    profiles:
+      - tv
+    volumes:
+      - type: bind
+        source: ./nginx/conf/nginx.conf
+        target: /etc/nginx/nginx.conf
+        read_only: true
+      - type: bind
+        source: ./nginx/conf/real_ip.conf
+        target: /etc/nginx/conf.d/real_ip.conf
+        read_only: true
+      - type: bind
+        source: ./nginx/conf/tv.conf
+        target: /etc/nginx/conf.d/tv.conf
+        read_only: true
+      - type: bind
+        source: /etc/certificates/tv-akashisn-info.crt
+        target: /etc/certificates/tv-akashisn-info.crt
+        read_only: true
+      - type: bind
+        source: /etc/certificates/tv-akashisn-info.key
+        target: /etc/certificates/tv-akashisn-info.key
+        read_only: true
+    environment:
+      TZ: "Asia/Tokyo"
+    expose:
+      - "443/tcp"
+    ports:
+      - "172.16.10.15:443:443/tcp"
+    networks:
+      external:
+    depends_on:
+      - epgstation
+    restart: always
+
+
   #
   # DNS
   #
@@ -147,47 +188,6 @@ services:
       external:
     depends_on:
       - dnsmasq
-    restart: always
-
-  #
-  # Nginx
-  #
-
-  nginx:
-    image: nginx:mainline
-    profiles:
-      - tv
-    volumes:
-      - type: bind
-        source: ./nginx/conf/nginx.conf
-        target: /etc/nginx/nginx.conf
-        read_only: true
-      - type: bind
-        source: ./nginx/conf/real_ip.conf
-        target: /etc/nginx/conf.d/real_ip.conf
-        read_only: true
-      - type: bind
-        source: ./nginx/conf/tv.conf
-        target: /etc/nginx/conf.d/tv.conf
-        read_only: true
-      - type: bind
-        source: /etc/certificates/tv-akashisn-info.crt
-        target: /etc/certificates/tv-akashisn-info.crt
-        read_only: true
-      - type: bind
-        source: /etc/certificates/tv-akashisn-info.key
-        target: /etc/certificates/tv-akashisn-info.key
-        read_only: true
-    environment:
-      TZ: "Asia/Tokyo"
-    expose:
-      - "443/tcp"
-    ports:
-      - "172.16.10.15:443:443/tcp"
-    networks:
-      external:
-    depends_on:
-      - epgstation
     restart: always
 
 volumes:
