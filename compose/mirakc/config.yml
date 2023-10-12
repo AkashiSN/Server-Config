@@ -77,11 +77,7 @@ channels:
   - name: スター・チャンネル2
     type: BS
     channel: BS15_1
-    services: [201]
-  - name: スター・チャンネル3
-    type: BS
-    channel: BS15_1
-    services: [202]
+    services: [201,202]
   - name: BS11
     type: BS
     channel: BS09_0
@@ -93,11 +89,7 @@ channels:
   - name: 放送大学 BS1
     type: BS
     channel: BS11_0
-    services: [231]
-  - name: 放送大学 BS2
-    type: BS
-    channel: BS11_0
-    services: [232]
+    services: [231,232]
   - name: グリーンチャンネル
     type: BS
     channel: BS21_2
