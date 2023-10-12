@@ -1,0 +1,136 @@
+# syntax = docker/dockerfile:1.4
+FROM buildpack-deps:bookworm AS buildpack-base
+SHELL ["/bin/bash", "-e", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN <<EOT
+apt-get update
+apt-get install -y \
+  cmake
+
+cat <<EOF >/toolchain.cmake
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR x86_64)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_C_COMPILER_TARGET x86_64-linux-gnu)
+set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_CXX_COMPILER_TARGET x86_64-linux-gnu)
+EOF
+EOT
+
+
+FROM buildpack-base AS mirakc-arib-build
+RUN <<EOT
+git clone --recursive https://github.com/mirakc/mirakc-arib.git -b 0.21.13 --depth=1 /tmp/mirakc-arib
+cd /tmp/mirakc-arib
+
+cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=/toolchain.cmake
+make -C build -j $(nproc) vendor
+make -C build -j $(nproc)
+strip ./build/bin/mirakc-arib
+
+mkdir -p /dist/usr/local/bin/
+cp ./build/bin/mirakc-arib /dist/usr/local/bin/
+EOT
+
+
+FROM buildpack-base AS arib25-build
+RUN <<EOT
+apt-get install -y \
+  libpcsclite-dev
+
+git clone https://github.com/stz2012/libarib25.git --depth=1 /tmp/libarib25
+cd /tmp/libarib25
+
+cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=/toolchain.cmake -DUSE_AVX2=ON
+make -C build -j $(nproc)
+
+cat <<EOF >./arib-b25-stream
+#!/bin/sh
+sh -c cat | b25 -v 0 /dev/stdin /dev/stdout | cat
+EOF
+chmod +x ./arib-b25-stream
+
+mkdir -p /dist/usr/local/{bin,lib}/
+cp ./arib-b25-stream /dist/usr/local/bin/
+cp ./build/b25 /dist/usr/local/bin/
+cp ./build/libarib25.so* /dist/usr/local/lib/
+EOT
+
+
+FROM buildpack-base AS v4l-build
+ENV V4L_VERSION=1.24.1
+RUN <<EOT
+apt-get install -y \
+  libasound2-dev \
+  libelf-dev \
+  libudev-dev
+
+curl -L -o /tmp/v4l-utils.tar.bz2 https://linuxtv.org/downloads/v4l-utils/v4l-utils-${V4L_VERSION}.tar.bz2
+mkdir -p /tmp/v4l-utils && cd /tmp/v4l-utils
+tar xf /tmp/v4l-utils.tar.bz2 -C . --strip-components 1
+
+./configure --disable-doxygen-doc --enable-gconv
+make -j$(nproc) CFLAGS="-fPIC"
+make install
+
+mkdir -p /dist/usr/local/{bin,lib}/
+cp /usr/local/bin/dvb* /dist/usr/local/bin/
+cp /usr/local/lib/libdvbv5.so* /dist/usr/local/lib/
+cp -r /usr/local/lib/gconv /dist/usr/local/lib/
+EOT
+
+
+FROM rust:bookworm as mirakc-build
+SHELL ["/bin/bash", "-e", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN <<EOT
+git clone https://github.com/mirakc/mirakc.git -b 2.4.10 --depth=1 /tmp/mirakc
+cd /tmp/mirakc
+cargo build --profile=release --bin mirakc
+cargo build --profile=release --bin mirakc-timeshift-fs
+
+cat <<EOF >./run-mirakc-timeshift-fs
+#!/bin/sh
+trap 'umount /mnt' EXIT
+/usr/local/bin/mirakc-timeshift-fs /mnt
+EOF
+chmod +x ./run-mirakc-timeshift-fs
+
+mkdir -p /dist/usr/local/bin/
+cp ./target/release/mirakc /dist/usr/local/bin/
+cp ./run-mirakc-timeshift-fs /dist/usr/local/bin/
+cp ./target/release/mirakc-timeshift-fs /dist/usr/local/bin/
+mkdir -p /etc/mirakc/
+cp ./resources/strings.yml /etc/mirakc/strings.yml
+EOT
+
+
+FROM debian:bookworm-slim AS mirakc
+SHELL ["/bin/bash", "-e", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive \
+    MIRAKC_CONFIG=/etc/mirakc/config.yml \
+    MIRAKC_BUILD_PROFILE=release
+
+COPY --from=mirakc-arib-build /dist /
+COPY --from=arib25-build /dist /
+COPY --from=v4l-build /dist /
+COPY --from=mirakc-build /dist /
+
+RUN <<EOT
+apt-get update
+apt-get install -y \
+  ca-certificates \
+  curl \
+  jq \
+  libpcsclite1 \
+  libudev1 \
+  socat
+apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+EOT
+
+EXPOSE 40772
+ENTRYPOINT ["/usr/local/bin/mirakc"]
+CMD []
