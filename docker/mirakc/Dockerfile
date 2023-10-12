@@ -54,7 +54,7 @@ chmod +x ./arib-b25-stream
 mkdir -p /dist/usr/local/{bin,lib}/
 cp ./arib-b25-stream /dist/usr/local/bin/
 cp ./build/b25 /dist/usr/local/bin/
-cp ./build/libarib25.so* /dist/usr/local/lib/
+cp -d ./build/libarib25.so* /dist/usr/local/lib/
 EOT
 
 
@@ -76,7 +76,7 @@ make install
 
 mkdir -p /dist/usr/local/{bin,lib}/
 cp /usr/local/bin/dvb* /dist/usr/local/bin/
-cp /usr/local/lib/libdvbv5.so* /dist/usr/local/lib/
+cp -d /usr/local/lib/libdvbv5.so* /dist/usr/local/lib/
 cp -r /usr/local/lib/gconv /dist/usr/local/lib/
 EOT
 
