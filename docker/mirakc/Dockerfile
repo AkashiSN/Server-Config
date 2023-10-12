@@ -110,6 +110,7 @@ EOT
 FROM debian:bookworm-slim AS mirakc
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive \
+    GCONV_PATH=/usr/local/lib/gconv \
     MIRAKC_CONFIG=/etc/mirakc/config.yml \
     MIRAKC_BUILD_PROFILE=release
 
