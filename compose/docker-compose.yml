@@ -19,7 +19,7 @@ services:
     ports:
       - 40772:40772
     volumes:
-      - mirakc-epg:/var/lib/mirakc/epg
+      - mirakc_epg:/var/lib/mirakc/epg
       - type: bind
         source: ./mirakc/config.yml
         target: /etc/mirakc/config.yml
@@ -192,10 +192,8 @@ services:
 
 volumes:
   mariadb_epgstation:
-    name: mariadb_epgstation
     driver: local
-  mirakc-epg:
-    name: mirakc_epg
+  mirakc_epg:
     driver: local
 
 networks:
