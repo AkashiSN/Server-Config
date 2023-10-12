@@ -40,7 +40,7 @@ services:
       - tv
     image: mariadb:10.8
     volumes:
-      - mariadb-epgstation:/var/lib/mysql
+      - mariadb_epgstation:/var/lib/mysql
     environment:
       TZ: "Asia/Tokyo"
       MYSQL_USER: epgstation
@@ -191,7 +191,7 @@ services:
     restart: always
 
 volumes:
-  mariadb-epgstation:
+  mariadb_epgstation:
     name: mariadb_epgstation
     driver: local
   mirakc-epg:
