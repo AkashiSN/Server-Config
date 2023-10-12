@@ -8,16 +8,16 @@ server:
     - http: '0.0.0.0:40772'
 
 channels:
-  - name: ＮＨＫＥテレ
+  - name: NHKEテレ
     type: GR
     channel: '13'
   - name: 読売テレビ
     type: GR
     channel: '14'
-  - name: ＡＢＣテレビ
+  - name: ABCテレビ
     type: GR
     channel: '15'
-  - name: ＭＢＳ毎日放送
+  - name: MBS毎日放送
     type: GR
     channel: '16'
   - name: 関西テレビ
@@ -26,158 +26,158 @@ channels:
   - name: テレビ大阪
     type: GR
     channel: '18'
-  - name: ＮＨＫ総合
+  - name: NHK総合
     type: GR
     channel: '24'
-  - name: ＢＳ朝日１
+  - name: BS朝日 151
     type: BS
     channel: BS01_0
     services: [151]
-  - name: ＢＳ朝日２
+  - name: BS朝日 152
     type: BS
     channel: BS01_0
     services: [152]
-  - name: ＢＳ朝日３
+  - name: BS朝日 153
     type: BS
     channel: BS01_0
     services: [153]
-  - name: ＢＳ－ＴＢＳ
+  - name: BS-TBS 161
     type: BS
     channel: BS01_1
     services: [161]
-  - name: ＢＳ－ＴＢＳ
+  - name: BS-TBS 162
     type: BS
     channel: BS01_1
     services: [162]
-  - name: ＢＳ－ＴＢＳ
+  - name: BS-TBS 163
     type: BS
     channel: BS01_1
     services: [163]
-  - name: ＢＳテレ東
+  - name: BSテレ東 171
     type: BS
     channel: BS01_2
     services: [171]
-  - name: ＢＳテレ東２
+  - name: BSテレ東 172
     type: BS
     channel: BS01_2
     services: [172]
-  - name: ＢＳテレ東３
+  - name: BSテレ東 173
     type: BS
     channel: BS01_2
     services: [173]
-  - name: ＷＯＷＯＷプライム
+  - name: WOWOWプライム
     type: BS
     channel: BS03_0
     services: [191]
-  - name: ＮＨＫＢＳプレミアム
+  - name: NHKBSプレミアム 103
     type: BS
     channel: BS03_1
     services: [103]
-  - name: ＮＨＫＢＳプレミアム
+  - name: NHKBSプレミアム 104
     type: BS
     channel: BS03_1
     services: [104]
-  - name: ＷＯＷＯＷライブ
+  - name: WOWOWライブ
     type: BS
     channel: BS05_0
     services: [192]
-  - name: ＷＯＷＯＷシネマ
+  - name: WOWOWシネマ
     type: BS
     channel: BS05_1
     services: [193]
-  - name: ＢＳ１１イレブン
+  - name: BS11イレブン
     type: BS
     channel: BS09_0
     services: [211]
-  - name: スターチャンネル１
+  - name: スターチャンネル1
     type: BS
     channel: BS09_1
     services: [200]
-  - name: ＢＳ１２トゥエルビ
+  - name: BS12トゥエルビ
     type: BS
     channel: BS09_2
     services: [222]
-  - name: ＢＳスカパー！
+  - name: BSスカパー!
     type: BS
     channel: BS11_0
     services: [241]
-  - name: 放送大学ｅｘ
+  - name: 放送大学ex
     type: BS
     channel: BS11_1
     services: [231]
-  - name: 放送大学ｏｎ
+  - name: 放送大学on
     type: BS
     channel: BS11_1
     services: [232]
-  - name: ＢＳ釣りビジョン
+  - name: BS釣りビジョン
     type: BS
     channel: BS11_2
     services: [251]
-  - name: ＢＳ日テレ
+  - name: BS日テレ 141
     type: BS
     channel: BS13_0
     services: [141]
-  - name: ＢＳ日テレ
+  - name: BS日テレ 142
     type: BS
     channel: BS13_0
     services: [142]
-  - name: ＢＳ日テレ
+  - name: BS日テレ 143
     type: BS
     channel: BS13_0
     services: [143]
-  - name: ＢＳフジ・１８１
+  - name: BSフジ 181
     type: BS
     channel: BS13_1
     services: [181]
-  - name: ＢＳフジ・１８２
+  - name: BSフジ 182
     type: BS
     channel: BS13_1
     services: [182]
-  - name: ＢＳフジ・１８３
+  - name: BSフジ 183
     type: BS
     channel: BS13_1
     services: [183]
-  - name: ＢＳアニマックス
+  - name: BSアニマックス
     type: BS
     channel: BS13_2
     services: [236]
-  - name: ＮＨＫＢＳ１
+  - name: NHKBS 101
     type: BS
     channel: BS15_0
     services: [101]
-  - name: ＮＨＫＢＳ１
+  - name: NHKBS 102
     type: BS
     channel: BS15_0
     services: [102]
-  - name: スターチャンネル２
+  - name: スターチャンネル2
     type: BS
     channel: BS15_1
     services: [201]
-  - name: スターチャンネル３
+  - name: スターチャンネル3
     type: BS
     channel: BS15_1
     services: [202]
-  - name: Ｊ　ＳＰＯＲＴＳ　４
+  - name: J SPORTS 4
     type: BS
     channel: BS19_0
     services: [245]
-  - name: Ｊ　ＳＰＯＲＴＳ　１
+  - name: J SPORTS 1
     type: BS
     channel: BS19_1
     services: [242]
-  - name: Ｊ　ＳＰＯＲＴＳ　２
+  - name: J SPORTS 2
     type: BS
     channel: BS19_2
     services: [243]
-  - name: Ｊ　ＳＰＯＲＴＳ　３
+  - name: J SPORTS 3
     type: BS
     channel: BS19_3
     services: [244]
-  - name: ＷＯＷＯＷプラス
+  - name: WOWOWプラス
     type: BS
     channel: BS21_0
     services: [252]
-  - name: 日本映画専門ｃｈ
+  - name: 日本映画専門ch
     type: BS
     channel: BS21_1
     services: [255]
@@ -190,26 +190,22 @@ tuners:
   - name: DDMaxM4-0
     types:
       - GR
-      - BS
     command: dvbv5-zap -a 0 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
 
   - name: DDMaxM4-1
     types:
       - GR
-      - BS
     command: dvbv5-zap -a 1 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
 
   - name: DDMaxM4-2
     types:
-      - GR
       - BS
-    command: dvbv5-zap -a 2 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
+    command: dvbv5-zap --lnbf=110BS -a 2 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
 
   - name: DDMaxM4-3
     types:
-      - GR
       - BS
-    command: dvbv5-zap -a 3 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
+    command: dvbv5-zap --lnbf=110BS -a 3 -c /etc/mirakc/isdb.conf -r -P {{{channel}}} -o -
 
 filters:
   decode-filter:
