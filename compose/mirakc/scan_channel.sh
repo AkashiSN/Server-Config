@@ -29,9 +29,9 @@ readonly DEVICE_MAP_CS='/dev/dvb:/dev/dvb'
 # must be ts stream output to stdout
 # if empty setting, then skip channel scan
 #   <channel> : channel
-readonly RECORD_COMMAND_GR='dvbv5-zap -a 0 -c /usr/local/etc/dvbv5/dvbv5_channels_isdb.conf -s -r -P <channel> -t 10 -o -'
-readonly RECORD_COMMAND_BS='dvbv5-zap -a 1 -c /usr/local/etc/dvbv5/dvbv5_channels_isdb.conf -s -r -P <channel> -t 10 -o -'
-readonly RECORD_COMMAND_CS='dvbv5-zap -a 2 -c /usr/local/etc/dvbv5/dvbv5_channels_isdb.conf -s -r -P <channel> -t 10 -o -'
+readonly RECORD_COMMAND_GR='dvbv5-zap -a 0 -c /usr/local/etc/dvbv5/dvbv5_channels_isdb.conf -s -r -P <channel> -t 30 -o -'
+readonly RECORD_COMMAND_BS='dvbv5-zap -a 1 -c /usr/local/etc/dvbv5/dvbv5_channels_isdb.conf -s -r -P <channel> -t 30 -o -'
+readonly RECORD_COMMAND_CS='dvbv5-zap -a 2 -c /usr/local/etc/dvbv5/dvbv5_channels_isdb.conf -s -r -P <channel> -t 30 -o -'
 
 # scan target channels: GR
 CHANNELS_GR="$(cat << EOT
@@ -86,57 +86,57 @@ CHANNELS_GR="$(cat << EOT
 61
 62
 
-C13
-C14
-C15
-C16
-C17
-C18
-C19
-C20
-C21
-C22
-C23
-C24
-C25
-C26
-C27
-C28
-C29
-C30
-C31
-C32
-C33
-C34
-C35
-C36
-C37
-C38
-C39
-C40
-C41
-C42
-C43
-C44
-C45
-C46
-C47
-C48
-C49
-C50
-C51
-C52
-C53
-C54
-C55
-C56
-C57
-C58
-C59
-C60
-C61
-C62
-C63
+# C13
+# C14
+# C15
+# C16
+# C17
+# C18
+# C19
+# C20
+# C21
+# C22
+# C23
+# C24
+# C25
+# C26
+# C27
+# C28
+# C29
+# C30
+# C31
+# C32
+# C33
+# C34
+# C35
+# C36
+# C37
+# C38
+# C39
+# C40
+# C41
+# C42
+# C43
+# C44
+# C45
+# C46
+# C47
+# C48
+# C49
+# C50
+# C51
+# C52
+# C53
+# C54
+# C55
+# C56
+# C57
+# C58
+# C59
+# C60
+# C61
+# C62
+# C63
 
 EOT
 )"
@@ -148,109 +148,109 @@ BS01_0
 BS01_1
 BS01_2
 BS01_3
-#BS01_4
-#BS01_5
-#BS01_6
-#BS01_7
+# BS01_4
+# BS01_5
+# BS01_6
+# BS01_7
 
 BS03_0
 BS03_1
 BS03_2
 BS03_3
-#BS03_4
-#BS03_5
-#BS03_6
-#BS03_7
+# BS03_4
+# BS03_5
+# BS03_6
+# BS03_7
 
 BS05_0
 BS05_1
 BS05_2
 BS05_3
-#BS05_4
-#BS05_5
-#BS05_6
-#BS05_7
+# BS05_4
+# BS05_5
+# BS05_6
+# BS05_7
 
-#BS07_0
-#BS07_1
-#BS07_2
-#BS07_3
-#BS07_4
-#BS07_5
-#BS07_6
-#BS07_7
+# BS07_0
+# BS07_1
+# BS07_2
+# BS07_3
+# BS07_4
+# BS07_5
+# BS07_6
+# BS07_7
 
 BS09_0
 BS09_1
 BS09_2
 BS09_3
-#BS09_4
-#BS09_5
-#BS09_6
-#BS09_7
+# BS09_4
+# BS09_5
+# BS09_6
+# BS09_7
 
 BS11_0
 BS11_1
 BS11_2
 BS11_3
-#BS11_4
-#BS11_5
-#BS11_6
-#BS11_7
+# BS11_4
+# BS11_5
+# BS11_6
+# BS11_7
 
 BS13_0
 BS13_1
 BS13_2
 BS13_3
-#BS13_4
-#BS13_5
-#BS13_6
-#BS13_7
+# BS13_4
+# BS13_5
+# BS13_6
+# BS13_7
 
 BS15_0
 BS15_1
 BS15_2
 BS15_3
-#BS15_4
-#BS15_5
-#BS15_6
-#BS15_7
+# BS15_4
+# BS15_5
+# BS15_6
+# BS15_7
 
-#BS17_0
-#BS17_1
-#BS17_2
-#BS17_3
-#BS17_4
-#BS17_5
-#BS17_6
-#BS17_7
+# BS17_0
+# BS17_1
+# BS17_2
+# BS17_3
+# BS17_4
+# BS17_5
+# BS17_6
+# BS17_7
 
 BS19_0
 BS19_1
 BS19_2
 BS19_3
-#BS19_4
-#BS19_5
-#BS19_6
-#BS19_7
+# BS19_4
+# BS19_5
+# BS19_6
+# BS19_7
 
 BS21_0
 BS21_1
 BS21_2
 BS21_3
-#BS21_4
-#BS21_5
-#BS21_6
-#BS21_7
+# BS21_4
+# BS21_5
+# BS21_6
+# BS21_7
 
 BS23_0
 BS23_1
 BS23_2
 BS23_3
-#BS23_4
-#BS23_5
-#BS23_6
-#BS23_7
+# BS23_4
+# BS23_5
+# BS23_6
+# BS23_7
 
 EOT
 )"
@@ -258,18 +258,18 @@ readonly CHANNELS_BS=$(echo "${CHANNELS_BS}" | grep -e '^[^#]')
 
 # scan target channels: CS
 CHANNELS_CS="$(cat << EOT
-CS2
-CS4
-CS6
-CS8
-CS10
-CS12
-CS14
-CS16
-CS18
-CS20
-CS22
-CS24
+# CS2
+# CS4
+# CS6
+# CS8
+# CS10
+# CS12
+# CS14
+# CS16
+# CS18
+# CS20
+# CS22
+# CS24
 
 EOT
 )"
@@ -311,6 +311,7 @@ if [ -n "${DEVICE_MAP_GR}" ] && [ -n "${RECORD_COMMAND_GR}" ]; then
 
     # extract .name (first service only)
     sname=$(echo "${json}" | jq -M -r '.[0] | .name')
+    echo "${sname}"
 
     # extract all service .sid
     sid=$(echo "${json}" | jq -M -r '.[] | .sid' | jq -M -s . | jq -M -r 'join(",")')
@@ -347,6 +348,7 @@ if [ -n "${DEVICE_MAP_BS}" ] && [ -n "${RECORD_COMMAND_BS}" ]; then
 
     # extract .name (first service only)
     sname=$(echo "${json}" | jq -M -r '.[0] | .name')
+    echo "${sname}"
 
     # extract all service .sid
     sid=$(echo "${json}" | jq -M -r '.[] | .sid' | jq -M -s . | jq -M -r 'join(",")')
@@ -405,6 +407,7 @@ if [ -n "${DEVICE_MAP_CS}" ] && [ -n "${RECORD_COMMAND_CS}" ]; then
 
         # extract .name
         sname=$(echo "${service_json}" | jq -M -r '.name')
+        echo "${sname}"
 
         # extract .sid
         sid=$(echo "${service_json}" | jq -M -r '.sid')
@@ -414,6 +417,7 @@ if [ -n "${DEVICE_MAP_CS}" ] && [ -n "${RECORD_COMMAND_CS}" ]; then
     else
       # service name = channel
       sname="${ch}"
+      echo "${sname}"
 
       # extract all service .sid
       sid=$(echo "${json}" | jq -M -r '.[] | .sid' | jq -M -s . | jq -M -r 'join(",")')

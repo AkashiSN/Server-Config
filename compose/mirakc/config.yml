@@ -75,6 +75,12 @@ channels:
     extra-args: ''
     disabled: false
 
+  - name: 'ＮＨＫＢＳプレミアム'
+    type: 'BS'
+    channel: 'BS03_1'
+    extra-args: ''
+    disabled: false
+
   - name: 'ＷＯＷＯＷライブ'
     type: 'BS'
     channel: 'BS05_0'
@@ -87,9 +93,21 @@ channels:
     extra-args: ''
     disabled: false
 
+  - name: 'ＢＳ１１イレブン'
+    type: 'BS'
+    channel: 'BS09_0'
+    extra-args: ''
+    disabled: false
+
   - name: 'スターチャンネル１'
     type: 'BS'
     channel: 'BS09_1'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳ１２トゥエルビ'
+    type: 'BS'
+    channel: 'BS09_2'
     extra-args: ''
     disabled: false
 
@@ -99,9 +117,21 @@ channels:
     extra-args: ''
     disabled: false
 
+  - name: 'ＢＳ釣りビジョン'
+    type: 'BS'
+    channel: 'BS11_1'
+    extra-args: ''
+    disabled: false
+
   - name: 'ＢＳ日テレ'
     type: 'BS'
     channel: 'BS13_0'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳフジ・１８１'
+    type: 'BS'
+    channel: 'BS13_1'
     extra-args: ''
     disabled: false
 
@@ -117,9 +147,45 @@ channels:
     extra-args: ''
     disabled: false
 
+  - name: 'Ｊ　ＳＰＯＲＴＳ　４'
+    type: 'BS'
+    channel: 'BS19_0'
+    extra-args: ''
+    disabled: false
+
   - name: 'Ｊ　ＳＰＯＲＴＳ　１'
     type: 'BS'
     channel: 'BS19_1'
+    extra-args: ''
+    disabled: false
+
+  - name: 'Ｊ　ＳＰＯＲＴＳ　２'
+    type: 'BS'
+    channel: 'BS19_2'
+    extra-args: ''
+    disabled: false
+
+  - name: 'Ｊ　ＳＰＯＲＴＳ　３'
+    type: 'BS'
+    channel: 'BS19_3'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＷＯＷＯＷプラス'
+    type: 'BS'
+    channel: 'BS21_0'
+    extra-args: ''
+    disabled: false
+
+  - name: '日本映画専門ｃｈ'
+    type: 'BS'
+    channel: 'BS21_1'
+    extra-args: ''
+    disabled: false
+
+  - name: 'グリーンチャンネル'
+    type: 'BS'
+    channel: 'BS21_2'
     extra-args: ''
     disabled: false
 
