@@ -7,141 +7,121 @@ server:
   addrs:
     - http: '0.0.0.0:40772'
 
+# from scan_channel.sh
 channels:
-  - name: NHKEテレ
-    type: GR
+  - name: 'ＮＨＫＥテレ１大阪'
+    type: 'GR'
     channel: '13'
-  - name: 読売テレビ
-    type: GR
+    extra-args: ''
+    disabled: false
+
+  - name: '読売テレビ１'
+    type: 'GR'
     channel: '14'
-  - name: ABCテレビ
-    type: GR
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＡＢＣテレビ１'
+    type: 'GR'
     channel: '15'
-  - name: MBS毎日放送
-    type: GR
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＭＢＳ毎日放送'
+    type: 'GR'
     channel: '16'
-  - name: 関西テレビ
-    type: GR
+    extra-args: ''
+    disabled: false
+
+  - name: '関西テレビ１'
+    type: 'GR'
     channel: '17'
-  - name: テレビ大阪
-    type: GR
+    extra-args: ''
+    disabled: false
+
+  - name: 'テレビ大阪１'
+    type: 'GR'
     channel: '18'
-  - name: NHK総合
-    type: GR
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＮＨＫ総合１・大阪'
+    type: 'GR'
     channel: '24'
-  # BS
-  - name: NHK BS1
-    type: BS
-    channel: BS15_0
-    services: [101]
-  - name: NHK BSプレミアム
-    type: BS
-    channel: BS03_1
-    services: [103]
-  - name: BS日テレ
-    type: BS
-    channel: BS13_0
-    services: [141]
-  - name: BS朝日
-    type: BS
-    channel: BS01_0
-    services: [151]
-  - name: BS-TBS
-    type: BS
-    channel: BS01_1
-    services: [161]
-  - name: BSテレ東
-    type: BS
-    channel: BS01_2
-    services: [171]
-  - name: BSフジ
-    type: BS
-    channel: BS13_1
-    services: [181]
-  - name: WOWOWプライム
-    type: BS
-    channel: BS03_0
-    services: [191]
-  - name: WOWOWライブ
-    type: BS
-    channel: BS05_0
-    services: [192]
-  - name: WOWOWシネマ
-    type: BS
-    channel: BS05_1
-    services: [193]
-  - name: スター・チャンネル1
-    type: BS
-    channel: BS09_1
-    services: [200]
-  - name: スター・チャンネル2
-    type: BS
-    channel: BS15_1
-    services: [201,202]
-  - name: BS11
-    type: BS
-    channel: BS09_0
-    services: [211]
-  - name: TwellV
-    type: BS
-    channel: BS09_2
-    services: [222]
-  - name: 放送大学 BS1
-    type: BS
-    channel: BS11_0
-    services: [231,232]
-  - name: グリーンチャンネル
-    type: BS
-    channel: BS21_2
-    services: [234]
-  - name: BSアニマックス
-    type: BS
-    channel: BS13_2
-    services: [236]
-  - name: J SPORTS 1
-    type: BS
-    channel: BS19_1
-    services: [242]
-  - name: J SPORTS 2
-    type: BS
-    channel: BS19_2
-    services: [243]
-  - name: J SPORTS 3
-    type: BS
-    channel: BS19_3
-    services: [244]
-  - name: J SPORTS 4
-    type: BS
-    channel: BS19_0
-    services: [245]
-  - name: BS釣りビジョン
-    type: BS
-    channel: BS11_1
-    services: [251]
-  - name: WOWOWプラス
-    type: BS
-    channel: BS21_0
-    services: [252]
-  - name: 日本映画専門チャンネル
-    type: BS
-    channel: BS21_1
-    services: [255]
-  - name: ディズニー・チャンネル
-    type: BS
-    channel: BS23_0
-    services: [256]
-  - name: BS松竹東急
-    type: BS
-    channel: BS23_3
-    services: [260]
-  - name: BSJapanext
-    type: BS
-    channel: BS23_2
-    services: [263]
-  - name: BSよしもと
-    type: BS
-    channel: BS23_1
-    services: [265]
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳ朝日１'
+    type: 'BS'
+    channel: 'BS01_0'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳ－ＴＢＳ'
+    type: 'BS'
+    channel: 'BS01_1'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳテレ東'
+    type: 'BS'
+    channel: 'BS01_2'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＷＯＷＯＷプライム'
+    type: 'BS'
+    channel: 'BS03_0'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＷＯＷＯＷライブ'
+    type: 'BS'
+    channel: 'BS05_0'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＷＯＷＯＷシネマ'
+    type: 'BS'
+    channel: 'BS05_1'
+    extra-args: ''
+    disabled: false
+
+  - name: 'スターチャンネル１'
+    type: 'BS'
+    channel: 'BS09_1'
+    extra-args: ''
+    disabled: false
+
+  - name: '放送大学テレビ'
+    type: 'BS'
+    channel: 'BS11_0'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳ日テレ'
+    type: 'BS'
+    channel: 'BS13_0'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳアニマックス'
+    type: 'BS'
+    channel: 'BS13_2'
+    extra-args: ''
+    disabled: false
+
+  - name: 'スターチャンネル２'
+    type: 'BS'
+    channel: 'BS15_0'
+    extra-args: ''
+    disabled: false
+
+  - name: 'Ｊ　ＳＰＯＲＴＳ　１'
+    type: 'BS'
+    channel: 'BS19_1'
+    extra-args: ''
+    disabled: false
 
 tuners:
   - name: DDMaxM4-0
