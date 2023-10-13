@@ -6,7 +6,7 @@ services:
   #
 
   mirakc:
-    image: ghcr.io/akashisn/mirakc
+    image: ghcr.io/akashisn/mirakc@sha256:4b6f3f2531710339d3815aae6122950eb5b9612e292995cb55438f2d84e234af
     init: true
     profiles:
       - tv
@@ -30,10 +30,10 @@ services:
         read_only: true
     environment:
       TZ: Asia/Tokyo
-      # RUST_LOG: info,mirakc=debug
-      # MIRAKC_DEBUG_CHILD_PROCESS: 1
-      # MIRAKC_ARIB_LOG: debug
-      # MIRAKC_ARIB_LOG_NO_TIMESTAMP: 1
+      RUST_LOG: info
+      MIRAKC_DEBUG_CHILD_PROCESS: 1
+      MIRAKC_ARIB_LOG: info
+      MIRAKC_ARIB_LOG_NO_TIMESTAMP: 1
     networks:
       external:
     restart: always
@@ -58,7 +58,7 @@ services:
     restart: always
 
   epgstation:
-    image: ghcr.io/akashisn/epgstation
+    image: ghcr.io/akashisn/epgstation@sha256:a453c0af13cd24189afb0e0b1a042115deb39a9f8025dbcf3c53f8007d1732d6
     profiles:
       - tv
     volumes:
