@@ -62,115 +62,117 @@ stream:
   live:
     ts:
       m2ts:
-        - name: 1080p - QSV
+        - name: 最高画質 (15Mbps)
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
               -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
               -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
               -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1920:-1 -b:v 3000k
-              -preset veryfast -y -f mpegts pipe:1'
-        - name: 720p - QSV
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 15000k
+              -preset faster -y -f mpegts pipe:1'
+        - name: 高画質 (10Mbps)
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
               -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
               -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
               -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1280:-1 -b:v 2000k
-              -preset veryfast -y -f mpegts pipe:1'
-        - name: 480p - QSV
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 10000k
+              -preset faster -y -f mpegts pipe:1'
+        - name: 中画質 (5Mbps)
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
               -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
               -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
               -threads 0 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_qsv -flags +cgop
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=640:-1 -b:v 1000k
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 5000k
+              -preset veryfast -y -f mpegts pipe:1'
+        - name: 低画質 (1Mbps)
+          cmd:
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+              -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+              -threads 0 -c:a aac -ar 48000 -b:a 96k -ac 2 -c:v h264_qsv -flags +cgop
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 1000k
               -preset veryfast -y -f mpegts pipe:1'
         - name: 無変換
 
       m2tsll:
-        - name: 1080p - QSV
+        - name: 最高画質 (15Mbps)
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
               -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
               -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
               -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1920:-1 -b:v 3000k
-              -preset veryfast -y -f mpegts pipe:1'
-        - name: 720p - QSV
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 15000k
+              -preset faster -y -f mpegts pipe:1'
+        - name: 高画質 (10Mbps)
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
               -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
               -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
               -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1280:-1 -b:v 2000k
-              -preset veryfast -y -f mpegts pipe:1'
-        - name: 480p - QSV
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 10000k
+              -preset faster -y -f mpegts pipe:1'
+        - name: 中画質 (5Mbps)
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
               -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
               -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
               -threads 0 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_qsv -flags +cgop
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=640:-1 -b:v 1000k
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 5000k
               -preset veryfast -y -f mpegts pipe:1'
-
+        - name: 低画質 (1Mbps)
+          cmd:
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+              -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+              -threads 0 -c:a aac -ar 48000 -b:a 96k -ac 2 -c:v h264_qsv -flags +cgop
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 1000k
+              -preset veryfast -y -f mpegts pipe:1'
   recorded:
     ts:
       hls:
-        - name: 1080p - QSV
+        - name: 最高画質 (15Mbps)
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
               -dual_mono_mode main -i pipe:0 -sn -map 0 -threads 0 -c:s copy -c:d copy -ignore_unknown
               -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
-              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments
+              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
               -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1920:-1 -b:v 3000k
-              -preset veryfast -flags +loop-global_header %OUTPUT%'
-        - name: 720p - QSV
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 15000k
+              -preset faster -flags +loop-global_header %OUTPUT%'
+        - name: 高画質 (10Mbps)
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
               -dual_mono_mode main -i pipe:0 -sn -map 0 -threads 0 -c:s copy -c:d copy -ignore_unknown
               -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
-              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments
+              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
               -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1280:-1 -b:v 2000k
-              -preset veryfast -flags +loop-global_header %OUTPUT%'
-        - name: 480p - QSV
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 10000k
+              -preset faster -flags +loop-global_header %OUTPUT%'
+        - name: 中画質 (5Mbps)
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
               -dual_mono_mode main -i pipe:0 -sn -map 0 -threads 0 -c:s copy -c:d copy -ignore_unknown
               -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
-              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments
-              -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_qsv
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=640:-1 -b:v 1000k
+              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
+              -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 5000k
               -preset veryfast -flags +loop-global_header %OUTPUT%'
-
+        - name: 低画質 (1Mbps)
+          cmd:
+              '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+              -dual_mono_mode main -i pipe:0 -sn -map 0 -threads 0 -c:s copy -c:d copy -ignore_unknown
+              -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
+              -c:a aac -ar 48000 -b:a 96k -ac 2 -c:v h264_qsv
+              -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 1000k
+              -preset veryfast -flags +loop-global_header %OUTPUT%'
     encoded:
       hls:
-        - name: 1080p - QSV
+        - name: 無変換
           cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
-              -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 0 -ignore_unknown
+              '%FFMPEG% -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 0 -ignore_unknown
               -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
-              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments
-              -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1920:-1 -b:v 3000k
-              -preset veryfast -flags +loop-global_header %OUTPUT%'
-        - name: 720p - QSV
-          cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
-              -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 0 -ignore_unknown
-              -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
-              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments
-              -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=1280:-1 -b:v 2000k
-              -preset veryfast -flags +loop-global_header %OUTPUT%'
-        - name: 480p - QSV
-          cmd:
-              '%FFMPEG% -init_hw_device qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
-              -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 0 -ignore_unknown
-              -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
-              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments
-              -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_qsv
-              -vf hwupload=extra_hw_frames=64,vpp_qsv=deinterlace=2,scale_qsv=640:-1 -b:v 1000k
-              -preset veryfast -flags +loop-global_header %OUTPUT%'
+              -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
+              -c:a copy -c:v copy -flags +loop-global_header %OUTPUT%'
