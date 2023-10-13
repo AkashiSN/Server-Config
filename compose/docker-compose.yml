@@ -24,10 +24,6 @@ services:
         source: ./mirakc/config.yml
         target: /etc/mirakc/config.yml
         read_only: true
-      - type: bind
-        source: ./mirakc/isdb.conf
-        target: /etc/mirakc/isdb.conf
-        read_only: true
     environment:
       TZ: Asia/Tokyo
       RUST_LOG: info
