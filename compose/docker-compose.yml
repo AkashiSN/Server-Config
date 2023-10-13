@@ -132,6 +132,23 @@ services:
 
 
   #
+  # Tunnel
+  #
+  cloudflared:
+    image: cloudflare/cloudflared:2023.8.2
+    profiles:
+      - tunnel
+    command:
+      - tunnel
+      - run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    networks:
+      external:
+    restart: always
+
+
+  #
   # DNS
   #
 
