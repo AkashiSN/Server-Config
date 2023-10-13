@@ -74,10 +74,14 @@ tar xf /tmp/v4l-utils.tar.bz2 -C . --strip-components 1
 make -j$(nproc) CFLAGS="-fPIC"
 make install
 
-mkdir -p /dist/usr/local/{bin,lib}/
+git clone https://github.com/Chinachu/dvbconf-for-isdb.git --depth 1 /tmp/dvbconf
+cat /tmp/dvbconf/conf/dvbv5_channels_isdb{t,s}.conf > /tmp/dvbv5_channels_isdb.conf
+
+mkdir -p /dist/usr/local/{bin,lib,etc/dvbv5}/
 cp /usr/local/bin/dvb* /dist/usr/local/bin/
 cp -d /usr/local/lib/libdvbv5.so* /dist/usr/local/lib/
 cp -r /usr/local/lib/gconv /dist/usr/local/lib/
+cp /tmp/dvbv5_channels_isdb.conf /dist/usr/local/etc/dvbv5/
 EOT
 
 
