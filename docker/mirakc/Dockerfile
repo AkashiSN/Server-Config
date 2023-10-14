@@ -42,12 +42,12 @@ apt-get install -y \
 git clone https://github.com/stz2012/libarib25.git --depth=1 /tmp/libarib25
 cd /tmp/libarib25
 
-cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=/toolchain.cmake -DUSE_AVX2=ON
+cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=/toolchain.cmake
 make -C build -j $(nproc)
 
 cat <<EOF >./arib-b25-stream
 #!/bin/sh
-sh -c cat | b25 -v 0 /dev/stdin /dev/stdout | cat
+b25 - -
 EOF
 chmod +x ./arib-b25-stream
 
