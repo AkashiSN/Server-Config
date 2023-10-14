@@ -6,7 +6,7 @@ services:
   #
 
   mirakc:
-    image: ghcr.io/akashisn/mirakc@sha256:7c36f99b7b99199e01e5b5bbb5e01636e0bac64cd8b3c6c2b1c23e4e6617b4d2
+    image: ghcr.io/akashisn/mirakc@sha256:e58e8da9909f8a62219556bddefe75fa04daab4d6b47dac3cff505f5e159c525
     init: true
     profiles:
       - tv
@@ -151,7 +151,6 @@ services:
   #
   # DNS
   #
-
   dnsmasq:
     image: ghcr.io/akashisn/dnsmasq@sha256:85942fe35c91fb4140f102fc2d3de257aeadca8787cb5df762897bf1ac49f269
     profiles:

@@ -16,7 +16,7 @@ readonly OUTPUT_FILE='mirakc_channels.yml'
 # use container image
 # https://hub.docker.com/r/mirakc/mirakc/tags
 # readonly CONTAINER_IMAGE='docker.io/mirakc/mirakc:latest'
-readonly CONTAINER_IMAGE='ghcr.io/akashisn/mirakc@sha256:4b6f3f2531710339d3815aae6122950eb5b9612e292995cb55438f2d84e234af'
+readonly CONTAINER_IMAGE='ghcr.io/akashisn/mirakc@sha256:e58e8da9909f8a62219556bddefe75fa04daab4d6b47dac3cff505f5e159c525'
 
 # tuner device mapping for container
 # if empty setting, then skip channel scan
