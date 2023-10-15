@@ -38,8 +38,8 @@ ffprobe: /usr/local/bin/ffprobe
 encodeProcessNum: 6
 concurrentEncodeNum: 2
 encode:
-  - name: H.264 - QSV
-    cmd: "%NODE% %ROOT%/config/h264_qsv.js"
+  - name: H.264
+    cmd: "%NODE% %ROOT%/config/enc-enhance.js"
     suffix: .mp4
     rate: 4.0
 
