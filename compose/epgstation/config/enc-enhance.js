@@ -163,10 +163,6 @@ Array.prototype.push.apply(args, [output]);
         throw new Error(err);
     });
 
-    child.on('close', () => {
-        execSync('/bin/chown www-data:www-data "' + output + '"');
-    });
-
     process.on('SIGINT', () => {
         child.kill('SIGINT');
     });
