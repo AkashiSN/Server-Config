@@ -1,10 +1,19 @@
 version: 2
 updates:
-  - package-ecosystem: "docker"
-    directory: "/docker/**/"
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/workflows"
+  # https://github.com/dependabot/dependabot-core/issues/2178
+  - package-ecosystem: "docker"
+    directory: "/docker/epgstation"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "/docker/nextcloud"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "/docker/wordpress"
     schedule:
       interval: "weekly"
