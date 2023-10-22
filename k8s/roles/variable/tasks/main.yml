@@ -37,7 +37,7 @@
   changed_when: false
 
 - name: Set ipFamilyPolicy
-  ansible.builtin.set_fact:
+  ansible.builtin.set_fact: # noqa jinja[spacing]
     ip_family_policy: >-
       {%- if default_interface_v6.stdout != "" -%}
       RequireDualStack

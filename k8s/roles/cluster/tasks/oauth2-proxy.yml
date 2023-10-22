@@ -1,0 +1,53 @@
+---
+# file: roles/cluster/tasks/oauth2-proxy.yml
+- name: Add oauth2-proxy Helm charts repository
+  kubernetes.core.helm_repository:
+    name: oauth2-proxy
+    repo_url: https://oauth2-proxy.github.io/manifests
+  become: false
+
+- name: Check if oauth2-proxy Helm chart is installed
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep oauth2-proxy
+    executable: /bin/bash
+  register: oauth2_proxy_helm_chart_result
+  changed_when: oauth2_proxy_helm_chart_result.rc != 0
+  ignore_errors: true
+  become: false
+
+- name: Deploy oauth2-proxy chart using set values on target
+  kubernetes.core.helm:
+    release_name: oauth2-proxy
+    chart_ref: oauth2-proxy/oauth2-proxy
+    release_namespace: oauth2-proxy
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    release_values:
+      config:
+        clientID: "{{ oauth2_client_id }}"
+        clientSecret: "{{ oauth2_client_secret }}"
+      extraArgs:
+        provider: github
+        github-user: "AkashiSN"
+        whitelist-domain: ".akashisn.info"
+        cookie-domain: ".akashisn.info"
+        redirect-url: "https://{{ oauth2_host }}/oauth2/callback"
+        cookie-secure: "true"
+      ingress:
+        enabled: true
+        className: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+        hosts:
+          - "{{ oauth2_host }}"
+        tls:
+          - secretName: letsencrypt-cert
+            hosts:
+              - "{{ oauth2_host }}"
+  register: oauth2_proxy_helm_chart_install
+  when: oauth2_proxy_helm_chart_result.rc != 0
+  become: false

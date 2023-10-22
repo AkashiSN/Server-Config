@@ -1,0 +1,47 @@
+---
+# file: roles/cluster/tasks/tekton.yml
+- name: Git checkout tekton-operator
+  ansible.builtin.git:  # noqa latest[git]
+    repo: 'https://github.com/tektoncd/operator.git'
+    dest: /opt/tekton-operator
+  become: true
+
+- name: Check if tekton-operator Helm chart is installed
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep tekton-operator
+    executable: /bin/bash
+  register: tekton_operator_helm_chart_result
+  changed_when: tekton_operator_helm_chart_result.rc != 0
+  ignore_errors: true
+  become: false
+
+- name: Deploy tekton-operator chart using set values on target
+  kubernetes.core.helm:
+    release_name: tekton-operator
+    chart_ref: /opt/tekton-operator/chart
+    release_namespace: tekton-operator
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    values:
+      installCRDs: true
+  register: tekton_operator_helm_chart_install
+  when: tekton_operator_helm_chart_result.rc != 0
+  become: false
+
+- name: Apply the tekton-operator config
+  kubernetes.core.k8s:
+    state: present
+    src: "/opt/tekton-operator/config/crs/kubernetes/config/all/operator_v1alpha1_config_cr.yaml"
+  when: tekton_operator_helm_chart_result.rc != 0
+  become: false
+
+- name: Apply the tekton-dashboard ingress config
+  kubernetes.core.k8s:
+    state: present
+    template: tekton-ingress.yml.j2
+  when: tekton_operator_helm_chart_result.rc != 0
+  become: false

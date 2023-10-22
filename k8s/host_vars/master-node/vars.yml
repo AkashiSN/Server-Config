@@ -13,6 +13,10 @@ truenas_apikey: "{{ vault_truenas_apikey }}"
 # nginx-ingress
 nginx_ingress_lb_v4_addr: "172.16.254.100"
 nginx_ingress_lb_v6_host_addr: "ffff:fac:ade:100"
+# oauth2-proxy
+oauth2_host: "{{ vault_oauth2_host }}"
+oauth2_client_id: "{{ vault_oauth2_client_id }}"
+oauth2_client_secret: "{{ vault_oauth2_client_secret }}"
 # acme
 cloudflare_token: "{{ vault_cloudflare_token }}"
 email: "{{ vault_email }}"
@@ -20,6 +24,8 @@ email: "{{ vault_email }}"
 grafana_admin_user: "admin"
 grafana_admin_password: "{{ vault_grafana_admin_password }}"
 grafana_host: "{{ vault_grafana_host }}"
+# tekton
+tekton_host: "{{ vault_tekton_host }}"
 # dns
 dns_lb_v4_addr: "172.16.254.110"
 dns_lb_v6_host_addr: "ffff:fac:ade:110"

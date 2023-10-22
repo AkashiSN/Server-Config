@@ -44,6 +44,14 @@
         file: metrics-server.yml
       when: inventory_hostname != "microk8s"
 
+    - name: Import oauth2-proxy.yml
+      ansible.builtin.import_tasks:
+        file: oauth2-proxy.yml
+
+    - name: Import tekton.yml
+      ansible.builtin.import_tasks:
+        file: tekton.yml
+
     # - name: Import democratic-csi.yml
     #   ansible.builtin.import_tasks:
     #     file: democratic-csi.yml
