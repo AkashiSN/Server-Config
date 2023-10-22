@@ -28,7 +28,7 @@
 - name: Apply the wordpress/persistent-volumes manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/wordpress/persistent-volume.yml.j2
+    template: manifests/wordpress/persistent-volume.yml
   become: false
 
 - name: Check if the wordpress/cronjob is deployed
@@ -78,7 +78,7 @@
 - name: Apply the wordpress/wordpress manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/wordpress/wordpress.yml.j2
+    template: manifests/wordpress/wordpress.yml
     wait: true
   become: false
 

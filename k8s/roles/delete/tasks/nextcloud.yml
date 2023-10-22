@@ -9,7 +9,7 @@
 - name: Delete the nextcloud/nextcloud manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/nextcloud/nextcloud.yml.j2
+    template: manifests/nextcloud/nextcloud.yml
     wait: true
   become: false
 
@@ -44,5 +44,5 @@
 - name: Delete the nextcloud/persistent-volumes manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/nextcloud/persistent-volume.yml.j2
+    template: manifests/nextcloud/persistent-volume.yml
   become: false

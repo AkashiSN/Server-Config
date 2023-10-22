@@ -29,7 +29,7 @@
 - name: Apply the nextcloud/persistent-volumes manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/nextcloud/persistent-volume.yml.j2
+    template: manifests/nextcloud/persistent-volume.yml
   become: false
 
 - name: Check if the nextcloud/cronjob is deployed
@@ -79,7 +79,7 @@
 - name: Apply the nextcloud/nextcloud manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/nextcloud/nextcloud.yml.j2
+    template: manifests/nextcloud/nextcloud.yml
     wait: true
   become: false
 

@@ -35,3 +35,13 @@
     executable: /bin/bash
   register: ipv6_prefix
   changed_when: false
+
+- name: Set ipFamilyPolicy
+  ansible.builtin.set_fact:
+    ip_family_policy: >-
+      {%- if default_interface_v6.stdout != "" -%}
+      RequireDualStack
+      {%- else -%}
+      SingleStack
+      {%- endif -%}
+  become: false

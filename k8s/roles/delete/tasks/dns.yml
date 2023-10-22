@@ -6,9 +6,14 @@
     definition: "{{ lookup('file', 'manifests/dns/cronjob.yml') | from_yaml_all }}"
   become: false
 
+- name: Set loadBalancerIPs
+  ansible.builtin.set_fact:
+    dns_load_balancer_ips: ""
+  become: false
+
 - name: Delete the dns/dns manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/dns/dns.yml.j2
+    template: manifests/dns/dns.yml
     wait: true
   become: false

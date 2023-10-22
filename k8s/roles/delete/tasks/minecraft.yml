@@ -3,12 +3,12 @@
 - name: Delete the minecraft/minecraft manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/minecraft/minecraft.yml.j2
+    template: manifests/minecraft/minecraft.yml
     wait: true
   become: false
 
 - name: Delete the minecraft/persistent-volumes manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/minecraft/persistent-volume.yml.j2
+    template: manifests/minecraft/persistent-volume.yml
   become: false

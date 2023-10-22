@@ -37,13 +37,13 @@
 - name: Apply the minecraft/persistent-volumes manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/minecraft/persistent-volume.yml.j2
+    template: manifests/minecraft/persistent-volume.yml
   become: false
 
 - name: Apply the minecraft/minecraft manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/minecraft/minecraft.yml.j2
+    template: manifests/minecraft/minecraft.yml
     wait: true
   become: false
 

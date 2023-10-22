@@ -102,19 +102,13 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-{% if default_interface_v6.stdout != "" %}
-    metallb.universe.tf/loadBalancerIPs: "{{ dns_lb_v4_addr }},{{ ipv6_prefix.stdout }}:{{ dns_lb_v6_host_addr }}"
-{% else %}
-    metallb.universe.tf/loadBalancerIPs: "{{ dns_lb_v4_addr }}"
-{% endif %}
+    metallb.universe.tf/loadBalancerIPs: "{{ dns_load_balancer_ips }}"
   labels:
     service: dns-server
   name: dns-server
   namespace: dns
 spec:
-{% if default_interface_v6.stdout != "" %}
-  ipFamilyPolicy: RequireDualStack
-{% endif %}
+  ipFamilyPolicy: "{{ ip_family_policy }}"
   type: LoadBalancer
   externalTrafficPolicy: Local
   ports:

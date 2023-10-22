@@ -9,7 +9,7 @@
 - name: Delete the wordpress/wordpress manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/wordpress/wordpress.yml.j2
+    template: manifests/wordpress/wordpress.yml
     wait: true
   become: false
 
@@ -37,5 +37,5 @@
 - name: Delete the wordpress/persistent-volumes manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/wordpress/persistent-volume.yml.j2
+    template: manifests/wordpress/persistent-volume.yml
   become: false
