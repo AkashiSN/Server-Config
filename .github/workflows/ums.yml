@@ -5,6 +5,8 @@ on:
     paths:
       - 'docker/ums/**'
       - '.github/workflows/ums.yml'
+    branches:
+      - main
 
 jobs:
   build:

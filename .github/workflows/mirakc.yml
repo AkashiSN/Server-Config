@@ -5,6 +5,8 @@ on:
     paths:
       - 'docker/mirakc/**'
       - '.github/workflows/mirakc.yml'
+    branches:
+      - main
 
 jobs:
   build:

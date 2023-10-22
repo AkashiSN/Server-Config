@@ -5,6 +5,8 @@ on:
     paths:
       - 'docker/kubectl/**'
       - '.github/workflows/kubectl.yml'
+    branches:
+      - main
 
 jobs:
   build:

@@ -5,6 +5,8 @@ on:
     paths:
       - 'docker/epgstation/**'
       - '.github/workflows/epgstation.yml'
+    branches:
+      - main
 
 jobs:
   build:

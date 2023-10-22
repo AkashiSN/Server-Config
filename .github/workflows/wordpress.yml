@@ -5,6 +5,8 @@ on:
     paths:
       - 'docker/wordpress/**'
       - '.github/workflows/wordpress.yml'
+    branches:
+      - main
 
 jobs:
   build:

@@ -5,6 +5,8 @@ on:
     paths:
       - 'docker/dnsdist/**'
       - '.github/workflows/dnsdist.yml'
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:

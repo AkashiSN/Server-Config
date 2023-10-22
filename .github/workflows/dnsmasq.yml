@@ -5,6 +5,8 @@ on:
     paths:
       - 'docker/dnsmasq/**'
       - '.github/workflows/dnsmasq.yml'
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:

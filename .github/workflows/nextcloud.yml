@@ -5,6 +5,8 @@ on:
     paths:
       - 'docker/nextcloud/**'
       - '.github/workflows/nextcloud.yml'
+    branches:
+      - main
 
 jobs:
   build:

@@ -17,3 +17,7 @@ updates:
     directory: "/docker/wordpress"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "/k8s/manifests/dns"
+    schedule:
+      interval: "weekly"
