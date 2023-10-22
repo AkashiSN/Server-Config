@@ -8,16 +8,34 @@ updates:
   - package-ecosystem: "docker"
     directory: "/docker/epgstation"
     schedule:
-      interval: "weekly"
+      interval: "daily"
   - package-ecosystem: "docker"
     directory: "/docker/nextcloud"
     schedule:
-      interval: "weekly"
+      interval: "daily"
   - package-ecosystem: "docker"
     directory: "/docker/wordpress"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+  # k8s manifests
   - package-ecosystem: "docker"
     directory: "/k8s/manifests/dns"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/k8s/manifests/nextcloud"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "mariadb"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+  - package-ecosystem: "docker"
+    directory: "/k8s/manifests/wordpress"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "mariadb"
+        update-types:
+          - "version-update:semver-major"
