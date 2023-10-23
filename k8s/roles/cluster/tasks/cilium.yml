@@ -33,7 +33,7 @@
         mode: cluster-pool
         operator:
           clusterPoolIPv4PodCIDRList: "10.244.0.0/16"
-          clusterPoolIPv6PodCIDRList: "{{ ipv6_prefix.stdout }}:{{ ipv6_pod_cider }}"
+          clusterPoolIPv6PodCIDRList: "{{ ipv6_prefix }}:{{ ipv6_pod_cider }}"
           clusterPoolIPv4MaskSize: 24
           clusterPoolIPv6MaskSize: 112
       ipv4:
@@ -65,7 +65,7 @@
 - name: Patch cilium-config ConfigMap
   ansible.builtin.shell: >
     kubectl -n kube-system patch configmap/cilium-config --type merge
-    -p "{\"data\":{\"enable-ipv6-ndp\": \"true\", \"ipv6-service-range\": \"{{ ipv6_prefix.stdout }}:{{ ipv6_service_cider }}\"}}"
+    -p "{\"data\":{\"enable-ipv6-ndp\": \"true\", \"ipv6-service-range\": \"{{ ipv6_prefix }}:{{ ipv6_service_cider }}\"}}"
   register: result
   when: cilium_helm_chart_install is not skipped
   changed_when: result is not skipped

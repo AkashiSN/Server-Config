@@ -28,7 +28,7 @@
 - name: Apply the wordpress/persistent-volumes manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/wordpress/persistent-volume.yml
+    definition: "{{ lookup('file', 'manifests/wordpress/persistent-volume.yml') | from_yaml_all }}"
   become: false
 
 - name: Check if the wordpress/cronjob is deployed
@@ -78,7 +78,7 @@
 - name: Apply the wordpress/wordpress manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/wordpress/wordpress.yml
+    definition: "{{ lookup('file', 'manifests/wordpress/wordpress.yml') | from_yaml_all }}"
     wait: true
   become: false
 

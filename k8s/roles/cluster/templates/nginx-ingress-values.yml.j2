@@ -6,12 +6,8 @@ controller:
     type: LoadBalancer
     externalTrafficPolicy: Local
     annotations:
-{% if default_interface_v6.stdout != "" %}
-      metallb.universe.tf/loadBalancerIPs: "{{ nginx_ingress_lb_v4_addr }},{{ ipv6_prefix.stdout }}:{{ nginx_ingress_lb_v6_host_addr }}"
-    ipFamilyPolicy: RequireDualStack
-{% else %}
-      metallb.universe.tf/loadBalancerIPs: "{{ nginx_ingress_lb_v4_addr }}"
-{% endif %}
+      metallb.universe.tf/address-pool: ingress-pool
+    ipFamilyPolicy: PreferDualStack
   config:
     entries:
       redirect-to-https: "True"

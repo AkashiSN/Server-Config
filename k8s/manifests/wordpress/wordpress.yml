@@ -6,7 +6,7 @@ metadata:
 data:
   TZ: "Asia/Tokyo"
   HTTP_X_FORWARDED_PROTO: https,http
-  WORDPRESS_URL: "{{ wordpress_host }}"
+  WORDPRESS_URL: blog.akashisn.info
   WORDPRESS_TITLE: "akashisnの日記"
   WORDPRESS_DB_HOST: wordpress-mariadb:3306
   WORDPRESS_DB_USER: wordpress
@@ -149,10 +149,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - "{{ wordpress_host }}"
+        - blog.akashisn.info
       secretName: letsencrypt-cert
   rules:
-    - host: "{{ wordpress_host }}"
+    - host: blog.akashisn.info
       http:
         paths:
           - path: /

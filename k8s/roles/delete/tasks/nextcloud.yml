@@ -9,7 +9,7 @@
 - name: Delete the nextcloud/nextcloud manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/nextcloud/nextcloud.yml
+    definition: "{{ lookup('file', 'manifests/nextcloud/nextcloud.yml') | from_yaml_all }}"
     wait: true
   become: false
 
@@ -44,5 +44,5 @@
 - name: Delete the nextcloud/persistent-volumes manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/nextcloud/persistent-volume.yml
+    definition: "{{ lookup('file', 'manifests/nextcloud/persistent-volume.yml') | from_yaml_all }}"
   become: false

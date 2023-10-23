@@ -9,7 +9,7 @@
 - name: Delete the wordpress/wordpress manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/wordpress/wordpress.yml
+    definition: "{{ lookup('file', 'manifests/wordpress/wordpress.yml') | from_yaml_all }}"
     wait: true
   become: false
 
@@ -37,5 +37,5 @@
 - name: Delete the wordpress/persistent-volumes manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/wordpress/persistent-volume.yml
+    definition: "{{ lookup('file', 'manifests/wordpress/persistent-volume.yml') | from_yaml_all }}"
   become: false

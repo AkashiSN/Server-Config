@@ -3,12 +3,12 @@
 - name: Delete the minecraft/minecraft manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/minecraft/minecraft.yml
+    definition: "{{ lookup('file', 'manifests/minecraft/minecraft.yml') | from_yaml_all }}"
     wait: true
   become: false
 
 - name: Delete the minecraft/persistent-volumes manifest
   kubernetes.core.k8s:
     state: absent
-    template: manifests/minecraft/persistent-volume.yml
+    definition: "{{ lookup('file', 'manifests/minecraft/persistent-volume.yml') | from_yaml_all }}"
   become: false

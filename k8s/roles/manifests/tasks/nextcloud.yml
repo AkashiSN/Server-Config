@@ -29,7 +29,7 @@
 - name: Apply the nextcloud/persistent-volumes manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/nextcloud/persistent-volume.yml
+    definition: "{{ lookup('file', 'manifests/nextcloud/persistent-volume.yml') | from_yaml_all }}"
   become: false
 
 - name: Check if the nextcloud/cronjob is deployed
@@ -79,7 +79,7 @@
 - name: Apply the nextcloud/nextcloud manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/nextcloud/nextcloud.yml
+    definition: "{{ lookup('file', 'manifests/nextcloud/nextcloud.yml') | from_yaml_all }}"
     wait: true
   become: false
 

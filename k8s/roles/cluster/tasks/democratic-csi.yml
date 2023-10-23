@@ -59,7 +59,7 @@
             datasetPermissionsUser: 0
             datasetPermissionsGroup: 0
           nfs:
-            shareHost: "{{ truenas_addr }}"
+            shareHost: "172.16.255.1"
             shareAlldirs: false
             shareAllowedHosts: []
             shareAllowedNetworks: []

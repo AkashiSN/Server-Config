@@ -6,8 +6,29 @@ metadata:
 spec:
   addresses:
     - {{ metallb_ipv4_range }}
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: ingress-pool
+  namespace: kube-system
+spec:
+  addresses:
+    - {{ nginx_ingress_lb_v4_addr }}/32
 {% if default_interface_v6.stdout != "" %}
-    - {{ ipv6_prefix.stdout }}:{{ metallb_ipv6_cider }}
+    - {{ ipv6_prefix }}:{{ nginx_ingress_lb_v6_host_addr }}/128
+{% endif %}
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: dns-pool
+  namespace: kube-system
+spec:
+  addresses:
+    - {{ dns_lb_v4_addr }}/32
+{% if default_interface_v6.stdout != "" %}
+    - {{ ipv6_prefix }}:{{ dns_lb_v6_host_addr }}/128
 {% endif %}
 ---
 apiVersion: metallb.io/v1beta1
@@ -18,3 +39,5 @@ metadata:
 spec:
   ipAddressPools:
     - default-pool
+    - ingress-pool
+    - dns-pool

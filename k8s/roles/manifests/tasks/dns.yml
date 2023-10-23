@@ -24,20 +24,10 @@
   changed_when: result is not skipped
   become: false
 
-- name: Set loadBalancerIPs
-  ansible.builtin.set_fact: # noqa jinja[spacing]
-    dns_load_balancer_ips: >-
-      {%- if default_interface_v6.stdout != "" -%}
-      {{ dns_lb_v4_addr }},{{ ipv6_prefix.stdout }}:{{ dns_lb_v6_host_addr }}
-      {%- else -%}
-      {{ dns_lb_v4_addr }}
-      {%- endif -%}
-  become: false
-
 - name: Apply the dns/dns manifest
   kubernetes.core.k8s:
     state: present
-    template: manifests/dns/dns.yml
+    definition: "{{ lookup('file', 'manifests/dns/dns.yml') | from_yaml_all }}"
     wait: false # because of certificate acme challenge
   become: false
 

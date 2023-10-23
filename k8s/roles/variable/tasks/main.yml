@@ -36,12 +36,11 @@
   register: ipv6_prefix
   changed_when: false
 
-- name: Set ipFamilyPolicy
+- name: Set ipv6Prefix
   ansible.builtin.set_fact: # noqa jinja[spacing]
-    ip_family_policy: >-
+    ipv6_prefix: >-
       {%- if default_interface_v6.stdout != "" -%}
-      RequireDualStack
+      {{ ipv6_prefix.stdout }}
       {%- else -%}
-      SingleStack
       {%- endif -%}
   become: false

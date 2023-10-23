@@ -102,13 +102,13 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    metallb.universe.tf/loadBalancerIPs: "{{ dns_load_balancer_ips }}"
+    metallb.universe.tf/address-pool: dns-pool
   labels:
     service: dns-server
   name: dns-server
   namespace: dns
 spec:
-  ipFamilyPolicy: "{{ ip_family_policy }}"
+  ipFamilyPolicy: PreferDualStack
   type: LoadBalancer
   externalTrafficPolicy: Local
   ports:
@@ -132,7 +132,7 @@ metadata:
 spec:
   secretName: dns-cert
   dnsNames:
-    - "{{ dns_host }}"
+    - dns.akashisn.info
   issuerRef:
     name: letsencrypt-cluster-issuer
     kind: ClusterIssuer
@@ -149,10 +149,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - "{{ dns_host }}"
+        - dns.akashisn.info
       secretName: dns-cert
   rules:
-    - host: "{{ dns_host }}"
+    - host: dns.akashisn.info
       http:
         paths:
           - path: /

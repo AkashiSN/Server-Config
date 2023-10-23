@@ -6,14 +6,14 @@ spec:
   capacity:
     storage: 30Gi
   accessModes:
-  - ReadWriteOncePod
+    - ReadWriteOncePod
   persistentVolumeReclaimPolicy: Retain
   storageClassName: iscsi-ssd-storage
   claimRef:
     namespace: minecraft
     name: data-minecraft-vanilla-0
   iscsi:
-    targetPortal: "{{ truenas_addr }}:3260"
+    targetPortal: "172.16.255.1:3260"
     iqn: iqn.2005-10.org.freenas.ctl:minecraft
     lun: 0
     fsType: xfs

@@ -9,8 +9,8 @@ kind: ClusterConfiguration
 clusterName: "k8s-cluster"
 controlPlaneEndpoint: "{{ node_ip.stdout }}"
 networking:
-  podSubnet: "10.244.0.0/16,{{ ipv6_prefix.stdout }}:{{ ipv6_pod_cider }}"
-  serviceSubnet: "10.96.0.0/16,{{ ipv6_prefix.stdout }}:{{ ipv6_service_cider }}"
+  podSubnet: "10.244.0.0/16,{{ ipv6_prefix }}:{{ ipv6_pod_cider }}"
+  serviceSubnet: "10.96.0.0/16,{{ ipv6_prefix }}:{{ ipv6_service_cider }}"
 controllerManager:
   extraArgs:
     bind-address: "0.0.0.0"

@@ -4,10 +4,9 @@ ipv6_service_cider: "cafe:1::/112"
 # external-ip
 external_ip: "{{ vault_external_ip }}"
 # metallb
-metallb_ipv4_range: "172.16.254.100-172.16.254.150"
+metallb_ipv4_range: "172.16.254.120-172.16.254.150"
 metallb_ipv6_cider: "ffff:fac:ade::/112"
 # truenas
-truenas_addr: "172.16.255.1"
 truenas_host: "{{ vault_truenas_host }}"
 truenas_apikey: "{{ vault_truenas_apikey }}"
 # nginx-ingress
@@ -29,14 +28,11 @@ tekton_host: "{{ vault_tekton_host }}"
 # dns
 dns_lb_v4_addr: "172.16.254.110"
 dns_lb_v6_host_addr: "ffff:fac:ade:110"
-dns_host: "{{ vault_dns_host }}"
 # minecraft
 minecraft_lb_v4_addr:  "172.16.254.120"
 minecraft_rcon_password: "{{ vault_minecraft_rcon_password }}"
 minecraft_whitelist: "{{ vault_minecraft_whitelist }}"
 # nextcloud
-nextcloud_host: "{{ vault_nextcloud_host }}"
-nextcloud_static_host: "{{ vault_nextcloud_static_host }}"
 nextcloud_admin_user: "{{ vault_nextcloud_admin_user }}"
 nextcloud_admin_password: "{{ vault_nextcloud_admin_password }}"
 nextcloud_mariadb_root_password: "{{ vault_nextcloud_mariadb_root_password }}"
@@ -44,7 +40,6 @@ nextcloud_mariadb_user_password: "{{ vault_nextcloud_mariadb_user_password }}"
 nextcloud_smtp_user: "{{ vault_nextcloud_smtp_user }}"
 nextcloud_smtp_password: "{{ vault_nextcloud_smtp_password }}"
 # wordpress
-wordpress_host: "{{ vault_wordpress_host }}"
 wordpress_mariadb_root_password: "{{ vault_wordpress_mariadb_root_password }}"
 wordpress_mariadb_user_password: "{{ vault_wordpress_mariadb_user_password }}"
 wordpress_admin_user: "{{ vault_wordpress_admin_user }}"

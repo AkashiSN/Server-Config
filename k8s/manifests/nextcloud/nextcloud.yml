@@ -10,7 +10,7 @@ data:
   NEXTCLOUD_DATA_DIR: /mnt/nextcloud
   OVERWRITEPROTOCOL: https
   TRUSTED_PROXIES: nextcloud
-  NEXTCLOUD_TRUSTED_DOMAINS: "{{ nextcloud_host }}"
+  NEXTCLOUD_TRUSTED_DOMAINS: files.akashisn.info
   MYSQL_HOST: nextcloud-mariadb
   MYSQL_USER: nextcloud
   MYSQL_DATABASE: nextcloud
@@ -224,11 +224,11 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - "{{ nextcloud_host }}"
-        - "{{ nextcloud_static_host }}"
+        - files.akashisn.info
+        - static.akashisn.info
       secretName: letsencrypt-cert
   rules:
-    - host: "{{ nextcloud_host }}"
+    - host: files.akashisn.info
       http:
         paths:
           - path: /
@@ -238,7 +238,7 @@ spec:
                 name: nextcloud
                 port:
                   name: nginx-nextcloud
-    - host: "{{ nextcloud_static_host }}"
+    - host: static.akashisn.info
       http:
         paths:
           - path: /
