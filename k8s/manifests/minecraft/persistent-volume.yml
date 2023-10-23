@@ -13,7 +13,7 @@ spec:
     namespace: minecraft
     name: data-minecraft-vanilla-0
   iscsi:
-    targetPortal: "172.16.255.1:3260"
+    targetPortal: 172.16.255.1:3260
     iqn: iqn.2005-10.org.freenas.ctl:minecraft
     lun: 0
     fsType: xfs

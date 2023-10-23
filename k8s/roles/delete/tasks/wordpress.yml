@@ -13,6 +13,13 @@
     wait: true
   become: false
 
+- name: Delete the wordpress/wordpress-conf manifest
+  kubernetes.core.k8s:
+    state: absent
+    definition: "{{ lookup('file', 'manifests/wordpress/wordpress-conf.yml') | from_yaml_all }}"
+    wait: true
+  become: false
+
 - name: Delete the wordpress/redis manifest
   kubernetes.core.k8s:
     state: absent
