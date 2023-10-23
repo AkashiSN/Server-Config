@@ -1,4 +1,5 @@
 # syntax = docker/dockerfile:1.4
+FROM l3tnun/epgstation:v2.7.1-debian AS epgstation-image
 FROM akashisn/ffmpeg:6.0 AS ffmpeg-image
 
 RUN <<EOT
@@ -16,7 +17,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LIBVA_DRIVERS_PATH=/usr/local/lib/dri \
     LIBVA_DRIVER_NAME=iHD
 
-COPY --from=l3tnun/epgstation:v2.7.1-debian /app /app
+COPY --from=epgstation-image /app /app
 COPY --from=ffmpeg-image /dist /
 
 RUN <<EOT
