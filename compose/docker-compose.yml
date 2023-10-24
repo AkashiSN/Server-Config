@@ -6,7 +6,7 @@ services:
   #
 
   mirakc:
-    image: ghcr.io/akashisn/mirakc@sha256:e58e8da9909f8a62219556bddefe75fa04daab4d6b47dac3cff505f5e159c525
+    image: ghcr.io/akashisn/mirakc@sha256:35e7c3079c9c298833902be78fb3a73881384cea2148be6b6b7efc775c134dd9
     init: true
     profiles:
       - tv
@@ -54,7 +54,7 @@ services:
     restart: always
 
   epgstation:
-    image: ghcr.io/akashisn/epgstation@sha256:a453c0af13cd24189afb0e0b1a042115deb39a9f8025dbcf3c53f8007d1732d6
+    image: ghcr.io/akashisn/epgstation@sha256:501c65f85f46e9b1af256b7cabce92d5cef209396f6cd432ffa747448af4a29b
     profiles:
       - tv
     volumes:
@@ -152,7 +152,7 @@ services:
   # DNS
   #
   dnsmasq:
-    image: ghcr.io/akashisn/dnsmasq@sha256:85942fe35c91fb4140f102fc2d3de257aeadca8787cb5df762897bf1ac49f269
+    image: ghcr.io/akashisn/dnsmasq@sha256:fcff5ebbcf7e2fc21a43d7db89ed8d06981d0e8f86cdfe30ab1435c5ebdc6e9a
     profiles:
       - dns
     volumes:
@@ -170,7 +170,7 @@ services:
     restart: always
 
   dnsdist:
-    image: ghcr.io/akashisn/dnsdist@sha256:b8aed38d75751400890e71fb0676be87286dcbe1ccf7e1e38e543ce8761ccd5c
+    image: ghcr.io/akashisn/dnsdist@sha256:ba29d891d18b2ab6e1d05f33bdfd9eb2e561917abe3d7b02e46f359b71249a5e
     profiles:
       - dns
     volumes:
