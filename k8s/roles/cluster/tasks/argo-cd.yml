@@ -1,0 +1,80 @@
+---
+# file: roles/cluster/tasks/argo-cd.yml
+- name: Add argo Helm charts repository
+  kubernetes.core.helm_repository:
+    name: argo
+    repo_url: https://argoproj.github.io/argo-helm
+  become: false
+
+- name: Check if argo-cd Helm chart is installed
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep argo-cd
+    executable: /bin/bash
+  register: argo_cd_helm_chart_result
+  changed_when: argo_cd_helm_chart_result.rc != 0
+  ignore_errors: true
+  become: false
+
+- name: Deploy argocd chart using set values on target
+  kubernetes.core.helm:
+    release_name: argo-cd
+    chart_ref: argo/argo-cd
+    release_namespace: argo-cd
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    release_values:
+      configs:
+        cm:
+          url: "https://{{ argocd_host }}"
+        secret:
+          argocdServerAdminPassword: "{{ argocd_admin_password }}"
+      server:
+        ingress:
+          enabled: true
+          ingressClassName: nginx
+          annotations:
+            cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+            nginx.org/websocket-services: argo-cd-argocd-server
+            nginx.org/ssl-services: argo-cd-argocd-server
+          hosts:
+            - "{{ argocd_host }}"
+          tls:
+            - secretName: letsencrypt-cert
+              hosts:
+                - "{{ argocd_host }}"
+          https: true
+  register: argo_cd_helm_chart_install
+  when: argo_cd_helm_chart_result.rc != 0
+  become: false
+
+- name: Create the argo-cd/Application
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: server-config
+        namespace: argo-cd
+      spec:
+        destination:
+          server: https://kubernetes.default.svc
+        project: default
+        source:
+          path: k8s/manifests
+          repoURL: https://github.com/AkashiSN/Server-Config.git
+          targetRevision: main
+        syncPolicy:
+          automated:
+            selfHeal: true
+          syncOptions:
+            - RespectIgnoreDifferences=true
+        ignoreDifferences:
+          - kind: Secret
+            jsonPointers:
+              - /data
+  become: false

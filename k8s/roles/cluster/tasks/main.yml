@@ -52,6 +52,10 @@
       ansible.builtin.import_tasks:
         file: tekton.yml
 
+    - name: Import argo-cd.yml
+      ansible.builtin.import_tasks:
+        file: argo-cd.yml
+
     - name: Import kubernetes-replicator.yml
       ansible.builtin.import_tasks:
         file: kubernetes-replicator.yml
