@@ -22,6 +22,7 @@ grafana_host: "{{ vault_grafana_host }}"
 tekton_host: "{{ vault_tekton_host }}"
 # argo-cd
 argocd_host: "{{ vault_argocd_host }}"
+argocd_webhook_github_secret: "{{ vault_argocd_webhook_github_secret }}"
 argocd_admin_password: "{{ vault_argocd_admin_password }}"
 # hashicorp vault
 hashicorp_vault_client_id: "{{ vault_hashicorp_vault_client_id }}"
