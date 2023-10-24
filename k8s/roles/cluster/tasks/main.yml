@@ -52,6 +52,14 @@
       ansible.builtin.import_tasks:
         file: tekton.yml
 
+    - name: Import kubernetes-replicator.yml
+      ansible.builtin.import_tasks:
+        file: kubernetes-replicator.yml
+
+    - name: Import hashicorp-vault.yml
+      ansible.builtin.import_tasks:
+        file: hashicorp-vault.yml
+
     # - name: Import democratic-csi.yml
     #   ansible.builtin.import_tasks:
     #     file: democratic-csi.yml

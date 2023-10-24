@@ -1,0 +1,66 @@
+---
+# file: roles/cluster/tasks/hashicorp-vault.yml
+- name: Add hashicorp Helm charts repository
+  kubernetes.core.helm_repository:
+    name: hashicorp
+    repo_url: https://helm.releases.hashicorp.com
+  become: false
+
+- name: Check if vault-secrets-operator Helm chart is installed
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep vault-secrets-operator
+    executable: /bin/bash
+  register: hashicorp_vault_helm_chart_result
+  changed_when: hashicorp_vault_helm_chart_result.rc != 0
+  ignore_errors: true
+  become: false
+
+- name: Deploy vault-secrets-operator chart on target
+  kubernetes.core.helm:
+    release_name: vault-secrets-operator
+    chart_ref: hashicorp/vault-secrets-operator
+    release_namespace: vault-secrets-operator
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+  when: hashicorp_vault_helm_chart_result.rc != 0
+  become: false
+
+- name: Create the vault-secrets-operator/vso-secrets
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: vso-secrets
+        namespace: vault-secrets-operator
+        annotations:
+          replicator.v1.mittwald.de/replication-allowed: "true"
+          replicator.v1.mittwald.de/replication-allowed-namespaces: "*"
+      type: Opaque
+      data:
+        clientID: "{{ hashicorp_vault_client_id | b64encode }}"
+        clientSecret: "{{ hashicorp_vault_client_secret | b64encode }}"
+  become: false
+
+- name: Apply the vault-secrets-operator/HCPAuth config
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: secrets.hashicorp.com/v1beta1
+      kind: HCPAuth
+      metadata:
+        name: hcp-auth
+        namespace: vault-secrets-operator
+      spec:
+        organizationID: "{{ hashicorp_vault_organization_id }}"
+        projectID: "{{ hashicorp_vault_project_id }}"
+        allowedNamespaces:
+          - "*"
+        servicePrincipal:
+          secretRef: vso-secrets
+  become: false

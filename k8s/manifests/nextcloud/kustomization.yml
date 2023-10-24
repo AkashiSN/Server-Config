@@ -1,0 +1,9 @@
+resources:
+  - persistent-volume.yml
+  - secret.yml
+  - redis.yml
+  - mariadb.yml
+  - nginx-conf.yml
+  - nextcloud-conf.yml
+  - nextcloud.yml
+  - cronjob.yml

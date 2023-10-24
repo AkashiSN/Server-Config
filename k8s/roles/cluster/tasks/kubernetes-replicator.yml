@@ -1,0 +1,30 @@
+---
+# file: roles/cluster/tasks/kubernetes-replicator.yml
+- name: Add mittwald Helm charts repository
+  kubernetes.core.helm_repository:
+    name: mittwald
+    repo_url: https://helm.mittwald.de
+  become: false
+
+- name: Check if kubernetes-replicator Helm chart is installed
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm list --all-namespaces --deployed --short | grep kubernetes-replicator
+    executable: /bin/bash
+  register: kubernetes_replicator_helm_chart_result
+  changed_when: kubernetes_replicator_helm_chart_result.rc != 0
+  ignore_errors: true
+  become: false
+
+- name: Deploy kubernetes-replicator chart on target
+  kubernetes.core.helm:
+    release_name: kubernetes-replicator
+    chart_ref: mittwald/kubernetes-replicator
+    release_namespace: kubernetes-replicator
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+  when: kubernetes_replicator_helm_chart_result.rc != 0
+  become: false

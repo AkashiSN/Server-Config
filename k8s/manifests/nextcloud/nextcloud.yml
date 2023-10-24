@@ -21,7 +21,7 @@ data:
   SMTP_SECURE: tls
   MAIL_FROM_ADDRESS: no-reply
   MAIL_DOMAIN: files.localhost
-  SMTP_PASSWORD_FILE: /secrets/nextcloud_smtp_password
+  SMTP_PASSWORD_FILE: /secrets/smtp_password
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -55,8 +55,8 @@ spec:
             - name: SMTP_NAME
               valueFrom:
                 secretKeyRef:
-                  name: nextcloud-secrets
-                  key: nextcloud_smtp_user
+                  name: common-secrets
+                  key: email_address
           volumeMounts:
             - name: app
               mountPath: /var/www/html
@@ -125,8 +125,12 @@ spec:
               memory: 2000Mi
       volumes:
         - name: nextcloud-secrets
-          secret:
-            secretName: nextcloud-secrets
+          projected:
+            sources:
+              - secret:
+                  name: nextcloud-secrets
+              - secret:
+                  name: common-secrets
         - name: nextcloud-conf
           configMap:
             name: nextcloud-conf
