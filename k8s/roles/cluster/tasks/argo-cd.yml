@@ -30,6 +30,7 @@
       configs:
         cm:
           url: "https://{{ argocd_host }}"
+          statusbadge.enabled: "true"
         secret:
           githubSecret: "{{ argocd_webhook_github_secret }}"
           argocdServerAdminPassword: "{{ argocd_admin_password }}"
