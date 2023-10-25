@@ -46,7 +46,7 @@
           instance_id:
           httpConnection:
             protocol: https
-            host: "{{ truenas_host }}"
+            host: "{{ truenas_fqdn }}"
             port: 443
             apiKey: "{{ truenas_apikey }}"
             apiVersion: 2

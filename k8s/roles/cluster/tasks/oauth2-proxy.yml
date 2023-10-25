@@ -21,33 +21,23 @@
   kubernetes.core.helm:
     release_name: oauth2-proxy
     chart_ref: oauth2-proxy/oauth2-proxy
-    release_namespace: oauth2-proxy
-    create_namespace: true
+    release_namespace: auth
     update_repo_cache: true
     wait: true
     atomic: true
     release_values:
-      config:
-        clientID: "{{ oauth2_client_id }}"
-        clientSecret: "{{ oauth2_client_secret }}"
       extraArgs:
-        provider: github
-        github-user: "AkashiSN"
-        whitelist-domain: ".akashisn.info"
-        cookie-domain: ".akashisn.info"
-        redirect-url: "https://{{ oauth2_host }}/oauth2/callback"
+        provider: oidc
+        provider-display-name: dex
+        client-id: "oauth2-proxy"
+        client-secret: "{{ oauth2_proxy_client_secret }}"
+        whitelist-domain: ".{{ domain }}"
+        cookie-domain: ".{{ domain }}"
+        redirect-url: "https://{{ auth_fqdn }}/oauth2/callback"
+        oidc-issuer-url: "https://{{ auth_fqdn }}/dex"
         cookie-secure: "true"
       ingress:
-        enabled: true
-        className: nginx
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
-        hosts:
-          - "{{ oauth2_host }}"
-        tls:
-          - secretName: letsencrypt-cert
-            hosts:
-              - "{{ oauth2_host }}"
+        enabled: false
   register: oauth2_proxy_helm_chart_install
   when: oauth2_proxy_helm_chart_result.rc != 0
   become: false

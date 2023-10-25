@@ -213,10 +213,10 @@
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
         hosts:
-          - "{{ grafana_host }}"
+          - "{{ grafana_fqdn: }}"
         tls:
           - secretName: letsencrypt-cert
             hosts:
-              - "{{ grafana_host }}"
+              - "{{ grafana_fqdn }}"
   when: grafana_helm_chart_result.rc != 0
   become: false

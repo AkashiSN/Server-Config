@@ -1,0 +1,41 @@
+configs:
+  cm:
+    url: "https://{{ argocd_fqdn }}"
+    statusbadge.enabled: "true"
+    oidc.config: |-
+      name: dex
+      issuer: "https://{{ auth_fqdn }}/dex"
+      clientID: argo-cd
+      clientSecret: "$oidc.dex.clientSecret"
+      requestedIDTokenClaims:
+        email:
+          essential: true
+      requestedScopes:
+        - openid
+        - profile
+        - email
+  rbac:
+    policy.default: "role:readonly"
+    scopes: "[email]"
+  secret:
+    extra:
+      oidc.dex.clientSecret: "{{ argocd_client_secret }}"
+    githubSecret: "{{ argocd_webhook_github_secret }}"
+    argocdServerAdminPassword: "{{ argocd_admin_password }}"
+dex:
+  enabled: false
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+      nginx.org/websocket-services: argo-cd-argocd-server
+      nginx.org/ssl-services: argo-cd-argocd-server
+    hosts:
+      - "{{ argocd_fqdn }}"
+    tls:
+      - secretName: letsencrypt-cert
+        hosts:
+          - "{{ argocd_fqdn }}"
+    https: true

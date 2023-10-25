@@ -1,0 +1,48 @@
+image:
+  pullPolicy: Always
+  tag: master
+config:
+  issuer: "https://{{ auth_fqdn }}/dex"
+  storage:
+    type: kubernetes
+    config:
+      inCluster: true
+  oauth2:
+    skipApprovalScreen: true
+  staticClients:
+    - id: argo-cd
+      redirectURIs:
+        - "https://{{ argocd_fqdn }}/auth/callback"
+      name: argo-cd
+      secret: "{{ argocd_client_secret }}"
+    - id: oauth2-proxy
+      redirectURIs:
+        - "https://{{ auth_fqdn }}/oauth2/callback"
+      name: oauth2-proxy
+      secret: "{{ oauth2_proxy_client_secret }}"
+  connectors:
+    - type: oidc
+      id: slack
+      name: slack
+      config:
+        issuer: "https://slack.com"
+        clientID: "{{ dex_slack_client_id }}"
+        clientSecret: "{{ dex_slack_client_secret }}"
+        redirectURI: "https://{{ auth_fqdn }}/dex/callback"
+        scopes:
+          - openid
+          - profile
+          - email
+        getUserInfo: true
+        userIDKey: "https://slack.com/user_id"
+        userNameKey: name
+        insecureEnableGroups: true
+        allowedGroups:
+{% for item in dex_slack_allowed_groups.split(',') %}
+          - "{{ item }}"
+{% endfor %}
+        claimMapping:
+          email: email
+          groups: "https://slack.com/team_id"
+ingress:
+  enabled: false

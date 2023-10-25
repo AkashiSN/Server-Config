@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-auth
+  namespace: auth
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - "{{ auth_fqdn }}"
+      secretName: letsencrypt-cert
+  rules:
+    - host: "{{ auth_fqdn }}"
+      http:
+        paths:
+          - path: /dex
+            pathType: Prefix
+            backend:
+              service:
+                name: dex
+                port:
+                  number: 5556
+          - path: /oauth2
+            pathType: Prefix
+            backend:
+              service:
+                name: oauth2-proxy
+                port:
+                  number: 80

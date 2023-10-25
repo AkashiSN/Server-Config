@@ -26,29 +26,7 @@
     update_repo_cache: true
     wait: true
     atomic: true
-    release_values:
-      configs:
-        cm:
-          url: "https://{{ argocd_host }}"
-          statusbadge.enabled: "true"
-        secret:
-          githubSecret: "{{ argocd_webhook_github_secret }}"
-          argocdServerAdminPassword: "{{ argocd_admin_password }}"
-      server:
-        ingress:
-          enabled: true
-          ingressClassName: nginx
-          annotations:
-            cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
-            nginx.org/websocket-services: argo-cd-argocd-server
-            nginx.org/ssl-services: argo-cd-argocd-server
-          hosts:
-            - "{{ argocd_host }}"
-          tls:
-            - secretName: letsencrypt-cert
-              hosts:
-                - "{{ argocd_host }}"
-          https: true
+    values: "{{ lookup('template', 'argo-cd-values.yml.j2') | from_yaml }}"
   register: argo_cd_helm_chart_install
   when: argo_cd_helm_chart_result.rc != 0
   become: false

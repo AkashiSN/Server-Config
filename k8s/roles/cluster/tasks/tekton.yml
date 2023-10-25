@@ -36,12 +36,10 @@
   kubernetes.core.k8s:
     state: present
     src: "/opt/tekton-operator/config/crs/kubernetes/config/all/operator_v1alpha1_config_cr.yaml"
-  when: tekton_operator_helm_chart_result.rc != 0
   become: false
 
 - name: Apply the tekton-dashboard ingress config
   kubernetes.core.k8s:
     state: present
     template: tekton-ingress.yml.j2
-  when: tekton_operator_helm_chart_result.rc != 0
   become: false

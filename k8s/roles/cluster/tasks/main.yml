@@ -10,13 +10,13 @@
   when: inventory_hostname in groups["master"]
   become: false
   block:
-    - name: Create the 'monitoring' namespace
-      kubernetes.core.k8s:
-        state: present
-        api_version: v1
-        name: monitoring
-        kind: Namespace
-      when: inventory_hostname != "microk8s"
+    # - name: Create the 'monitoring' namespace
+    #   kubernetes.core.k8s:
+    #     state: present
+    #     api_version: v1
+    #     name: monitoring
+    #     kind: Namespace
+    #   when: inventory_hostname != "microk8s"
 
     - name: Import helm.yml
       ansible.builtin.import_tasks:
@@ -44,13 +44,30 @@
         file: metrics-server.yml
       when: inventory_hostname != "microk8s"
 
+    - name: Create the 'auth' namespace
+      kubernetes.core.k8s:
+        state: present
+        api_version: v1
+        name: auth
+        kind: Namespace
+
+    - name: Apply the auth ingress config
+      kubernetes.core.k8s:
+        state: present
+        template: auth-ingress.yml.j2
+      become: false
+
+    - name: Import dex.yml
+      ansible.builtin.import_tasks:
+        file: dex.yml
+
     - name: Import oauth2-proxy.yml
       ansible.builtin.import_tasks:
         file: oauth2-proxy.yml
 
-    - name: Import tekton.yml
-      ansible.builtin.import_tasks:
-        file: tekton.yml
+    # - name: Import tekton.yml
+    #   ansible.builtin.import_tasks:
+    #     file: tekton.yml
 
     - name: Import argo-cd.yml
       ansible.builtin.import_tasks:
