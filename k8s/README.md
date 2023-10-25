@@ -133,3 +133,44 @@ kubeadm upgrade plan
 
 kubeadm upgrade apply VERSION
 ```
+
+
+### Switch production to microk8s
+
+```
+interface Tunnel0.0
+
+no ip napt static 172.16.254.100 tcp 80
+no ip napt static 172.16.254.100 tcp 443
+no ip napt static 172.16.254.110 udp 53
+no ip napt static 172.16.254.110 tcp 853
+no ip napt static 172.16.254.120 tcp 25565
+
+ip napt static 172.16.254.50 tcp 80
+ip napt static 172.16.254.50 tcp 443
+ip napt static 172.16.254.60 udp 53
+ip napt static 172.16.254.60 tcp 853
+ip napt static 172.16.254.70 tcp 25565
+
+exit
+```
+
+### Switch microk8s to production
+
+```
+interface Tunnel0.0
+
+no ip napt static 172.16.254.50 tcp 80
+no ip napt static 172.16.254.50 tcp 443
+no ip napt static 172.16.254.60 udp 53
+no ip napt static 172.16.254.60 tcp 853
+no ip napt static 172.16.254.70 tcp 25565
+
+ip napt static 172.16.254.100 tcp 80
+ip napt static 172.16.254.100 tcp 443
+ip napt static 172.16.254.110 udp 53
+ip napt static 172.16.254.110 tcp 853
+ip napt static 172.16.254.120 tcp 25565
+
+exit
+```
