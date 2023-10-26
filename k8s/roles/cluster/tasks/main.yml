@@ -10,14 +10,6 @@
   when: inventory_hostname in groups["master"]
   become: false
   block:
-    - name: Create the 'monitoring' namespace
-      kubernetes.core.k8s:
-        state: present
-        api_version: v1
-        name: monitoring
-        kind: Namespace
-      when: inventory_hostname != "microk8s"
-
     - name: Import helm.yml
       ansible.builtin.import_tasks:
         file: helm.yml
@@ -65,10 +57,6 @@
       ansible.builtin.import_tasks:
         file: oauth2-proxy.yml
 
-    # - name: Import tekton.yml
-    #   ansible.builtin.import_tasks:
-    #     file: tekton.yml
-
     - name: Import argo-cd.yml
       ansible.builtin.import_tasks:
         file: argo-cd.yml
@@ -80,16 +68,6 @@
     - name: Import hashicorp-vault.yml
       ansible.builtin.import_tasks:
         file: hashicorp-vault.yml
-
-    # - name: Import democratic-csi.yml
-    #   ansible.builtin.import_tasks:
-    #     file: democratic-csi.yml
-    #   when: inventory_hostname != "microk8s"
-
-    # - name: Import monitoring.yml
-    #   ansible.builtin.import_tasks:
-    #     file: monitoring.yml
-    #   when: inventory_hostname != "microk8s"
 
 - name: Wait for all pods to be ready
   ansible.builtin.command:

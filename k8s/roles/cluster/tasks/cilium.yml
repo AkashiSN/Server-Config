@@ -43,21 +43,6 @@
       k8sServiceHost: "{{ node_ip.stdout }}"
       k8sServicePort: 6443
       kubeProxyReplacement: strict
-      dashboards:
-        enabled: true
-        namespace: monitoring
-        label: grafana_dashboard
-        labelValue: "1"
-      prometheus:
-        enabled: true
-      operator:
-        dashboards:
-          enabled: true
-          namespace: monitoring
-          label: grafana_dashboard
-          labelValue: "1"
-        prometheus:
-          enabled: true
   register: cilium_helm_chart_install
   when: cilium_helm_chart_result.rc != 0
   become: false

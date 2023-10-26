@@ -140,6 +140,14 @@ kubeadm upgrade apply VERSION
 args: ["bash", "-c", "sleep infinity"]
 ```
 
+### Renew certificate
+
+```bash
+kubectl get cert,cr,order,challenge
+kubectl delete cert <certname>
+```
+
+
 ### Switch production to microk8s
 
 ```

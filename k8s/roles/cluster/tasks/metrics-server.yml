@@ -25,8 +25,5 @@
     update_repo_cache: true
     wait: true
     atomic: true
-    release_values:
-      metrics:
-        enabled: true
   when: metrics_server_helm_chart_result.rc != 0
   become: false

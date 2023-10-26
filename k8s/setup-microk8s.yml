@@ -14,4 +14,4 @@
     - variable
     - role: cluster
       vars:
-        target_env: "production" # staging or production
+        target_env: "staging" # staging or production

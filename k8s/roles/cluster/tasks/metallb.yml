@@ -25,9 +25,6 @@
     update_repo_cache: true
     wait: true
     atomic: true
-    release_values:
-      prometheus:
-        scrapeAnnotations: true
   register: metallb_helm_chart_install
   when: metallb_helm_chart_result.rc != 0
   become: false

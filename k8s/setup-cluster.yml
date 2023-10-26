@@ -18,5 +18,5 @@
       when: inventory_hostname != "microk8s"
     - role: cluster
       vars:
-        target_env: "production" # staging or production
+        target_env: "staging" # staging or production
       when: inventory_hostname != "microk8s"

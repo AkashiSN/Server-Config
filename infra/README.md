@@ -28,13 +28,25 @@ qm template $vmid
 ## Create proxmox user for terraform
 
 ```bash
-pveum role add TerraformProv -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
+pveum role add TerraformProv -privs "SDN.Use Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
 
 pveum user add terraform-prov@pve --password <password>
 
 pveum aclmod / -user terraform-prov@pve -role TerraformProv
 
 pvesh create /access/users/terraform-prov@pve/token/terraform --privsep 0
+```
+
+`terraform.tfvars`
+```t
+proxmox_api_url      = "https://{{pve_host}}/api2/json"
+proxmox_token_id     = "terraform-prov@pve!terraform"
+proxmox_token_secret = ""
+
+userdata = {
+  user_name       = ""
+  hashed_password = "" # mkpasswd --method=SHA-512 --rounds=4096
+}
 ```
 
 ## Plan and Apply
