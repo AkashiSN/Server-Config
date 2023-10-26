@@ -134,6 +134,11 @@ kubeadm upgrade plan
 kubeadm upgrade apply VERSION
 ```
 
+## Debug
+
+```yml
+args: ["bash", "-c", "sleep infinity"]
+```
 
 ### Switch production to microk8s
 

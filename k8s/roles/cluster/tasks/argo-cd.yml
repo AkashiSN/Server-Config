@@ -49,10 +49,6 @@
           repoURL: https://github.com/AkashiSN/Server-Config.git
           targetRevision: main
         syncPolicy:
-          automated:
-            selfHeal: true
-            prune: true
-            allowEmpty: false
           syncOptions:
             - RespectIgnoreDifferences=true
         ignoreDifferences:

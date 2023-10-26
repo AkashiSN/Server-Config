@@ -3,7 +3,8 @@
 - name: Setup common for kubeadm
   hosts: virtualmachines
   roles:
-    - variable
+    - role: variable
+      when: inventory_hostname != "microk8s"
     - role: common
       vars:
         os: "xUbuntu_22.04"
@@ -13,7 +14,8 @@
 - name: Setup cluster by kubeadm
   hosts: virtualmachines
   roles:
-    - variable
+    - role: variable
+      when: inventory_hostname != "microk8s"
     - role: cluster
       vars:
         target_env: "production" # staging or production
