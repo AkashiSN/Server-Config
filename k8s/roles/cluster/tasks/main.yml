@@ -69,6 +69,12 @@
       ansible.builtin.import_tasks:
         file: hashicorp-vault.yml
 
+    - name: Create the storage class
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', 'manifests/storage-class.yml') | from_yaml_all }}"
+      become: false
+
 - name: Wait for all pods to be ready
   ansible.builtin.command:
     cmd: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'

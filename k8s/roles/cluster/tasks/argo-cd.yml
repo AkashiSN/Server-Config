@@ -34,27 +34,5 @@
 - name: Create the argo-cd/Application
   kubernetes.core.k8s:
     state: present
-    definition:
-      apiVersion: argoproj.io/v1alpha1
-      kind: Application
-      metadata:
-        name: server-config
-        namespace: argo-cd
-      spec:
-        destination:
-          server: https://kubernetes.default.svc
-        project: default
-        source:
-          path: k8s/manifests
-          repoURL: https://github.com/AkashiSN/Server-Config.git
-          targetRevision: main
-        syncPolicy:
-          syncOptions:
-            - ApplyOutOfSyncOnly=true
-            - CreateNamespace=true
-            - RespectIgnoreDifferences=true
-        ignoreDifferences:
-          - kind: Secret
-            jsonPointers:
-              - /data
+    definition: "{{ lookup('file', 'manifests/application.yml') | from_yaml }}"
   become: false

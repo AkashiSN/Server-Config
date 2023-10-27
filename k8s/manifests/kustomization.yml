@@ -1,6 +1,0 @@
-resources:
-  - storage-class.yml
-  - dns/
-  # - minecraft/
-  - nextcloud
-  - wordpress/

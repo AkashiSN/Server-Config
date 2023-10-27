@@ -28,7 +28,6 @@
     atomic: true
     release_values:
       installCRDs: true
-      enableCertificateOwnerRef: true
   register: cert_manager_helm_chart_install
   when: cert_manager_helm_chart_result.rc != 0
   become: false

@@ -37,11 +37,16 @@ kubectl apply -k manifests/
 ```
 
 ### DNS
+
+[![argo-cd](https://argocd.akashisn.info/api/badge?name=dns&revision=true)](https://argocd.akashisn.info/applications/argo-cd/dns)
+
 ```bash
 kubectl get -n dns pod,svc
 ```
 
 ### Minecraft
+
+[![argo-cd](https://argocd.akashisn.info/api/badge?name=minecraft&revision=true)](https://argocd.akashisn.info/applications/argo-cd/minecraft)
 
 ```bash
 kubectl get pod,svc -n minecraft
@@ -50,6 +55,8 @@ kubectl exec -it -n minecraft minecraft-vanilla-0 -- bash
 ```
 
 ### Nextcloud
+
+[![argo-cd](https://argocd.akashisn.info/api/badge?name=nextcloud&revision=true)](https://argocd.akashisn.info/applications/argo-cd/nextcloud)
 
 ```bash
 kubectl get -n nextcloud pod
@@ -60,6 +67,8 @@ kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- /bin/sh -c 'su www-dat
 ```
 
 ### Wordpress
+
+[![argo-cd](https://argocd.akashisn.info/api/badge?name=wordpress&revision=true)](https://argocd.akashisn.info/applications/argo-cd/wordpress)
 
 ```bash
 kubectl get -n wordpress pod,svc
