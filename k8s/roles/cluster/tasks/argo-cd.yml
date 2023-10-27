@@ -50,6 +50,8 @@
           targetRevision: main
         syncPolicy:
           syncOptions:
+            - ApplyOutOfSyncOnly=true
+            - CreateNamespace=true
             - RespectIgnoreDifferences=true
         ignoreDifferences:
           - kind: Secret
