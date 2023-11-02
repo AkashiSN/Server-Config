@@ -55,6 +55,10 @@
       ansible.builtin.import_tasks:
         file: watchdog.yml
 
+    - name: Import argo-cd.yml
+      ansible.builtin.import_tasks:
+        file: argo-cd.yml
+
 - name: For kubeadm
   when: inventory_hostname != "microk8s" and
         inventory_hostname != "k3s"

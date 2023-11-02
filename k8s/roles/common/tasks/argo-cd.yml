@@ -1,0 +1,27 @@
+---
+# file: roles/common/tasks/argo-cd.yml
+- name: Get ARGO_CD_VERSION
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      curl --silent "https://api.github.com/repos/argoproj/argo-cd/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/'
+    executable: /bin/bash
+  register: argo_cd_version
+  changed_when: false
+  when: inventory_hostname in groups["master"]
+  become: false
+
+- name: Download argo-cd cli
+  ansible.builtin.get_url:
+    url: https://github.com/argoproj/argo-cd/releases/download/{{ argo_cd_version.stdout }}/argocd-linux-amd64
+    dest: /usr/local/bin/argocd
+    mode: "755"
+  when: inventory_hostname in groups["master"]
+  become: true
+
+- name: Add IP to /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: '{{ nginx_ingress_lb_v4_addr }} {{ argocd_grpc_fqdn }}'
+  when: inventory_hostname in groups["master"]
+  become: true

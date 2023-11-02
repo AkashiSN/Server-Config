@@ -4,7 +4,11 @@
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="server --disable=traefik,servicelb,local-storage" sh -s -
+      curl -sfL https://get.k3s.io | \
+        INSTALL_K3S_CHANNEL="latest" \
+        K3S_KUBECONFIG_MODE="644" \
+        INSTALL_K3S_EXEC="server --disable=traefik,servicelb,local-storage" \
+        sh -s -
     executable: /bin/bash
   changed_when: true
 

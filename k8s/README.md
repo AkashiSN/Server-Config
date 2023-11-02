@@ -9,8 +9,6 @@ ansible-playbook setup-cluster.yml
 
 $ sudo reboot
 $ watch kubectl get pod -A
-
-kubectl apply -k manifests/
 ```
 
 ## Install k8s - microk8s
@@ -20,20 +18,22 @@ ansible-playbook setup-microk8s.yml
 
 $ sudo reboot
 $ watch kubectl get pod -A
-
-kubectl apply -k manifests/
 ```
 
 ## Before shutdown
 
 ```bash
-kubectl delete -k manifests/
+kubectl delete -f manifests/application.yml
+or
+kubectl delete -f https://raw.githubusercontent.com/AkashiSN/Server-Config/main/k8s/manifests/application.yml
 ```
 
 ## After power on
 
 ```bash
-kubectl apply -k manifests/
+kubectl apply -f manifests/application.yml
+or
+kubectl apply -f https://raw.githubusercontent.com/AkashiSN/Server-Config/main/k8s/manifests/application.yml
 ```
 
 ### DNS

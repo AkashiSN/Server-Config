@@ -28,6 +28,7 @@ oauth2_proxy_client_secret: "{{ vault_oauth2_proxy_client_secret }}"
 tekton_fqdn: "{{ vault_tekton_host }}.{{ domain }}"
 # argo-cd
 argocd_fqdn: "{{ vault_argocd_host }}.{{ domain }}"
+argocd_grpc_fqdn: "grpc.{{ argocd_fqdn }}"
 argocd_client_secret: "{{ vault_argocd_client_secret }}"
 argocd_webhook_github_secret: "{{ vault_argocd_webhook_github_secret }}"
 argocd_admin_password: "{{ vault_argocd_admin_password }}"
