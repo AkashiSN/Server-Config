@@ -76,19 +76,19 @@ export domain=
 export cf_token=
 export cf_zone_id=
 
-cat >/tmp/dbs-cf-token << EOF
+cat >/tmp/dns-cf-token << EOF
 CF_Token=${cf_token}
 CF_Zone_ID=${cf_zone_id}
 EOF
 
 pvenode acme account register default "${email}"
-pvenode acme plugin add dns cloudflare --api cf --data /tmp/dbs-cf-token
+pvenode acme plugin add dns cloudflare --api cf --data /tmp/dns-cf-token
 pvenode config set --acme account=default --acmedomain0 domain=${domain},plugin=cloudflare
 pvenode acme cert order
 
 systemctl restart pveproxy
 
-rm /tmp/dbs-cf-token
+rm /tmp/dns-cf-token
 ```
 
 ## Troubleshooting

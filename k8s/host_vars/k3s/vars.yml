@@ -1,0 +1,42 @@
+# domain
+domain: "akashisn.info"
+# external-ip
+external_ip: "{{ vault_external_ip }}"
+# metallb
+metallb_ipv4_range: "172.16.254.70-172.16.254.99"
+# truenas
+truenas_fqdn: "{{ vault_truenas_host }}.{{ domain }}"
+truenas_apikey: "{{ vault_truenas_apikey }}"
+# nginx-ingress
+nginx_ingress_lb_v4_addr: "172.16.254.50"
+# acme
+cloudflare_token: "{{ vault_cloudflare_token }}"
+email: "{{ vault_email }}"
+# grafana
+grafana_admin_user: "admin"
+grafana_admin_password: "{{ vault_grafana_admin_password }}"
+grafana_fqdn: "{{ vault_grafana_host }}.{{ domain }}"
+# auth
+auth_fqdn: "{{ vault_auth_host }}.{{ domain }}"
+# dex
+dex_slack_client_id: "{{ vault_dex_slack_client_id }}"
+dex_slack_client_secret: "{{ vault_dex_slack_client_secret }}"
+dex_slack_allowed_groups: "{{ vault_dex_slack_allowed_groups_id }}"
+# oauth2-proxy
+oauth2_proxy_client_secret: "{{ vault_oauth2_proxy_client_secret }}"
+# tekton
+tekton_fqdn: "{{ vault_tekton_host }}.{{ domain }}"
+# argo-cd
+argocd_fqdn: "{{ vault_argocd_host }}.{{ domain }}"
+argocd_client_secret: "{{ vault_argocd_client_secret }}"
+argocd_webhook_github_secret: "{{ vault_argocd_webhook_github_secret }}"
+argocd_admin_password: "{{ vault_argocd_admin_password }}"
+# hashicorp vault
+hashicorp_vault_client_id: "{{ vault_hashicorp_vault_client_id }}"
+hashicorp_vault_client_secret: "{{ vault_hashicorp_vault_client_secret }}"
+hashicorp_vault_organization_id: "{{ vault_hashicorp_vault_organization_id }}"
+hashicorp_vault_project_id: "{{ vault_hashicorp_vault_project_id }}"
+# dns
+dns_lb_v4_addr: "172.16.254.60"
+# minecraft
+minecraft_lb_v4_addr:  "172.16.254.70"

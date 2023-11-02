@@ -1,0 +1,45 @@
+#cloud-config
+hostname: ${hostname}
+manage_etc_hosts: true
+
+users:
+  - name: ${user_name}
+    passwd: ${hashed_password}
+    lock_passwd: false
+    groups: adm, sudo
+    home: /home/${user_name}
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_import_id:
+      - gh:${github_id}
+
+apt:
+  conf: |
+    APT {
+      Periodic {
+        Update-Package-Lists "0";
+        Unattended-Upgrade "0";
+      };
+    };
+  primary:
+    - arches: [default]
+      uri: http://ftp.udx.icscoe.jp/Linux/ubuntu
+  security:
+    - arches: [default]
+      uri: http://security.ubuntu.com/ubuntu
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - qemu-guest-agent
+
+keyboard:
+  layout: jp
+  model: jp106
+
+runcmd:
+  - [ sh, -c, sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="console=tty1"/' /etc/default/grub.d/50-cloudimg-settings.cfg ]
+  - [ sh, -c, echo "GRUB_GFXPAYLOAD_LINUX=1024x768" | tee -a /etc/default/grub ]
+  - [ sh, -c, update-grub ]
+  - [ sh, -c, service qemu-guest-agent restart ]

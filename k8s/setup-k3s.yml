@@ -1,0 +1,17 @@
+---
+# file: setup-k3s.yml
+- name: Setup common for k3s
+  hosts: k3s
+  roles:
+    - variable
+    - role: common
+      vars:
+        k8s_major_version: "1.28"
+
+- name: Setup cluster by k3s
+  hosts: k3s
+  roles:
+    - variable
+    - role: cluster
+      vars:
+        target_env: "staging" # staging or production

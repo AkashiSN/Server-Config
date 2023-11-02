@@ -1,6 +1,5 @@
 ---
 # file: roles/cluster/tasks/monitoring.yml
-
 # Helm charts
 - name: Add grafana Helm charts repository
   kubernetes.core.helm_repository:

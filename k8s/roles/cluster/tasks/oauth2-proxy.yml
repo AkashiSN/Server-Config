@@ -23,7 +23,7 @@
     chart_ref: oauth2-proxy/oauth2-proxy
     release_namespace: auth
     update_repo_cache: true
-    wait: true
+    wait: false
     atomic: true
     release_values:
       extraArgs:

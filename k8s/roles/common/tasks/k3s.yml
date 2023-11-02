@@ -1,0 +1,52 @@
+---
+# file: roles/common/tasks/k3s.yml
+- name: Install k3s
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="server --disable=traefik,servicelb,local-storage" sh -s -
+    executable: /bin/bash
+  changed_when: true
+
+- name: Create .kube directory in the user's home
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+    mode: "0700"
+  become: false
+
+- name: Copy admin.conf to user's tmp directory
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "/tmp/config"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+    mode: "0644"
+    remote_src: true
+  changed_when: false
+  become: true
+
+- name: Copy tmp to user's .kube directory
+  ansible.builtin.copy:
+    src: /tmp/config
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+    mode: "0600"
+    remote_src: true
+  become: false
+
+- name: Remove tmp files
+  ansible.builtin.file:
+    path: /tmp/config
+    state: absent
+  changed_when: false
+  become: true
+
+- name: Install helm
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      curl -sfL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash -s -
+    executable: /bin/bash
+  changed_when: true

@@ -56,7 +56,8 @@
         file: watchdog.yml
 
 - name: For kubeadm
-  when: inventory_hostname != "microk8s"
+  when: inventory_hostname != "microk8s" and
+        inventory_hostname != "k3s"
   become: true
   block:
     - name: Import iptables.yml
@@ -79,6 +80,11 @@
   ansible.builtin.import_tasks:
     file: microk8s.yml
   when: inventory_hostname == "microk8s"
+
+- name: For k3s
+  ansible.builtin.import_tasks:
+    file: k3s.yml
+  when: inventory_hostname == "k3s"
 
 - name: Update all packages to their latest version
   ansible.builtin.apt:
