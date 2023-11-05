@@ -19,6 +19,13 @@
   when: inventory_hostname in groups["master"]
   become: true
 
+- name: Add IP to /etc/cloud/templates/hosts.debian.tmpl
+  ansible.builtin.lineinfile:
+    path: /etc/cloud/templates/hosts.debian.tmpl
+    line: '{{ nginx_ingress_lb_v4_addr }} {{ argocd_grpc_fqdn }}'
+  when: inventory_hostname in groups["master"]
+  become: true
+
 - name: Add IP to /etc/hosts
   ansible.builtin.lineinfile:
     path: /etc/hosts
