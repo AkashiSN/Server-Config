@@ -14,17 +14,6 @@
   become: false
 
 # Prometheus
-- name: Check if prometheus Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep prometheus
-    executable: /bin/bash
-  register: prometheus_helm_chart_result
-  changed_when: prometheus_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy prometheus chart using set values on target
   kubernetes.core.helm:
     release_name: prometheus
@@ -47,21 +36,9 @@
         persistence:
           enabled: true
           storageClass: truenas-nfs-csi
-  when: prometheus_helm_chart_result.rc != 0
   become: false
 
 # Loki
-- name: Check if loki Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep loki
-    executable: /bin/bash
-  register: loki_helm_chart_result
-  changed_when: loki_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy loki chart using set values on target
   kubernetes.core.helm:
     release_name: loki
@@ -94,21 +71,9 @@
           enabled: false
       test:
         enabled: false
-  when: loki_helm_chart_result.rc != 0
   become: false
 
 # Promtail
-- name: Check if promtail Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep promtail
-    executable: /bin/bash
-  register: promtail_helm_chart_result
-  changed_when: promtail_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy promtail chart on target
   kubernetes.core.helm:
     release_name: promtail
@@ -122,21 +87,9 @@
       config:
         snippets:
           pipelineStages: "{{ lookup('file', 'promtail-pipeline-stages.yml') | from_yaml }}"
-  when: promtail_helm_chart_result.rc != 0
   become: false
 
 # Grafana
-- name: Check if grafana Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep grafana
-    executable: /bin/bash
-  register: grafana_helm_chart_result
-  changed_when: grafana_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Create grafana-secrets
   kubernetes.core.k8s:
     state: present
@@ -217,5 +170,4 @@
           - secretName: letsencrypt-cert
             hosts:
               - "{{ grafana_fqdn }}"
-  when: grafana_helm_chart_result.rc != 0
   become: false

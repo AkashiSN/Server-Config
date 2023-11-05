@@ -46,11 +46,3 @@
     state: absent
   changed_when: false
   become: true
-
-- name: Install helm
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      curl -sfL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash -s -
-    executable: /bin/bash
-  changed_when: true

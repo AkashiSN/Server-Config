@@ -32,7 +32,6 @@ server:
     ingressClassName: nginx
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
-      nginx.org/websocket-services: argo-cd-argocd-server
     hosts:
       - "{{ argocd_fqdn }}"
     tls:
@@ -45,7 +44,7 @@ server:
     ingressClassName: nginx
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
-      nginx.org/grpc-services: argo-cd-argocd-server
+      nginx.ingress.kubernetes.io/backend-protocol: GRPC
     hosts:
       - "{{ argocd_grpc_fqdn }}"
     tls:

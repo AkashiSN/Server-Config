@@ -143,7 +143,7 @@ kind: Ingress
 metadata:
   name: ingress-dns-server
   annotations:
-    nginx.org/ssl-services: dns-server
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
   namespace: dns
 spec:
   ingressClassName: nginx

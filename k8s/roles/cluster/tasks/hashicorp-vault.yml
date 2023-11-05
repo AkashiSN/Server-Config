@@ -6,17 +6,6 @@
     repo_url: https://helm.releases.hashicorp.com
   become: false
 
-- name: Check if vault-secrets-operator Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep vault-secrets-operator
-    executable: /bin/bash
-  register: hashicorp_vault_helm_chart_result
-  changed_when: hashicorp_vault_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy vault-secrets-operator chart on target
   kubernetes.core.helm:
     release_name: vault-secrets-operator
@@ -26,7 +15,6 @@
     update_repo_cache: true
     wait: true
     atomic: true
-  when: hashicorp_vault_helm_chart_result.rc != 0
   become: false
 
 - name: Create the vault-secrets-operator/vso-secrets

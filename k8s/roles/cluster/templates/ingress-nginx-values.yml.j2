@@ -1,0 +1,35 @@
+controller:
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+    annotations:
+      metallb.universe.tf/address-pool: ingress-pool
+    ipFamilyPolicy: PreferDualStack
+    ipFamilies: {}
+  config:
+    ssl-redirect: true
+    proxy-connect-timeout: 3600
+    proxy-send-timeout: 3600
+    proxy-read-timeout: 3600
+    proxy-body-size: "0"
+    proxy-buffering: "on"
+    proxy-buffer-size: "64k"
+    proxy-buffers-number: 100
+    proxy-real-ip-cidr: "{{ real_ip_from }}"
+    enable-real-ip: true
+    use-forwarded-headers: true
+    log-format-upstream: >-
+      time=$time_iso8601
+      server_name=$server_name
+      remote_addr=$remote_addr
+      remote_port=$realip_remote_port
+      country=$http_cf_ipcountry
+      method=$request_method
+      uri="$request_uri"
+      proto=$server_protocol
+      status=$status
+      body_sent=$body_bytes_sent
+      referer="$http_referer"
+      forwarded_for=$http_x_forwarded_for
+      request_time=$request_time
+      user_agent="$http_user_agent"

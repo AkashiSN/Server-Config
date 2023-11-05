@@ -6,17 +6,6 @@
     repo_url: https://oauth2-proxy.github.io/manifests
   become: false
 
-- name: Check if oauth2-proxy Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep oauth2-proxy
-    executable: /bin/bash
-  register: oauth2_proxy_helm_chart_result
-  changed_when: oauth2_proxy_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy oauth2-proxy chart using set values on target
   kubernetes.core.helm:
     release_name: oauth2-proxy
@@ -38,6 +27,4 @@
         cookie-secure: "true"
       ingress:
         enabled: false
-  register: oauth2_proxy_helm_chart_install
-  when: oauth2_proxy_helm_chart_result.rc != 0
   become: false

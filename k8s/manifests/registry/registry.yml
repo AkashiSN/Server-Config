@@ -113,12 +113,7 @@ kind: Ingress
 metadata:
   name: ingress-registry-server
   annotations:
-    nginx.org/ssl-services: registry
-    nginx.org/client-max-body-size: "0"
-    nginx.org/proxy-request-buffering: "off"
-    nginx.org/proxy-connect-timeout: 3600s
-    nginx.org/proxy-send-timeout: 3600s
-    nginx.org/proxy-read-timeout: 3600s
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
   namespace: registry
 spec:
   ingressClassName: nginx

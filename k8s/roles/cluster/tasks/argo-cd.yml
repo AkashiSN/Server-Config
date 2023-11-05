@@ -6,17 +6,6 @@
     repo_url: https://argoproj.github.io/argo-helm
   become: false
 
-- name: Check if argo-cd Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep argo-cd
-    executable: /bin/bash
-  register: argo_cd_helm_chart_result
-  changed_when: argo_cd_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy argocd chart using set values on target
   kubernetes.core.helm:
     release_name: argo-cd
@@ -27,8 +16,6 @@
     wait: true
     atomic: true
     values: "{{ lookup('template', 'argo-cd-values.yml.j2') | from_yaml }}"
-  register: argo_cd_helm_chart_install
-  when: argo_cd_helm_chart_result.rc != 0
   become: false
 
 - name: Create the argo-cd/Application

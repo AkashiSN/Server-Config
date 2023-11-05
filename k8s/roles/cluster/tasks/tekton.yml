@@ -6,17 +6,6 @@
     dest: /opt/tekton-operator
   become: true
 
-- name: Check if tekton-operator Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep tekton-operator
-    executable: /bin/bash
-  register: tekton_operator_helm_chart_result
-  changed_when: tekton_operator_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy tekton-operator chart using set values on target
   kubernetes.core.helm:
     release_name: tekton-operator
@@ -28,8 +17,6 @@
     atomic: true
     values:
       installCRDs: true
-  register: tekton_operator_helm_chart_install
-  when: tekton_operator_helm_chart_result.rc != 0
   become: false
 
 - name: Apply the tekton-operator config

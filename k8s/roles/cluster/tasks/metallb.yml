@@ -6,17 +6,6 @@
     repo_url: https://metallb.github.io/metallb
   become: false
 
-- name: Check if metallb Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep metallb
-    executable: /bin/bash
-  register: metallb_helm_chart_result
-  changed_when: metallb_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy metallb chart using set values on target
   kubernetes.core.helm:
     release_name: metallb
@@ -25,8 +14,6 @@
     update_repo_cache: true
     wait: true
     atomic: true
-  register: metallb_helm_chart_install
-  when: metallb_helm_chart_result.rc != 0
   become: false
 
 - name: Create a metallb AddressPool config
@@ -34,6 +21,4 @@
     state: present
     template: metallb-addresspool.yml.j2
   register: result
-  when: metallb_helm_chart_install is not skipped
-  changed_when: result is defined
   become: false

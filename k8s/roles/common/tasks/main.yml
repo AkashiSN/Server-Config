@@ -59,6 +59,10 @@
       ansible.builtin.import_tasks:
         file: argo-cd.yml
 
+    - name: Import helm.yml
+      ansible.builtin.import_tasks:
+        file: helm.yml
+
 - name: For kubeadm
   when: inventory_hostname != "microk8s" and
         inventory_hostname != "k3s"
@@ -67,10 +71,6 @@
     - name: Import iptables.yml
       ansible.builtin.import_tasks:
         file: iptables.yml
-
-    - name: Import helm.yml
-      ansible.builtin.import_tasks:
-        file: helm.yml
 
     - name: Import crio.yml
       ansible.builtin.import_tasks:

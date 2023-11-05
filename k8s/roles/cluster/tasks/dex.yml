@@ -6,17 +6,6 @@
     repo_url: https://charts.dexidp.io
   become: false
 
-- name: Check if dex Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep dex
-    executable: /bin/bash
-  register: dex_helm_chart_result
-  changed_when: dex_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy dex chart using set values on target
   kubernetes.core.helm:
     release_name: dex
@@ -26,6 +15,4 @@
     wait: true
     atomic: true
     values: "{{ lookup('template', 'dex-values.yml.j2') | from_yaml }}"
-  register: dex_helm_chart_install
-  when: dex_helm_chart_result.rc != 0
   become: false

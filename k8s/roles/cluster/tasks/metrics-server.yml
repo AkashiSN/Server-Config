@@ -6,17 +6,6 @@
     repo_url: https://kubernetes-sigs.github.io/metrics-server/
   become: false
 
-- name: Check if metrics-server Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep metrics-server
-    executable: /bin/bash
-  register: metrics_server_helm_chart_result
-  changed_when: metrics_server_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy metrics-server chart on target
   kubernetes.core.helm:
     release_name: metrics-server
@@ -25,5 +14,4 @@
     update_repo_cache: true
     wait: true
     atomic: true
-  when: metrics_server_helm_chart_result.rc != 0
   become: false

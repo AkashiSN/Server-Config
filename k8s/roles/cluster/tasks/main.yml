@@ -24,9 +24,9 @@
       ansible.builtin.import_tasks:
         file: metallb.yml
 
-    - name: Import nginx-ingress.yml
+    - name: Import ingress-nginx.yml
       ansible.builtin.import_tasks:
-        file: nginx-ingress.yml
+        file: ingress-nginx.yml
 
     - name: Import cert-manager.yml
       ansible.builtin.import_tasks:

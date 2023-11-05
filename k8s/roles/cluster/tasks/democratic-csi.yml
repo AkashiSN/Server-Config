@@ -6,17 +6,6 @@
     repo_url: https://democratic-csi.github.io/charts/
   become: false
 
-- name: Check if democratic-csi Helm chart is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      helm list --all-namespaces --deployed --short | grep democratic-csi
-    executable: /bin/bash
-  register: democratic_csi_helm_chart_result
-  changed_when: democratic_csi_helm_chart_result.rc != 0
-  ignore_errors: true
-  become: false
-
 - name: Deploy democratic-csi chart using set values on target
   kubernetes.core.helm:
     release_name: democratic-csi
@@ -67,5 +56,4 @@
             shareMaprootGroup: wheel
             shareMapallUser: ""
             shareMapallGroup: ""
-  when: democratic_csi_helm_chart_result.rc != 0
   become: false

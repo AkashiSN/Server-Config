@@ -4,19 +4,8 @@ metadata:
   name: ingress-tekton
   namespace: tekton-pipelines
   annotations:
-    nginx.org/websocket-services: tekton-dashboard
-    nginx.org/location-snippets: |
-      auth_request /oauth2/auth;
-      error_page 401 = /oauth2/start?rd=https://{{ tekton_fqdn }}/$request_uri;
-    nginx.org/server-snippets: |
-      location ~ ^/oauth2/(?:auth|start)$ {
-        proxy_pass       http://oauth2-proxy.auth.svc.cluster.local;
-        proxy_set_header Host             $host;
-        proxy_set_header X-Real-IP        $remote_addr;
-        proxy_set_header X-Scheme         $scheme;
-        proxy_set_header Content-Length   "";
-        proxy_pass_request_body           off;
-      }
+    nginx.ingress.kubernetes.io/auth-url: https://{{ auth_fqdn }}/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: https://{{ auth_fqdn }}/oauth2/start?rd=https://{{ tekton_fqdn }}/$escaped_request_uri
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
 spec:
   ingressClassName: nginx
