@@ -12,7 +12,7 @@ spec:
   tls:
     - hosts:
         - "{{ tekton_fqdn }}"
-      secretName: letsencrypt-cert
+      secretName: tekton-cert
   rules:
     - host: "{{ tekton_fqdn }}"
       http:

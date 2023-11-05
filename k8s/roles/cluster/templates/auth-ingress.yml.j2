@@ -10,7 +10,7 @@ spec:
   tls:
     - hosts:
         - "{{ auth_fqdn }}"
-      secretName: letsencrypt-cert
+      secretName: auth-cert
   rules:
     - host: "{{ auth_fqdn }}"
       http:

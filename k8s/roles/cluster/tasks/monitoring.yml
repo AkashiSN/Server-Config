@@ -167,7 +167,7 @@
         hosts:
           - "{{ grafana_fqdn }}"
         tls:
-          - secretName: letsencrypt-cert
+          - secretName: grafana-cert
             hosts:
               - "{{ grafana_fqdn }}"
   become: false

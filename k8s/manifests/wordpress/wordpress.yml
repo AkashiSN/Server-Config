@@ -157,7 +157,7 @@ spec:
   tls:
     - hosts:
         - blog.akashisn.info
-      secretName: letsencrypt-cert
+      secretName: wordpress-cert
   rules:
     - host: blog.akashisn.info
       http:

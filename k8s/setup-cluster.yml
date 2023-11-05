@@ -2,6 +2,12 @@
 # file: setup-cluster.yml
 - name: Setup common for kubeadm
   hosts: virtualmachines
+  gather_facts: false
+  any_errors_fatal: true
+  pre_tasks:
+    - name: Gather facts for target hosts
+      ansible.builtin.setup:
+      when: inventory_hostname not in ["microk8s", "k3s"]
   roles:
     - role: variable
       when: inventory_hostname != "microk8s" and
@@ -15,6 +21,12 @@
 
 - name: Setup cluster by kubeadm
   hosts: virtualmachines
+  gather_facts: false
+  any_errors_fatal: true
+  pre_tasks:
+    - name: Gather facts for target hosts
+      ansible.builtin.setup:
+      when: inventory_hostname not in ["microk8s", "k3s"]
   roles:
     - role: variable
       when: inventory_hostname != "microk8s" and

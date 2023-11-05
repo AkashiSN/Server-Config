@@ -14,4 +14,7 @@
       set -o pipefail
       helm plugin install https://github.com/databus23/helm-diff
     executable: /bin/bash
-  changed_when: true
+  register: helm_diff_result
+  ignore_errors: true
+  changed_when: "'helm-diff installed into' in helm_diff_result.stdout"
+  failed_when: "'Error: plugin already exists' in helm_diff_result.stderr"

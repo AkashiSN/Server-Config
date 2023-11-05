@@ -230,7 +230,7 @@ spec:
     - hosts:
         - files.akashisn.info
         - static.akashisn.info
-      secretName: letsencrypt-cert
+      secretName: nextcloud-cert
   rules:
     - host: files.akashisn.info
       http:
