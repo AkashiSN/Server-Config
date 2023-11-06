@@ -1,0 +1,41 @@
+name: kubectl-update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check for Kubernetes updates
+        id: check-update
+        run: |
+          CURRENT_KUBE_VERSION=$(sed -n -r -e "s/.*KUBE_VERSION=\"(.*)\"/\1/p" ./docker/kubectl/Dockerfile)
+          LATEST_KUBE_VERSION=$(curl -LS https://dl.k8s.io/release/stable.txt)
+          echo "current=$CURRENT_KUBE_VERSION" >> $GITHUB_ENV
+          echo "latest=$LATEST_KUBE_VERSION" >> $GITHUB_ENV
+
+      - name: Apply update & Create commit
+        if: env.current != env.latest
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git switch -c actions/kubectl-${{ env.latest }}
+
+          sed -i -re "s/(KUBE_VERSION=)\".*\"/\1\"${{ env.latest }}\"/g" ./docker/kubectl/Dockerfile
+
+          git add ./docker/kubectl/Dockerfile
+          git commit -m "Bump kubectl from ${{ env.current }} to ${{ env.latest }} in /docker/kubectl"
+          git push
+
+      - name: Create pull request
+        run: |
+          gh pr create -B main -H actions/kubectl-${{ env.latest }} \
+            --title 'Bump kubectl from ${{ env.current }} to ${{ env.latest }} in /docker/kubectl' \
+            --body 'Bumps kubectl from `${{ env.current }}` to `${{ env.latest }}`.'
