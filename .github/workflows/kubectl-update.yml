@@ -32,7 +32,7 @@ jobs:
 
           git add ./docker/kubectl/Dockerfile
           git commit -m "Bump kubectl from ${{ env.current }} to ${{ env.latest }} in /docker/kubectl"
-          git push
+          git push --set-upstream origin actions/kubectl-${{ env.latest }}
 
       - name: Create pull request
         run: |
