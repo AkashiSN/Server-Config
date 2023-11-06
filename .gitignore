@@ -2,4 +2,5 @@
 .vscode
 *.env
 vault.yml
+*.gpg
 !.gitkeep
