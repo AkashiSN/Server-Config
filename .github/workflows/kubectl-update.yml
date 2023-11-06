@@ -27,7 +27,7 @@ jobs:
 
           git switch -c actions/kubectl-${{ env.latest }}
 
-          sed -i -re "s/(KUBE_VERSION=)\".*\"/\1\"${{ env.latest }}\"/g" ./docker/kubectl/Dockerfile
+          sed -i -r -e "s/(KUBE_VERSION=)\".*\"/\1\"${{ env.latest }}\"/g" ./docker/kubectl/Dockerfile
 
           git add ./docker/kubectl/Dockerfile
           git commit -m "Bump kubectl from ${{ env.current }} to ${{ env.latest }} in /docker/kubectl"

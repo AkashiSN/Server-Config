@@ -1,0 +1,62 @@
+name: mirakc-update
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check for mirakc-arib updates
+        run: |
+          CURRENT_MIRAKC_ARIB_VERSION=$(sed -n -r -e "s/.*MIRAKC_ARIB_VERSION=([^  ]*).*/\1/p" ./docker/mirakc/Dockerfile)
+          LATEST_MIRAKC_ARIB_VERSION=$(curl -sL https://api.github.com/repos/mirakc/mirakc-arib/tags | jq -r '.[].name' |  head -n 1)
+          echo "current_mirakc_arib=$CURRENT_MIRAKC_ARIB_VERSION" >> $GITHUB_ENV
+          echo "latest_mirakc_arib=$LATEST_MIRAKC_ARIB_VERSION" >> $GITHUB_ENV
+
+      - name: Check for mirakc updates
+        run: |
+          CURRENT_MIRAKC_VERSION=$(sed -n -r -e "s/.*MIRAKC_VERSION=([^  ]*).*/\1/p" ./docker/mirakc/Dockerfile)
+          LATEST_MIRAKC_VERSION=$(curl -sL https://api.github.com/repos/mirakc/mirakc/tags | jq -r '.[].name' |  head -n 1)
+          echo "current_mirakc=$CURRENT_MIRAKC_VERSION" >> $GITHUB_ENV
+          echo "latest_mirakc=$LATEST_MIRAKC_VERSION" >> $GITHUB_ENV
+
+      - name: Check for v4l-utils updates
+        run: |
+          CURRENT_V4L_VERSION=$(sed -n -r -e "s/.*V4L_VERSION=([^  ]*).*/\1/p" ./docker/mirakc/Dockerfile)
+          LATEST_V4L_VERSION=$(curl -sL https://linuxtv.org/downloads/v4l-utils/ | sed -n -r -e 's/.*<a href="v4l-utils-(.*).tar.bz2">.*/\1/p' | sort -r -V | head -n 1)
+          echo "current_v4l=$CURRENT_V4L_VERSION" >> $GITHUB_ENV
+          echo "latest_v4l=$LATEST_V4L_VERSION" >> $GITHUB_ENV
+
+      - name: Apply update & Create commit
+        if: env.current_mirakc_arib != env.latest_mirakc_arib ||
+            env.current_mirakc != env.latest_mirakc ||
+            env.current_v4l != env.latest_v4l
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git switch -c actions/mirakc-update
+
+          sed -i -r -e "s/(.*MIRAKC_ARIB_VERSION=)[^ ]*/\1${{ env.latest_mirakc_arib }}/g" ./docker/mirakc/Dockerfile
+          sed -i -r -e "s/(.*MIRAKC_VERSION=)[^ ]*/\1${{ env.latest_mirakc }}/g" ./docker/mirakc/Dockerfile
+          sed -i -r -e "s/(.*V4L_VERSION=)[^ ]*/\1${{ env.latest_v4l }}/g" ./docker/mirakc/Dockerfile
+
+          git add ./docker/mirakc/Dockerfile
+          git commit -m "Bump mirakc in /docker/mirakc"
+          git push --set-upstream origin actions/mirakc-update
+
+      - name: Create pull request
+        if: env.current_mirakc_arib != env.latest_mirakc_arib ||
+            env.current_mirakc != env.latest_mirakc ||
+            env.current_v4l != env.latest_v4l
+        run: |
+          gh pr create -B main -H actions/mirakc-update \
+            --title 'Bump mirakc in /docker/mirakc' \
+            --body 'Bumps mirakc.'
+        env:
+          GH_TOKEN: ${{ github.token }}
