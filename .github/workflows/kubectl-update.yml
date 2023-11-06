@@ -39,3 +39,5 @@ jobs:
           gh pr create -B main -H actions/kubectl-${{ env.latest }} \
             --title 'Bump kubectl from ${{ env.current }} to ${{ env.latest }} in /docker/kubectl' \
             --body 'Bumps kubectl from `${{ env.current }}` to `${{ env.latest }}`.'
+        env:
+          GH_TOKEN: ${{ github.token }}
