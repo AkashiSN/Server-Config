@@ -63,13 +63,9 @@ terraform apply
 
 In wsl2
 ```bash
-sudo apt install qemu-utils cloud-image-utils
-
-qemu-img convert -p -f qcow2 jammy-server-cloudimg-amd64.img -O vhdx -o subformat=dynamic jammy-server-cloudimg-amd64.vhdx
-
 export hostname="k3s-hyperv"
 export user_name=
-export hashed_password=  # mkpasswd --method=SHA-512 --rounds=4096
+export hashed_password=  # mkpasswd --method=yescrypt (via whois)
 export github_id="AkashiSN"
 
 cat >user-data <<EOF
@@ -115,7 +111,7 @@ runcmd:
   - [ sh, -c, update-grub ]
 EOF
 
-export ipv4_address="172.16.254.10/24"
+export ipv4_address="172.16.254.40/24"
 export ipv4_default_gateway="172.16.254.1"
 
 cat >network-config <<EOF
@@ -138,7 +134,14 @@ ethernets:
         - 8.8.8.8
 EOF
 
+sudo apt install qemu-utils cloud-image-utils
+
 cloud-localds cloud-init.iso user-data -N network-config
+mv cloud-init.iso /mnt/c/ProgramData/Microsoft/Windows/Virtual\ Hard\ Disks/cloud-init.iso
+
+wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+qemu-img convert -p -f qcow2 jammy-server-cloudimg-amd64.img -O vhdx -o subformat=dynamic jammy-server-cloudimg-amd64.vhdx
+mv jammy-server-cloudimg-amd64.vhdx /mnt/c/ProgramData/Microsoft/Windows/Virtual\ Hard\ Disks/jammy-server-cloudimg-amd64.vhdx
 ```
 
 In windows powershell
