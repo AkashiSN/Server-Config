@@ -1,7 +1,7 @@
 variable "userdata" {
   type = object({
     user_name       = string
-    hashed_password = string # mkpasswd --method=SHA-512 --rounds=4096
+    hashed_password = string # mkpasswd --method=yescrypt (via whois)
   })
   sensitive = true
 }
