@@ -6,8 +6,6 @@ virtualmachines:
           ansible_host: k8s-control-plane
         k3s:
           ansible_host: k3s
-        microk8s:
-          ansible_host: microk8s
     worker:
       hosts:
         worker-node01:

@@ -11,10 +11,10 @@ $ sudo reboot
 $ watch kubectl get pod -A
 ```
 
-## Install k8s - microk8s
+## Install k8s - k3s
 
 ```bash
-ansible-playbook setup-microk8s.yml
+ansible-playbook setup-k3s.yml
 
 $ sudo reboot
 $ watch kubectl get pod -A
@@ -160,7 +160,7 @@ kubectl delete cert <certname>
 ```
 
 
-### Switch production to microk8s
+### Switch production to k3s
 
 ```
 interface Tunnel0.0
@@ -180,7 +180,7 @@ ip napt static 172.16.254.70 tcp 25565
 exit
 ```
 
-### Switch microk8s to production
+### Switch k3s to production
 
 ```
 interface Tunnel0.0

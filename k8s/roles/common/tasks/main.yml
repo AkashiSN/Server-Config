@@ -64,8 +64,7 @@
         file: helm.yml
 
 - name: For kubeadm
-  when: inventory_hostname != "microk8s" and
-        inventory_hostname != "k3s"
+  when: inventory_hostname != "k3s"
   become: true
   block:
     - name: Import iptables.yml
@@ -79,11 +78,6 @@
     - name: Import kubeadm.yml
       ansible.builtin.import_tasks:
         file: kubeadm.yml
-
-- name: For microk8s
-  ansible.builtin.import_tasks:
-    file: microk8s.yml
-  when: inventory_hostname == "microk8s"
 
 - name: For k3s
   ansible.builtin.import_tasks:

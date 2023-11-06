@@ -67,7 +67,7 @@ sudo apt install qemu-utils cloud-image-utils
 
 qemu-img convert -p -f qcow2 jammy-server-cloudimg-amd64.img -O vhdx -o subformat=dynamic jammy-server-cloudimg-amd64.vhdx
 
-export hostname="microk8s-hyperv"
+export hostname="k3s-hyperv"
 export user_name=
 export hashed_password=  # mkpasswd --method=SHA-512 --rounds=4096
 export github_id="AkashiSN"
@@ -143,7 +143,7 @@ cloud-localds cloud-init.iso user-data -N network-config
 
 In windows powershell
 ```powershell
-$vmName = "microk8s"
+$vmName = "k3s"
 $vhdx = "C:\ProgramData\Microsoft\Windows\Virtual Hard Disks\jammy-server-cloudimg-amd64.vhdx"
 $cloudInitIso = "C:\ProgramData\Microsoft\Windows\Virtual Hard Disks\cloud-init.iso"
 $vmPath = "C:\ProgramData\Microsoft\Windows\Hyper-V\"
