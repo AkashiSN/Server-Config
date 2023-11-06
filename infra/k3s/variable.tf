@@ -14,11 +14,11 @@ variable "github_id" {
 locals {
   k3s = {
     vmid                 = 115
-    memory               = 16384
-    cores                = 16
+    memory               = 8192
+    cores                = 6
     onboot               = false
-    proxmox_node         = "pve"
-    proxmox_address      = "172.16.254.4"
+    proxmox_node         = "pve01"
+    proxmox_address      = "172.16.254.5"
     hostname             = "k3s"
     ipv4_address         = "172.16.254.15/24"
     ipv4_default_gateway = "172.16.254.1"

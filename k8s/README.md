@@ -36,7 +36,7 @@ or
 kubectl apply -f https://raw.githubusercontent.com/AkashiSN/Server-Config/main/k8s/manifests/application.yml
 
 argocd app list
-argocd app sync ${app}
+argocd app sync <app>
 ```
 
 ### DNS
@@ -155,8 +155,9 @@ args: ["bash", "-c", "sleep infinity"]
 ### Renew certificate
 
 ```bash
-kubectl get cert,cr,order,challenge
+kubectl get cert,cr,order,challenge,secret
 kubectl delete cert <certname>
+kubectl delete secret <secretname>
 ```
 
 
