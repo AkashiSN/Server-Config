@@ -17,9 +17,3 @@
     atomic: true
     values: "{{ lookup('template', 'argo-cd-values.yml.j2') | from_yaml }}"
   become: false
-
-- name: Create the argo-cd/Application
-  kubernetes.core.k8s:
-    state: present
-    definition: "{{ lookup('file', 'manifests/application.yml') | from_yaml }}"
-  become: false
