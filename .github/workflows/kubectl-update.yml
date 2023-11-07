@@ -12,13 +12,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate token
-        id: generate_token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.AUTO_MERGE_BOT_APP_ID }}
-          private-key: ${{ secrets.AUTO_MERGE_BOT_PRIVATE_KEY }}
-
       - name: Check for Kubernetes updates
         id: check-update
         run: |
@@ -48,4 +41,4 @@ jobs:
             --title 'Bump kubectl from ${{ env.current }} to ${{ env.latest }} in /docker/kubectl' \
             --body 'Bumps kubectl from `${{ env.current }}` to `${{ env.latest }}`.'
         env:
-          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
