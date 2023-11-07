@@ -6,7 +6,7 @@ services:
   #
 
   mirakc:
-    image: ghcr.io/akashisn/mirakc@sha256:35e7c3079c9c298833902be78fb3a73881384cea2148be6b6b7efc775c134dd9
+    image: ghcr.io/akashisn/mirakc@sha256:49822e7a5bd44eae663aac5665789a673e50da030348f8d860fab70ccad3834f
     init: true
     profiles:
       - tv
@@ -54,7 +54,7 @@ services:
     restart: always
 
   epgstation:
-    image: ghcr.io/akashisn/epgstation@sha256:501c65f85f46e9b1af256b7cabce92d5cef209396f6cd432ffa747448af4a29b
+    image: ghcr.io/akashisn/epgstation@sha256:ce411e5f238dd9cf2e166617f6e174e16d31fd7f4d376b8aa1b957e5e7be92a8
     profiles:
       - tv
     volumes:
