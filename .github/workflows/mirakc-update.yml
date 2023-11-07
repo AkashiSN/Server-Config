@@ -12,6 +12,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Generate token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.UPDATE_BOT_APP_ID }}
+          private-key: ${{ secrets.UPDATE_BOT_PRIVATE_KEY }}
+
       - name: Check for mirakc-arib updates
         run: |
           CURRENT_MIRAKC_ARIB_VERSION=$(sed -n -r -e "s/.*MIRAKC_ARIB_VERSION=([^  ]*).*/\1/p" ./docker/mirakc/Dockerfile)
@@ -60,4 +67,4 @@ jobs:
             --title 'Bump mirakc in /docker/mirakc' \
             --body 'Bumps mirakc.'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
