@@ -1,10 +1,10 @@
 name: ums
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'docker/ums/**'
-      - '.github/workflows/ums.yml'
     branches:
       - main
 

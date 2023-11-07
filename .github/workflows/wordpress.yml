@@ -1,10 +1,10 @@
 name: wordpress
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'docker/wordpress/**'
-      - '.github/workflows/wordpress.yml'
     branches:
       - main
 

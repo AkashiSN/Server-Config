@@ -1,10 +1,10 @@
 name: kubectl
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'docker/kubectl/**'
-      - '.github/workflows/kubectl.yml'
     branches:
       - main
 

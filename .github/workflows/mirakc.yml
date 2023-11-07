@@ -1,10 +1,10 @@
 name: mirakc
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'docker/mirakc/**'
-      - '.github/workflows/mirakc.yml'
     branches:
       - main
 

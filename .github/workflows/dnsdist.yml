@@ -1,13 +1,12 @@
 name: dnsdist
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'docker/dnsdist/**'
-      - '.github/workflows/dnsdist.yml'
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:

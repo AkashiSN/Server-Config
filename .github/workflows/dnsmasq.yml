@@ -1,13 +1,12 @@
 name: dnsmasq
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'docker/dnsmasq/**'
-      - '.github/workflows/dnsmasq.yml'
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:

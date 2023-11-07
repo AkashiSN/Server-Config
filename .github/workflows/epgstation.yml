@@ -1,10 +1,10 @@
 name: epgstation
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'docker/epgstation/**'
-      - '.github/workflows/epgstation.yml'
     branches:
       - main
 

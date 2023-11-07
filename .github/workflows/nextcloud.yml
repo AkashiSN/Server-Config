@@ -1,10 +1,10 @@
 name: nextcloud
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'docker/nextcloud/**'
-      - '.github/workflows/nextcloud.yml'
     branches:
       - main
 
