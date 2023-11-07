@@ -9,6 +9,7 @@ ansible-playbook setup-cluster.yml
 
 $ sudo reboot
 $ watch kubectl get pod -A
+$ kubectl apply -f manifests/application.yml
 ```
 
 ## Install k8s - k3s
@@ -18,6 +19,7 @@ ansible-playbook setup-k3s.yml
 
 $ sudo reboot
 $ watch kubectl get pod -A
+$ kubectl apply -f manifests/application.yml
 ```
 
 ## Before shutdown
@@ -34,9 +36,6 @@ kubectl delete -f https://raw.githubusercontent.com/AkashiSN/Server-Config/main/
 kubectl apply -f manifests/application.yml
 or
 kubectl apply -f https://raw.githubusercontent.com/AkashiSN/Server-Config/main/k8s/manifests/application.yml
-
-argocd app list
-argocd app sync <app>
 ```
 
 ### DNS
