@@ -6,7 +6,7 @@ data "template_file" "cloud_init_k8s_control_plane_userdata" {
     hostname        = local.k8s_control_plane.hostname
     user_name       = var.userdata.user_name
     hashed_password = var.userdata.hashed_password
-    github_id       = var.github_id
+    github_id       = var.userdata.github_id
   }
 }
 
@@ -16,6 +16,7 @@ data "template_file" "cloud_init_k8s_control_plane_network" {
 
   vars = {
     ipv4_address          = local.k8s_control_plane.ipv4_address
+    ipv4_prefix           = local.k8s_control_plane.ipv4_prefix
     ipv4_default_gateway  = local.k8s_control_plane.ipv4_default_gateway
     ipv6_address_token    = local.k8s_control_plane.ipv6_address_token
     nas_interface_address = ""
@@ -37,10 +38,10 @@ resource "local_file" "cloud_init_k8s_control_plane_network" {
 # Transfer the file to the Proxmox Host
 resource "null_resource" "cloud_init_k8s_control_plane_userdata" {
   connection {
-    type        = "ssh"
-    user        = "root"
-    private_key = file("~/.ssh/id_ed25519")
-    host        = local.k8s_control_plane.proxmox_address
+    type  = "ssh"
+    user  = "root"
+    agent = true
+    host  = local.k8s_control_plane.proxmox_address
   }
 
   provisioner "file" {
@@ -52,10 +53,10 @@ resource "null_resource" "cloud_init_k8s_control_plane_userdata" {
 # Transfer the file to the Proxmox Host
 resource "null_resource" "cloud_init_k8s_control_plane_network" {
   connection {
-    type        = "ssh"
-    user        = "root"
-    private_key = file("~/.ssh/id_ed25519")
-    host        = local.k8s_control_plane.proxmox_address
+    type  = "ssh"
+    user  = "root"
+    agent = true
+    host  = local.k8s_control_plane.proxmox_address
   }
 
   provisioner "file" {
@@ -64,7 +65,7 @@ resource "null_resource" "cloud_init_k8s_control_plane_network" {
   }
 }
 
-resource "proxmox_vm_qemu" "vm-k8s_control_plane" {
+resource "proxmox_vm_qemu" "vm_k8s_control_plane" {
   # Wait for the cloud-config file to exist
   depends_on = [
     null_resource.cloud_init_k8s_control_plane_userdata,
@@ -87,8 +88,8 @@ resource "proxmox_vm_qemu" "vm-k8s_control_plane" {
   agent   = 1
   onboot  = local.k8s_control_plane.onboot
 
-  boot     = "order=scsi0"
-  scsihw   = "virtio-scsi-pci"
+  boot   = "order=scsi0"
+  scsihw = "virtio-scsi-pci"
 
   disk {
     size    = "128G"
@@ -113,6 +114,24 @@ resource "proxmox_vm_qemu" "vm-k8s_control_plane" {
   lifecycle {
     ignore_changes = [
       network
+    ]
+  }
+}
+
+# Wait for cloud-init completed, reboot vm
+resource "null_resource" "vm_k8s_control_plane_reboot" {
+  depends_on = [proxmox_vm_qemu.vm_k8s_control_plane]
+
+  provisioner "remote-exec" {
+    connection {
+      type  = "ssh"
+      user  = var.userdata.user_name
+      agent = true
+      host  = local.k8s_control_plane.ipv4_address
+    }
+    inline = [
+      "sudo cloud-init status --wait",
+      "sudo shutdown -r +0"
     ]
   }
 }

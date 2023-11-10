@@ -1,14 +1,19 @@
-variable "userdata" {
+variable "proxmox" {
   type = object({
-    user_name       = string
-    hashed_password = string # mkpasswd --method=yescrypt (via whois)
+    api_url      = string
+    token_id     = string
+    token_secret = string
   })
   sensitive = true
 }
 
-variable "github_id" {
-  type    = string
-  default = "AkashiSN"
+variable "userdata" {
+  type = object({
+    user_name       = string
+    hashed_password = string # mkpasswd --method=yescrypt (via whois)
+    github_id       = string
+  })
+  sensitive = true
 }
 
 locals {
@@ -20,7 +25,8 @@ locals {
     proxmox_node         = "pve01"
     proxmox_address      = "172.16.254.5"
     hostname             = "k3s"
-    ipv4_address         = "172.16.254.15/24"
+    ipv4_address         = "172.16.254.15"
+    ipv4_prefix          = "24"
     ipv4_default_gateway = "172.16.254.1"
   }
 }

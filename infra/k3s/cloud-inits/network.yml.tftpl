@@ -7,7 +7,7 @@ ethernets:
     accept-ra: false
     link-local: [ ]
     addresses:
-      - ${ipv4_address}
+      - ${ipv4_address}/${ipv4_prefix}
     routes:
       - to: default
         via: ${ipv4_default_gateway}
