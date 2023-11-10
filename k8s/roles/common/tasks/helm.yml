@@ -17,4 +17,11 @@
   register: helm_diff_result
   ignore_errors: true
   changed_when: "'helm-diff installed into' in helm_diff_result.stdout"
-  failed_when: "'Error: plugin already exists' in helm_diff_result.stderr"
+
+- name: Upgrade helm diff
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      helm plugin upgrade diff
+    executable: /bin/bash
+  changed_when: "'helm-diff installed into' in helm_diff_result.stdout"

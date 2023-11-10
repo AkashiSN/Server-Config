@@ -31,7 +31,7 @@ argocd_fqdn: "{{ vault_argocd_host }}.{{ domain }}"
 argocd_grpc_fqdn: "grpc.{{ argocd_fqdn }}"
 argocd_client_secret: "{{ vault_argocd_client_secret }}"
 argocd_webhook_github_secret: "{{ vault_argocd_webhook_github_secret }}"
-argocd_admin_password: "{{ vault_argocd_admin_password }}"
+argocd_admin_password: "{{ vault_argocd_admin_password }}" # htpasswd -nBC 12 "" | tr -d ':\n' | sed 's/$2y/$2a/'
 # hashicorp vault
 hashicorp_vault_client_id: "{{ vault_hashicorp_vault_client_id }}"
 hashicorp_vault_client_secret: "{{ vault_hashicorp_vault_client_secret }}"

@@ -2,40 +2,23 @@
 ## Environment
 - Ubuntu 22.04
 
-## Install k8s - kubeadm
+## Install
 
 ```bash
-ansible-playbook setup-cluster.yml
-
-$ sudo reboot
-$ watch kubectl get pod -A
-$ kubectl apply -f manifests/application.yml
-```
-
-## Install k8s - k3s
-
-```bash
-ansible-playbook setup-k3s.yml
-
-$ sudo reboot
-$ watch kubectl get pod -A
-$ kubectl apply -f manifests/application.yml
+make k8s or k3s
+make app-k8s or app-k3s
 ```
 
 ## Before shutdown
 
 ```bash
-kubectl delete -f manifests/application.yml
-or
-kubectl delete -f https://raw.githubusercontent.com/AkashiSN/Server-Config/main/k8s/manifests/application.yml
+make delete-app-k3s or make delete-app-k8s
 ```
 
 ## After power on
 
 ```bash
-kubectl apply -f manifests/application.yml
-or
-kubectl apply -f https://raw.githubusercontent.com/AkashiSN/Server-Config/main/k8s/manifests/application.yml
+make app-k8s or app-k3s
 ```
 
 ### DNS

@@ -14,17 +14,5 @@
     update_repo_cache: true
     wait: false
     atomic: true
-    release_values:
-      extraArgs:
-        provider: oidc
-        provider-display-name: dex
-        client-id: "oauth2-proxy"
-        client-secret: "{{ oauth2_proxy_client_secret }}"
-        whitelist-domain: ".{{ domain }}"
-        cookie-domain: ".{{ domain }}"
-        redirect-url: "https://{{ auth_fqdn }}/oauth2/callback"
-        oidc-issuer-url: "https://{{ auth_fqdn }}/dex"
-        cookie-secure: "true"
-      ingress:
-        enabled: false
+    values: "{{ lookup('template', 'oauth2-proxy-values.yml.j2') | from_yaml }}"
   become: false

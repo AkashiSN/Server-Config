@@ -1,0 +1,19 @@
+hostAlias:
+  enabled: true
+  ip: "{{ nginx_ingress_lb_v4_addr }}"
+  hostname: "{{ auth_fqdn }}"
+extraArgs:
+  provider: oidc
+  provider-display-name: dex
+  client-id: "oauth2-proxy"
+  client-secret: "{{ oauth2_proxy_client_secret }}"
+  whitelist-domain: ".{{ domain }}"
+  cookie-domain: ".{{ domain }}"
+  redirect-url: "https://{{ auth_fqdn }}/oauth2/callback"
+  oidc-issuer-url: "https://{{ auth_fqdn }}/dex"
+  cookie-secure: "true"
+{% if target_env == "staging" %}
+  ssl-insecure-skip-verify: "true"
+{% endif %}
+ingress:
+  enabled: false
