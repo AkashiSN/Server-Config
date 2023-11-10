@@ -8,21 +8,8 @@ pvesm set local --content vztmpl,snippets,iso,backup
 ## Create template vm
 
 ```bash
-wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
-
-vmid=9000
-
-qm create $vmid --name ubuntu2204-server-template --agent 1 --ostype l26 --memory 2048 --cpu host --cores 4 --net0 virtio,bridge=vmbr0
-
-qm importdisk $vmid jammy-server-cloudimg-amd64.img local-zfs
-
-qm set $vmid --scsihw virtio-scsi-pci --scsi0 local-zfs:vm-$vmid-disk-0,ssd=1
-
-qm set $vmid --ide2 local-zfs:cloudinit
-
-qm set $vmid --boot c --bootdisk scsi0
-
-qm template $vmid
+make template
+make update-template
 ```
 
 ## Create proxmox user for terraform
@@ -36,27 +23,11 @@ pveum aclmod / -user terraform-prov@pve -role TerraformProv
 
 pvesh create /access/users/terraform-prov@pve/token/terraform --privsep 0
 ```
-
-`terraform.tfvars`
-```t
-proxmox_api_url      = "https://{{pve_host}}/api2/json"
-proxmox_token_id     = "terraform-prov@pve!terraform"
-proxmox_token_secret = ""
-
-userdata = {
-  user_name       = ""
-  hashed_password = "" # mkpasswd --method=SHA-512 --rounds=4096
-}
-```
-
-## Plan and Apply
-
-Make sure you can login to the root of the pve node with `~/.ssh/id_ed25519`.
-Don't forget to set `PermitRootLogin prohibit-password` in `/etc/ssh/sshd_config`.
+## Create VM
 
 ```bash
-terraform plan
-terraform apply
+cd k3s or k8s
+make vm
 ```
 
 # for Hyper-V (Windows 11 Pro)
