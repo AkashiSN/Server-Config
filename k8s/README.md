@@ -131,7 +131,8 @@ kubeadm upgrade apply VERSION
 ## Debug
 
 ```yml
-args: ["bash", "-c", "sleep infinity"]
+image: busybox
+command: ["/bin/sh", "-c", "sleep infinity"]
 ```
 
 ### Renew certificate

@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: overleaf-mongodb
+  name: overleaf-mongodb
+  namespace: overleaf
+spec:
+  replicas: 1
+  serviceName: overleaf-mongodb
+  selector:
+    matchLabels:
+      app: overleaf-mongodb
+  template:
+    metadata:
+      labels:
+        app: overleaf-mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: bitnami/mongodb:6.0.11
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 27017
+              name: mongodb
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: root
+            - name: MONGODB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: overleaf-secrets
+                  key: overleaf_mongodb_root_password
+            - name: MONGODB_USERNAME
+              value: overleaf
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: overleaf-secrets
+                  key: overleaf_mongodb_user_password
+            - name: MONGODB_DATABASE
+              value: overleaf
+            - name: MONGODB_ADVERTISED_HOSTNAME
+              value: overleaf-mongodb
+            - name: MONGODB_REPLICA_SET_MODE
+              value: primary
+            - name: MONGODB_REPLICA_SET_NAME
+              value: rs0
+            - name: MONGODB_REPLICA_SET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: overleaf-secrets
+                  key: overleaf_mongodb_key
+          volumeMounts:
+            - name: db
+              mountPath: /data/db
+            - name: configdb
+              mountPath: /data/configdb
+            - name: secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 100m
+              memory: 500Mi
+      volumes:
+        - name: secrets
+          secret:
+            secretName: overleaf-secrets
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: db
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 100Gi
+    - metadata:
+        name: configdb
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: overleaf-mongodb
+  name: overleaf-mongodb
+  namespace: overleaf
+spec:
+  type: ClusterIP
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: mongodb
+  selector:
+    app: overleaf-mongodb

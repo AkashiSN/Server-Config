@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: overleaf-env
+  namespace: overleaf
+data:
+  TZ: "Asia/Tokyo"
+  SHARELATEX_APP_NAME: Overleaf Community Edition
+  SHARELATEX_REDIS_HOST: overleaf-redis
+  SHARELATEX_BEHIND_PROXY: 'true'
+  SHARELATEX_SECURE_COOKIE: '1'
+  REDIS_HOST: overleaf-redis
+  ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
+  ENABLE_CONVERSIONS: 'true'
+  EMAIL_CONFIRMATION_DISABLED: 'true'
+  TEXMFVAR: /var/lib/sharelatex/tmp/texmf-var
+  SHARELATEX_SITE_URL: https://tex.akashisn.info
+  SHARELATEX_NAV_TITLE: Overleaf Community Edition
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: overleaf
+  name: overleaf
+  namespace: overleaf
+spec:
+  replicas: 1
+  serviceName: overleaf
+  selector:
+    matchLabels:
+      app: overleaf
+  template:
+    metadata:
+      labels:
+        app: overleaf
+    spec:
+      containers:
+        - name: overleaf
+          image: sharelatex/sharelatex:4.2.0
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: overleaf-env
+          env:
+            - name: SHARELATEX_MONGO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: overleaf-secrets
+                  key: overleaf_mongodb_uri
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/sharelatex
+            - name: secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 2000m
+              memory: 1500Mi
+            limits:
+              cpu: 4000m
+              memory: 3000Mi
+      volumes:
+        - name: secrets
+          secret:
+            secretName: overleaf-secrets
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: overleaf
+  name: overleaf
+  namespace: overleaf
+spec:
+  ports:
+    - name: overleaf
+      port: 80
+      targetPort: 80
+  selector:
+    app: overleaf
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-overleaf
+  namespace: overleaf
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - tex.akashisn.info
+      secretName: overleaf-cert
+  rules:
+    - host: tex.akashisn.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: overleaf
+                port:
+                  name: overleaf
