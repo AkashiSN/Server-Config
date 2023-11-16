@@ -63,6 +63,12 @@ kubectl exec -it -n wordpress wordpress-0 -c wordpress -- bash
 kubectl exec -it -n wordpress wordpress-0 -c wordpress -- /bin/sh -c 'su www-data --shel=/bin/sh --command="wp <command>"'
 ```
 
+### Overleaf
+
+```bash
+kubectl exec -it -n overleaf overleaf-0 -- /bin/bash -c "grunt user:create-admin --email=<email>"
+```
+
 ### Buiildkit
 
 ```bash

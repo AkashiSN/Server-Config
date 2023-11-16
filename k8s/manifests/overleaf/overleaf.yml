@@ -6,16 +6,33 @@ metadata:
 data:
   TZ: "Asia/Tokyo"
   SHARELATEX_APP_NAME: Overleaf Community Edition
-  SHARELATEX_REDIS_HOST: overleaf-redis
   SHARELATEX_BEHIND_PROXY: 'true'
   SHARELATEX_SECURE_COOKIE: '1'
+  SHARELATEX_REDIS_HOST: overleaf-redis
   REDIS_HOST: overleaf-redis
+  SHARELATEX_REDIS_PORT: '6379'
+  REDIS_PORT: '6379'
   ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
   ENABLE_CONVERSIONS: 'true'
   EMAIL_CONFIRMATION_DISABLED: 'true'
   TEXMFVAR: /var/lib/sharelatex/tmp/texmf-var
   SHARELATEX_SITE_URL: https://tex.akashisn.info
   SHARELATEX_NAV_TITLE: Overleaf Community Edition
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: overleaf-init
+  namespace: overleaf
+data:
+  init.sh: |
+    #!/bin/sh
+    set -eu
+
+    # https://github.com/overleaf/overleaf/issues/1146
+    sed -i 's/127.0.0.1/localhost/g' /etc/nginx/sites-enabled/sharelatex.conf
+
+    exec "$@"
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -39,10 +56,18 @@ spec:
         - name: overleaf
           image: sharelatex/sharelatex:4.2.0
           imagePullPolicy: IfNotPresent
+          command:
+            - init.sh
+            - /sbin/my_init
           envFrom:
             - configMapRef:
                 name: overleaf-env
           env:
+            - name: SHARELATEX_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: common-secrets
+                  key: contact_email_address
             - name: SHARELATEX_MONGO_URL
               valueFrom:
                 secretKeyRef:
@@ -53,6 +78,10 @@ spec:
               mountPath: /var/lib/sharelatex
             - name: secrets
               mountPath: /secrets
+            - name: overleaf-init
+              mountPath: /usr/local/bin/init.sh
+              subPath: init.sh
+              readOnly: true
           resources:
             requests:
               cpu: 2000m
@@ -64,6 +93,10 @@ spec:
         - name: secrets
           secret:
             secretName: overleaf-secrets
+        - name: overleaf-init
+          configMap:
+            defaultMode: 504
+            name: overleaf-init
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: Delete
   volumeClaimTemplates:
