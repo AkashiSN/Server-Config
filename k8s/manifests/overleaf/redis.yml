@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: overleaf-redis
+  namespace: overleaf
+spec:
+  selector:
+    matchLabels:
+      app: overleaf-redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: overleaf-redis
+    spec:
+      containers:
+        - name: overleaf-redis
+          image: redis:7.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              name: overleaf-redis
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: overleaf-redis
+  name: overleaf-redis
+  namespace: overleaf
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      name: overleaf-redis
+  selector:
+    app: overleaf-redis
