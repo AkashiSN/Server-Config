@@ -20,7 +20,7 @@ EOT
 
 
 FROM buildpack-base AS mirakc-arib-build
-ENV MIRAKC_ARIB_VERSION=0.21.14
+ENV MIRAKC_ARIB_VERSION=0.21.15
 RUN <<EOT
 git clone --recursive https://github.com/mirakc/mirakc-arib.git -b ${MIRAKC_ARIB_VERSION} --depth=1 /tmp/mirakc-arib
 cd /tmp/mirakc-arib
