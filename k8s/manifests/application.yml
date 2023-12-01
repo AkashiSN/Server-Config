@@ -11,7 +11,6 @@ spec:
           # - name: minecraft
           - name: nextcloud
           - name: wordpress
-          - name: overleaf
   template:
     metadata:
       name: "{{name}}"

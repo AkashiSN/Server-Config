@@ -39,6 +39,15 @@
     update_cache: true
   become: true
 
+- name: Hold cri-o and cri-o-runc packages
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - cri-o
+    - cri-o-runc
+  become: true
+
 - name: Update ulimits in crio.conf
   ansible.builtin.replace:
     path: /etc/crio/crio.conf

@@ -91,6 +91,26 @@ systemctl restart pveproxy
 rm /tmp/dns-cf-token
 ```
 
+## Fix e1000e Detected Hardware Unit Hang
+https://gist.github.com/brunneis/0c27411a8028610117fefbe5fb669d10
+
+```bash
+cat >/usr/lib/systemd/system/fix-e1000e@.service << EOF
+[Unit]
+Description="Fix for %i ethernet hang errors"
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/ethtool -K %i tso off gso off
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now fix-e1000e@eno1
+```
+
 ## Troubleshooting
 
 ### RRDC update error /var/lib/rrdcached/db/pve2-node/pve: -1
