@@ -98,7 +98,7 @@ spec:
     name: musics-nextcloud-0
   nfs:
     server: 172.16.255.1
-    path: /mnt/hdd/musics
+    path: /mnt/hdd/nfs/musics
   mountOptions:
     - nfsvers=4.2
 ---
@@ -118,7 +118,7 @@ spec:
     name: musics-aac-nextcloud-0
   nfs:
     server: 172.16.255.1
-    path: /mnt/hdd/musics-aac
+    path: /mnt/hdd/nfs/musics-aac
   mountOptions:
     - nfsvers=4.2
 ---
@@ -138,6 +138,6 @@ spec:
     name: musics-opus-nextcloud-0
   nfs:
     server: 172.16.255.1
-    path: /mnt/hdd/musics-opus
+    path: /mnt/hdd/nfs/musics-opus
   mountOptions:
     - nfsvers=4.2
