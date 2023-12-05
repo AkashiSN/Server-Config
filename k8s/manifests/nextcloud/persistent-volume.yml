@@ -145,7 +145,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nextcloud-musics-opus-pv
+  name: nextcloud-videos-pv
 spec:
   capacity:
     storage: 2Ti
