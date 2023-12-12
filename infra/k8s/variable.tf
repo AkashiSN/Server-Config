@@ -33,6 +33,7 @@ locals {
   worker_node_01 = {
     vmid                  = 125
     memory                = 32768
+    minimum_memory        = 16384
     cores                 = 16
     onboot                = true
     proxmox_node          = "pve"

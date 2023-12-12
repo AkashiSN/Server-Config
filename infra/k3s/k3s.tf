@@ -81,6 +81,7 @@ resource "proxmox_vm_qemu" "vm_k3s" {
   cicustom = "user=local:snippets/cloud_init_k3s_userdata.yml,network=local:snippets/cloud_init_k3s_network.yml"
 
   memory  = local.k3s.memory
+  balloon = local.k3s.minimum_memory
   cores   = local.k3s.cores
   qemu_os = "l26"
   agent   = 1

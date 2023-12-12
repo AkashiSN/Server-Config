@@ -19,7 +19,8 @@ variable "userdata" {
 locals {
   k3s = {
     vmid                 = 115
-    memory               = 8192
+    memory               = 16384
+    minimum_memory       = 8192
     cores                = 6
     onboot               = false
     proxmox_node         = "pve01"
