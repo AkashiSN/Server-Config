@@ -10,6 +10,17 @@
 apt install iptables-persistent -y
 ```
 
+## ZFS ARC
+```bash
+# https://github.com/openzfs/zfs/issues/12810
+
+cat >/etc/modprobe.d/zfs.conf << EOF
+options zfs zfs_arc_shrinker_limit=0
+EOF
+
+update-initramfs -u -k all
+```
+
 ## Pcie Passthrough
 ```bash
 # https://wiki.archlinux.org/title/Intel_GVT-g
@@ -23,14 +34,14 @@ proxmox-boot-tool refresh
 cat >/etc/modules-load.d/kvm-gvt-g.conf << EOF
 kvmgt
 vfio_iommu_type1
-vfio_mdev
+mdev
 EOF
 
 cat >/etc/modules-load.d/pass-through.conf << EOF
 vfio
 vfio_iommu_type1
 vfio_pci
-vfio_virqfd
+# vfio_virqfd # not needed if on kernel 6.2 or newer
 EOF
 
 update-initramfs -u -k all
@@ -41,6 +52,8 @@ reboot
 ```
 
 ```bash
+$ systemctl status systemd-modules-load.service
+
 $ dmesg | grep -E "IOMMU|enabled"
 DMAR: IOMMU enabled
 
