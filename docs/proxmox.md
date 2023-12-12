@@ -10,12 +10,19 @@
 apt install iptables-persistent -y
 ```
 
-## ZFS ARC
+## Kernel module config
 ```bash
+# zfs arc
 # https://github.com/openzfs/zfs/issues/12810
 
 cat >/etc/modprobe.d/zfs.conf << EOF
 options zfs zfs_arc_shrinker_limit=0
+EOF
+
+# kvm msrs
+cat >/etc/modprobe.d/kvm.conf << EOF
+options kvm ignore_msrs=1
+options kvm report_ignored_msrs=0
 EOF
 
 update-initramfs -u -k all
@@ -41,8 +48,8 @@ cat >/etc/modules-load.d/pass-through.conf << EOF
 vfio
 vfio_iommu_type1
 vfio_pci
-# vfio_virqfd # not needed if on kernel 6.2 or newer
 EOF
+# vfio_virqfd # not needed if on kernel 6.2 or newer
 
 update-initramfs -u -k all
 ```
