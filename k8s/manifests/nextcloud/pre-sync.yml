@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: nextcloud
-          image: ghcr.io/akashisn/nextcloud@sha256:be184bb8949420802b4e20aff8ec39bfbe02cb078ae7ca0140bb65e75b2af677
+          image: ghcr.io/akashisn/nextcloud@sha256:c7e06ad98d5f82f5c7f7d9d69f889b16190218fcb17f5df352f34e82c6c531e9
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
       restartPolicy: Never
