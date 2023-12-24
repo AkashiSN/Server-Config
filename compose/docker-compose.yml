@@ -6,7 +6,7 @@ services:
   #
 
   mirakc:
-    image: ghcr.io/akashisn/mirakc@sha256:49822e7a5bd44eae663aac5665789a673e50da030348f8d860fab70ccad3834f
+    image: ghcr.io/akashisn/mirakc@sha256:a55199342462ae410c2e3c03515c62379ce40011c0189450d7261a0be6797107
     init: true
     profiles:
       - tv
