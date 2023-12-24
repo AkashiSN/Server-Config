@@ -9,45 +9,75 @@ server:
 
 # from scan_channel.sh
 channels:
-  - name: 'ＮＨＫＥテレ１大阪'
+  - name: 'Ｊ：ＣＯＭテレビ'
     type: 'GR'
     channel: '13'
     extra-args: ''
     disabled: false
 
-  - name: '読売テレビ１'
-    type: 'GR'
-    channel: '14'
-    extra-args: ''
-    disabled: false
-
-  - name: 'ＡＢＣテレビ１'
+  - name: 'テレ玉１'
     type: 'GR'
     channel: '15'
     extra-args: ''
     disabled: false
 
-  - name: 'ＭＢＳ毎日放送'
-    type: 'GR'
-    channel: '16'
-    extra-args: ''
-    disabled: false
-
-  - name: '関西テレビ１'
-    type: 'GR'
-    channel: '17'
-    extra-args: ''
-    disabled: false
-
-  - name: 'テレビ大阪１'
+  - name: 'ｔｖｋ１'
     type: 'GR'
     channel: '18'
     extra-args: ''
     disabled: false
 
-  - name: 'ＮＨＫ総合１・大阪'
+  - name: 'Ｊ：ＣＯＭチャンネル'
+    type: 'GR'
+    channel: '19'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＴＯＫＹＯ　ＭＸ１'
+    type: 'GR'
+    channel: '20'
+    extra-args: ''
+    disabled: false
+
+  - name: 'フジテレビ'
+    type: 'GR'
+    channel: '21'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＴＢＳ１'
+    type: 'GR'
+    channel: '22'
+    extra-args: ''
+    disabled: false
+
+  - name: 'テレビ東京１'
+    type: 'GR'
+    channel: '23'
+    extra-args: ''
+    disabled: false
+
+  - name: 'テレビ朝日'
     type: 'GR'
     channel: '24'
+    extra-args: ''
+    disabled: false
+
+  - name: '日テレ１'
+    type: 'GR'
+    channel: '25'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＮＨＫＥテレ１東京'
+    type: 'GR'
+    channel: '26'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＮＨＫ総合１・東京'
+    type: 'GR'
+    channel: '27'
     extra-args: ''
     disabled: false
 
@@ -75,7 +105,7 @@ channels:
     extra-args: ''
     disabled: false
 
-  - name: 'ＮＨＫＢＳプレミアム'
+  - name: 'ＮＨＫ'
     type: 'BS'
     channel: 'BS03_1'
     extra-args: ''
@@ -186,6 +216,30 @@ channels:
   - name: 'グリーンチャンネル'
     type: 'BS'
     channel: 'BS21_2'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ディズニーｃｈ'
+    type: 'BS'
+    channel: 'BS23_0'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳよしもと'
+    type: 'BS'
+    channel: 'BS23_1'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳＪａｐａｎｅｘｔ'
+    type: 'BS'
+    channel: 'BS23_2'
+    extra-args: ''
+    disabled: false
+
+  - name: 'ＢＳ松竹東急'
+    type: 'BS'
+    channel: 'BS23_3'
     extra-args: ''
     disabled: false
 
