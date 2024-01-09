@@ -35,75 +35,100 @@ resource "local_file" "cloud_init_k8s_control_plane_network" {
   filename = "${path.module}/.tmp/cloud_init_k8s_control_plane_network.yml"
 }
 
-# Transfer the file to the Proxmox Host
-resource "null_resource" "cloud_init_k8s_control_plane_userdata" {
-  connection {
-    type  = "ssh"
-    user  = "root"
-    agent = true
-    host  = local.k8s_control_plane.proxmox_address
-  }
+# Transfer the cloud-init userdata file to the Proxmox Host
+resource "proxmox_virtual_environment_file" "cloud_init_k8s_control_plane_userdata" {
+  content_type = "snippets"
+  datastore_id = "local"
+  overwrite    = true
+  node_name    = local.k8s_control_plane.proxmox_node
 
-  provisioner "file" {
-    source      = local_file.cloud_init_k8s_control_plane_userdata.filename
-    destination = "/var/lib/vz/snippets/cloud_init_k8s_control_plane_userdata.yml"
+  source_file {
+    path      = local_file.cloud_init_k8s_control_plane_userdata.filename
+    file_name = "cloud_init_k8s_control_plane_userdata.yml"
   }
 }
 
-# Transfer the file to the Proxmox Host
-resource "null_resource" "cloud_init_k8s_control_plane_network" {
-  connection {
-    type  = "ssh"
-    user  = "root"
-    agent = true
-    host  = local.k8s_control_plane.proxmox_address
-  }
+# Transfer the cloud-init network file to the Proxmox Host
+resource "proxmox_virtual_environment_file" "cloud_init_k8s_control_plane_network" {
+  content_type = "snippets"
+  datastore_id = "local"
+  overwrite    = true
+  node_name    = local.k8s_control_plane.proxmox_node
 
-  provisioner "file" {
-    source      = local_file.cloud_init_k8s_control_plane_network.filename
-    destination = "/var/lib/vz/snippets/cloud_init_k8s_control_plane_network.yml"
+  source_file {
+    path      = local_file.cloud_init_k8s_control_plane_network.filename
+    file_name = "cloud_init_k8s_control_plane_network.yml"
   }
 }
 
-resource "proxmox_vm_qemu" "vm_k8s_control_plane" {
+resource "proxmox_virtual_environment_vm" "vm_k8s_control_plane" {
   # Wait for the cloud-config file to exist
   depends_on = [
-    null_resource.cloud_init_k8s_control_plane_userdata,
-    null_resource.cloud_init_k8s_control_plane_network
+    proxmox_virtual_environment_file.cloud_init_k8s_control_plane_userdata,
+    proxmox_virtual_environment_file.cloud_init_k8s_control_plane_network
   ]
 
-  vmid        = local.k8s_control_plane.vmid
-  name        = local.k8s_control_plane.hostname
-  target_node = local.k8s_control_plane.proxmox_node
+  vm_id     = local.k8s_control_plane.vmid
+  name      = local.k8s_control_plane.hostname
+  node_name = local.k8s_control_plane.proxmox_node
 
-  clone      = "ubuntu2204-server-template"
-  full_clone = true
-  os_type    = "cloud-init"
+  started = true
+  on_boot = local.k8s_control_plane.onboot
 
-  cicustom = "user=local:snippets/cloud_init_k8s_control_plane_userdata.yml,network=local:snippets/cloud_init_k8s_control_plane_network.yml"
-
-  memory  = local.k8s_control_plane.memory
-  cores   = local.k8s_control_plane.cores
-  qemu_os = "l26"
-  agent   = 1
-  onboot  = local.k8s_control_plane.onboot
-
-  boot   = "order=scsi0"
-  scsihw = "virtio-scsi-pci"
-
-  disk {
-    size    = "128G"
-    type    = "scsi"
-    storage = "local-zfs"
-    ssd     = 1
+  startup {
+    order = "3"
   }
 
-  network {
+  agent {
+    enabled = true
+  }
+
+  clone {
+    vm_id = local.k8s_control_plane.template_vmid
+    full  = true
+  }
+
+  operating_system {
+    type = "l26"
+  }
+
+  initialization {
+    datastore_id         = "local-zfs"
+    interface            = "ide2"
+    user_data_file_id    = proxmox_virtual_environment_file.cloud_init_k8s_control_plane_userdata.id
+    network_data_file_id = proxmox_virtual_environment_file.cloud_init_k8s_control_plane_network.id
+  }
+
+  memory {
+    dedicated = local.k8s_control_plane.memory
+    floating  = local.k8s_control_plane.memory
+  }
+  cpu {
+    cores = local.k8s_control_plane.cores
+    type  = "host"
+    units = 1024
+  }
+
+  boot_order = [
+    "scsi0"
+  ]
+
+  scsi_hardware = "virtio-scsi-pci"
+
+  disk {
+    datastore_id = "local-zfs"
+    file_format  = "raw"
+    interface    = "scsi0"
+    size         = 128
+    ssd          = true
+  }
+
+  network_device {
     model  = "virtio"
     bridge = "vmbr0"
   }
 
-  network {
+  network_device {
     model  = "virtio"
     bridge = "vmbr1"
   }
@@ -113,14 +138,14 @@ resource "proxmox_vm_qemu" "vm_k8s_control_plane" {
   ## TF to think this needs to be rebuilt on every apply
   lifecycle {
     ignore_changes = [
-      network
+      network_device
     ]
   }
 }
 
 # Wait for cloud-init completed, reboot vm
 resource "null_resource" "vm_k8s_control_plane_reboot" {
-  depends_on = [proxmox_vm_qemu.vm_k8s_control_plane]
+  depends_on = [proxmox_virtual_environment_vm.vm_k8s_control_plane]
 
   provisioner "remote-exec" {
     connection {

@@ -15,13 +15,14 @@ make update-template
 ## Create proxmox user for terraform
 
 ```bash
-pveum role add TerraformProv -privs "SDN.Use Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
 
-pveum user add terraform-prov@pve --password <password>
+pveum role add Terraform -privs "Datastore.Allocate Datastore.AllocateSpace Datastore.AllocateTemplate Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify SDN.Use VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt User.Modify"
 
-pveum aclmod / -user terraform-prov@pve -role TerraformProv
+pveum user add terraform@pve
 
-pvesh create /access/users/terraform-prov@pve/token/terraform --privsep 0
+pveum aclmod / -user terraform@pve -role Terraform
+
+pvesh create /access/users/terraform@pve/token/terraform --privsep 0
 ```
 ## Create VM
 

@@ -1,8 +1,9 @@
 variable "proxmox" {
   type = object({
-    api_url      = string
-    token_id     = string
-    token_secret = string
+    endpoint  = string
+    user      = string
+    pass      = string
+    api_token = string
   })
   sensitive = true
 }
@@ -19,6 +20,7 @@ variable "userdata" {
 locals {
   k8s_control_plane = {
     vmid                 = 120
+    template_vmid        = 9001
     memory               = 8192
     cores                = 6
     onboot               = true
@@ -32,8 +34,8 @@ locals {
   }
   worker_node_01 = {
     vmid                  = 125
+    template_vmid         = 9000
     memory                = 32768
-    minimum_memory        = 16384
     cores                 = 16
     onboot                = true
     proxmox_node          = "pve"
