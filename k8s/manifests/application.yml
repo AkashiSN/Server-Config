@@ -32,14 +32,11 @@ spec:
         #         - op: replace
         #           path: /spec/type
         #           value: NodePort
-        #         - op: replace
-        #           path: /spec/ports/0/port
+        #         - op: add
+        #           path: /spec/ports/0/nodePort
         #           value: 53
-        #         - op: replace
-        #           path: /spec/ports/1/port
-        #           value: 30443
-        #         - op: replace
-        #           path: /spec/ports/2/port
+        #         - op: add
+        #           path: /spec/ports/2/nodePort
         #           value: 853
       syncPolicy:
         automated: {}
