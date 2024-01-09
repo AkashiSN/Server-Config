@@ -1,7 +1,7 @@
 ---
-# file: setup-k3s.yml
-- name: Setup common for k3s
-  hosts: k3s
+# file: setup-k3s-vps.yml
+- name: Setup common for k3s-vps
+  hosts: k3s-vps
   roles:
     - variable
     - role: common
@@ -9,7 +9,7 @@
         k8s_major_version: "1.29"
 
 - name: Setup cluster by k3s
-  hosts: k3s
+  hosts: k3s-vps
   roles:
     - variable
     - role: cluster

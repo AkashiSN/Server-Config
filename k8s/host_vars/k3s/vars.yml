@@ -1,7 +1,5 @@
 # domain
 domain: "akashisn.info"
-# external-ip
-external_ip: "{{ vault_external_ip }}"
 # metallb
 metallb_ipv4_range: "172.16.254.70-172.16.254.99"
 # truenas

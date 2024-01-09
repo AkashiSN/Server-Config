@@ -23,6 +23,24 @@ spec:
         path: "k8s/manifests/{{name}}"
         repoURL: https://github.com/AkashiSN/Server-Config.git
         targetRevision: main
+        # kustomize:
+        #   patches:
+        #     - target:
+        #         kind: Service
+        #         name: dns-server
+        #       patch: |-
+        #         - op: replace
+        #           path: /spec/type
+        #           value: NodePort
+        #         - op: replace
+        #           path: /spec/ports/0/port
+        #           value: 53
+        #         - op: replace
+        #           path: /spec/ports/1/port
+        #           value: 30443
+        #         - op: replace
+        #           path: /spec/ports/2/port
+        #           value: 853
       syncPolicy:
         automated: {}
         syncOptions:

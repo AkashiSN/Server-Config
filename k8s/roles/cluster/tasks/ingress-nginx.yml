@@ -8,7 +8,7 @@
 
 - name: Concat cloudflare_ips strings
   ansible.builtin.set_fact:
-    real_ip_from: "{{ cloudflare_ips | join(', ') }}, {{ local_ips | join(',') }}, {{ external_ip }}"
+    real_ip_from: "{{ cloudflare_ips | join(', ') }}, {{ local_ips | join(',') }}, {{ external_ip.stdout }}"
   become: false
 
 - name: Deploy ingress-nginx chart using set values on target

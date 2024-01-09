@@ -51,10 +51,6 @@
       ansible.builtin.import_tasks:
         file: kernel.yml
 
-    - name: Import watchdog.yml
-      ansible.builtin.import_tasks:
-        file: watchdog.yml
-
     - name: Import argo-cd.yml
       ansible.builtin.import_tasks:
         file: argo-cd.yml
@@ -64,7 +60,8 @@
         file: helm.yml
 
 - name: For kubeadm
-  when: inventory_hostname != "k3s"
+  when: inventory_hostname != "k3s" and
+        inventory_hostname != "k3s-vps"
   become: true
   block:
     - name: Import iptables.yml
@@ -82,7 +79,8 @@
 - name: For k3s
   ansible.builtin.import_tasks:
     file: k3s.yml
-  when: inventory_hostname == "k3s"
+  when: inventory_hostname == "k3s" or
+        inventory_hostname == "k3s-vps"
 
 - name: Update all packages to their latest version
   ansible.builtin.apt:

@@ -1,11 +1,20 @@
 controller:
   service:
+{% if inventory_hostname == "k3s-vps" %}
+    type: NodePort
+    externalTrafficPolicy: Local
+    ipFamilyPolicy: PreferDualStack
+    nodePorts:
+      http: "80"
+      https: "443"
+{% else %}
     type: LoadBalancer
     externalTrafficPolicy: Local
     annotations:
       metallb.universe.tf/address-pool: ingress-pool
     ipFamilyPolicy: PreferDualStack
     ipFamilies: {}
+{% endif %}
   config:
     ssl-redirect: true
     proxy-connect-timeout: 3600

@@ -5,7 +5,8 @@
     src: crio.conf
     dest: /etc/modules-load.d/crio.conf
     mode: "0644"
-  when: inventory_hostname != "k3s"
+  when: inventory_hostname != "k3s" and
+        inventory_hostname != "k3s-vps"
   become: true
 
 - name: Copy k8s.conf configuration

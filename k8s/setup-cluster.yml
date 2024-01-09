@@ -7,15 +7,18 @@
   pre_tasks:
     - name: Gather facts for target hosts
       ansible.builtin.setup:
-      when: inventory_hostname != "k3s"
+      when: inventory_hostname != "k3s" and
+            inventory_hostname != "k3s-vps"
   roles:
     - role: variable
-      when: inventory_hostname != "k3s"
+      when: inventory_hostname != "k3s" and
+            inventory_hostname != "k3s-vps"
     - role: common
       vars:
         os: "xUbuntu_22.04"
-        k8s_major_version: "1.28"
-      when: inventory_hostname != "k3s"
+        k8s_major_version: "1.29"
+      when: inventory_hostname != "k3s" and
+            inventory_hostname != "k3s-vps"
 
 - name: Setup cluster by kubeadm
   hosts: virtualmachines
@@ -24,11 +27,14 @@
   pre_tasks:
     - name: Gather facts for target hosts
       ansible.builtin.setup:
-      when: inventory_hostname != "k3s"
+      when: inventory_hostname != "k3s" and
+            inventory_hostname != "k3s-vps"
   roles:
     - role: variable
-      when: inventory_hostname != "k3s"
+      when: inventory_hostname != "k3s" and
+            inventory_hostname != "k3s-vps"
     - role: cluster
       vars:
         target_env: "staging" # staging or production
-      when: inventory_hostname != "k3s"
+      when: inventory_hostname != "k3s" and
+            inventory_hostname != "k3s-vps"

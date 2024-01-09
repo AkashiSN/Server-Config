@@ -1,6 +1,10 @@
 hostAlias:
   enabled: true
+{% if inventory_hostname == "k3s-vps" %}
+  ip: "{{ external_ip.stdout }}"
+{% else %}
   ip: "{{ nginx_ingress_lb_v4_addr }}"
+{% endif %}
   hostname: "{{ auth_fqdn }}"
 extraArgs:
   provider: oidc

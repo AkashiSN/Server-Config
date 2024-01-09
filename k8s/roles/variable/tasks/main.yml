@@ -18,6 +18,15 @@
   register: node_ip
   changed_when: false
 
+- name: Get global IP
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      dig -4 @one.one.one.one whoami.cloudflare TXT CH +short | sed 's/"//g'
+    executable: /bin/bash
+  register: external_ip
+  changed_when: false
+
 - name: Get default v6 network interface
   ansible.builtin.shell:
     cmd: |
