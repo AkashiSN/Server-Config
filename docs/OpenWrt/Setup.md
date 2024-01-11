@@ -112,7 +112,7 @@ opkg install luci-i18n-ddns-ja ddns-scripts-cloudflare
 opkg install luci-i18n-wol-ja
 
 # Install ACME
-opkg install luci-i18n-acme-ja acme-dnsapi
+opkg install luci-i18n-acme-ja acme-acmesh-dnsapi
 
 # Install Quemu Guest Agent
 opkg install qemu-ga
