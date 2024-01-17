@@ -17,7 +17,7 @@ data:
     }
 
     http {
-      include           /etc/nginx/mime.types;
+      include           mime.types;
       default_type      application/octet-stream;
 
       set_real_ip_from 10.244.0.0/16;
@@ -32,6 +32,9 @@ data:
 
       sendfile          on;
       #tcp_nopush       on;
+
+      # Prevent nginx HTTP Server Detection
+      server_tokens off;
 
       keepalive_timeout 65;
 
@@ -59,9 +62,6 @@ data:
       access_log /var/log/nginx/access.log main;
       error_log /var/log/nginx/error.log warn;
 
-      # Prevent nginx HTTP Server Detection
-      server_tokens off;
-
       # HSTS settings
       # WARNING: Only add the preload option once you read about
       # the consequences in https://hstspreload.org/. This option
@@ -87,7 +87,7 @@ data:
       gzip_comp_level 4;
       gzip_min_length 256;
       gzip_proxied expired no-cache no-store private no_last_modified no_etag auth;
-      gzip_types application/atom+xml application/javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/wasm application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy;
+      gzip_types application/atom+xml text/javascript application/javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/wasm application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy;
 
       # Pagespeed is not supported by Nextcloud, so if your server is built
       # with the `ngx_pagespeed` module, uncomment this line to disable it.
@@ -120,7 +120,7 @@ data:
       # Rule borrowed from `.htaccess` to handle Microsoft DAV clients
       location = / {
         if ( $http_user_agent ~ ^DavClnt ) {
-          return 302 $http_x_forwarded_proto://$http_host/remote.php/webdav/$is_args$args;
+          return 302 /remote.php/webdav/$is_args$args;
         }
       }
 
@@ -138,18 +138,18 @@ data:
         # The rules in this block are an adaptation of the rules
         # in `.htaccess` that concern `/.well-known`.
 
-        location = /.well-known/carddav { return 301 $http_x_forwarded_proto://$http_host/remote.php/dav/; }
-        location = /.well-known/caldav  { return 301 $http_x_forwarded_proto://$http_host/remote.php/dav/; }
+        location = /.well-known/carddav { return 301 /remote.php/dav/; }
+        location = /.well-known/caldav  { return 301 /remote.php/dav/; }
 
-        # location = /.well-known/webfinger { return 301 $http_x_forwarded_proto://$http_host/index.php$uri; }
-        # location = /.well-known/nodeinfo  { return 301 $http_x_forwarded_proto://$http_host/index.php$uri; }
+        # location = /.well-known/webfinger { return 301 /index.php$uri; }
+        # location = /.well-known/nodeinfo  { return 301 /index.php$uri; }
 
         location /.well-known/acme-challenge    { try_files $uri $uri/ =404; }
         location /.well-known/pki-validation    { try_files $uri $uri/ =404; }
 
         # Let Nextcloud's API for `/.well-known` URIs handle all other
         # requests by passing them to the front-end controller.
-        return 301 $http_x_forwarded_proto://$http_host/index.php$request_uri;
+        return 301 /index.php$request_uri;
       }
 
       # Rules borrowed from `.htaccess` to hide certain paths from clients
@@ -162,7 +162,7 @@ data:
       # to the URI, resulting in a HTTP 500 error response.
       location ~ \.php(?:$|/) {
         # Required for legacy support
-        rewrite ^/(?!index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|oc[ms]-provider\/.+|.+\/richdocumentscode\/proxy) /index.php$request_uri;
+        rewrite ^/(?!index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|ocs-provider\/.+|.+\/richdocumentscode\/proxy) /index.php$request_uri;
 
         fastcgi_split_path_info ^(.+?\.php)(/.*)$;
         set $path_info $fastcgi_path_info;
@@ -186,7 +186,21 @@ data:
         fastcgi_max_temp_file_size 0;
       }
 
-      location ~ \.(?:css|js|svg|gif|png|jpg|ico|wasm|tflite|map)$ {
+      # Javascript mimetype fixes for nginx
+      # Note: The block below should be removed, and the js|mjs section should be
+      # added to the block below this one. This is a temporary fix until Nginx
+      # upstream fixes the js mime-type
+      location ~* \.(?:js|mjs)$ {
+        types {
+          text/javascript js mjs;
+        }
+        try_files $uri /index.php$request_uri;
+        add_header Cache-Control "public, max-age=15778463, $asset_immutable";
+        access_log off;
+      }
+
+      # Serve static files
+      location ~ \.(?:css|svg|gif|png|jpg|ico|wasm|tflite|map|ogg|flac)$ {
         try_files $uri /index.php$request_uri;
         add_header Cache-Control "public, max-age=15778463, $asset_immutable";
         access_log off;     # Optional: Don't log access to assets
@@ -204,7 +218,7 @@ data:
 
       # Rule borrowed from `.htaccess`
       location /remote {
-        return 301 $http_x_forwarded_proto://$http_host/remote.php$request_uri;
+        return 301 /remote.php$request_uri;
       }
 
       location / {
@@ -236,7 +250,7 @@ data:
       gzip_comp_level 4;
       gzip_min_length 256;
       gzip_proxied expired no-cache no-store private no_last_modified no_etag auth;
-      gzip_types application/atom+xml application/javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/wasm application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy;
+      gzip_types application/atom+xml text/javascript application/javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/wasm application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy;
 
       # HTTP response headers borrowed from Nextcloud `.htaccess`
       add_header Referrer-Policy                      "no-referrer"   always;
