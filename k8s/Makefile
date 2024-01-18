@@ -48,8 +48,8 @@ delete-app-k3s:
 	cd $(CURDIR) ; \
 	cat manifests/application.yml | ssh $(K3S_HOST) kubectl delete -f -
 
-.PHONY: delete-k3s-vps
-delete-k3s-vps:
+.PHONY: delete-app-k3s-vps
+delete-app-k3s-vps:
 	cd $(CURDIR) ; \
 	sed -r -e '/kustomize:/,/^[^ ]/s/^(\s+)# /\1/' manifests/application.yml | ssh $(K3S_VPS_HOST) kubectl delete -f -
 
