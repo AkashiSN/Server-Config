@@ -1,4 +1,5 @@
 resources:
+  - pre-sync.yml
   - persistent-volume.yml
   - secret.yml
   - palworld.yml

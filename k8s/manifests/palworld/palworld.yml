@@ -113,7 +113,7 @@ spec:
     spec:
       containers:
         - name: palworld-server
-          image: thijsvanloef/palworld-server-docker
+          image: thijsvanloef/palworld-server-docker@sha256:14fa264e0aa060d32e8b9b0a6c81088470049aba4589d2ac5618f08abffb6568
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8211
@@ -135,7 +135,7 @@ spec:
                   key: rconPassword
           envFrom:
             - configMapRef:
-                name: palworld-cm
+                name: palworld-env
           volumeMounts:
             - mountPath: /palworld
               name: data
@@ -144,11 +144,11 @@ spec:
               subPath: PalWorldSettings.ini
           resources:
             requests:
-              cpu: 1000m
+              cpu: 4000m
               memory: 16Gi
             limits:
-              cpu: 4000m
-              memory: 20Gi
+              cpu: 6000m
+              memory: 32Gi
       volumes:
         - name: palworld-settings
           configMap:

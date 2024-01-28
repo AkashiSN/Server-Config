@@ -43,3 +43,7 @@ updates:
       - dependency-name: "mariadb"
         update-types:
           - "version-update:semver-major"
+  - package-ecosystem: "docker"
+    directory: "/k8s/manifests/palworld"
+    schedule:
+      interval: "daily"

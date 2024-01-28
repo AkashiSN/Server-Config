@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: image-pull-job
+  namespace: palworld
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  ttlSecondsAfterFinished: 10
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+        - name: palworld
+          image: thijsvanloef/palworld-server-docker@sha256:14fa264e0aa060d32e8b9b0a6c81088470049aba4589d2ac5618f08abffb6568
+          command: ["/bin/sh"]
+          args: ["-c", "exit 0"]
+      restartPolicy: Never
