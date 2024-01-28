@@ -1,7 +1,7 @@
 # domain
 domain: "akashisn.info"
 # metallb
-metallb_ipv4_range: "172.16.254.70-172.16.254.99"
+metallb_ipv4_range: "172.16.254.80-172.16.254.99"
 # truenas
 truenas_fqdn: "{{ vault_truenas_host }}.{{ domain }}"
 truenas_apikey: "{{ vault_truenas_apikey }}"
@@ -39,3 +39,5 @@ hashicorp_vault_project_id: "{{ vault_hashicorp_vault_project_id }}"
 dns_lb_v4_addr: "172.16.254.60"
 # minecraft
 minecraft_lb_v4_addr:  "172.16.254.70"
+# palworld
+palworld_lb_v4_addr: "172.16.254.75"

@@ -39,6 +39,16 @@ kubectl logs -f -n minecraft minecraft-vanilla-0
 kubectl exec -it -n minecraft minecraft-vanilla-0 -- bash
 ```
 
+### Palworld
+
+[![argo-cd](https://argocd.akashisn.info/api/badge?name=palworld&revision=true)](https://argocd.akashisn.info/applications/argo-cd/palworld)
+
+```bash
+kubectl get pod,svc -n palworld
+kubectl logs -f -n palworld palworld-server-0
+kubectl exec -it -n palworld palworld-server-0 -- bash
+```
+
 ### Nextcloud
 
 [![argo-cd](https://argocd.akashisn.info/api/badge?name=nextcloud&revision=true)](https://argocd.akashisn.info/applications/argo-cd/nextcloud)
@@ -154,12 +164,14 @@ no ip napt static 172.16.254.100 tcp 443
 no ip napt static 172.16.254.110 udp 53
 no ip napt static 172.16.254.110 tcp 853
 no ip napt static 172.16.254.120 tcp 25565
+no ip napt static 172.16.254.125 udp 8211
 
 ip napt static 172.16.254.50 tcp 80
 ip napt static 172.16.254.50 tcp 443
 ip napt static 172.16.254.60 udp 53
 ip napt static 172.16.254.60 tcp 853
 ip napt static 172.16.254.70 tcp 25565
+ip napt static 172.16.254.75 udp 8211
 
 exit
 ```
@@ -174,12 +186,14 @@ no ip napt static 172.16.254.50 tcp 443
 no ip napt static 172.16.254.60 udp 53
 no ip napt static 172.16.254.60 tcp 853
 no ip napt static 172.16.254.70 tcp 25565
+no ip napt static 172.16.254.75 udp 8211
 
 ip napt static 172.16.254.100 tcp 80
 ip napt static 172.16.254.100 tcp 443
 ip napt static 172.16.254.110 udp 53
 ip napt static 172.16.254.110 tcp 853
 ip napt static 172.16.254.120 tcp 25565
+ip napt static 172.16.254.125 udp 8211
 
 exit
 ```

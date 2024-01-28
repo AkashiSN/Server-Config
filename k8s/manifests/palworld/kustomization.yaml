@@ -1,0 +1,4 @@
+resources:
+  - persistent-volume.yml
+  - secret.yml
+  - palworld.yml
