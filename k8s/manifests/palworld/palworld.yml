@@ -153,6 +153,8 @@ spec:
         - name: palworld-settings
           configMap:
             name: palworld-settings
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
   volumeClaimTemplates:
     - metadata:
         name: data
