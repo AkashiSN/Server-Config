@@ -113,7 +113,7 @@ spec:
     spec:
       containers:
         - name: palworld-server
-          image: thijsvanloef/palworld-server-docker@sha256:5ebefdfb66068d7e022c55e87e3629fc4c7af3859b66d637ac4cc4384f8f9dd0
+          image: thijsvanloef/palworld-server-docker@sha256:3b0be9dacbb04058762123b10e2b5816ac83fa3a8b11c788ac58608ba5ac8c05
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8211
