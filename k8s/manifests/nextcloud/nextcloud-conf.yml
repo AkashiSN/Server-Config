@@ -51,5 +51,13 @@ data:
     php /var/www/html/occ app:enable twofactor_totp
     php /var/www/html/occ app:enable suspicious_login
 
+    php /var/www/html/occ config:system:set default_timezone --value='Asia/Tokyo'
+    php /var/www/html/occ config:system:set maintenance_window_start --value=1
     php /var/www/html/occ config:system:set default_phone_region --value=JP
     php /var/www/html/occ config:app:set files max_chunk_size --value 94371840 # 90MiB
+
+    # previewgenerator
+    php /var/www/html/occ app:enable previewgenerator
+    php /var/www/html/occ config:app:set previewgenerator squareSizes --value='64 256 1024'
+    php /var/www/html/occ config:app:set previewgenerator widthSizes  --value='64 256 1024'
+    php /var/www/html/occ config:app:set previewgenerator heightSizes --value='64 256 1024'

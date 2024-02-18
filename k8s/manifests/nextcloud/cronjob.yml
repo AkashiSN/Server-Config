@@ -47,7 +47,7 @@ spec:
         spec:
           serviceAccount: nextcloud
           containers:
-            - name: kubectl
+            - name: cron
               image: ghcr.io/akashisn/kubectl@sha256:9cefa64a4218a1bbc7529dd3e5596e73942fa4335086da4b7aa4cc313a6002ed
               imagePullPolicy: IfNotPresent
               args:
@@ -62,5 +62,21 @@ spec:
                   "/bin/sh",
                   "-c",
                   'su www-data --shel=/bin/sh --command="/usr/local/bin/php -f /var/www/html/cron.php"',
+                ]
+            - name: preview
+              image: ghcr.io/akashisn/kubectl@sha256:9cefa64a4218a1bbc7529dd3e5596e73942fa4335086da4b7aa4cc313a6002ed
+              imagePullPolicy: IfNotPresent
+              args:
+                [
+                  "exec",
+                  "-n",
+                  "nextcloud",
+                  "nextcloud-0",
+                  "-c",
+                  "nextcloud",
+                  "--",
+                  "/bin/sh",
+                  "-c",
+                  'su www-data --shel=/bin/sh --command="/usr/local/bin/php /var/www/html/occ preview:pre-generate"',
                 ]
           restartPolicy: Never
