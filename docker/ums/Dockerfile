@@ -7,7 +7,7 @@ ARG UMS_VERSION="13.6.0" \
 FROM ubuntu:22.04 AS ums-build
 
 SHELL ["/bin/bash", "-e", "-c"]
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /workdir
 ARG UMS_VERSION \

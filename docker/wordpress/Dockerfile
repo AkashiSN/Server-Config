@@ -2,7 +2,7 @@
 FROM wordpress:6.4.3-php8.2-fpm
 
 SHELL ["/bin/bash", "-e", "-c"]
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOT
 apt-get update

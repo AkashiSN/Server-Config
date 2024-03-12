@@ -2,8 +2,8 @@
 FROM nextcloud:28.0.3-fpm
 
 SHELL ["/bin/bash", "-e", "-c"]
-ENV DEBIAN_FRONTEND noninteractive \
-    NEXTCLOUD_UPDATE 1
+ENV DEBIAN_FRONTEND=noninteractive \
+    NEXTCLOUD_UPDATE=1
 
 RUN <<EOT
 apt-get update
@@ -28,9 +28,9 @@ rm -r /tmp/pear
 cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 EOT
 
-ENV LANG en_US.UTF-8 \
-    LANGUAGE en_US:en \
-    LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["php-fpm"]
