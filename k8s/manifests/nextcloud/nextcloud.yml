@@ -72,6 +72,8 @@ spec:
               mountPath: /mnt/musics_opus
             - name: videos
               mountPath: /mnt/videos
+            - name: photos
+              mountPath: /mnt/photos
             - name: nextcloud-secrets
               mountPath: /secrets
             - name: nextcloud-conf
@@ -202,6 +204,15 @@ spec:
             storage: 500Gi
     - metadata:
         name: videos
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: nfs-hdd-storage
+        resources:
+          requests:
+            storage: 2Ti
+    - metadata:
+        name: photos
       spec:
         accessModes:
           - ReadWriteOncePod

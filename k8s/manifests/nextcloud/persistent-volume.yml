@@ -161,3 +161,23 @@ spec:
     path: /mnt/hdd/nfs/videos
   mountOptions:
     - nfsvers=4.2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-photos-pv
+spec:
+  capacity:
+    storage: 2Ti
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-hdd-storage
+  claimRef:
+    namespace: nextcloud
+    name: photos-nextcloud-0
+  nfs:
+    server: 172.16.255.1
+    path: /mnt/hdd/nfs/photos
+  mountOptions:
+    - nfsvers=4.2
