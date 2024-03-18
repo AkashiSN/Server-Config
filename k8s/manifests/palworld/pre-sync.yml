@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: palworld
-          image: thijsvanloef/palworld-server-docker@sha256:4204f3eba98d1a92db1c5b8faebbf2e18c9678cf8a50c3e3bd01599886d620cc
+          image: thijsvanloef/palworld-server-docker@sha256:d8400308048115e22c178a1bebd475af8d0707282ffee4bb541f8c0452fc2821
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
       restartPolicy: Never
