@@ -136,8 +136,20 @@ resource "proxmox_virtual_environment_vm" "vm_worker_node_01" {
   }
 
   hostpci {
+    # Intel Corporation 82599 10 Gigabit Network Connection
     device = "hostpci0"
     id     = "0000:02:00"
+  }
+
+  hostpci {
+    # Digital Devices GmbH Device 000a
+    device = "hostpci1"
+    id     = "0000:06:00"
+  }
+
+  usb {
+    # Advanced Card Systems, Ltd ACR39U
+    host = "072f:b100"
   }
 
   # Ignore changes to the network
