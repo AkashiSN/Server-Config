@@ -21,6 +21,7 @@
   kubernetes.core.helm:
     release_name: cilium
     chart_ref: cilium/cilium
+    chart_version: "1.14.*"
     release_namespace: kube-system
     update_repo_cache: true
     wait: true
@@ -32,8 +33,8 @@
       ipam:
         mode: cluster-pool
         operator:
-          clusterPoolIPv4PodCIDRList: "10.244.0.0/16"
-          clusterPoolIPv6PodCIDRList: "{{ ipv6_prefix }}:{{ ipv6_pod_cider }}"
+          clusterPoolIPv4PodCIDRList: ["10.244.0.0/16"]
+          clusterPoolIPv6PodCIDRList: ["{{ ipv6_prefix }}:{{ ipv6_pod_cider }}"]
           clusterPoolIPv4MaskSize: 24
           clusterPoolIPv6MaskSize: 112
       ipv4:

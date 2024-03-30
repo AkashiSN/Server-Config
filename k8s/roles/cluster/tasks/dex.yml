@@ -10,6 +10,7 @@
   kubernetes.core.helm:
     release_name: dex
     chart_ref: dex/dex
+    chart_version: "0.17.*"
     release_namespace: auth
     update_repo_cache: true
     wait: true

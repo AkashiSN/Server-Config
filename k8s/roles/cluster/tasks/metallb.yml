@@ -10,6 +10,7 @@
   kubernetes.core.helm:
     release_name: metallb
     chart_ref: metallb/metallb
+    chart_version: "0.14.*"
     release_namespace: kube-system
     update_repo_cache: true
     wait: true

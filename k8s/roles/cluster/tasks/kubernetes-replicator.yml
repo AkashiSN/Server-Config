@@ -10,6 +10,7 @@
   kubernetes.core.helm:
     release_name: kubernetes-replicator
     chart_ref: mittwald/kubernetes-replicator
+    chart_version: "2.9.*"
     release_namespace: kubernetes-replicator
     create_namespace: true
     update_repo_cache: true
