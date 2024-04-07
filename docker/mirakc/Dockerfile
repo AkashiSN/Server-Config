@@ -88,7 +88,7 @@ EOT
 
 FROM rust:bookworm as mirakc-build
 SHELL ["/bin/bash", "-e", "-c"]
-ENV MIRAKC_VERSION=3.1.5 \
+ENV MIRAKC_VERSION=3.1.6 \
     DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOT
