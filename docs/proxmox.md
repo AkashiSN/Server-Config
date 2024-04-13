@@ -142,7 +142,7 @@ systemctl daemon-reload
 systemctl enable --now tailscale-offload@vmbr0
 
 # Run tailscale
-tailscale up --advertise-exit-node
+tailscale up --advertise-exit-node --advertise-routes=172.16.254.0/24,172.16.100.0/24
 ```
 
 ## Fix e1000e Detected Hardware Unit Hang
