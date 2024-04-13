@@ -112,6 +112,39 @@ systemctl restart pveproxy
 rm /tmp/dns-cf-token
 ```
 
+## Tailscale
+```bash
+# Install tailscale
+curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list
+apt-get update
+apt-get install -y tailscale
+
+# Enable forward
+echo 'net.ipv4.ip_forward = 1' | tee -a /etc/sysctl.d/99-tailscale.conf
+echo 'net.ipv6.conf.all.forwarding = 1' | tee -a /etc/sysctl.d/99-tailscale.conf
+sysctl -p /etc/sysctl.d/99-tailscale.conf
+
+# Enable Offload
+cat >/usr/lib/systemd/system/tailscale-offload@.service << EOF
+[Unit]
+Description="Linux optimizations for subnet routers and exit nodes %i."
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/ethtool -K %i rx-udp-gro-forwarding on rx-gro-list off
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now tailscale-offload@vmbr0
+
+# Run tailscale
+tailscale up --advertise-exit-node
+```
+
 ## Fix e1000e Detected Hardware Unit Hang
 https://gist.github.com/brunneis/0c27411a8028610117fefbe5fb669d10
 

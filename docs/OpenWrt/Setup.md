@@ -5,7 +5,7 @@ https://www.jwtechtips.top/how-to-install-openwrt-in-proxmox/
 # Upgrade
 
 ```bash
-OPENWRT_VERSION=23.05.2
+OPENWRT_VERSION=23.05.3
 wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/x86/64/openwrt-${OPENWRT_VERSION}-x86-64-generic-ext4-combined.img.gz
 wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/bcm27xx/bcm2711/openwrt-${OPENWRT_VERSION}-bcm27xx-bcm2711-rpi-4-ext4-sysupgrade.img.gz
 wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/rockchip/armv8/openwrt-${OPENWRT_VERSION}-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz
@@ -31,7 +31,7 @@ export TOKEN=""
 cat <<EOF > /etc/init.d/cloudflared
 #!/bin/sh /etc/rc.common
 
-cmd="/usr/bin/cloudflared --pidfile /var/run/cloudflared.pid --autoupdate-freq 24h0m0s tunnel run --token $TOKEN"
+cmd="/usr/bin/cloudflared --pidfile /var/run/cloudflared.pid --no-autoupdate tunnel run --token $TOKEN"
 pid_file="/var/run/cloudflared.pid"
 
 # Timeout (in seconds) to wait for DNS
