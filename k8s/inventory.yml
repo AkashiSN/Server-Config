@@ -11,4 +11,6 @@ virtualmachines:
     worker:
       hosts:
         worker-node01:
-          ansible_host: worker-node
+          ansible_host: worker-node-01
+        worker-node02:
+          ansible_host: worker-node-02

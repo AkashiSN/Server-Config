@@ -20,7 +20,7 @@ locals {
   k8s_control_plane = {
     vmid                 = 120
     template_vmid        = 9001
-    memory               = 8192
+    memory               = 16384
     cores                = 6
     onboot               = true
     proxmox_node         = "pve01"
@@ -45,6 +45,23 @@ locals {
     ipv4_default_gateway  = "172.16.254.1"
     ipv6_address_token    = "::254:25"
     nas_interface_address = "172.16.255.2/24"
+    nas_network_address   = "172.16.255.0/24"
+    nas_network_gateway   = "172.16.255.1"
+  }
+  worker_node_02 = {
+    vmid                  = 126
+    template_vmid         = 9002
+    memory                = 32768
+    cores                 = 8
+    onboot                = true
+    proxmox_node          = "pve02"
+    proxmox_address       = "172.16.254.6"
+    hostname              = "worker-node-02"
+    ipv4_address          = "172.16.254.26"
+    ipv4_prefix           = "24"
+    ipv4_default_gateway  = "172.16.254.1"
+    ipv6_address_token    = "::254:26"
+    nas_interface_address = "172.16.255.3/24"
     nas_network_address   = "172.16.255.0/24"
     nas_network_gateway   = "172.16.255.1"
   }

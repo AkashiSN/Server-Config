@@ -46,6 +46,9 @@ template:
 # pve01
 	$(MAKE) download-cloudimg PROXMOX_NODE=pve01
 	$(MAKE) create-template PROXMOX_NODE=pve01 TEMPLATE_VMID=9001
+# pve02
+	$(MAKE) download-cloudimg PROXMOX_NODE=pve02
+	$(MAKE) create-template PROXMOX_NODE=pve02 TEMPLATE_VMID=9002
 
 .PHONY: update-template
 update-template:
@@ -60,3 +63,9 @@ update-template:
 	$(MAKE) download-cloudimg PROXMOX_NODE=pve01
 	$(MAKE) destroy-template PROXMOX_NODE=pve01 TEMPLATE_VMID=9001
 	$(MAKE) create-template PROXMOX_NODE=pve01 TEMPLATE_VMID=9001
+
+# pve02
+	$(MAKE) cleanup-cloudimg PROXMOX_NODE=pve02
+	$(MAKE) download-cloudimg PROXMOX_NODE=pve02
+	$(MAKE) destroy-template PROXMOX_NODE=pve02 TEMPLATE_VMID=9002
+	$(MAKE) create-template PROXMOX_NODE=pve02 TEMPLATE_VMID=9002
