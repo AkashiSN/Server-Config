@@ -26,10 +26,7 @@ spec:
           image: ghcr.io/akashisn/mirakc@sha256:8ef5d395a351cbd511b711d6854924566c12e1d0390fd30cdd3e6605ef1cf406
           imagePullPolicy: IfNotPresent
           securityContext:
-            capabilities:
-              add:
-                - "SYS_ADMIN"
-                - "SYS_NICE"
+            privileged: true
           ports:
             - containerPort: 40772
               name: mirakc

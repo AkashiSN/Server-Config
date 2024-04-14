@@ -46,6 +46,8 @@ spec:
         - name: epgstation
           image: ghcr.io/akashisn/epgstation@sha256:a70090592966e54a0525c7016c796eabd21b712ac6408d5c50677e5f8fb10f01
           imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
           ports:
             - containerPort: 8888
               name: epgstation
@@ -118,7 +120,7 @@ metadata:
   namespace: tv
   annotations:
     nginx.ingress.kubernetes.io/auth-url: https://auth.akashisn.info/oauth2/auth
-    nginx.ingress.kubernetes.io/auth-signin: https://auth.akashisn.info/oauth2/start?rd=https://tv.akashisn.info/$escaped_request_uri
+    nginx.ingress.kubernetes.io/auth-signin: https://auth.akashisn.info/oauth2/start?rd=https://tv.akashisn.info$escaped_request_uri
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
 spec:
   ingressClassName: nginx
