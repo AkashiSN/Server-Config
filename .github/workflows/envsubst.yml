@@ -1,0 +1,36 @@
+name: envsubst
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'docker/envsubst/**'
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: akashisn
+          password: ${{ github.token }}
+
+      - name: Build and push - envsubst
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker/envsubst
+          file: ./docker/envsubst/Dockerfile
+          tags: |
+            ghcr.io/akashisn/envsubst
+          platforms: linux/amd64
+          push: true
