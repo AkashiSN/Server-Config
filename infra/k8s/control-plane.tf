@@ -75,6 +75,9 @@ resource "proxmox_virtual_environment_vm" "vm_k8s_control_plane" {
   started = true
   on_boot = local.k8s_control_plane.onboot
 
+  bios    = "seabios"
+  machine = "pc"
+
   startup {
     order = "3"
   }
@@ -133,12 +136,11 @@ resource "proxmox_virtual_environment_vm" "vm_k8s_control_plane" {
     bridge = "vmbr1"
   }
 
-  # Ignore changes to the network
-  ## MAC address is generated on every apply, causing
-  ## TF to think this needs to be rebuilt on every apply
+  # Ignore changes
   lifecycle {
     ignore_changes = [
-      network_device
+      started,
+      vga
     ]
   }
 }

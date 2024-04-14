@@ -9,7 +9,7 @@ credential:
 	pass infra/terraform/tfvars > $(CURDIR)/terraform.tfvars
 
 .PHONY: vm
-vm: clean credential
+vm:
 	cd $(CURDIR) ; \
 	terraform plan && \
 	terraform apply

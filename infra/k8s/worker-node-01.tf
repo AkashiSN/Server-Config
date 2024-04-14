@@ -77,6 +77,9 @@ resource "proxmox_virtual_environment_vm" "vm_worker_node_01" {
   started = true
   on_boot = local.worker_node_01.onboot
 
+  bios    = "seabios"
+  machine = "pc"
+
   startup {
     order = "3"
   }
@@ -136,14 +139,21 @@ resource "proxmox_virtual_environment_vm" "vm_worker_node_01" {
   }
 
   hostpci {
-    # Intel Corporation 82599 10 Gigabit Network Connection
+    # Intel Corporation CoffeeLake-S GT2 [UHD Graphics 630]
     device = "hostpci0"
+    id     = "0000:00:02"
+    mdev   = "i915-GVTg_V5_4"
+  }
+
+  hostpci {
+    # Intel Corporation 82599 10 Gigabit Network Connection
+    device = "hostpci1"
     id     = "0000:02:00"
   }
 
   hostpci {
     # Digital Devices GmbH Device 000a
-    device = "hostpci1"
+    device = "hostpci2"
     id     = "0000:06:00"
   }
 
@@ -152,12 +162,11 @@ resource "proxmox_virtual_environment_vm" "vm_worker_node_01" {
     host = "072f:b100"
   }
 
-  # Ignore changes to the network
-  ## MAC address is generated on every apply, causing
-  ## TF to think this needs to be rebuilt on every apply
+  # Ignore changes
   lifecycle {
     ignore_changes = [
-      network_device
+      started,
+      vga
     ]
   }
 }

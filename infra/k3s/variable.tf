@@ -20,12 +20,12 @@ variable "userdata" {
 locals {
   k3s = {
     vmid                 = 115
-    template_vmid        = 9001
+    template_vmid        = 9002
     memory               = 8192
     cores                = 6
     onboot               = false
-    proxmox_node         = "pve01"
-    proxmox_address      = "172.16.254.5"
+    proxmox_node         = "pve02"
+    proxmox_address      = "172.16.254.6"
     hostname             = "k3s"
     ipv4_address         = "172.16.254.15"
     ipv4_prefix          = "24"
