@@ -79,7 +79,7 @@ metadata:
   labels:
     service: epgstation-mariadb
   name: epgstation-mariadb
-  namespace: epgstation
+  namespace: tv
 spec:
   ports:
     - name: mariadb
