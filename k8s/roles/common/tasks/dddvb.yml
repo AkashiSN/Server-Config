@@ -1,0 +1,54 @@
+---
+# file: roles/common/tasks/dddvb.yml
+- name: Install dddvb dependency packages
+  ansible.builtin.apt:
+    name:
+      - build-essential
+      - dkms
+      - unzip
+    state: present
+    update_cache: true
+  become: true
+
+- name: Check if dddvb is installed via dkms
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      dkms status -m dddvb
+    executable: /bin/bash
+  register: dkms_status
+  ignore_errors: true
+  changed_when: false
+  become: true
+
+- name: Download and unarchive dddvb source
+  ansible.builtin.unarchive:
+    src: "https://github.com/DigitalDevices/dddvb/archive/{{ dddvb_version }}.zip"
+    dest: "/tmp/"
+    mode: "0644"
+    remote_src: true
+  when: "'dddvb' not in dkms_status.stdout or 'installed' not in dkms_status.stdout"
+  become: true
+
+- name: Copy dddvb-build.sh.j2 script template
+  ansible.builtin.template:
+    src: dddvb-build.sh.j2
+    dest: /tmp/dddvb-build.sh
+    mode: "0755"
+  when: "'dddvb' not in dkms_status.stdout or 'installed' not in dkms_status.stdout"
+  become: true
+
+- name: Run a build script
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      /tmp/dddvb-build.sh
+    executable: /bin/bash
+  when: "'dddvb' not in dkms_status.stdout or 'installed' not in dkms_status.stdout"
+  changed_when: true
+  become: true
+
+- name: Reboot
+  ansible.builtin.reboot:
+  when: "'dddvb' not in dkms_status.stdout or 'installed' not in dkms_status.stdout"
+  become: true

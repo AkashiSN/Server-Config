@@ -1,0 +1,50 @@
+#!/bin/bash
+set -eu
+
+cd /tmp/dddvb-{{ dddvb_version }}
+
+echo "Make once"
+make
+
+echo "Generate dkms.conf"
+cat <<EOF | tee dkms.conf
+PACKAGE_NAME=dddvb
+PACKAGE_VERSION={{ dddvb_version }}
+AUTOINSTALL="yes"
+CHECK_MODULE_VERSION="no"
+MAKE="'make' all KVER=\${kernelver}"
+CLEAN="make clean"
+EOF
+
+let "module_number=0" || true
+pkgname="dddvb-dkms"
+for file in $(find ./ -type f -name "*.ko"); do
+  MODULE_LOCATION=$(dirname $file | cut -d\/ -f 2-)
+  echo "BUILT_MODULE_NAME[$module_number]=\"$(basename $file .ko)\"" >> dkms.conf
+  echo "BUILT_MODULE_LOCATION[$module_number]=\"$MODULE_LOCATION\"" >> dkms.conf
+  echo "DEST_MODULE_LOCATION[$module_number]=\"/extramodules/$pkgname\"" >> dkms.conf
+  let "module_number=${module_number}+1" || true
+done
+
+echo "Rememove check module"
+make clean
+
+echo "Update Makefile"
+sed -i -e 's/shell uname -r/KVER/g' Makefile
+
+echo "Copy sorce to dkms dir"
+cd ..
+cp -r dddvb-{{ dddvb_version }} /usr/src/
+
+echo Registration to DKMS
+dkms add -m dddvb -v {{ dddvb_version }}
+
+echo "Install present kernel driver"
+dkms install -m dddvb -v {{ dddvb_version }}
+
+echo "Set up to use your own driver instead of the OS standard one."
+mkdir -p /etc/depmod.d
+echo 'search extra updates built-in' | tee /etc/depmod.d/extra.conf
+depmod -a
+
+echo "please restart apply driver."

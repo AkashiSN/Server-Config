@@ -24,7 +24,7 @@
 
 - name: Remove dependencies that are no longer required
   ansible.builtin.apt:
-    autoremove: yes
+    autoremove: true
   become: true
 
 - name: Install kubernetes pre-requisites
@@ -86,6 +86,11 @@
     file: k3s.yml
   when: inventory_hostname == "k3s" or
         inventory_hostname == "k3s-vps"
+
+- name: For dddvb
+  ansible.builtin.import_tasks:
+    file: dddvb.yml
+  when: inventory_hostname == "worker-node01"
 
 - name: Update all packages to their latest version
   ansible.builtin.apt:
