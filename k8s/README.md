@@ -21,6 +21,15 @@ make delete-app-k3s or make delete-app-k8s
 make app-k8s or app-k3s
 ```
 
+## Node maintenance
+
+```bash
+kubectl drain worker-node-01 --ignore-daemonsets --delete-emptydir-data
+kubectl get pod -A -o wide --watch
+# maintenance e.g. update, reboot
+kubectl uncordon worker-node-01
+```
+
 ### DNS
 
 [![argo-cd](https://argocd.akashisn.info/api/badge?name=dns&revision=true)](https://argocd.akashisn.info/applications/argo-cd/dns)
