@@ -88,7 +88,7 @@ data:
                   -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
                   -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
                   -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 15000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 15000k
                   -preset faster -y -f mpegts pipe:1'
             - name: 高画質 (10Mbps)
               cmd:
@@ -96,7 +96,7 @@ data:
                   -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
                   -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
                   -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 10000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 10000k
                   -preset faster -y -f mpegts pipe:1'
             - name: 中画質 (5Mbps)
               cmd:
@@ -104,7 +104,7 @@ data:
                   -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
                   -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
                   -threads 0 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_qsv -flags +cgop
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 5000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 5000k
                   -preset veryfast -y -f mpegts pipe:1'
             - name: 低画質 (1Mbps)
               cmd:
@@ -112,7 +112,7 @@ data:
                   -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
                   -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
                   -threads 0 -c:a aac -ar 48000 -b:a 96k -ac 2 -c:v h264_qsv -flags +cgop
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 1000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 1000k
                   -preset veryfast -y -f mpegts pipe:1'
             - name: 無変換
 
@@ -123,7 +123,7 @@ data:
                   -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
                   -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
                   -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 15000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 15000k
                   -preset faster -y -f mpegts pipe:1'
             - name: 高画質 (10Mbps)
               cmd:
@@ -131,7 +131,7 @@ data:
                   -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
                   -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
                   -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 10000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 10000k
                   -preset faster -y -f mpegts pipe:1'
             - name: 中画質 (5Mbps)
               cmd:
@@ -139,7 +139,7 @@ data:
                   -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
                   -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
                   -threads 0 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_qsv -flags +cgop
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 5000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 5000k
                   -preset veryfast -y -f mpegts pipe:1'
             - name: 低画質 (1Mbps)
               cmd:
@@ -147,7 +147,7 @@ data:
                   -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
                   -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
                   -threads 0 -c:a aac -ar 48000 -b:a 96k -ac 2 -c:v h264_qsv -flags +cgop
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 1000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 1000k
                   -preset veryfast -y -f mpegts pipe:1'
       recorded:
         ts:
@@ -159,7 +159,7 @@ data:
                   -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
                   -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
                   -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 15000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 15000k
                   -preset faster -flags +loop-global_header %OUTPUT%'
             - name: 高画質 (10Mbps)
               cmd:
@@ -168,7 +168,7 @@ data:
                   -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
                   -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
                   -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 10000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 10000k
                   -preset faster -flags +loop-global_header %OUTPUT%'
             - name: 中画質 (5Mbps)
               cmd:
@@ -177,7 +177,7 @@ data:
                   -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
                   -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
                   -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 5000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 5000k
                   -preset veryfast -flags +loop-global_header %OUTPUT%'
             - name: 低画質 (1Mbps)
               cmd:
@@ -186,7 +186,7 @@ data:
                   -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
                   -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
                   -c:a aac -ar 48000 -b:a 96k -ac 2 -c:v h264_qsv
-                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 1000k
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -aspect 16:9 -b:v 1000k
                   -preset veryfast -flags +loop-global_header %OUTPUT%'
         encoded:
           hls:
