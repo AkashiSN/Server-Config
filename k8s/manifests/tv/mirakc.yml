@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: mirakc
+  name: mirakc
+  namespace: tv
+spec:
+  replicas: 1
+  serviceName: mirakc
+  selector:
+    matchLabels:
+      app: mirakc
+  template:
+    metadata:
+      labels:
+        app: mirakc
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker-node-01
+      securityContext:
+        fsGroup: 33
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: mirakc
+          image: ghcr.io/akashisn/mirakc@sha256:8ef5d395a351cbd511b711d6854924566c12e1d0390fd30cdd3e6605ef1cf406
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              add:
+                - "SYS_ADMIN"
+                - "SYS_NICE"
+          ports:
+            - containerPort: 40772
+              name: mirakc
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+            - name: RUST_LOG
+              value: info
+            - name: MIRAKC_DEBUG_CHILD_PROCESS
+              value: "1"
+            - name: MIRAKC_ARIB_LOG
+              value: info
+            - name: MIRAKC_ARIB_LOG_NO_TIMESTAMP
+              value: "1"
+          volumeMounts:
+            - name: epg
+              mountPath: /var/lib/mirakc/epg
+            - name: bus
+              mountPath: /dev/bus
+            - name: dvb
+              mountPath: /dev/dvb
+            - name: conf
+              mountPath: /etc/mirakc/config.yml
+              subPath: config.yml
+              readOnly: true
+          resources:
+            requests:
+              cpu: 300m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 2000Mi
+      volumes:
+        - name: conf
+          configMap:
+            name: mirakc-conf
+        - name: bus
+          hostPath:
+            path: /dev/bus
+        - name: dvb
+          hostPath:
+            path: /dev/dvb
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: epg
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: mirakc
+  name: mirakc
+  namespace: tv
+spec:
+  ports:
+    - name: mirakc
+      port: 40772
+      targetPort: mirakc
+  selector:
+    app: mirakc

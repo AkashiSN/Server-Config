@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: image-pull-job
+  namespace: tv
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  ttlSecondsAfterFinished: 10
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+        - name: envsubst
+          image: ghcr.io/akashisn/envsubst@sha256:32cb715670b2f497233819b0e5448d355ddcc1de4dd893ba92c186d33bcd9a7f
+          command: ["/bin/sh"]
+          args: ["-c", "exit 0"]
+        - name: mirakc
+          image: ghcr.io/akashisn/mirakc@sha256:8ef5d395a351cbd511b711d6854924566c12e1d0390fd30cdd3e6605ef1cf406
+          command: ["/bin/sh"]
+          args: ["-c", "exit 0"]
+        - name: epgstation
+          image: ghcr.io/akashisn/epgstation@sha256:a70090592966e54a0525c7016c796eabd21b712ac6408d5c50677e5f8fb10f01
+          command: ["/bin/sh"]
+          args: ["-c", "exit 0"]
+      restartPolicy: Never

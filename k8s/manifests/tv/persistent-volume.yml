@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mirakc-epg-pv
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: tv
+    name: epg-mirakc-0
+  iscsi:
+    targetPortal: 172.16.255.1:3260
+    iqn: iqn.2005-10.org.freenas.ctl:mirakc-epg
+    lun: 0
+    fsType: xfs
+    readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: epgstation-mariadb-pv
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: tv
+    name: data-epgstation-mariadb-0
+  iscsi:
+    targetPortal: 172.16.255.1:3260
+    iqn: iqn.2005-10.org.freenas.ctl:epgstation-mariadb
+    lun: 0
+    fsType: xfs
+    readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: epgstation-recorded-pv
+spec:
+  capacity:
+    storage: 8Ti
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-hdd-storage
+  claimRef:
+    namespace: tv
+    name: recorded-epgstation-0
+  nfs:
+    server: 172.16.255.1
+    path: /mnt/hdd/nfs/recorded
+  mountOptions:
+    - nfsvers=4.2

@@ -1,0 +1,530 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: epgstation-hooks
+  namespace: tv
+data:
+  init.sh: |
+    #!/bin/sh
+    set -eu
+
+    envsubst '$$MYSQL_PASSWORD' < /template/config.yml.template > /config/config.yml
+
+    cp /template/*.yml /config/
+    cp /template/*.js /config/
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: epgstation-conf
+  namespace: tv
+data:
+  config.yml.template: |
+    port: 8888
+    socketioPort: 8888
+    clientSocketioPort: 443
+    mirakurunPath: http://mirakc:40772
+    apiServers:
+      - https://tv.akashisn.info
+
+    dbtype: mysql
+    mysql:
+      host: epgstation-mariadb
+      port: 3306
+      user: epgstation
+      password: ${MYSQL_PASSWORD}
+      database: epgstation
+      charset: utf8mb4
+
+    needToReplaceEnclosingCharacters: true
+
+    epgUpdateIntervalTime: 10
+
+    conflictPriority: 1
+    recPriority: 2
+
+    recordedFormat: "%TITLE% [%CHNAME%] %YEAR%年%MONTH%月%DAY%日(%DOW%曜日)"
+    recordedFileExtension: .m2ts
+    recorded:
+      - name: recorded
+        path: "%ROOT%/recorded"
+
+    thumbnail: "%ROOT%/recorded/thumbnail"
+    thumbnailSize: 480x270
+    thumbnailPosition: 5
+
+    ffmpeg: /usr/local/bin/ffmpeg
+    ffprobe: /usr/local/bin/ffprobe
+
+    encodeProcessNum: 6
+    concurrentEncodeNum: 2
+    encode:
+      - name: H.264
+        cmd: "%NODE% %ROOT%/config/enc-enhance.js"
+        suffix: .mp4
+        rate: 4.0
+
+    urlscheme:
+      m2ts:
+        ios: vlc-x-callback://x-callback-url/stream?url=PROTOCOL%3A%2F%2FADDRESS
+        android: intent://ADDRESS#Intent;action=android.intent.action.VIEW;type=video/*;scheme=PROTOCOL;end
+      video:
+        ios: infuse://x-callback-url/play?url=PROTOCOL://ADDRESS
+        android: intent://ADDRESS#Intent;action=android.intent.action.VIEW;type=video/*;scheme=PROTOCOL;end
+      download:
+        ios: vlc-x-callback://x-callback-url/download?url=PROTOCOL%3A%2F%2FADDRESS&filename=FILENAME
+
+    uploadTempDir: /tmp/upload
+    streamFilePath: /tmp/hlsfile
+
+    stream:
+      live:
+        ts:
+          m2ts:
+            - name: 最高画質 (15Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+                  -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+                  -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 15000k
+                  -preset faster -y -f mpegts pipe:1'
+            - name: 高画質 (10Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+                  -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+                  -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 10000k
+                  -preset faster -y -f mpegts pipe:1'
+            - name: 中画質 (5Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+                  -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+                  -threads 0 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_qsv -flags +cgop
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 5000k
+                  -preset veryfast -y -f mpegts pipe:1'
+            - name: 低画質 (1Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -re -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+                  -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+                  -threads 0 -c:a aac -ar 48000 -b:a 96k -ac 2 -c:v h264_qsv -flags +cgop
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 1000k
+                  -preset veryfast -y -f mpegts pipe:1'
+            - name: 無変換
+
+          m2tsll:
+            - name: 最高画質 (15Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+                  -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+                  -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 15000k
+                  -preset faster -y -f mpegts pipe:1'
+            - name: 高画質 (10Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+                  -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+                  -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv -flags +cgop
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 10000k
+                  -preset faster -y -f mpegts pipe:1'
+            - name: 中画質 (5Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+                  -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+                  -threads 0 -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v h264_qsv -flags +cgop
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 5000k
+                  -preset veryfast -y -f mpegts pipe:1'
+            - name: 低画質 (1Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d copy
+                  -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1
+                  -threads 0 -c:a aac -ar 48000 -b:a 96k -ac 2 -c:v h264_qsv -flags +cgop
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 1000k
+                  -preset veryfast -y -f mpegts pipe:1'
+      recorded:
+        ts:
+          hls:
+            - name: 最高画質 (15Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -dual_mono_mode main -i pipe:0 -sn -map 0 -threads 0 -c:s copy -c:d copy -ignore_unknown
+                  -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                  -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
+                  -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 15000k
+                  -preset faster -flags +loop-global_header %OUTPUT%'
+            - name: 高画質 (10Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -dual_mono_mode main -i pipe:0 -sn -map 0 -threads 0 -c:s copy -c:d copy -ignore_unknown
+                  -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                  -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
+                  -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 10000k
+                  -preset faster -flags +loop-global_header %OUTPUT%'
+            - name: 中画質 (5Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -dual_mono_mode main -i pipe:0 -sn -map 0 -threads 0 -c:s copy -c:d copy -ignore_unknown
+                  -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                  -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
+                  -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v h264_qsv
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 5000k
+                  -preset veryfast -flags +loop-global_header %OUTPUT%'
+            - name: 低画質 (1Mbps)
+              cmd:
+                  '%FFMPEG% -init_hw_device qsv=qsv:hw -hwaccel qsv -filter_hw_device qsv -hwaccel_output_format qsv
+                  -dual_mono_mode main -i pipe:0 -sn -map 0 -threads 0 -c:s copy -c:d copy -ignore_unknown
+                  -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                  -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
+                  -c:a aac -ar 48000 -b:a 96k -ac 2 -c:v h264_qsv
+                  -vf hwupload=extra_hw_frames=64,deinterlace_qsv -b:v 1000k
+                  -preset veryfast -flags +loop-global_header %OUTPUT%'
+        encoded:
+          hls:
+            - name: 無変換
+              cmd:
+                  '%FFMPEG% -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 0 -ignore_unknown
+                  -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                  -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts
+                  -c:a copy -c:v copy -flags +loop-global_header %OUTPUT%'
+
+  enc-enhance.js: |
+    const spawn = require('child_process').spawn;
+    const execFile = require('child_process').execFile;
+    const ffmpeg = process.env.FFMPEG;
+    const ffprobe = process.env.FFPROBE;
+
+    const input = process.env.INPUT;
+    const output = process.env.OUTPUT;
+    const isDualMono = parseInt(process.env.AUDIOCOMPONENTTYPE, 10) == 2;
+    const args = ['-y'];
+
+    /**
+    * 動画長取得関数
+    * @param {string} filePath ファイルパス
+    * @return number 動画長を返す (秒)
+    */
+    const getDuration = filePath => {
+        return new Promise((resolve, reject) => {
+            execFile(ffprobe, ['-v', '0', '-show_format', '-of', 'json', filePath], (err, stdout) => {
+                if (err) {
+                    reject(err);
+
+                    return;
+                }
+
+                try {
+                    const result = JSON.parse(stdout);
+                    resolve(parseFloat(result.format.duration));
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        });
+    };
+
+    // 字幕用
+    Array.prototype.push.apply(args, ['-fix_sub_duration']);
+    // input 設定
+    Array.prototype.push.apply(args, ['-i', input]);
+    // ビデオストリーム設定
+    Array.prototype.push.apply(args, ['-map', '0:v', '-c:v', 'libx264']);
+    // インターレス解除
+    Array.prototype.push.apply(args, ['-vf', 'yadif']);
+    // オーディオストリーム設定
+    if (isDualMono) {
+        Array.prototype.push.apply(args, [
+            '-filter_complex',
+            'channelsplit[FL][FR]',
+            '-map', '[FL]',
+            '-map', '[FR]',
+            '-metadata:s:a:0', 'language=jpn',
+            '-metadata:s:a:1', 'language=eng',
+        ]);
+    } else {
+        Array.prototype.push.apply(args, ['-map', '0:a']);
+    }
+    Array.prototype.push.apply(args, ['-c:a', 'aac']);
+    // 字幕ストリーム設定
+    Array.prototype.push.apply(args, ['-map', '0:s?', '-c:s', 'mov_text']);
+    // 品質設定
+    Array.prototype.push.apply(args, ['-preset', 'medium', '-crf', '18']);
+    // 出力ファイル
+    Array.prototype.push.apply(args, [output]);
+
+    (async () => {
+        // 進捗計算のために動画の長さを取得
+        const duration = await getDuration(input);
+
+        const child = spawn(ffmpeg, args);
+
+        /**
+        * エンコード進捗表示用に標準出力に進捗情報を吐き出す
+        * 出力する JSON
+        * {"type":"progress","percent": 0.8, "log": "view log" }
+        */
+        child.stderr.on('data', data => {
+            let strbyline = String(data).split('\n');
+            for (let i = 0; i < strbyline.length; i++) {
+                let str = strbyline[i];
+                if (str.startsWith('frame')) {
+                    // 想定log
+                    // frame= 5159 fps= 11 q=29.0 size=  122624kB time=00:02:51.84 bitrate=5845.8kbits/s dup=19 drop=0 speed=0.372x
+                    const progress = {};
+                    const ffmpeg_reg = /frame=\s*(?<frame>\d+)\sfps=\s*(?<fps>\d+(?:\.\d+)?)\sq=\s*(?<q>[+-]?\d+(?:\.\d+)?)\sL?size=\s*(?<size>\d+(?:\.\d+)?)kB\stime=\s*(?<time>\d+[:\.\d+]*)\sbitrate=\s*(?<bitrate>\d+(?:\.\d+)?)kbits\/s(?:\sdup=\s*(?<dup>\d+))?(?:\sdrop=\s*(?<drop>\d+))?\sspeed=\s*(?<speed>\d+(?:\.\d+)?)x/;
+                    let ffmatch =str.match(ffmpeg_reg);
+                    /**
+                    * match結果
+                    * [
+                    *   'frame= 5159 fps= 11 q=29.0 size=  122624kB time=00:02:51.84 bitrate=5845.8kbits/s dup=19 drop=0 speed=0.372x',
+                    *   '5159',
+                    *   '11',
+                    *   '29.0',
+                    *   '122624',
+                    *   '00:02:51.84',
+                    *   '5845.8',
+                    *   '19',
+                    *   '0',
+                    *   '0.372',
+                    *   index: 0,
+                    *   input: 'frame= 5159 fps= 11 q=29.0 size=  122624kB time=00:02:51.84 bitrate=5845.8kbits/s dup=19 drop=0 speed=0.372x    \r',
+                    *   groups: [Object: null prototype] {
+                    *     frame: '5159',
+                    *     fps: '11',
+                    *     q: '29.0',
+                    *     size: '122624',
+                    *     time: '00:02:51.84',
+                    *     bitrate: '5845.8',
+                    *     dup: '19',
+                    *     drop: '0',
+                    *     speed: '0.372'
+                    *   }
+                    * ]
+                    */
+
+                    if (ffmatch === null) continue;
+
+                    progress['frame'] = parseInt(ffmatch.groups.frame);
+                    progress['fps'] = parseFloat(ffmatch.groups.fps);
+                    progress['q'] = parseFloat(ffmatch.groups.q);
+                    progress['size'] = parseInt(ffmatch.groups.size);
+                    progress['time'] = ffmatch.groups.time;
+                    progress['bitrate'] = parseFloat(ffmatch.groups.bitrate);
+                    progress['dup'] = ffmatch.groups.dup == null ? 0 : parseInt(ffmatch.groups.dup);
+                    progress['drop'] = ffmatch.groups.drop == null ? 0 : parseInt(ffmatch.groups.drop);
+                    progress['speed'] = parseFloat(ffmatch.groups.speed);
+
+                    let current = 0;
+                    const times = progress.time.split(':');
+                    for (let i = 0; i < times.length; i++) {
+                        if (i == 0) {
+                            current += parseFloat(times[i]) * 3600;
+                        } else if (i == 1) {
+                            current += parseFloat(times[i]) * 60;
+                        } else if (i == 2) {
+                            current += parseFloat(times[i]);
+                        }
+                    }
+
+                    // 進捗率 1.0 で 100%
+                    const percent = current / duration;
+                    const log =
+                        'frame= ' +
+                        progress.frame +
+                        ' fps=' +
+                        progress.fps +
+                        ' size=' +
+                        progress.size +
+                        ' time=' +
+                        progress.time +
+                        ' bitrate=' +
+                        progress.bitrate +
+                        ' drop=' +
+                        progress.drop +
+                        ' speed=' +
+                        progress.speed;
+
+                    console.log(JSON.stringify({ type: 'progress', percent: percent, log: log }));
+                }
+            }
+        });
+
+        child.on('error', err => {
+            console.error(err);
+            throw new Error(err);
+        });
+
+        process.on('SIGINT', () => {
+            child.kill('SIGINT');
+        });
+    })();
+
+  epgUpdaterLogConfig.yml: |
+    appenders:
+      system:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%EPGUpdaterSystem%"
+        pattern: "-yyyy-MM-dd"
+      access:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%EPGUpdaterAccess%"
+        pattern: "-yyyy-MM-dd"
+      stream:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%EPGUpdaterStream%"
+        pattern: "-yyyy-MM-dd"
+      encode:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%EPGUpdaterEncode%"
+        pattern: "-yyyy-MM-dd"
+      console:
+        type: console
+      stdout:
+        type: stdout
+    categories:
+      default:
+        appenders:
+          - console
+          - stdout
+        level: info
+      system:
+        appenders:
+          - system
+          - stdout
+        level: info
+      access:
+        appenders:
+          - access
+          - stdout
+        level: info
+      stream:
+        appenders:
+          - stream
+          - stdout
+        level: info
+
+  operatorLogConfig.yml: |
+    appenders:
+      system:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%OperatorSystem%"
+        pattern: "-yyyy-MM-dd"
+      access:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%OperatorAccess%"
+        pattern: "-yyyy-MM-dd"
+      stream:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%OperatorStream%"
+        pattern: "-yyyy-MM-dd"
+      encode:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%OperatorEncode%"
+        pattern: "-yyyy-MM-dd"
+      console:
+        type: console
+      stdout:
+        type: stdout
+    categories:
+      default:
+        appenders:
+          - console
+          - stdout
+        level: info
+      system:
+        appenders:
+          - system
+          - stdout
+        level: info
+      access:
+        appenders:
+          - access
+          - stdout
+        level: info
+      stream:
+        appenders:
+          - stream
+          - stdout
+        level: info
+
+  serviceLogConfig.yml: |
+    appenders:
+      system:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%ServiceSystem%"
+        pattern: "-yyyy-MM-dd"
+      access:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%ServiceAccess%"
+        pattern: "-yyyy-MM-dd"
+      stream:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%ServiceStream%"
+        pattern: "-yyyy-MM-dd"
+      encode:
+        type: file
+        maxLogSize: 1048576
+        backups: 3
+        filename: "%ServiceEncode%"
+        pattern: "-yyyy-MM-dd"
+      console:
+        type: console
+      stdout:
+        type: stdout
+    categories:
+      default:
+        appenders:
+          - console
+          - stdout
+        level: info
+      system:
+        appenders:
+          - system
+          - stdout
+        level: info
+      access:
+        appenders:
+          - access
+          - stdout
+        level: info
+      stream:
+        appenders:
+          - stream
+          - stdout
+        level: info
+      encode:
+        appenders:
+          - encode
+          - stdout
+        level: info

@@ -22,6 +22,11 @@
     update_cache: true
   become: true
 
+- name: Remove dependencies that are no longer required
+  ansible.builtin.apt:
+    autoremove: yes
+  become: true
+
 - name: Install kubernetes pre-requisites
   ansible.builtin.pip:
     name:
