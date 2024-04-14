@@ -1,0 +1,9 @@
+resources:
+  - pre-sync.yml
+  - persistent-volume.yml
+  - secret.yml
+  - mirakc.yml
+  - mirakc-conf.yml
+  - mariadb.yml
+  - epgstation.yml
+  - epgstation-conf.yml

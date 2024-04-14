@@ -12,6 +12,7 @@ spec:
           # - name: palworld
           - name: nextcloud
           - name: wordpress
+          - name: tv
   template:
     metadata:
       name: "{{name}}"
