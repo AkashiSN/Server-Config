@@ -39,3 +39,5 @@ EOT
 
 EXPOSE 8888
 WORKDIR /app
+
+ENTRYPOINT ["npm", "start"]
