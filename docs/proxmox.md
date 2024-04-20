@@ -129,6 +129,8 @@ sysctl -p /etc/sysctl.d/99-tailscale.conf
 cat >/usr/lib/systemd/system/tailscale-offload@.service << EOF
 [Unit]
 Description="Linux optimizations for subnet routers and exit nodes %i."
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=oneshot
@@ -142,7 +144,7 @@ systemctl daemon-reload
 systemctl enable --now tailscale-offload@vmbr0
 
 # Run tailscale
-tailscale up --advertise-exit-node --advertise-routes=172.16.254.0/24,172.16.100.0/24
+tailscale up --advertise-routes=172.16.254.0/24,172.16.100.0/24
 ```
 
 ## Fix e1000e Detected Hardware Unit Hang
@@ -152,6 +154,8 @@ https://gist.github.com/brunneis/0c27411a8028610117fefbe5fb669d10
 cat >/usr/lib/systemd/system/fix-e1000e@.service << EOF
 [Unit]
 Description="Fix for %i ethernet hang errors"
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=oneshot
