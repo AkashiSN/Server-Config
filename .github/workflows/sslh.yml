@@ -1,0 +1,36 @@
+name: sslh
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'docker/sslh/**'
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: akashisn
+          password: ${{ github.token }}
+
+      - name: Build and push - sslh
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker/sslh
+          file: ./docker/sslh/Dockerfile
+          tags: |
+            ghcr.io/akashisn/sslh
+          platforms: linux/amd64
+          push: true
