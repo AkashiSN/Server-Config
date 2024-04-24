@@ -1,39 +1,50 @@
 # syntax = docker/dockerfile:1.4
-FROM alpine AS build
+FROM ubuntu:22.04 AS build
 
-ENV SSLH_VERSION="v2.1.1"
+SHELL ["/bin/bash", "-e", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive \
+    SSLH_VERSION="v2.1.1"
 
 RUN <<EOT
-apk add --no-cache \
-    gcc \
-    git \
-    libconfig-dev \
-    make \
-    musl-dev \
-    pcre2-dev \
-    perl
+apt-get update
+apt-get install -y \
+  gcc \
+  git \
+  libbsd-dev \
+  libcap-dev \
+  libcap-dev \
+  libconfig-dev \
+  libpcre2-dev \
+  libsystemd-dev \
+  libwrap0-dev \
+  make \
+  perl
 
 git clone --recursive https://github.com/yrutschle/sslh.git -b ${SSLH_VERSION} --depth=1 /tmp/sslh
 cd /tmp/sslh
 
 ./configure
-make sslh-select
+make USELIBWRAP=1 USELIBCAP=1 USESYSTEMD=1 USELIBBSD=1 sslh-select
 strip sslh-select
 EOT
 
-FROM alpine
+FROM ubuntu:22.04
 
 COPY --from=build /tmp/sslh/sslh-select /usr/local/bin/sslh
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOT
-apk add --no-cache \
-    libconfig \
-    pcre2 \
-    iptables \
-    ip6tables \
-    libcap
+apt-get update
+apt-get install -y \
+  iptables \
+  libbsd0 \
+  libcap2-bin \
+  libconfig9 \
+  libwrap0
+apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-adduser -s '/bin/sh' -S -D sslh
+useradd --shell '/bin/sh' --system --create-home sslh
 setcap cap_net_bind_service,cap_net_raw+ep /usr/local/bin/sslh
 EOT
 
