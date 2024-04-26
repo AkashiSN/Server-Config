@@ -9,7 +9,7 @@ cp --archive --parents --no-dereference /usr/local/lib/* /dist
 EOT
 
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive \
