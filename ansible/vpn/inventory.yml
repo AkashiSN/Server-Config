@@ -1,0 +1,4 @@
+virtualmachines:
+  hosts:
+    vpn-server:
+      ansible_host: vpn-server
