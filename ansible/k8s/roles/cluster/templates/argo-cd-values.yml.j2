@@ -1,7 +1,7 @@
 configs:
   cm:
     url: "https://{{ argocd_fqdn }}"
-    statusbadge.enabled: "true"
+    statusbadge.enabled: true
     oidc.config: |-
       name: dex
       issuer: "https://{{ auth_fqdn }}/dex"
@@ -31,8 +31,8 @@ server:
     enabled: true
     ingressClassName: nginx
     annotations:
-      nginx.ingress.kubernetes.io/auth-url: https://auth.akashisn.info/oauth2/auth
-      nginx.ingress.kubernetes.io/auth-signin: https://auth.akashisn.info/oauth2/start?rd=https://{{ argocd_fqdn }}$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-url: "https://auth.akashisn.info/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://auth.akashisn.info/oauth2/start?rd=https://{{ argocd_fqdn }}$escaped_request_uri"
       cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
     hostname: "{{ argocd_fqdn }}"
     extraTls:

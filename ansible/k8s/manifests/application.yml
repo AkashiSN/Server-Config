@@ -22,7 +22,7 @@ spec:
         namespace: "{{name}}"
       project: default
       source:
-        path: "k8s/manifests/{{name}}"
+        path: "ansible/k8s/manifests/{{name}}"
         repoURL: https://github.com/AkashiSN/Server-Config.git
         targetRevision: main
         # kustomize:
