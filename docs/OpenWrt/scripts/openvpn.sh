@@ -52,7 +52,7 @@ function generate_rootCA() {
 	openssl req -new -key "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -sha256 -out req.pem -subj "/CN=root"
 
 	# Create self sign certificate
-	openssl ca -batch -policy policy_anything -create_serial -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${CATOP}/cacert.pem" -days 1095 -selfsign -extensions v3_ca -infiles req.pem
+	openssl ca -batch -policy policy_anything -create_serial -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${CATOP}/cacert.pem" -days 3650 -selfsign -extensions v3_ca -infiles req.pem
 	rm -f req.pem
 
 	echo "Root CA certificate is in ${CATOP}/cacert.pem,${CATOP}/private/cakey.pem"
@@ -73,7 +73,7 @@ function generate_server() {
 	openssl req -new -key "${SERVER_CERT_DIR}/server_key.pem" -sha256 -out req.pem -subj "/CN=$FQDN"
 
 	# Sign a certificate request
-	openssl ca -batch -policy policy_anything -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${SERVER_CERT_DIR}/server_cert.pem" -days 1095 -infiles req.pem
+	openssl ca -batch -policy policy_anything -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${SERVER_CERT_DIR}/server_cert.pem" -days 3650 -infiles req.pem
 	rm -f req.pem
 
 	echo "Server certificate is in ${SERVER_CERT_DIR}/server_cert.pem,server_key.pem"

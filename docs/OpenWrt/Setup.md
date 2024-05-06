@@ -1,37 +1,26 @@
-# Install in proxmox
+# Setup Openwrt
+
+## Install in proxmox
 
 https://www.jwtechtips.top/how-to-install-openwrt-in-proxmox/
 
-# Upgrade
 
-```bash
-OPENWRT_VERSION=23.05.3
-wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/x86/64/openwrt-${OPENWRT_VERSION}-x86-64-generic-ext4-combined.img.gz
-wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/bcm27xx/bcm2711/openwrt-${OPENWRT_VERSION}-bcm27xx-bcm2711-rpi-4-ext4-sysupgrade.img.gz
-wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/rockchip/armv8/openwrt-${OPENWRT_VERSION}-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz
+## Init settings
 
-sysupgrade -v ./openwrt.img.gz
+### Expanding root partition and filesystem
+```sh
+# https://openwrt.org/docs/guide-user/advanced/expand_root
+wget -U "" -O expand-root.sh "https://openwrt.org/_export/code/docs/guide-user/advanced/expand_root?codeblock=0"
+. ./expand-root.sh
 ```
 
+### Cloudflared init script
 ```sh
-opkg update
-
-# Install ja package
-opkg install luci-i18n-base-ja luci-i18n-firewall-ja luci-i18n-opkg-ja luci-i18n-uhttpd-ja
-
-# Install curl
-opkg install curl
-
-# Install cloudflared
-curl -L --output /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64
-chmod +x /tmp/cloudflared
-mv /tmp/cloudflared /usr/bin/cloudflared
-
 export TOKEN=""
 cat <<EOF > /etc/init.d/cloudflared
 #!/bin/sh /etc/rc.common
 
-cmd="/usr/bin/cloudflared --pidfile /var/run/cloudflared.pid --no-autoupdate tunnel run --token $TOKEN"
+cmd="/usr/bin/cloudflared --pidfile /var/run/cloudflared.pid tunnel run --token $TOKEN"
 pid_file="/var/run/cloudflared.pid"
 
 # Timeout (in seconds) to wait for DNS
@@ -82,6 +71,43 @@ EOF
 chmod +x /etc/init.d/cloudflared
 /etc/init.d/cloudflared enable
 echo "/etc/init.d/cloudflared" >> /etc/sysupgrade.conf
+```
+
+## Upgrade
+
+```bash
+OPENWRT_VERSION=23.05.3
+wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/x86/64/openwrt-${OPENWRT_VERSION}-x86-64-generic-ext4-combined.img.gz
+wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/bcm27xx/bcm2711/openwrt-${OPENWRT_VERSION}-bcm27xx-bcm2711-rpi-4-ext4-sysupgrade.img.gz
+wget -O openwrt.img.gz https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/rockchip/armv8/openwrt-${OPENWRT_VERSION}-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz
+
+sysupgrade -v ./openwrt.img.gz
+```
+
+
+```sh
+# Update package list
+opkg update
+
+# Install resize package
+opkg install parted losetup resize2fs
+
+# Reboot and resize
+reboot
+
+# Update package list
+opkg update
+
+# Install ja package
+opkg install luci-i18n-base-ja luci-i18n-firewall-ja luci-i18n-opkg-ja luci-i18n-uhttpd-ja
+
+# Install curl
+opkg install curl
+
+# Install cloudflared
+curl -L --output /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64
+chmod +x /tmp/cloudflared
+mv /tmp/cloudflared /usr/bin/cloudflared
 
 # Install OpenSSH sftp
 opkg install openssh-sftp-server
@@ -119,6 +145,9 @@ opkg install qemu-ga
 
 # Install mwan3
 opkg install luci-app-mwan3 luci-i18n-mwan3-ja
+
+# Remove opkg config file
+rm /etc/config/*-opkg
 
 # reboot
 reboot

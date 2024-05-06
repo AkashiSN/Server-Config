@@ -1,20 +1,24 @@
 # Setup
 
 Create pass phrase
-- `/etc/openvpn/root_ca_pass_phrase`
+```bash
+openssl rand -base64 32 > /etc/openvpn/root_ca_pass_phrase
+```
 
 ```bash
 # Set env file
 cat <<EOF > /etc/openvpn/.openvpn.env
 FQDN="host"
-CLIENTS="MacBookPro13 Pixel6Pro iPadPro11 Xperia10IV"
+CLIENTS="MacBookPro13 iPhone15ProMax iPadPro11 Xperia10IV"
 EOF
 ```
 
 ```bash
+# Download script
 curl -o /etc/openvpn/openvpn.sh -L https://raw.githubusercontent.com/AkashiSN/Server-Config/main/docs/OpenWrt/scripts/openvpn.sh
 chmod +x /etc/openvpn/openvpn.sh
 
+# Init run script
 /etc/openvpn/openvpn.sh
 
 echo "/etc/openvpn/" >> /etc/sysupgrade.conf
