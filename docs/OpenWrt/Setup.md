@@ -102,7 +102,7 @@ opkg update
 opkg install luci-i18n-base-ja luci-i18n-firewall-ja luci-i18n-opkg-ja luci-i18n-uhttpd-ja
 
 # Install curl
-opkg install curl
+opkg install curl ca-certificates
 
 # Install cloudflared
 curl -L --output /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64

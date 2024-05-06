@@ -9,7 +9,7 @@ openssl rand -base64 32 > /etc/openvpn/root_ca_pass_phrase
 # Set env file
 cat <<EOF > /etc/openvpn/.openvpn.env
 FQDN="host"
-CLIENTS="MacBookPro13 iPhone15ProMax iPadPro11 Xperia10IV"
+CLIENTS="MacBookPro13 iPhone15ProMax iPadPro11 Xperia10IV GlAxt1800"
 EOF
 ```
 
