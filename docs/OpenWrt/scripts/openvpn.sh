@@ -43,16 +43,20 @@ function generate_rootCA() {
 	openssl ecparam -genkey -name prime256v1 -noout -out "${CATOP}/private/cakey.pem"
 
   # Add pass phrase to private key
-	openssl ec -in "${CATOP}/private/cakey.pem" -passout "file:${ROOT_CA_PASS_FILE}" -out "${CATOP}/private/cakey_enc.pem" -aes256
+	openssl ec -in "${CATOP}/private/cakey.pem" -passout "file:${ROOT_CA_PASS_FILE}" \
+		-out "${CATOP}/private/cakey_enc.pem" -aes256
 
   # Overwrite plain key by encrypted key
 	mv "${CATOP}/private/cakey_enc.pem" "${CATOP}/private/cakey.pem"
 
 	# Create a certificate request
-	openssl req -new -key "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -sha256 -out req.pem -subj "/CN=root"
+	openssl req -new -key "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" \
+		-sha256 -out req.pem -subj "/CN=root"
 
 	# Create self sign certificate
-	openssl ca -batch -policy policy_anything -create_serial -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${CATOP}/cacert.pem" -days 3650 -selfsign -extensions v3_ca -infiles req.pem
+	openssl ca -batch -policy policy_anything -create_serial -keyfile "${CATOP}/private/cakey.pem" \
+		-passin "file:${ROOT_CA_PASS_FILE}" -out "${CATOP}/cacert.pem" \
+		-days 3650 -selfsign -extensions v3_ca -infiles req.pem
 	rm -f req.pem
 
 	echo "Root CA certificate is in ${CATOP}/cacert.pem,${CATOP}/private/cakey.pem"
@@ -73,7 +77,9 @@ function generate_server() {
 	openssl req -new -key "${SERVER_CERT_DIR}/server_key.pem" -sha256 -out req.pem -subj "/CN=$FQDN"
 
 	# Sign a certificate request
-	openssl ca -batch -policy policy_anything -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${SERVER_CERT_DIR}/server_cert.pem" -days 3650 -infiles req.pem
+	openssl ca -batch -policy policy_anything -keyfile "${CATOP}/private/cakey.pem" \
+		-passin "file:${ROOT_CA_PASS_FILE}" -out "${SERVER_CERT_DIR}/server_cert.pem" \
+		-days 3650 -infiles req.pem
 	rm -f req.pem
 
 	echo "Server certificate is in ${SERVER_CERT_DIR}/server_cert.pem,server_key.pem"
@@ -88,7 +94,7 @@ function generate_keys() {
 	# Diffie-Hellman (DH) key
 	#
 	if [ -e "${OPENVPN_DIR}/dh.pem" ];then
-		mv "${OPENVPN_DIR}/dh.pem" "${SERVER_CERT_DIR}/dh.pem"
+		cp "${OPENVPN_DIR}/dh.pem" "${SERVER_CERT_DIR}/dh.pem"
 	else
 		openssl dhparam -out "${SERVER_CERT_DIR}/dh.pem" -2 4096
 	fi
@@ -116,16 +122,20 @@ function generate_client() {
 	openssl req -new -key "${CLIENT_CERT_DIR}/${1}_key.pem" -sha256 -out req.pem -subj "/CN=${1}"
 
 	# Sign a certificate request
-	openssl ca -batch -policy policy_anything -keyfile "${CATOP}/private/cakey.pem" -passin "file:${ROOT_CA_PASS_FILE}" -out "${CLIENT_CERT_DIR}/${1}_cert.pem" -days 1095 -infiles req.pem
+	openssl ca -batch -policy policy_anything -keyfile "${CATOP}/private/cakey.pem" \
+		-passin "file:${ROOT_CA_PASS_FILE}" -out "${CLIENT_CERT_DIR}/${1}_cert.pem" \
+		-days 3650 -infiles req.pem
 	rm -f req.pem
 
   cat << EOS > ${CLIENT_CERT_DIR}/${1}.ovpn
 client
 nobind
 dev tun0
-remote ${FQDN} 1194 udp
-resolv-retry 30
 
+remote ${FQDN} 1194 udp
+remote ${FQDN} 443 tcp
+
+keepalive 5 10
 redirect-gateway def1
 
 remote-cert-tls server
@@ -173,8 +183,9 @@ FQDN="${FQDN}"
 CLIENTS="${CLIENTS}"
 EOS
 	generate_client "$2"
-else
+elif [ "$1" = "clean" ]; then
 	clean
+else
 	generate_rootCA
 	generate_server
 	generate_keys
