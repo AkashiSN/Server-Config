@@ -23,11 +23,11 @@ updates:
       interval: "daily"
   # k8s manifests
   - package-ecosystem: "docker"
-    directory: "/k8s/manifests/dns"
+    directory: "/ansible/k8s/manifests/dns"
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "/k8s/manifests/nextcloud"
+    directory: "/ansible/k8s/manifests/nextcloud"
     schedule:
       interval: "daily"
     ignore:
@@ -36,7 +36,7 @@ updates:
           - "version-update:semver-major"
           - "version-update:semver-minor"
   - package-ecosystem: "docker"
-    directory: "/k8s/manifests/wordpress"
+    directory: "/ansible/k8s/manifests/wordpress"
     schedule:
       interval: "daily"
     ignore:
@@ -44,7 +44,7 @@ updates:
         update-types:
           - "version-update:semver-major"
   # - package-ecosystem: "docker"
-  #   directory: "/k8s/manifests/tv"
+  #   directory: "/ansible/k8s/manifests/tv"
   #   schedule:
   #     interval: "daily"
   #   ignore:
@@ -53,6 +53,6 @@ updates:
   #         - "version-update:semver-major"
   #         - "version-update:semver-minor"
   # - package-ecosystem: "docker"
-  #   directory: "/k8s/manifests/palworld"
+  #   directory: "/ansible/k8s/manifests/palworld"
   #   schedule:
   #     interval: "weekly"
