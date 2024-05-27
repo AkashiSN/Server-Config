@@ -43,15 +43,15 @@ updates:
       - dependency-name: "mariadb"
         update-types:
           - "version-update:semver-major"
-  # - package-ecosystem: "docker"
-  #   directory: "/ansible/k8s/manifests/tv"
-  #   schedule:
-  #     interval: "daily"
-  #   ignore:
-  #     - dependency-name: "mariadb"
-  #       update-types:
-  #         - "version-update:semver-major"
-  #         - "version-update:semver-minor"
+  - package-ecosystem: "docker"
+    directory: "/ansible/k8s/manifests/tv"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "mariadb"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
   # - package-ecosystem: "docker"
   #   directory: "/ansible/k8s/manifests/palworld"
   #   schedule:
