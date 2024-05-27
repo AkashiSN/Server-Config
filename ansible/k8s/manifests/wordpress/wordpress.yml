@@ -40,7 +40,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: wordpress
-          image: ghcr.io/akashisn/wordpress@sha256:35c890565aacc1b477d9933cd7b001adf5f98c6903102ad64e90fdeb7430db10
+          image: ghcr.io/akashisn/wordpress@sha256:8638f732c543c62fdea18760bd42e67f3baf7f16e0c7e5d972a23f0605dcb450
           imagePullPolicy: IfNotPresent
           args:
             - /docker-entrypoint-hooks.sh
