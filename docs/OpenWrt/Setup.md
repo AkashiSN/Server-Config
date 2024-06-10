@@ -85,7 +85,7 @@ sysupgrade -v ./openwrt.img.gz
 ```
 
 
-```sh
+```bash
 # Update package list
 opkg update
 
@@ -109,8 +109,23 @@ curl -L --output /tmp/cloudflared https://github.com/cloudflare/cloudflared/rele
 chmod +x /tmp/cloudflared
 mv /tmp/cloudflared /usr/bin/cloudflared
 
-# Install OpenSSH sftp
-opkg install openssh-sftp-server
+# Install OpenSSH Server
+opkg install openssh-server openssh-sftp-server
+
+## Configure sshd
+sed -i -e '/^#PermitRootLogin/s/^#//' -e '/^#PubkeyAuthentication/s/^#//'  -e 's/^#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+
+## Setup pubkey
+mkdir -p /root/.ssh/
+wget -O /root/.ssh/authorized_keys https://github.com/AkashiSN.keys
+
+## Enable sshd
+/etc/init.d/sshd enable
+/etc/init.d/sshd restart
+
+## Disable dropbear
+/etc/init.d/dropbear disable
+/etc/init.d/dropbear stop
 
 # Download & Install ipip6 package
 curl -L -o ./ipip6_0.1_all.ipk "https://drive.google.com/uc?export=download&id=1iWwjliIeP-Bud2Bje8w-yHe7DE9oWdtn"
