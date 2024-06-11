@@ -44,7 +44,7 @@ spec:
               mountPath: /config
       containers:
         - name: epgstation
-          image: ghcr.io/akashisn/epgstation@sha256:f43e8eef3526c222b1e4f3b30dbe0a10615fc26ab6122968a4d358f68f89a2ac
+          image: ghcr.io/akashisn/epgstation@sha256:399347dbc79d81c4ebb872a57a7fe357d30ef2a0cd397193e8734bbc2cb63c59
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
