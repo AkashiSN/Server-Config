@@ -26,7 +26,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build and push - epgstation
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./docker/epgstation
           file: ./docker/epgstation/Dockerfile
