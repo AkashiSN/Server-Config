@@ -7,9 +7,13 @@ data:
   TZ: "Asia/Tokyo"
   EULA: "TRUE"
   MEMORY: "16G"
-  MOTD: "A §l§cVanilla§r Minecraft server powered by §nKubernetes§r"
+  MOTD: "A Minecraft server powered by §nKubernetes§r"
   DIFFICULTY: "normal"
-  VERSION: "1.19.4"
+  TYPE: AUTO_CURSEFORGE
+  VERSION: "1.20.1"
+  FORGE_VERSION: "47.3.0"
+  CF_SLUG: all-the-mods-9
+  CF_FILE_ID: "5458414"
   RCON_PASSWORD_FILE: "/secrets/minecraft_rcon_password"
   OVERRIDE_SERVER_PROPERTIES: "TRUE"
   ENABLE_WHITELIST: "TRUE"
@@ -20,24 +24,26 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    app: minecraft-vanilla
-  name: minecraft-vanilla
+    app: minecraft
+  name: minecraft
   namespace: minecraft
 spec:
   replicas: 1
-  serviceName: minecraft-vanilla
+  serviceName: minecraft
   selector:
     matchLabels:
-      app: minecraft-vanilla
+      app: minecraft
   template:
     metadata:
       labels:
-        app: minecraft-vanilla
+        app: minecraft
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker-node-02
       containers:
         - name: minecraft
-          image: itzg/minecraft-server
-          imagePullPolicy: Always
+          image: itzg/minecraft-server:2024.6.1-java21
+          imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 25565
             name: minecraft
@@ -48,8 +54,13 @@ spec:
           - name: WHITELIST
             valueFrom:
               secretKeyRef:
-                name: minecraft-whitelist
+                name: minecraft-secrets
                 key: minecraft_whitelist
+          - name: CF_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: minecraft-secrets
+                key: minecraft_cf_api_key
           volumeMounts:
             - mountPath: /data
               name: data
@@ -68,11 +79,11 @@ spec:
             periodSeconds: 60
           resources:
             requests:
-              cpu: 1000m
+              cpu: 4000m
               memory: 16Gi
             limits:
-              cpu: 4000m
-              memory: 20Gi
+              cpu: 8000m
+              memory: 24Gi
         # - name: backup
         #   image: itzg/mc-backup
         #   securityContext:
@@ -107,10 +118,10 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: minecraft-vanilla
+    service: minecraft
   annotations:
     metallb.universe.tf/loadBalancerIPs: "{{ minecraft_lb_v4_addr }}"
-  name: minecraft-vanilla
+  name: minecraft
   namespace: minecraft
 spec:
   type: LoadBalancer
@@ -119,4 +130,4 @@ spec:
   - port: 25565
     name: minecraft
   selector:
-    app: minecraft-vanilla
+    app: minecraft
