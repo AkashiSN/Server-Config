@@ -103,6 +103,8 @@ spec:
         - name: minecraft-secrets
           secret:
             secretName: minecraft-secrets
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
   volumeClaimTemplates:
   - metadata:
       name: data
