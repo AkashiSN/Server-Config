@@ -42,7 +42,7 @@ spec:
         kubernetes.io/hostname: worker-node-02
       containers:
         - name: minecraft
-          image: itzg/minecraft-server:2024.6.1-java21
+          image: itzg/minecraft-server:2024.6.1-java17
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 25565
