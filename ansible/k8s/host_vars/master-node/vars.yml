@@ -45,6 +45,7 @@ dns_lb_v4_addr: "172.16.254.110"
 dns_lb_v6_host_addr: "ffff:fac:ade:110"
 # minecraft
 minecraft_lb_v4_addr: "172.16.254.120"
+minecraft_lb_v6_host_addr: "ffff:fac:ade:120"
 # palworld
 palworld_lb_v4_addr: "172.16.254.125"
 palworld_lb_v6_host_addr: "ffff:fac:ade:125"

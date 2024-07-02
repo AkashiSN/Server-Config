@@ -44,6 +44,18 @@ spec:
 {% endif %}
 ---
 apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: minecraft-pool
+  namespace: kube-system
+spec:
+  addresses:
+    - {{ minecraft_lb_v4_addr }}/32
+{% if default_interface_v6.stdout != "" %}
+    - {{ ipv6_prefix }}:{{ minecraft_lb_v6_host_addr }}/128
+{% endif %}
+---
+apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
   name: l2-ip
@@ -53,4 +65,5 @@ spec:
     - default-pool
     - ingress-pool
     - dns-pool
+    - minecraft
     - palworld-pool

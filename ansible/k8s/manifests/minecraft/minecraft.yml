@@ -11,7 +11,7 @@ data:
   DIFFICULTY: "normal"
   TYPE: AUTO_CURSEFORGE
   VERSION: "1.20.1"
-  FORGE_VERSION: "47.3.0"
+  FORGE_VERSION: "47.2.20"
   CF_SLUG: all-the-mods-9
   CF_FILE_ID: "5458414"
   RCON_PASSWORD_FILE: "/secrets/minecraft_rcon_password"
@@ -120,7 +120,7 @@ metadata:
   labels:
     service: minecraft
   annotations:
-    metallb.universe.tf/loadBalancerIPs: "{{ minecraft_lb_v4_addr }}"
+    metallb.universe.tf/address-pool: dns-pool
   name: minecraft
   namespace: minecraft
 spec:
