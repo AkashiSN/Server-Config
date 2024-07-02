@@ -122,7 +122,7 @@ metadata:
   labels:
     service: minecraft
   annotations:
-    metallb.universe.tf/address-pool: dns-pool
+    metallb.universe.tf/address-pool: minecraft-pool
   name: minecraft
   namespace: minecraft
 spec:
