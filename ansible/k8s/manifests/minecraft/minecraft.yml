@@ -16,6 +16,7 @@ data:
   CF_FILE_ID: "5458414"
   RCON_PASSWORD_FILE: "/secrets/minecraft_rcon_password"
   OVERRIDE_SERVER_PROPERTIES: "TRUE"
+  WHITELIST_FILE: "/secrets/minecraft_whitelist"
   ENABLE_WHITELIST: "TRUE"
   ENFORCE_WHITELIST: "TRUE"
   OVERRIDE_WHITELIST: "TRUE"
@@ -51,11 +52,6 @@ spec:
           - configMapRef:
               name: minecraft-env
           env:
-          - name: WHITELIST
-            valueFrom:
-              secretKeyRef:
-                name: minecraft-secrets
-                key: minecraft_whitelist
           - name: CF_API_KEY
             valueFrom:
               secretKeyRef:
