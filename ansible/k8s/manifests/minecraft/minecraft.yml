@@ -20,6 +20,7 @@ data:
   ENABLE_WHITELIST: "TRUE"
   ENFORCE_WHITELIST: "TRUE"
   OVERRIDE_WHITELIST: "TRUE"
+  ALLOW_FLIGHT: "TRUE"
 ---
 apiVersion: apps/v1
 kind: StatefulSet
