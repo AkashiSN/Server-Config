@@ -18,3 +18,23 @@ spec:
     lun: 0
     fsType: xfs
     readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minecraft-backup-pv
+spec:
+  capacity:
+    storage: 2Ti
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-hdd-storage
+  claimRef:
+    namespace: minecraft
+    name: backup-minecraft-0
+  nfs:
+    server: 172.16.255.1
+    path: /mnt/hdd/nfs/minecraft-backup
+  mountOptions:
+    - nfsvers=4.2

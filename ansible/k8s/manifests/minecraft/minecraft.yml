@@ -60,6 +60,8 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: data
+            - mountPath: /backup
+              name: backup
             - mountPath: /secrets
               name: minecraft-secrets
           readinessProbe:
@@ -80,21 +82,6 @@ spec:
             limits:
               cpu: 8000m
               memory: 24Gi
-        # - name: backup
-        #   image: itzg/mc-backup
-        #   securityContext:
-        #     runAsUser: 1000
-        #   env:
-        #     - name: BACKUP_INTERVAL
-        #       value: "60"
-        #     - name: INITIAL_DELAY
-        #       value: "10"
-        #   volumeMounts:
-        #     - mountPath: /data
-        #       name: data
-        #       readOnly: true
-        #     - mountPath: /backups
-        #       name: backups
       volumes:
         - name: minecraft-secrets
           secret:
@@ -108,6 +95,15 @@ spec:
       accessModes:
       - ReadWriteOncePod
       storageClassName: iscsi-ssd-storage
+      resources:
+        requests:
+          storage: 50Gi
+  - metadata:
+      name: backup
+    spec:
+      accessModes:
+      - ReadWriteOncePod
+      storageClassName: nfs-hdd-storage
       resources:
         requests:
           storage: 50Gi
