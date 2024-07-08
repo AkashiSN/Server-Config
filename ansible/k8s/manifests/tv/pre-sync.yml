@@ -18,7 +18,7 @@ spec:
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
         - name: mirakc
-          image: ghcr.io/akashisn/mirakc@sha256:e5f1f0e4033fec61fd9bf71fec85a2182a00bd5fcbd77cdfa3d4108b2a90cced
+          image: ghcr.io/akashisn/mirakc@sha256:1246c8c636e0a886e7dba00bae5594c6ac0097e8c1e6a570edb349483ebbb555
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
         - name: epgstation
