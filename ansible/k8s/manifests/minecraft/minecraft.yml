@@ -6,7 +6,7 @@ metadata:
 data:
   TZ: "Asia/Tokyo"
   EULA: "TRUE"
-  MEMORY: "16G"
+  MEMORY: "32G"
   MOTD: "A Minecraft server powered by §nKubernetes§r"
   DIFFICULTY: "normal"
   TYPE: AUTO_CURSEFORGE
@@ -47,9 +47,8 @@ spec:
         kubernetes.io/hostname: worker-node-02
       containers:
         - name: minecraft
-          image: itzg/minecraft-server@sha256:34898750426828b5a8e7da06bc6c478a322d80c26848bffdc95b5d5b031c5f90
+          image: itzg/minecraft-server@sha256:e3399ae47a13e5ca5e33d991720bb3e25979bed20562ce53bbdad2e132e1f2b5
           imagePullPolicy: IfNotPresent
-          command: [ "/bin/sh", "-c", "sed -i '/jei/d' /image/cf-exclude-include.json && /start" ] # TODO FIX
           ports:
           - containerPort: 25565
             name: minecraft
@@ -83,10 +82,10 @@ spec:
           resources:
             requests:
               cpu: 4000m
-              memory: 16Gi
+              memory: 32Gi
             limits:
               cpu: 8000m
-              memory: 24Gi
+              memory: 50Gi
       volumes:
         - name: minecraft-secrets
           secret:

@@ -51,7 +51,7 @@ locals {
   worker_node_02 = {
     vmid                  = 126
     template_vmid         = 9002
-    memory                = 32768
+    memory                = 55296
     cores                 = 8
     onboot                = true
     proxmox_node          = "pve02"
