@@ -3,7 +3,7 @@ name: mirakc-update
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 15 * * 0' # (JST 0:00 on Sunday)
+    - cron: '0 0 1 * *' # (At 00:00 on day-of-month 1)
 
 jobs:
   check-update:

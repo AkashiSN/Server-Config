@@ -8,11 +8,11 @@ updates:
   - package-ecosystem: "docker"
     directory: "/docker/epgstation"
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "docker"
     directory: "/docker/nextcloud"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
       - dependency-name: "nextcloud"
         update-types:
@@ -20,16 +20,16 @@ updates:
   - package-ecosystem: "docker"
     directory: "/docker/wordpress"
     schedule:
-      interval: "daily"
+      interval: "weekly"
   # k8s manifests
   - package-ecosystem: "docker"
     directory: "/ansible/k8s/manifests/dns"
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "docker"
     directory: "/ansible/k8s/manifests/nextcloud"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
       - dependency-name: "mariadb"
         update-types:
@@ -38,7 +38,7 @@ updates:
   - package-ecosystem: "docker"
     directory: "/ansible/k8s/manifests/wordpress"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
       - dependency-name: "mariadb"
         update-types:
@@ -46,7 +46,7 @@ updates:
   - package-ecosystem: "docker"
     directory: "/ansible/k8s/manifests/tv"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
       - dependency-name: "mariadb"
         update-types:
