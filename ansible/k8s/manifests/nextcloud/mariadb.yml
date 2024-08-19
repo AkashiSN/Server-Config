@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: mariadb
-          image: mariadb:10.6.18
+          image: mariadb:10.6.19
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3306
