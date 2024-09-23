@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.4
 FROM l3tnun/epgstation:v2.10.0-debian AS epgstation-image
-FROM akashisn/ffmpeg:6.0 AS ffmpeg-image
+FROM akashisn/ffmpeg:7.0.2 AS ffmpeg-image
 
 RUN <<EOT
 mkdir -p /dist
