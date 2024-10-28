@@ -8,9 +8,9 @@ spec:
     - list:
         elements:
           - name: dns
-          - name: minecraft
+          # - name: minecraft
           # - name: palworld
-          - name: nextcloud
+          # - name: nextcloud
           # - name: wordpress
           # - name: tv
   template:

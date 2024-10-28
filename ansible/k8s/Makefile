@@ -1,6 +1,6 @@
-K3S_HOST			:= `sed -n '/k3s:/,/^ *ansible_host: /s/^ *ansible_host: *\([^ ]*\).*/\1/p' inventory.yml`
+K3S_HOST		:= `sed -n '/k3s:/,/^ *ansible_host: /s/^ *ansible_host: *\([^ ]*\).*/\1/p' inventory.yml`
 K3S_VPS_HOST	:= `sed -n '/k3s-vps:/,/^ *ansible_host: /s/^ *ansible_host: *\([^ ]*\).*/\1/p' inventory.yml`
-K8S_HOST			:= `sed -n '/master-node:/,/^ *ansible_host: /s/^ *ansible_host: *\([^ ]*\).*/\1/p' inventory.yml`
+K8S_HOST		:= `sed -n '/master-node:/,/^ *ansible_host: /s/^ *ansible_host: *\([^ ]*\).*/\1/p' inventory.yml`
 
 .PHONY: clean
 clean:

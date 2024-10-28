@@ -2,15 +2,16 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.50.0"
+      version = "0.66.3"
     }
   }
 }
 
 provider "proxmox" {
-  endpoint = var.proxmox.endpoint
+  endpoint = "https://172.16.254.4"
   username = var.proxmox.username
   password = var.proxmox.password
+  insecure = true
 
   ssh {
     agent    = true

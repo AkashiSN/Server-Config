@@ -3,14 +3,14 @@ cleanup-cloudimg:
 ifndef PROXMOX_NODE
 	$(error PROXMOX_NODE is not set)
 endif
-	ssh $(PROXMOX_NODE) rm -f jammy-server-cloudimg-amd64.img
+	ssh $(PROXMOX_NODE) rm -f noble-server-cloudimg-amd64.img
 
 .PHONY: download-cloudimg
 download-cloudimg:
 ifndef PROXMOX_NODE
 	$(error PROXMOX_NODE is not set)
 endif
-	ssh $(PROXMOX_NODE) wget -q https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img -O jammy-server-cloudimg-amd64.img
+	ssh $(PROXMOX_NODE) wget -q https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img -O noble-server-cloudimg-amd64.img
 
 .PHONY: destroy-template
 destroy-template:
@@ -30,9 +30,9 @@ endif
 ifndef TEMPLATE_VMID
 	$(error TEMPLATE_VMID is not set)
 endif
-	ssh $(PROXMOX_NODE) qm create $(TEMPLATE_VMID) --name ubuntu2204-server-template \
+	ssh $(PROXMOX_NODE) qm create $(TEMPLATE_VMID) --name ubuntu2404-server-template \
 			--agent 1 --ostype l26 --memory 2048 --cpu host --cores 4 --net0 virtio,bridge=vmbr0 && \
-	ssh $(PROXMOX_NODE) qm importdisk $(TEMPLATE_VMID) jammy-server-cloudimg-amd64.img local-zfs && \
+	ssh $(PROXMOX_NODE) qm importdisk $(TEMPLATE_VMID) noble-server-cloudimg-amd64.img local-zfs && \
 	ssh $(PROXMOX_NODE) qm set $(TEMPLATE_VMID) --scsihw virtio-scsi-pci --scsi0 local-zfs:vm-$(TEMPLATE_VMID)-disk-0,ssd=1 && \
 	ssh $(PROXMOX_NODE) qm set $(TEMPLATE_VMID) --ide2 local-zfs:cloudinit && \
 	ssh $(PROXMOX_NODE) qm set $(TEMPLATE_VMID) --boot c --bootdisk scsi0 && \
