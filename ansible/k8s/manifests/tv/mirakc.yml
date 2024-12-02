@@ -23,7 +23,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: mirakc
-          image: ghcr.io/akashisn/mirakc@sha256:7839c9f1c53bcc504f02bcbe3bd217580d5b9d5b343d4c19f2437b392e00410d
+          image: ghcr.io/akashisn/mirakc@sha256:4b77b06f14e0ade89282b702dd8f226fdee281da800d417a16bc2aee47d18a8c
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
