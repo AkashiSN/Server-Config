@@ -10,7 +10,7 @@
   kubernetes.core.helm:
     release_name: vault-secrets-operator
     chart_ref: hashicorp/vault-secrets-operator
-    chart_version: "0.5.*"
+    chart_version: "0.9.*"
     release_namespace: vault-secrets-operator
     create_namespace: true
     update_repo_cache: true

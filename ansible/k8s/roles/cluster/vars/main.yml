@@ -32,7 +32,3 @@ local_ips:
   - 10.1.0.0/16
   # Local network
   - 172.16.0.0/16
-
-# democratic-csi
-zfs_dataset_parent_name: ssd/k8s/vols
-zfs_detached_snapshots_dataset_parent_name: ssd/k8s/snaps
