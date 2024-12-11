@@ -25,7 +25,7 @@ spec:
                 name: immich-env
           env:
             - name: IMMICH_PORT
-              value: 2283
+              value: "2283"
           volumeMounts:
             - name: model-cache
               mountPath: /cache
