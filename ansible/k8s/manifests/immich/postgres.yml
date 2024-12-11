@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: immich-postgres
+  name: immich-postgres
+  namespace: immich
+spec:
+  replicas: 1
+  serviceName: immich-postgres
+  selector:
+    matchLabels:
+      app: immich-postgres
+  template:
+    metadata:
+      labels:
+        app: immich-postgres
+    spec:
+      containers:
+        - name: pgvecto-rs
+          image: tensorchord/pgvecto-rs:pg14-v0.2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgres
+          livenessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - |
+                pg_isready --dbname="${POSTGRES_DB}" --username="${POSTGRES_USER}" || exit 1;
+                Chksum="$(psql --dbname="${POSTGRES_DB}" --username="${POSTGRES_USER}" --tuples-only --no-align
+                --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')";
+                echo "checksum failure count is $$Chksum";
+                [ "$Chksum" = '0' ] || exit 1
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 10
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD_FILE
+              value: /secrets/immich_postgres_user_password
+            - name: POSTGRES_DB
+              value: immich
+            - name: POSTGRES_INITDB_ARGS
+              value: "--data-checksums"
+          args:
+            - postgres
+            - -c shared_preload_libraries=vectors.so
+            - -c 'search_path="$user", public, vectors'
+            - -c logging_collector=on
+            - -c max_wal_size=2GB
+            - -c shared_buffers=512MB
+            - -c wal_compression=on
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: immich-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+      volumes:
+        - name: immich-secrets
+          secret:
+            secretName: immich-secrets
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: iscsi-ssd-storage
+        resources:
+          requests:
+            storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: immich-postgres
+  name: immich-postgres
+  namespace: immich
+spec:
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+  selector:
+    app: immich-postgres

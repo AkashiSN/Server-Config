@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immich-env
+  namespace: immich
+data:
+  TZ: "Asia/Tokyo"
+  DB_HOSTNAME: immich-postgres
+  DB_PORT: 5432
+  DB_USERNAME: postgres
+  DB_PASSWORD_FILE: /secrets/immich_postgres_user_password
+  DB_DATABASE_NAME: immich
+  DB_VECTOR_EXTENSION: pgvecto.rs
+  REDIS_HOSTNAME: immich-redis
+  REDIS_PORT: 6379

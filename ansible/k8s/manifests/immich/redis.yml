@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-redis
+  namespace: immich
+spec:
+  selector:
+    matchLabels:
+      app: immich-redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: immich-redis
+    spec:
+      containers:
+        - name: immich-redis
+          image: redis:6.2-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              name: immich-redis
+          livenessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - redis-cli ping || exit 1
+          resources:
+            requests:
+              cpu: 50m
+              memory: 10Mi
+            limits:
+              cpu: 100m
+              memory: 50Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: immich-redis
+  name: immich-redis
+  namespace: immich
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      name: immich-redis
+  selector:
+    app: immich-redis

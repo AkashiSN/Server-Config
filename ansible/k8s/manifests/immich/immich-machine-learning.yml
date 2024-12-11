@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: immich-machine-learning
+  name: immich-machine-learning
+  namespace: immich
+spec:
+  replicas: 1
+  serviceName: immich-machine-learning
+  selector:
+    matchLabels:
+      app: immich-machine-learning
+  template:
+    metadata:
+      labels:
+        app: immich-machine-learning
+    spec:
+      containers:
+        - name: immich-machine-learning
+          image: ghcr.io/immich-app/immich-machine-learning:v1.122.2
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: immich-env
+          volumeMounts:
+            - name: model-cache
+              mountPath: /cache
+            - name: immich-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 300m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 2000Mi
+      volumes:
+        - name: immich-secrets
+          projected:
+            sources:
+              - secret:
+                  name: immich-secrets
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: model-cache
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: nfs-ssd-storage
+        resources:
+          requests:
+            storage: 50Gi

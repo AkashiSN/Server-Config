@@ -1,0 +1,10 @@
+resources:
+  - pre-sync.yml
+  - persistent-volume.yml
+  - secret.yml
+  - redis.yml
+  - postgres.yml
+  - immich-config.yml
+  - immich-machine-learning.yml
+  - immich-microservices.yml
+  - immich-server.yml

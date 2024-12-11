@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: immich-server
+  name: immich-server
+  namespace: immich
+spec:
+  replicas: 1
+  serviceName: immich-server
+  selector:
+    matchLabels:
+      app: immich-server
+  template:
+    metadata:
+      labels:
+        app: immich-server
+    spec:
+      containers:
+        - name: immich-server
+          image: ghcr.io/immich-app/immich-server:v1.122.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 2283
+              name: immich-server
+          env:
+            - name: IMMICH_WORKERS_INCLUDE
+              value: api
+          envFrom:
+            - configMapRef:
+                name: immich-env
+          volumeMounts:
+            - name: immich-photos
+              mountPath: /usr/src/app/upload
+            - name: immich-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 300m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 2000Mi
+      volumes:
+        - name: immich-secrets
+          projected:
+            sources:
+              - secret:
+                  name: immich-secrets
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: immich-photos
+      spec:
+        accessModes:
+          - ReadWriteMany
+        storageClassName: nfs-hdd-storage
+        resources:
+          requests:
+            storage: 2Ti
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: immich
+  name: immich
+  namespace: immich
+spec:
+  ports:
+    - name: immich
+      port: 2283
+      targetPort: immich-server
+  selector:
+    app: immich
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-immich
+  namespace: immich
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - photos.akashisn.info
+      secretName: immich-cert
+  rules:
+    - host: photos.akashisn.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: immich
+                port:
+                  name: immich

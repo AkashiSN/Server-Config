@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: immich-microservices
+  name: immich-microservices
+  namespace: immich
+spec:
+  replicas: 1
+  serviceName: immich-microservices
+  selector:
+    matchLabels:
+      app: immich-microservices
+  template:
+    metadata:
+      labels:
+        app: immich-microservices
+    spec:
+      containers:
+        - name: immich-microservices
+          image: ghcr.io/immich-app/immich-server:v1.122.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: IMMICH_WORKERS_EXCLUDE
+              value: api
+          envFrom:
+            - configMapRef:
+                name: immich-env
+          volumeMounts:
+            - name: immich-photos
+              mountPath: /usr/src/app/upload
+            - name: immich-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 300m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 2000Mi
+      volumes:
+        - name: immich-secrets
+          projected:
+            sources:
+              - secret:
+                  name: immich-secrets
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: immich-photos
+      spec:
+        accessModes:
+          - ReadWriteMany
+        storageClassName: nfs-hdd-storage
+        resources:
+          requests:
+            storage: 2Ti
