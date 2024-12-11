@@ -15,7 +15,7 @@ metadata:
 spec:
   addresses:
     - {{ nginx_ingress_lb_v4_addr }}/32
-{% if default_interface_v6.stdout != "" %}
+{% if default_interface_v6.stdout == "ignore" %}
     - {{ ipv6_prefix }}:{{ nginx_ingress_lb_v6_host_addr }}/128
 {% endif %}
 ---
@@ -27,7 +27,7 @@ metadata:
 spec:
   addresses:
     - {{ dns_lb_v4_addr }}/32
-{% if default_interface_v6.stdout != "" %}
+{% if default_interface_v6.stdout == "ignore" %}
     - {{ ipv6_prefix }}:{{ dns_lb_v6_host_addr }}/128
 {% endif %}
 ---
@@ -39,7 +39,7 @@ metadata:
 spec:
   addresses:
     - {{ palworld_lb_v4_addr }}/32
-{% if default_interface_v6.stdout != "" %}
+{% if default_interface_v6.stdout == "ignore" %}
     - {{ ipv6_prefix }}:{{ palworld_lb_v6_host_addr }}/128
 {% endif %}
 ---
@@ -51,7 +51,7 @@ metadata:
 spec:
   addresses:
     - {{ minecraft_lb_v4_addr }}/32
-{% if default_interface_v6.stdout != "" %}
+{% if default_interface_v6.stdout == "ignore" %}
     - {{ ipv6_prefix }}:{{ minecraft_lb_v6_host_addr }}/128
 {% endif %}
 ---

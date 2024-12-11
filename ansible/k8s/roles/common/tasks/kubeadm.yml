@@ -51,7 +51,7 @@
   ansible.builtin.lineinfile:
     path: /etc/default/kubelet
     regexp: KUBELET_EXTRA_ARGS
-    line: 'KUBELET_EXTRA_ARGS="--node-ip={{ node_ip.stdout }},{{ node_ipv6.stdout }}"'
+    line: 'KUBELET_EXTRA_ARGS="--node-ip={{ node_ip.stdout }}"'
     mode: "0644"
     create: false
   become: true
