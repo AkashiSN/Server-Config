@@ -1,6 +1,0 @@
----
-# file: setup-vpn.yml
-- name: Setup vpn server
-  hosts: vpn-server
-  roles:
-    - vpn
