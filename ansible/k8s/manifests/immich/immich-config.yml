@@ -5,6 +5,10 @@ metadata:
   namespace: immich
 data:
   TZ: "Asia/Tokyo"
+  IMMICH_ENV: production
+  IMMICH_HOST: "0.0.0.0"
+  IMMICH_PORT: "2283"
+  IMMICH_TRUSTED_PROXIES: immich-server
   DB_HOSTNAME: immich-postgres
   DB_PORT: "5432"
   DB_USERNAME: postgres

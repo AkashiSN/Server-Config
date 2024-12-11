@@ -20,12 +20,12 @@ spec:
         - name: immich-microservices
           image: ghcr.io/immich-app/immich-server:v1.122.2
           imagePullPolicy: IfNotPresent
-          env:
-            - name: IMMICH_WORKERS_EXCLUDE
-              value: api
           envFrom:
             - configMapRef:
                 name: immich-env
+          env:
+            - name: IMMICH_WORKERS_EXCLUDE
+              value: api
           volumeMounts:
             - name: immich-photos
               mountPath: /usr/src/app/upload

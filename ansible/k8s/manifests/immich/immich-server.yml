@@ -23,12 +23,12 @@ spec:
           ports:
             - containerPort: 2283
               name: immich-server
-          env:
-            - name: IMMICH_WORKERS_INCLUDE
-              value: api
           envFrom:
             - configMapRef:
                 name: immich-env
+          env:
+            - name: IMMICH_WORKERS_INCLUDE
+              value: api
           volumeMounts:
             - name: immich-photos
               mountPath: /usr/src/app/upload
@@ -48,16 +48,16 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: immich
-  name: immich
+    service: immich-server
+  name: immich-server
   namespace: immich
 spec:
   ports:
-    - name: immich
+    - name: immich-server
       port: 2283
       targetPort: immich-server
   selector:
-    app: immich
+    app: immich-server
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -80,6 +80,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: immich
+                name: immich-server
                 port:
-                  name: immich
+                  name: immich-server
