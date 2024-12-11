@@ -1,4 +1,4 @@
-dddvb_version: "0.9.39"
+dddvb_version: "0.9.40"
 
 deb_architecture: {
   "armv6l": "armhf",

@@ -50,9 +50,10 @@
 - name: Set KUBELET_EXTRA_ARGS in /etc/default/kubelet
   ansible.builtin.lineinfile:
     path: /etc/default/kubelet
-    line: 'KUBELET_EXTRA_ARGS="--node-ip={{ node_ip.stdout }}"'
+    regexp: KUBELET_EXTRA_ARGS
+    line: 'KUBELET_EXTRA_ARGS="--node-ip={{ node_ip.stdout }},{{ node_ipv6.stdout }}"'
     mode: "0644"
-    create: true
+    create: false
   become: true
 
 - name: Reload and restart kubelet service
@@ -60,18 +61,4 @@
     name: kubelet
     state: restarted
     daemon_reload: true
-  become: true
-
-- name: Update GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub
-  ansible.builtin.lineinfile:
-    path: /etc/default/grub
-    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"'
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="systemd.unified_cgroup_hierarchy=false"'
-    state: present
-  become: true
-
-- name: Update GRUB
-  ansible.builtin.command:
-    cmd: update-grub
-  changed_when: false
   become: true

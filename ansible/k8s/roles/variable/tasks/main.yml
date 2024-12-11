@@ -45,6 +45,15 @@
   register: ipv6_prefix
   changed_when: false
 
+- name: Get IPv6 node address
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      ip -6 addr show dev {{ default_interface_v6.stdout }} | sed -nE -e 's/.+inet6 ([0-9a-f:]+).+/\1/p' | grep {{ ipv6_prefix.stdout }} || true
+    executable: /bin/bash
+  register: node_ipv6
+  changed_when: false
+
 - name: Set ipv6Prefix
   ansible.builtin.set_fact: # noqa jinja[spacing]
     ipv6_prefix: >-

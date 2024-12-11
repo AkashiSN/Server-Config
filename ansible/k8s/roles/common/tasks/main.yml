@@ -16,6 +16,8 @@
       - open-iscsi
       - nfs-common
       - python3-pip
+      - python3-yaml
+      - python3-kubernetes
       - jq
       - sysstat
     state: present
@@ -26,13 +28,6 @@
   ansible.builtin.apt:
     autoremove: true
   become: true
-
-- name: Install kubernetes pre-requisites
-  ansible.builtin.pip:
-    name:
-      - pyyaml
-      - kubernetes
-  become: false
 
 - name: For common
   block:
@@ -56,10 +51,6 @@
       ansible.builtin.import_tasks:
         file: kernel.yml
 
-    - name: Import argo-cd.yml
-      ansible.builtin.import_tasks:
-        file: argo-cd.yml
-
     - name: Import helm.yml
       ansible.builtin.import_tasks:
         file: helm.yml
@@ -69,10 +60,6 @@
         inventory_hostname != "k3s-vps"
   become: true
   block:
-    - name: Import iptables.yml
-      ansible.builtin.import_tasks:
-        file: iptables.yml
-
     - name: Import crio.yml
       ansible.builtin.import_tasks:
         file: crio.yml
