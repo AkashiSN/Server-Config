@@ -7,7 +7,6 @@ variable "proxmox" {
   sensitive = true
 }
 
-
 variable "userdata" {
   type = object({
     user_name       = string
