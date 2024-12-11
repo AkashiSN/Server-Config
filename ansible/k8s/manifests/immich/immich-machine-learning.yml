@@ -31,6 +31,13 @@ spec:
               mountPath: /cache
             - name: immich-secrets
               mountPath: /secrets
+          resources:
+            requests:
+              cpu: 500m
+              memory: 500Mi
+            limits:
+              cpu: 1000m
+              memory: 2000Mi
       volumes:
         - name: immich-secrets
           projected:
