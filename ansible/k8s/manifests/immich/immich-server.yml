@@ -7,7 +7,6 @@ metadata:
   namespace: immich
 spec:
   replicas: 1
-  serviceName: immich-server
   selector:
     matchLabels:
       app: immich-server
