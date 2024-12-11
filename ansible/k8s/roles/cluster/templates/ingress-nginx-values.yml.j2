@@ -3,7 +3,6 @@ controller:
 {% if inventory_hostname == "k3s-vps" %}
     type: NodePort
     externalTrafficPolicy: Local
-    ipFamilyPolicy: PreferDualStack
     nodePorts:
       http: "80"
       https: "443"
@@ -12,8 +11,6 @@ controller:
     externalTrafficPolicy: Local
     annotations:
       metallb.universe.tf/address-pool: ingress-pool
-    ipFamilyPolicy: PreferDualStack
-    ipFamilies: {}
 {% endif %}
   config:
     ssl-redirect: true

@@ -177,7 +177,6 @@ metadata:
   namespace: palworld
 spec:
   type: LoadBalancer
-  ipFamilyPolicy: PreferDualStack
   externalTrafficPolicy: Local
   ports:
     - name: server

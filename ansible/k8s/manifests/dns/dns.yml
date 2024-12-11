@@ -108,7 +108,6 @@ metadata:
   name: dns-server
   namespace: dns
 spec:
-  ipFamilyPolicy: PreferDualStack
   type: LoadBalancer
   externalTrafficPolicy: Local
   ports:
