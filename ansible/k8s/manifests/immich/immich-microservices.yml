@@ -44,15 +44,6 @@ spec:
             sources:
               - secret:
                   name: immich-secrets
-  persistentVolumeClaimRetentionPolicy:
-    whenDeleted: Delete
-  volumeClaimTemplates:
-    - metadata:
-        name: immich-photos
-      spec:
-        accessModes:
-          - ReadWriteMany
-        storageClassName: nfs-hdd-storage
-        resources:
-          requests:
-            storage: 2Ti
+        - name: immich-photos
+          persistentVolumeClaim:
+            claimName: immich-photos-pvc

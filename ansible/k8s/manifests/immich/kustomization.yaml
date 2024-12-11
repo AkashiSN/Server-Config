@@ -1,6 +1,7 @@
 resources:
   - pre-sync.yml
   - persistent-volume.yml
+  - persistent-volume-claim.yml
   - secret.yml
   - redis.yml
   - postgres.yml
