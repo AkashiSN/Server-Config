@@ -6,7 +6,7 @@ metadata:
   name: immich-microservices
   namespace: immich
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: immich-microservices
