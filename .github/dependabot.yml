@@ -5,10 +5,10 @@ updates:
     schedule:
       interval: "weekly"
   # https://github.com/dependabot/dependabot-core/issues/2178
-  - package-ecosystem: "docker"
-    directory: "/docker/epgstation"
-    schedule:
-      interval: "weekly"
+  # - package-ecosystem: "docker"
+  #   directory: "/docker/epgstation"
+  #   schedule:
+  #     interval: "weekly"
   - package-ecosystem: "docker"
     directory: "/docker/nextcloud"
     schedule:
@@ -44,14 +44,26 @@ updates:
         update-types:
           - "version-update:semver-major"
   - package-ecosystem: "docker"
-    directory: "/ansible/k8s/manifests/tv"
+    directory: "/ansible/k8s/manifests/immich"
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "mariadb"
+      - dependency-name: "pgvecto-rs"
         update-types:
           - "version-update:semver-major"
           - "version-update:semver-minor"
+      - dependency-name: "redis"
+        update-types:
+          - "version-update:semver-major"
+  # - package-ecosystem: "docker"
+  #   directory: "/ansible/k8s/manifests/tv"
+  #   schedule:
+  #     interval: "weekly"
+  #   ignore:
+  #     - dependency-name: "mariadb"
+  #       update-types:
+  #         - "version-update:semver-major"
+  #         - "version-update:semver-minor"
   # - package-ecosystem: "docker"
   #   directory: "/ansible/k8s/manifests/palworld"
   #   schedule:
