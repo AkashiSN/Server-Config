@@ -43,18 +43,18 @@ updates:
       - dependency-name: "mariadb"
         update-types:
           - "version-update:semver-major"
-  - package-ecosystem: "docker"
-    directory: "/ansible/k8s/manifests/immich"
-    schedule:
-      interval: "weekly"
-    ignore:
-      - dependency-name: "pgvecto-rs"
-        update-types:
-          - "version-update:semver-major"
-          - "version-update:semver-minor"
-      - dependency-name: "redis"
-        update-types:
-          - "version-update:semver-major"
+  # - package-ecosystem: "docker"
+  #   directory: "/ansible/k8s/manifests/immich"
+  #   schedule:
+  #     interval: "weekly"
+  #   ignore:
+  #     - dependency-name: "pgvecto-rs"
+  #       update-types:
+  #         - "version-update:semver-major"
+  #         - "version-update:semver-minor"
+  #     - dependency-name: "redis"
+  #       update-types:
+  #         - "version-update:semver-major"
   # - package-ecosystem: "docker"
   #   directory: "/ansible/k8s/manifests/tv"
   #   schedule:
