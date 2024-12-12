@@ -9,7 +9,6 @@ data:
   NEXTCLOUD_ADMIN_PASSWORD_FILE: /secrets/nextcloud_admin_password
   NEXTCLOUD_DATA_DIR: /mnt/nextcloud
   OVERWRITEPROTOCOL: https
-  TRUSTED_PROXIES: nextcloud
   NEXTCLOUD_TRUSTED_DOMAINS: files.akashisn.info
   MYSQL_HOST: nextcloud-mariadb
   MYSQL_USER: nextcloud
