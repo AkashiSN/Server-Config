@@ -1,13 +1,12 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   labels:
     app: immich-machine-learning
   name: immich-machine-learning
   namespace: immich
 spec:
-  replicas: 1
-  serviceName: immich-machine-learning
+  replicas: 2
   selector:
     matchLabels:
       app: immich-machine-learning
@@ -37,15 +36,5 @@ spec:
             sources:
               - secret:
                   name: immich-secrets
-  persistentVolumeClaimRetentionPolicy:
-    whenDeleted: Delete
-  volumeClaimTemplates:
-    - metadata:
-        name: model-cache
-      spec:
-        accessModes:
-          - ReadWriteOncePod
-        storageClassName: nfs-ssd-storage
-        resources:
-          requests:
-            storage: 50Gi
+        - name : model-cache
+          emptyDir: {}
