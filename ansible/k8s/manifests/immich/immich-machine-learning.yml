@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: immich-machine-learning
-          image: ghcr.io/immich-app/immich-machine-learning:v1.122.2
+          image: ghcr.io/immich-app/immich-machine-learning:v1.123.0
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
