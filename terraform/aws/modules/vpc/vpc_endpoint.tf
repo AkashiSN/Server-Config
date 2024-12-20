@@ -62,7 +62,7 @@ resource "aws_vpc_endpoint" "s3" {
   policy            = data.aws_iam_policy_document.vpc_endpoint.json
 }
 
-resource "aws_vpc_endpoint_route_table_association" "private_a" {
+resource "aws_vpc_endpoint_route_table_association" "private" {
   route_table_id  = aws_route_table.private.id
   vpc_endpoint_id = aws_vpc_endpoint.s3.id
 }

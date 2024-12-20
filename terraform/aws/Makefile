@@ -1,3 +1,5 @@
+AWS_PROFILE:="cdx-pre-dev"
+
 .PHONY: clean
 clean:
 	rm -rf $(CURDIR)/.tmp
@@ -12,11 +14,11 @@ aws-credential:
 	unset AWS_SESSION_TOKEN; \
 	\
 	echo "Fetching MFA device serial number for the user..."; \
-	UserName=$$(pass infra/aws/cdx-pre-dev/iam-user); \
-	SerialNumber=$$(aws iam list-mfa-devices --user-name $$UserName | jq -r '.MFADevices[].SerialNumber'); \
+	UserName=$$(pass infra/aws/$(AWS_PROFILE)/iam-user 2>/dev/null); \
+	SerialNumber=$$(aws --profile $(AWS_PROFILE) iam list-mfa-devices --user-name $$UserName | jq -r '.MFADevices[].SerialNumber'); \
 	echo "MFA Serial Number: $$SerialNumber"; \
 	read -p 'Enter MFA Code: ' code; \
-	aws sts get-session-token --serial-number $$SerialNumber --token-code $$code > $(CURDIR)/.credential; \
+	aws --profile $(AWS_PROFILE) sts get-session-token --serial-number $$SerialNumber --token-code $$code > $(CURDIR)/.credential; \
 	\
 	echo "export AWS_ACCESS_KEY_ID=$$(cat $(CURDIR)/.credential | jq -r '.Credentials.AccessKeyId')" > $(CURDIR)/.env; \
 	echo "export AWS_SECRET_ACCESS_KEY=$$(cat $(CURDIR)/.credential | jq -r '.Credentials.SecretAccessKey')" >> $(CURDIR)/.env; \
@@ -27,5 +29,5 @@ aws-credential:
 	echo "Environment variables have been saved to .env. Run 'source .env' to load them into your shell."
 
 .PHONY: credential
-credential: aws-credential
-	echo "homelab_global_ip_address=\"$$(pass infra/homelab/global-ip-address)\"" > terraform.tfvars
+credential:
+	@echo "homelab_global_ip_address=\"$$(pass infra/homelab/global-ip-address 2>/dev/null)\"" > terraform.tfvars
