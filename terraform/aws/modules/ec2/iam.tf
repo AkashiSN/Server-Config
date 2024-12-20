@@ -9,12 +9,12 @@ data "aws_iam_policy_document" "ssm_role" {
 }
 
 resource "aws_iam_instance_profile" "ssm_role" {
-  name = "${var.project}_role_ssm"
+  name = "${var.project}_role-ssm"
   role = aws_iam_role.ssm_role.name
 }
 
 resource "aws_iam_role" "ssm_role" {
-  name               = "${var.project}_role_ssm"
+  name               = "${var.project}_role-ssm"
   assume_role_policy = data.aws_iam_policy_document.ssm_role.json
 }
 

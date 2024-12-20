@@ -19,8 +19,8 @@ resource "aws_default_security_group" "default" {
 }
 
 resource "aws_security_group" "ssm" {
-  name        = "${var.project}_sg_ssm"
-  description = "${var.project}_sg_ssm"
+  name        = "${var.project}_sg-ssm"
+  description = "${var.project}_sg-ssm"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -33,6 +33,6 @@ resource "aws_security_group" "ssm" {
   }
 
   tags = {
-    Name = "${var.project}_sg_ssm"
+    Name = "${var.project}_sg-ssm"
   }
 }

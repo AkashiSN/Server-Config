@@ -13,7 +13,7 @@ resource "aws_subnet" "private_a" {
   availability_zone = "ap-northeast-1a"
 
   tags = {
-    Name = "${var.project}_private_a"
+    Name = "${var.project}_private-a"
   }
 }
 
@@ -23,7 +23,7 @@ resource "aws_subnet" "private_c" {
   availability_zone = "ap-northeast-1c"
 
   tags = {
-    Name = "${var.project}_private_c"
+    Name = "${var.project}_private-c"
   }
 }
 

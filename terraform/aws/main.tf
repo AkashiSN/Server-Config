@@ -10,3 +10,8 @@ module "ec2" {
   source  = "./modules/ec2"
   project = local.project
 }
+
+module "eks" {
+  source  = "./modules/eks"
+  project = local.project
+}
