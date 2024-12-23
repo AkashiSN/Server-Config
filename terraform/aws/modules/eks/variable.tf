@@ -18,5 +18,6 @@ variable "network" {
 variable "vpc" {
   type = object({
     subnet_ids = list(string)
+    sg_ids     = list(string)
   })
 }

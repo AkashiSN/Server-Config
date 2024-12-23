@@ -27,5 +27,8 @@ module "eks" {
       module.vpc.subnet_private_a_id,
       module.vpc.subnet_private_c_id
     ]
+    sg_ids = [
+      module.vpc.sg_eks_cluster_id
+    ]
   }
 }

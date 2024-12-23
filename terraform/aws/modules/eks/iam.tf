@@ -71,3 +71,58 @@ resource "aws_iam_role_policy_attachment" "eks_auto_node_role_worker_policy" {
   role       = aws_iam_role.eks_auto_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodeMinimalPolicy"
 }
+
+# Hybrid Nodes IAM role
+data "aws_iam_policy_document" "eks_hybrid_node_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ssm.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "eks_hybrid_node_role" {
+  name               = "${var.project}_role-eks-hybrid-node"
+  assume_role_policy = data.aws_iam_policy_document.eks_hybrid_node_role.json
+}
+
+data "aws_iam_policy_document" "eks_describe_cluster_policy" {
+  statement {
+    actions   = ["eks:DescribeCluster"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "eks_describe_cluster_policy" {
+  name   = "EKSDescribeClusterPolicy"
+  role   = aws_iam_role.eks_hybrid_node_role.name
+  policy = data.aws_iam_policy_document.eks_describe_cluster_policy.json
+}
+
+data "aws_iam_policy_document" "eks_hybrid_ssm_policy" {
+  statement {
+    actions = [
+      "ssm:DescribeInstanceInformation",
+      "ssm:DeregisterManagedInstance"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "eks_hybrid_ssm_policy" {
+  name   = "EKSHybridSSMPolicy"
+  role   = aws_iam_role.eks_hybrid_node_role.name
+  policy = data.aws_iam_policy_document.eks_hybrid_ssm_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "eks_hybrid_node_role_ecr_pull_policy" {
+  role       = aws_iam_role.eks_hybrid_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_hybrid_node_role_ssm_policy" {
+  role       = aws_iam_role.eks_hybrid_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}

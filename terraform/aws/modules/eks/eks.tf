@@ -41,7 +41,8 @@ resource "aws_eks_cluster" "eks_hybrid_nodes" {
     endpoint_private_access = true
     endpoint_public_access  = false
 
-    subnet_ids = var.vpc.subnet_ids
+    subnet_ids         = var.vpc.subnet_ids
+    security_group_ids = var.vpc.sg_ids
   }
 
   tags = {
@@ -65,4 +66,10 @@ resource "aws_eks_access_policy_association" "eks_admin" {
   }
 
   depends_on = [aws_eks_access_entry.eks_admin]
+}
+
+resource "aws_eks_access_entry" "eks_hybrid_nodes" {
+  cluster_name  = aws_eks_cluster.eks_hybrid_nodes.name
+  principal_arn = aws_iam_role.eks_hybrid_node_role.arn
+  type          = "HYBRID_LINUX"
 }
