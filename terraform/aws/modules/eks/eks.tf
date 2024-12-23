@@ -12,7 +12,7 @@ resource "aws_eks_cluster" "eks_hybrid_nodes" {
   compute_config {
     enabled       = true
     node_pools    = ["general-purpose", "system"]
-    node_role_arn = aws_iam_role.eks_auto_node_role.arn
+    node_role_arn = aws_iam_role.eks_auto_nodes_role.arn
   }
 
   kubernetes_network_config {
@@ -70,6 +70,6 @@ resource "aws_eks_access_policy_association" "eks_admin" {
 
 resource "aws_eks_access_entry" "eks_hybrid_nodes" {
   cluster_name  = aws_eks_cluster.eks_hybrid_nodes.name
-  principal_arn = aws_iam_role.eks_hybrid_node_role.arn
+  principal_arn = aws_iam_role.eks_hybrid_nodes_role.arn
   type          = "HYBRID_LINUX"
 }
