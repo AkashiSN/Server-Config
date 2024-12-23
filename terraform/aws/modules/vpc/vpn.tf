@@ -1,4 +1,3 @@
-
 resource "aws_vpn_gateway" "vgw" {
   tags = {
     Name = "${var.project}_vgw"

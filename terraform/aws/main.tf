@@ -12,6 +12,20 @@ module "ec2" {
 }
 
 module "eks" {
-  source  = "./modules/eks"
-  project = local.project
+  depends_on = [module.vpc]
+
+  source   = "./modules/eks"
+  project  = local.project
+  iam_user = var.iam_user
+  network = {
+    service_cidr      = "10.96.0.0/16"
+    remote_node_cidrs = ["172.16.254.0/24"]
+    remote_pod_cidrs  = ["10.244.0.0/16"]
+  }
+  vpc = {
+    subnet_ids = [
+      module.vpc.subnet_private_a_id,
+      module.vpc.subnet_private_c_id
+    ]
+  }
 }
