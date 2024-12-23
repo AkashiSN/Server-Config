@@ -16,8 +16,8 @@ spec:
     region: $(AWS_REGION)
   hybrid:
     ssm:
-      activationId: $(shell cat .activation | jq -r '.ActivationId')
-      activationCode: $(shell cat .activation | jq -r '.ActivationCode')
+      activationId: $(shell cat .activation 2>/dev/null | jq -r '.ActivationId')
+      activationCode: $(shell cat .activation 2>/dev/null | jq -r '.ActivationCode')
 endef
 export NODE_CONFIG_YAML
 

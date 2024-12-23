@@ -18,9 +18,12 @@ module "eks" {
   project  = local.project
   iam_user = var.iam_user
   cluster_network = {
-    service_cidr      = "10.80.0.0/16"
-    remote_node_cidrs = ["172.16.254.0/24"]
-    remote_pod_cidrs  = ["10.85.0.0/16"]
+    service_cidr = "10.80.0.0/16"
+    remote_node_cidrs = [
+      "172.16.100.0/24",
+      "172.16.254.0/24"
+    ]
+    remote_pod_cidrs = ["10.85.0.0/16"]
   }
   vpc = {
     id = module.vpc.vpc_id

@@ -2,7 +2,7 @@
 set -eux
 
 k8s_version="1.31"
-aws_region="ap-northeast-1"
+export AWS_DEFAULT_REGION=ap-northeast-1
 
 # Install ssm-agent
 sudo snap install amazon-ssm-agent --classic
