@@ -4,12 +4,9 @@ clean:
 	rm -f $(CURDIR)/*.tfvars*
 	rm -f $(CURDIR)/*.tfstate*
 
-.PHONY: credential
-credential:
+terraform.tfvars:
 	pass infra/terraform/tfvars > $(CURDIR)/terraform.tfvars
 
 .PHONY: vm
-vm:
-	cd $(CURDIR) ; \
-	terraform plan && \
+vm: terraform.tfvars
 	terraform apply
