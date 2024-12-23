@@ -23,6 +23,10 @@ resource "aws_vpc_endpoint" "ssm" {
   security_group_ids = [
     aws_security_group.ssm.id
   ]
+
+  tags = {
+    Name = "${var.project}_vpce-ssm"
+  }
 }
 
 resource "aws_vpc_endpoint" "ssmmessages" {
@@ -38,6 +42,9 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   security_group_ids = [
     aws_security_group.ssm.id
   ]
+  tags = {
+    Name = "${var.project}_vpce-ssmmessages"
+  }
 }
 
 resource "aws_vpc_endpoint" "ec2messages" {
@@ -53,6 +60,9 @@ resource "aws_vpc_endpoint" "ec2messages" {
   security_group_ids = [
     aws_security_group.ssm.id
   ]
+  tags = {
+    Name = "${var.project}_vpce-ec2messages"
+  }
 }
 
 resource "aws_vpc_endpoint" "s3" {
@@ -60,6 +70,9 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.ap-northeast-1.s3"
   policy            = data.aws_iam_policy_document.vpc_endpoint.json
+  tags = {
+    Name = "${var.project}_vpce-s3"
+  }
 }
 
 resource "aws_vpc_endpoint_route_table_association" "private" {

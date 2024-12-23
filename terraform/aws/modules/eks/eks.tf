@@ -19,7 +19,7 @@ resource "aws_eks_cluster" "eks_hybrid_nodes" {
     elastic_load_balancing {
       enabled = true
     }
-    service_ipv4_cidr = var.network.service_cidr
+    service_ipv4_cidr = var.cluster_network.service_cidr
   }
 
   storage_config {
@@ -30,10 +30,10 @@ resource "aws_eks_cluster" "eks_hybrid_nodes" {
 
   remote_network_config {
     remote_node_networks {
-      cidrs = var.network.remote_node_cidrs
+      cidrs = var.cluster_network.remote_node_cidrs
     }
     remote_pod_networks {
-      cidrs = var.network.remote_pod_cidrs
+      cidrs = var.cluster_network.remote_pod_cidrs
     }
   }
 
@@ -42,7 +42,7 @@ resource "aws_eks_cluster" "eks_hybrid_nodes" {
     endpoint_public_access  = false
 
     subnet_ids         = var.vpc.subnet_ids
-    security_group_ids = var.vpc.sg_ids
+    security_group_ids = [aws_security_group.eks_cluster.id]
   }
 
   tags = {

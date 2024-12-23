@@ -30,5 +30,5 @@ aws-credential:
 
 .PHONY: credential
 credential:
-	@echo "homelab_global_ip_address=\"$$(pass infra/homelab/global-ip-address 2>/dev/null)\"" > terraform.tfvars
-	@echo "iam_user=\"$$(pass infra/aws/$(AWS_PROFILE)/iam-user 2>/dev/null)\"" >> terraform.tfvars
+	@echo "homelab_global_ip_address=\"$$(pass infra/homelab/global-ip-address 2>/dev/null)\"" > $(CURDIR)/terraform.tfvars
+	@echo "iam_user=\"$$(pass infra/aws/$(AWS_PROFILE)/iam-user 2>/dev/null)\"" >> $(CURDIR)/terraform.tfvars

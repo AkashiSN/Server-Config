@@ -17,18 +17,16 @@ module "eks" {
   source   = "./modules/eks"
   project  = local.project
   iam_user = var.iam_user
-  network = {
-    service_cidr      = "10.96.0.0/16"
+  cluster_network = {
+    service_cidr      = "10.80.0.0/16"
     remote_node_cidrs = ["172.16.254.0/24"]
-    remote_pod_cidrs  = ["10.244.0.0/16"]
+    remote_pod_cidrs  = ["10.85.0.0/16"]
   }
   vpc = {
+    id = module.vpc.vpc_id
     subnet_ids = [
       module.vpc.subnet_private_a_id,
       module.vpc.subnet_private_c_id
-    ]
-    sg_ids = [
-      module.vpc.sg_eks_cluster_id
     ]
   }
 }
