@@ -7,8 +7,7 @@ clean:
 	rm -f $(CURDIR)/*.tfvars*
 	rm -f $(CURDIR)/*.tfstate*
 
-.PHONY: aws-credential
-aws-credential:
+.env:
 	@unset AWS_ACCESS_KEY_ID; \
 	unset AWS_SECRET_ACCESS_KEY; \
 	unset AWS_SESSION_TOKEN; \
@@ -28,7 +27,11 @@ aws-credential:
 	\
 	echo "Environment variables have been saved to .env. Run 'source .env' to load them into your shell."
 
-.PHONY: credential
-credential:
+terraform.tfvars:
 	@echo "homelab_global_ip_address=\"$$(pass infra/homelab/global-ip-address 2>/dev/null)\"" > $(CURDIR)/terraform.tfvars
 	@echo "iam_user=\"$$(pass infra/aws/$(AWS_PROFILE)/iam-user 2>/dev/null)\"" >> $(CURDIR)/terraform.tfvars
+
+.PHONY: aws
+aws: terraform.tfvars .env
+	@. $(CURDIR)/.env; \
+	terraform apply
