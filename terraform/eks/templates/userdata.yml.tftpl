@@ -1,0 +1,72 @@
+#cloud-config
+hostname: ${hostname}
+manage_etc_hosts: true
+
+users:
+  - name: ${user_name}
+    passwd: ${hashed_password}
+    lock_passwd: false
+    groups: adm, sudo
+    home: /home/${user_name}
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_import_id:
+      - gh:${github_id}
+
+apt:
+  conf: |
+    APT {
+      Periodic {
+        Update-Package-Lists "1";
+        Unattended-Upgrade "0";
+      };
+    };
+  primary:
+    - arches: [default]
+      uri: http://ftp.udx.icscoe.jp/Linux/ubuntu
+  security:
+    - arches: [default]
+      uri: http://security.ubuntu.com/ubuntu
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - qemu-guest-agent
+  - linux-generic-hwe-24.04
+
+keyboard:
+  layout: jp
+  model: jp106
+
+write_files:
+  - path: /root/nodeConfig.yaml
+    permissions: '0644'
+    content: |
+      apiVersion: node.eks.aws/v1alpha1
+      kind: NodeConfig
+      spec:
+        cluster:
+          name: ${cluster_name}
+          region: ap-northeast-1
+        hybrid:
+          ssm:
+            activationId: ${ssm_activation_id}
+            activationCode: ${ssm_activation_code}
+
+runcmd:
+  # Update grub
+  - sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="console=tty1"/' /etc/default/grub.d/50-cloudimg-settings.cfg
+  - echo "GRUB_GFXPAYLOAD_LINUX=1024x768" | tee -a /etc/default/grub
+  - update-grub
+
+  # Setup hybrid node via nodeadm
+  - curl "https://hybrid-assets.eks.amazonaws.com/releases/latest/bin/linux/amd64/nodeadm" -o /usr/local/bin/nodeadm
+  - chmod +x /usr/local/bin/nodeadm
+  - nodeadm install "1.31" --credential-provider ssm
+  - nodeadm init -c "file:///root/nodeConfig.yaml"
+  - nodeadm debug -c "file:///root/nodeConfig.yaml"
+
+  # Restart qemu guest agent
+  - systemctl daemon-reload
+  - service qemu-guest-agent restart

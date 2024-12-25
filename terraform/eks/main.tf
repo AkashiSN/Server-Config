@@ -18,3 +18,14 @@ provider "proxmox" {
     username = "root"
   }
 }
+
+data "terraform_remote_state" "aws" {
+  backend = "s3"
+
+  config = {
+    region         = "ap-northeast-1"
+    bucket         = "su-nishi-bucket"
+    key            = "terraform/ap-northeast-1.tfstate"
+    dynamodb_table = "su-nishi-table"
+  }
+}

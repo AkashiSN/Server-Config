@@ -16,10 +16,10 @@ resource "aws_eks_cluster" "eks_hybrid_nodes" {
   }
 
   kubernetes_network_config {
+    service_ipv4_cidr = var.cluster_network.service_cidr
     elastic_load_balancing {
       enabled = true
     }
-    service_ipv4_cidr = var.cluster_network.service_cidr
   }
 
   storage_config {
@@ -52,14 +52,14 @@ resource "aws_eks_cluster" "eks_hybrid_nodes" {
 
 resource "aws_eks_access_entry" "eks_admin" {
   cluster_name  = aws_eks_cluster.eks_hybrid_nodes.name
-  principal_arn = data.aws_iam_user.current.arn
+  principal_arn = "arn:aws:iam::${local.account_id}:user/${var.iam_user}"
   type          = "STANDARD"
 }
 
 resource "aws_eks_access_policy_association" "eks_admin" {
   cluster_name  = aws_eks_cluster.eks_hybrid_nodes.name
+  principal_arn = "arn:aws:iam::${local.account_id}:user/${var.iam_user}"
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-  principal_arn = data.aws_iam_user.current.arn
 
   access_scope {
     type = "cluster"

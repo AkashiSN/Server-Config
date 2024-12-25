@@ -3,8 +3,7 @@ variable "project" {
 }
 
 variable "iam_user" {
-  type      = string
-  sensitive = true
+  type = string
 }
 
 variable "cluster_network" {

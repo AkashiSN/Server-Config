@@ -1,0 +1,38 @@
+k8sServicePort: "443"
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: eks.amazonaws.com/compute-type
+          operator: In
+          values:
+          - hybrid
+ipam:
+  mode: cluster-pool
+  operator:
+    clusterPoolIPv4MaskSize: 24
+    clusterPoolIPv4PodCIDRList: [10.85.0.0/16]
+operator:
+  replicas: 1
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: eks.amazonaws.com/compute-type
+            operator: In
+            values:
+            - hybrid
+  unmanagedPodWatcher:
+    restart: false
+envoy:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: eks.amazonaws.com/compute-type
+            operator: In
+            values:
+            - hybrid

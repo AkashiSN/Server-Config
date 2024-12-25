@@ -14,9 +14,14 @@ resource "aws_vpn_gateway_route_propagation" "vgw_propagate_main" {
   route_table_id = aws_vpc.main.main_route_table_id
 }
 
-resource "aws_vpn_gateway_route_propagation" "vgw_propagate_private" {
+resource "aws_vpn_gateway_route_propagation" "vgw_propagate_private_a" {
   vpn_gateway_id = aws_vpn_gateway.vgw.id
-  route_table_id = aws_route_table.private.id
+  route_table_id = aws_route_table.private_a.id
+}
+
+resource "aws_vpn_gateway_route_propagation" "vgw_propagate_private_c" {
+  vpn_gateway_id = aws_vpn_gateway.vgw.id
+  route_table_id = aws_route_table.private_c.id
 }
 
 resource "aws_customer_gateway" "cgw" {

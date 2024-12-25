@@ -12,8 +12,6 @@ module "ec2" {
 }
 
 module "eks" {
-  depends_on = [module.vpc]
-
   source   = "./modules/eks"
   project  = local.project
   iam_user = var.iam_user

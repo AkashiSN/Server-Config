@@ -4,6 +4,5 @@ variable "homelab_global_ip_address" {
 }
 
 variable "iam_user" {
-  type      = string
-  sensitive = true
+  type = string
 }

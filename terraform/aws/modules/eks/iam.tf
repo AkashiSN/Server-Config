@@ -9,10 +9,14 @@ data "aws_iam_policy_document" "eks_auto_cluster_role" {
   }
 }
 
+locals {
+  eks_auto_cluster_role_json = data.aws_iam_policy_document.eks_auto_cluster_role.json
+}
+
 resource "aws_iam_role" "eks_auto_cluster_role" {
   name               = "${var.project}_role-eks-auto-cluster"
   description        = "Allows access to other AWS service resources that are required to operate Auto Mode clusters managed by EKS."
-  assume_role_policy = data.aws_iam_policy_document.eks_auto_cluster_role.json
+  assume_role_policy = local.eks_auto_cluster_role_json
 }
 
 resource "aws_iam_role_policy_attachment" "eks_auto_cluster_role_cluster_policy" {
@@ -51,10 +55,14 @@ data "aws_iam_policy_document" "eks_auto_nodes_role" {
   }
 }
 
+locals {
+  eks_auto_nodes_role_json = data.aws_iam_policy_document.eks_auto_nodes_role.json
+}
+
 resource "aws_iam_role" "eks_auto_nodes_role" {
   name               = "${var.project}_role-eks-auto-nodes"
   description        = "Allows EKS nodes to connect to EKS Auto Mode clusters and to pull container images from ECR."
-  assume_role_policy = data.aws_iam_policy_document.eks_auto_nodes_role.json
+  assume_role_policy = local.eks_auto_nodes_role_json
 }
 
 resource "aws_iam_instance_profile" "eks_auto_nodes_role" {
@@ -83,9 +91,13 @@ data "aws_iam_policy_document" "eks_hybrid_nodes_role" {
   }
 }
 
+locals {
+  eks_hybrid_nodes_role_json = data.aws_iam_policy_document.eks_hybrid_nodes_role.json
+}
+
 resource "aws_iam_role" "eks_hybrid_nodes_role" {
   name               = "${var.project}_role-eks-hybrid-nodes"
-  assume_role_policy = data.aws_iam_policy_document.eks_hybrid_nodes_role.json
+  assume_role_policy = local.eks_hybrid_nodes_role_json
 }
 
 data "aws_iam_policy_document" "eks_describe_cluster_policy" {
@@ -95,10 +107,14 @@ data "aws_iam_policy_document" "eks_describe_cluster_policy" {
   }
 }
 
+locals {
+  eks_describe_cluster_policy_json = data.aws_iam_policy_document.eks_describe_cluster_policy.json
+}
+
 resource "aws_iam_role_policy" "eks_describe_cluster_policy" {
   name   = "EKSDescribeClusterPolicy"
   role   = aws_iam_role.eks_hybrid_nodes_role.name
-  policy = data.aws_iam_policy_document.eks_describe_cluster_policy.json
+  policy = local.eks_describe_cluster_policy_json
 }
 
 data "aws_iam_policy_document" "eks_hybrid_ssm_policy" {
@@ -111,10 +127,14 @@ data "aws_iam_policy_document" "eks_hybrid_ssm_policy" {
   }
 }
 
+locals {
+  eks_hybrid_ssm_policy_json = data.aws_iam_policy_document.eks_hybrid_ssm_policy.json
+}
+
 resource "aws_iam_role_policy" "eks_hybrid_ssm_policy" {
   name   = "EKSHybridSSMPolicy"
   role   = aws_iam_role.eks_hybrid_nodes_role.name
-  policy = data.aws_iam_policy_document.eks_hybrid_ssm_policy.json
+  policy = local.eks_hybrid_ssm_policy_json
 }
 
 resource "aws_iam_role_policy_attachment" "eks_hybrid_nodes_role_ecr_pull_policy" {

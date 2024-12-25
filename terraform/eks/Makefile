@@ -1,31 +1,6 @@
-AWS_REGION:=ap-northeast-1
-AWS_PROFILE:=cdx-pre-dev
-AWS_ACCOUNT_ID:=$$(aws sts get-caller-identity | jq -r '.Account')
-
-EKS_HYBRID_ROLE:=su-nishi_role-eks-hybrid-nodes
-EKS_CLUSTER_NAME:=su-nishi_eks-hybrid-nodes
-
-VM_HYBRID_NODE_HOST:=eks-v131-hybrid-node-01
-
-define NODE_CONFIG_YAML
-apiVersion: node.eks.aws/v1alpha1
-kind: NodeConfig
-spec:
-  cluster:
-    name: $(EKS_CLUSTER_NAME)
-    region: $(AWS_REGION)
-  hybrid:
-    ssm:
-      activationId: $(shell cat .activation 2>/dev/null | jq -r '.ActivationId')
-      activationCode: $(shell cat .activation 2>/dev/null | jq -r '.ActivationCode')
-endef
-export NODE_CONFIG_YAML
-
 .PHONY: clean
 clean:
 	rm -rf $(CURDIR)/.tmp
-	rm -f $(CURDIR)/.activation
-	rm -f $(CURDIR)/nodeConfig.yaml
 	rm -f $(CURDIR)/*.tfvars*
 	rm -f $(CURDIR)/*.tfstate*
 
@@ -38,23 +13,19 @@ vm: terraform.tfvars
 
 ../aws/.env:
 	cd $(CURDIR)/../aws/; \
-	$(MAKE) aws-credential
+	$(MAKE) .env
 
-.activation: ../aws/.env
+.kubeconfig: ../aws/.env
 	@. $(CURDIR)/../aws/.env; \
-	echo "Create activation for EKS hybrid nodes..."; \
-	aws ssm create-activation \
-	--region $(AWS_REGION) \
-	--default-instance-name eks-hybrid-nodes \
-	--description "Activation for EKS hybrid nodes" \
-	--iam-role $(EKS_HYBRID_ROLE) \
-	--tags Key=EKSClusterARN,Value=arn:aws:eks:$(AWS_REGION):$(AWS_ACCOUNT_ID):cluster/$(EKS_CLUSTER_NAME) \
-	--registration-limit 10 > $(CURDIR)/.activation
+	aws eks update-kubeconfig --kubeconfig .kubeconfig --name su-nishi_eks-hybrid-nodes
 
-nodeConfig.yaml: .activation
-	echo "$$NODE_CONFIG_YAML" > $(CURDIR)/nodeConfig.yaml
-
-.PHONY: install
-install: nodeConfig.yaml
-	scp nodeConfig.yaml $(VM_HYBRID_NODE_HOST):/tmp/nodeConfig.yaml
-	cat provisioner.sh | ssh $(VM_HYBRID_NODE_HOST) /bin/bash -
+.PHONY: install-cilium
+install-cilium: .kubeconfig
+	@. $(CURDIR)/../aws/.env; \
+	helm --kubeconfig .kubeconfig \
+		--repo https://helm.cilium.io/ \
+		install cilium cilium \
+		--version 1.16.5 \
+    	--namespace kube-system \
+    	--values cilium-values.yaml \
+		--set k8sServiceHost=$(shell sed -n 's|.*server: https://\(.*\)$$|\1|p' .kubeconfig)

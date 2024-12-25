@@ -1,2 +1,3 @@
 .activation
-nodeConfig.yaml
+.kubeconfig
+cilium-bgp.yaml

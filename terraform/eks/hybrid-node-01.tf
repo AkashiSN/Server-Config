@@ -1,18 +1,21 @@
 # Source the Cloud Init userdata Config file
 data "template_file" "cloud_init_hybrid_node_01_userdata" {
-  template = file("${path.module}/cloud-inits/userdata.yml.tftpl")
+  template = file("${path.module}/templates/userdata.yml.tftpl")
 
   vars = {
-    hostname        = local.hybrid_node_01.hostname
-    user_name       = var.userdata.user_name
-    hashed_password = var.userdata.hashed_password
-    github_id       = var.userdata.github_id
+    hostname            = local.hybrid_node_01.hostname
+    user_name           = var.userdata.user_name
+    hashed_password     = var.userdata.hashed_password
+    github_id           = var.userdata.github_id
+    cluster_name        = data.terraform_remote_state.aws.outputs.eks_cluster_name
+    ssm_activation_id   = data.terraform_remote_state.aws.outputs.ssm_activation_id
+    ssm_activation_code = data.terraform_remote_state.aws.outputs.ssm_activation_code
   }
 }
 
 # Source the Cloud Init network Config file
 data "template_file" "cloud_init_hybrid_node_01_network" {
-  template = file("${path.module}/cloud-inits/network.yml.tftpl")
+  template = file("${path.module}/templates/network.yml.tftpl")
 
   vars = {
     ipv4_address         = local.hybrid_node_01.ipv4_address

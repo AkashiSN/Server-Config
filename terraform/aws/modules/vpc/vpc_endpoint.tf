@@ -75,7 +75,12 @@ resource "aws_vpc_endpoint" "s3" {
   }
 }
 
-resource "aws_vpc_endpoint_route_table_association" "private" {
-  route_table_id  = aws_route_table.private.id
+resource "aws_vpc_endpoint_route_table_association" "s3_private_a" {
+  route_table_id  = aws_route_table.private_a.id
+  vpc_endpoint_id = aws_vpc_endpoint.s3.id
+}
+
+resource "aws_vpc_endpoint_route_table_association" "s3_private_c" {
+  route_table_id  = aws_route_table.private_c.id
   vpc_endpoint_id = aws_vpc_endpoint.s3.id
 }
