@@ -146,3 +146,44 @@ resource "aws_iam_role_policy_attachment" "eks_hybrid_nodes_role_ssm_policy" {
   role       = aws_iam_role.eks_hybrid_nodes_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
+
+
+# ALB controller service account IAM role
+data "aws_iam_policy_document" "eks_alb_controller_sa_role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.eks_hybrid_nodes.arn]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "${trimprefix(aws_iam_openid_connect_provider.eks_hybrid_nodes.url, "https://")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "${trimprefix(aws_iam_openid_connect_provider.eks_hybrid_nodes.url, "https://")}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
+    }
+  }
+}
+
+locals {
+  eks_alb_controller_sa_role_json = data.aws_iam_policy_document.eks_alb_controller_sa_role.json
+}
+
+resource "aws_iam_role" "eks_alb_controller_sa_role" {
+  name               = "${var.project}_role-eks-alb-controller-sa"
+  assume_role_policy = local.eks_alb_controller_sa_role_json
+}
+
+resource "aws_iam_policy" "eks_alb_controller_sa_policy" {
+  name   = "${var.project}_policy-eks-alb-controller-sa"
+  policy = file("${path.module}/files/aws_load_balancer_controller_policy.json")
+}
+
+resource "aws_iam_role_policy_attachment" "eks_alb_controller_sa_policy" {
+  role       = aws_iam_role.eks_alb_controller_sa_role.name
+  policy_arn = aws_iam_policy.eks_alb_controller_sa_policy.arn
+}

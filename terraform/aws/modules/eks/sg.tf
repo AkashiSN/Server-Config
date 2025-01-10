@@ -27,6 +27,22 @@ resource "aws_security_group" "eks_cluster" {
     cidr_blocks = var.cluster_network.remote_pod_cidrs
   }
 
+  ingress {
+    description = "allow-websocket-from-remote-pod"
+    from_port   = 9443
+    to_port     = 9443
+    protocol    = "tcp"
+    cidr_blocks = var.cluster_network.remote_pod_cidrs
+  }
+
+  ingress {
+    description = "allow-https-from-service"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.cluster_network.service_cidr]
+  }
+
   egress {
     description = "allow-all-outbound"
     from_port   = 0

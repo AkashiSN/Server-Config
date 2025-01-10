@@ -15,9 +15,10 @@ data "template_file" "helm_values_alb_controller" {
   template = file("${path.module}/templates/alb-controller-values.yml.tftpl")
 
   vars = {
-    cluster_name = data.terraform_remote_state.aws.outputs.eks_cluster_name
-    vpc_id       = data.terraform_remote_state.aws.outputs.vpc_id
-    aws_region   = "ap-northeast-1"
+    alb_controller_sa_role_arn = data.terraform_remote_state.aws.outputs.eks_alb_controller_sa_role_arn
+    cluster_name               = data.terraform_remote_state.aws.outputs.eks_cluster_name
+    vpc_id                     = data.terraform_remote_state.aws.outputs.vpc_id
+    aws_region                 = "ap-northeast-1"
   }
 }
 

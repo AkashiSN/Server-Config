@@ -73,3 +73,16 @@ resource "aws_eks_access_entry" "eks_hybrid_nodes" {
   principal_arn = aws_iam_role.eks_hybrid_nodes_role.arn
   type          = "HYBRID_LINUX"
 }
+
+data "tls_certificate" "eks_hybrid_nodes" {
+  url = aws_eks_cluster.eks_hybrid_nodes.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks_hybrid_nodes" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = data.tls_certificate.eks_hybrid_nodes.certificates[*].sha1_fingerprint
+  url             = data.tls_certificate.eks_hybrid_nodes.url
+  tags = {
+    eks_cluster = aws_eks_cluster.eks_hybrid_nodes.name
+  }
+}

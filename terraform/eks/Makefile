@@ -36,7 +36,7 @@ install-alb-controller: .kubeconfig
 	@. $(CURDIR)/../aws/.env; \
 	helm --kubeconfig .kubeconfig \
 		--repo https://aws.github.io/eks-charts \
-		install alb-controller aws-load-balancer-controller \
+		install aws-load-balancer-controller aws-load-balancer-controller \
 		--version 1.11.0 \
 		--namespace kube-system \
 		--values .tmp/alb-controller-values.yml

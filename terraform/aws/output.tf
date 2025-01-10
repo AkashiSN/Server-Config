@@ -10,6 +10,10 @@ output "eks_cluster_endpoint" {
   value = module.eks.eks_cluster_endpoint
 }
 
+output "eks_alb_controller_sa_role_arn" {
+  value = module.eks.eks_alb_controller_sa_role_arn
+}
+
 output "ssm_activation_id" {
   value = module.eks.ssm_activation_id
 }
