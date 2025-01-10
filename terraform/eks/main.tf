@@ -5,6 +5,14 @@ terraform {
       version = "0.69.0"
     }
   }
+
+  backend "s3" {
+    bucket         = "su-nishi-bucket"
+    region         = "ap-northeast-1"
+    key            = "terraform/pve-eks-hybrid-nodes.tfstate"
+    dynamodb_table = "su-nishi-table"
+    encrypt        = true
+  }
 }
 
 provider "proxmox" {

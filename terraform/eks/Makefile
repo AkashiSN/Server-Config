@@ -28,6 +28,15 @@ install-cilium: .kubeconfig
 		--repo https://helm.cilium.io/ \
 		install cilium cilium \
 		--version 1.16.5 \
-    	--namespace kube-system \
-    	--values cilium-values.yaml \
-		--set k8sServiceHost=$(shell sed -n 's|.*server: https://\(.*\)$$|\1|p' .kubeconfig)
+		--namespace kube-system \
+		--values .tmp/cilium-values.yml
+
+.PHONY: install-alb-controller
+install-alb-controller: .kubeconfig
+	@. $(CURDIR)/../aws/.env; \
+	helm --kubeconfig .kubeconfig \
+		--repo https://aws.github.io/eks-charts \
+		install alb-controller aws-load-balancer-controller \
+		--version 1.11.0 \
+		--namespace kube-system \
+		--values .tmp/alb-controller-values.yml
