@@ -3,17 +3,19 @@ clean:
 	rm -rf $(CURDIR)/.tmp
 	rm -f $(CURDIR)/*.tfvars*
 	rm -f $(CURDIR)/*.tfstate*
+	rm -f $(CURDIR)/.kubeconfig
 
 terraform.tfvars:
 	pass infra/terraform/tfvars > $(CURDIR)/terraform.tfvars
 
-.PHONY: vm
-vm: terraform.tfvars
-	terraform apply
-
 ../aws/.env:
 	cd $(CURDIR)/../aws/; \
 	$(MAKE) .env
+
+.PHONY: vm
+vm: terraform.tfvars ../aws/.env
+	@. $(CURDIR)/../aws/.env; \
+	terraform apply
 
 .kubeconfig: ../aws/.env
 	@. $(CURDIR)/../aws/.env; \
