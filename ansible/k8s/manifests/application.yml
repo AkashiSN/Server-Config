@@ -9,7 +9,6 @@ spec:
         elements:
           - name: dns
           # - name: minecraft
-          # - name: palworld
           - name: nextcloud
           # - name: wordpress
           - name: immich
