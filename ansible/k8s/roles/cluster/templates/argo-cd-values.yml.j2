@@ -8,9 +8,9 @@ configs:
     statusbadge.enabled: true
     oidc.config: |-
       name: cloudflare
-      issuer: "$argocd-cloudflare-secrets:issuer"
-      clientID: "$argocd-cloudflare-secrets:clientID"
-      clientSecret: "$argocd-cloudflare-secrets:clientSecret"
+      issuer: "{{ argocd_cloudflare_issuer }}"
+      clientID: "{{ argocd_cloudflare_client_id }}"
+      clientSecret: "{{ argocd_cloudflare_client_secret }}"
       requestedIDTokenClaims:
         email:
           essential: true
@@ -26,30 +26,6 @@ configs:
     scopes: "[email]"
   secret:
     githubSecret: "{{ argocd_webhook_github_secret }}"
-extraObjects:
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: vso-secrets
-      namespace: argo-cd
-      annotations:
-        replicator.v1.mittwald.de/replicate-from: vault-secrets-operator/vso-secrets
-    type: Opaque
-    data: {}
-  - apiVersion: secrets.hashicorp.com/v1beta1
-    kind: HCPVaultSecretsApp
-    metadata:
-      name: argocd-cloudflare-secrets
-      namespace: argo-cd
-    spec:
-      appName: argocd
-      refreshAfter: 48h
-      hcpAuthRef: vault-secrets-operator/hcp-auth
-      destination:
-        create: true
-        name: argocd-cloudflare-secrets
-        labels:
-          app.kubernetes.io/part-of: argocd
 dex:
   enabled: false
 server:
@@ -63,14 +39,3 @@ server:
       - secretName: argocd-cert
         hosts:
           - "{{ argocd_fqdn }}"
-  ingressGrpc:
-    enabled: true
-    ingressClassName: nginx
-    annotations:
-      nginx.ingress.kubernetes.io/backend-protocol: GRPC
-      cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
-    hostname: "{{ argocd_grpc_fqdn }}"
-    extraTls:
-      - secretName: argocd-grpc-cert
-        hosts:
-          - "{{ argocd_grpc_fqdn }}"
