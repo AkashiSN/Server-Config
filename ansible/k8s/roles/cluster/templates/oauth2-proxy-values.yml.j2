@@ -5,19 +5,26 @@ hostAliases:
   - ip: "{{ nginx_ingress_lb_v4_addr }}"
 {% endif %}
     hostnames:
-      - "{{ auth_fqdn }}"
+      - "{{ oauth2_proxy_fqdn }}"
 extraArgs:
   provider: oidc
-  provider-display-name: dex
-  client-id: "oauth2-proxy"
-  client-secret: "{{ oauth2_proxy_client_secret }}"
+  provider-display-name: cloudflare
+  client-id: "{{ oauth2_proxy_cloudflare_client_id }}"
+  client-secret: "{{ oauth2_proxy_cloudflare_client_secret }}"
   whitelist-domain: ".{{ domain }}"
   cookie-domain: ".{{ domain }}"
-  redirect-url: "https://{{ auth_fqdn }}/oauth2/callback"
-  oidc-issuer-url: "https://{{ auth_fqdn }}/dex"
+  redirect-url: "https://{{ oauth2_proxy_fqdn }}/oauth2/callback"
+  oidc-issuer-url: "{{ oauth2_proxy_cloudflare_issuer }}"
   cookie-secure: "true"
-{% if target_env == "staging" %}
-  ssl-insecure-skip-verify: "true"
-{% endif %}
+  cookie-secret: "{{ oauth2_proxy_cookie_secret }}"
 ingress:
-  enabled: false
+  enabled: true
+  className: nginx
+  hosts:
+    - "{{ oauth2_proxy_fqdn }}"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+  tls:
+    - secretName: auth-cert
+      hosts:
+        - "{{ oauth2_proxy_fqdn }}"

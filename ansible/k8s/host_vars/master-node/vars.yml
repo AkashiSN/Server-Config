@@ -13,7 +13,11 @@ nginx_ingress_lb_v6_host_addr: "ffff:fac:ade:100"
 cloudflare_token: "{{ vault_cloudflare_token }}"
 email: "{{ vault_email }}"
 # oauth2-proxy
-oauth2_proxy_client_secret: "{{ vault_oauth2_proxy_client_secret }}"
+oauth2_proxy_fqdn: "auth.{{ domain }}"
+oauth2_proxy_cloudflare_issuer: "{{ vault_oauth2_proxy_cloudflare_issuer }}"
+oauth2_proxy_cloudflare_client_id: "{{ vault_oauth2_proxy_cloudflare_client_id }}"
+oauth2_proxy_cloudflare_client_secret: "{{ vault_oauth2_proxy_cloudflare_client_secret }}"
+oauth2_proxy_cookie_secret: "{{ vault_oauth2_proxy_cookie_secret }}"
 # argo-cd
 argocd_fqdn: "argocd.{{ domain }}"
 argocd_cloudflare_issuer: "{{ vault_argocd_cloudflare_issuer }}"
