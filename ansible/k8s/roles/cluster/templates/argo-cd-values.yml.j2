@@ -1,12 +1,16 @@
+global:
+ domain: "{{ argocd_fqdn }}"
 configs:
   cm:
+    create: true
     url: "https://{{ argocd_fqdn }}"
+    admin.enabled: false
     statusbadge.enabled: true
     oidc.config: |-
-      name: dex
-      issuer: "https://{{ auth_fqdn }}/dex"
-      clientID: argo-cd
-      clientSecret: "$oidc.dex.clientSecret"
+      name: cloudflare
+      issuer: "$argocd-cloudflare-secrets:issuer"
+      clientID: "$argocd-cloudflare-secrets:clientID"
+      clientSecret: "$argocd-cloudflare-secrets:clientSecret"
       requestedIDTokenClaims:
         email:
           essential: true
@@ -14,16 +18,38 @@ configs:
         - openid
         - profile
         - email
-  rbac:
-    policy.default: "role:readonly"
-    scopes: "[email]"
-  secret:
-    extra:
-      oidc.dex.clientSecret: "{{ argocd_client_secret }}"
-    githubSecret: "{{ argocd_webhook_github_secret }}"
-    argocdServerAdminPassword: "{{ argocd_admin_password }}"
+        - groups
   params:
     server.insecure: true
+  rbac:
+    policy.default: "role:admin"
+    scopes: "[email]"
+  secret:
+    githubSecret: "{{ argocd_webhook_github_secret }}"
+extraObjects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vso-secrets
+      namespace: argo-cd
+      annotations:
+        replicator.v1.mittwald.de/replicate-from: vault-secrets-operator/vso-secrets
+    type: Opaque
+    data: {}
+  - apiVersion: secrets.hashicorp.com/v1beta1
+    kind: HCPVaultSecretsApp
+    metadata:
+      name: argocd-cloudflare-secrets
+      namespace: argo-cd
+    spec:
+      appName: argocd
+      refreshAfter: 48h
+      hcpAuthRef: vault-secrets-operator/hcp-auth
+      destination:
+        create: true
+        name: argocd-cloudflare-secrets
+        labels:
+          app.kubernetes.io/part-of: argocd
 dex:
   enabled: false
 server:
