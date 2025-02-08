@@ -31,7 +31,7 @@ resource "aws_eks_cluster" "eks_auto_mode" {
     endpoint_private_access = true
     endpoint_public_access  = true
 
-    public_access_cidrs = [ "${var.homelab.global_ip_address}/32" ]
+    public_access_cidrs = ["${var.homelab.global_ip_address}/32"]
 
     subnet_ids         = var.vpc.subnet_ids
     security_group_ids = [aws_security_group.eks_cluster.id]
