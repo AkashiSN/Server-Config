@@ -7,9 +7,9 @@ data "template_file" "cloud_init_hybrid_node_01_userdata" {
     user_name           = var.userdata.user_name
     hashed_password     = var.userdata.hashed_password
     github_id           = var.userdata.github_id
-    cluster_name        = data.terraform_remote_state.aws.outputs.eks_cluster_name
-    ssm_activation_id   = data.terraform_remote_state.aws.outputs.ssm_activation_id
-    ssm_activation_code = data.terraform_remote_state.aws.outputs.ssm_activation_code
+    cluster_name        = data.terraform_remote_state.aws.outputs.eks_hybrid_nodes_cluster_name
+    ssm_activation_id   = data.terraform_remote_state.aws.outputs.eks_hybrid_nodes_ssm_activation_id
+    ssm_activation_code = data.terraform_remote_state.aws.outputs.eks_hybrid_nodes_ssm_activation_code
   }
 }
 

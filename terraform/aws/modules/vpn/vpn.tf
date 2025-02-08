@@ -5,23 +5,23 @@ resource "aws_vpn_gateway" "vgw" {
 }
 
 resource "aws_vpn_gateway_attachment" "vpn_attachment" {
-  vpc_id         = aws_vpc.main.id
+  vpc_id         = var.vpc.id
   vpn_gateway_id = aws_vpn_gateway.vgw.id
 }
 
 resource "aws_vpn_gateway_route_propagation" "vgw_propagate_main" {
   vpn_gateway_id = aws_vpn_gateway.vgw.id
-  route_table_id = aws_vpc.main.main_route_table_id
+  route_table_id = var.vpc.route_table_id.main
 }
 
 resource "aws_vpn_gateway_route_propagation" "vgw_propagate_private_a" {
   vpn_gateway_id = aws_vpn_gateway.vgw.id
-  route_table_id = aws_route_table.private_a.id
+  route_table_id = var.vpc.route_table_id.private_a
 }
 
 resource "aws_vpn_gateway_route_propagation" "vgw_propagate_private_c" {
   vpn_gateway_id = aws_vpn_gateway.vgw.id
-  route_table_id = aws_route_table.private_c.id
+  route_table_id = var.vpc.route_table_id.private_c
 }
 
 resource "aws_customer_gateway" "cgw" {

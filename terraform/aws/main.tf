@@ -1,8 +1,22 @@
 module "vpc" {
   source  = "./modules/vpc"
   project = local.project
+
+}
+
+module "vpn" {
+  source  = "./modules/vpn"
+  project = local.project
   homelab = {
     global_ip_address = var.homelab_global_ip_address
+  }
+  vpc = {
+    id = module.vpc.vpc_id
+    route_table_id = {
+      main      = module.vpc.route_table_main_id
+      private_a = module.vpc.route_table_private_a_id
+      private_c = module.vpc.route_table_private_c_id
+    }
   }
 }
 
@@ -11,8 +25,8 @@ module "ec2" {
   project = local.project
 }
 
-module "eks" {
-  source   = "./modules/eks"
+module "eks_hybrid_nodes" {
+  source   = "./modules/eks-hybrid-nodes"
   project  = local.project
   iam_user = var.iam_user
   cluster_network = {
