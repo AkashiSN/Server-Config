@@ -50,6 +50,9 @@ module "eks_auto_mode" {
   source   = "./modules/eks-auto-mode"
   project  = local.project
   iam_user = var.iam_user
+  homelab = {
+    global_ip_address = var.homelab_global_ip_address
+  }
   vpc = {
     id = module.vpc.vpc_id
     subnet_ids = [

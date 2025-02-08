@@ -1,6 +1,6 @@
 resource "aws_eks_cluster" "eks_auto_mode" {
   name     = "${var.project}_eks-auto-mode"
-  version  = "1.31"
+  version  = "1.32"
   role_arn = aws_iam_role.eks_auto_cluster_role.arn
 
   bootstrap_self_managed_addons = false
@@ -29,7 +29,9 @@ resource "aws_eks_cluster" "eks_auto_mode" {
 
   vpc_config {
     endpoint_private_access = true
-    endpoint_public_access  = false
+    endpoint_public_access  = true
+
+    public_access_cidrs = [ "${var.homelab.global_ip_address}/32" ]
 
     subnet_ids         = var.vpc.subnet_ids
     security_group_ids = [aws_security_group.eks_cluster.id]
