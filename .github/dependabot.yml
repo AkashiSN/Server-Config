@@ -10,6 +10,14 @@ updates:
   #   schedule:
   #     interval: "weekly"
   - package-ecosystem: "docker"
+    directory: "/docker/dnsdist"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "/docker/dnsmasq"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
     directory: "/docker/nextcloud"
     schedule:
       interval: "weekly"

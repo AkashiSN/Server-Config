@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.21.2
 
 RUN apk --no-cache add dnsmasq curl && \
     echo '#!/bin/sh' > /docker-entrypoint.sh && \
