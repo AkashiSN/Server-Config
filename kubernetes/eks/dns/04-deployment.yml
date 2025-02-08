@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dns-server
+  namespace: dns
+spec:
+  selector:
+    matchLabels:
+      app: dns-server
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: dns-server
+    spec:
+      containers:
+        - name: dnsmasq
+          image: ghcr.io/akashisn/dnsmasq@sha256:fcff5ebbcf7e2fc21a43d7db89ed8d06981d0e8f86cdfe30ab1435c5ebdc6e9a
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: dnsmasq-conf
+              mountPath: /etc/dnsmasq.d/dnsmasq.conf
+              subPath: dnsmasq.conf
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi
+        - name: dnsdist
+          image: ghcr.io/akashisn/dnsdist@sha256:ba29d891d18b2ab6e1d05f33bdfd9eb2e561917abe3d7b02e46f359b71249a5e
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 53
+              protocol: UDP
+              name: dnsdist
+            - containerPort: 443
+              protocol: TCP
+              name: dnsdist-doh
+            - containerPort: 853
+              protocol: TCP
+              name: dnsdist-dot
+          volumeMounts:
+            - name: dnsdist-conf
+              mountPath: /etc/dnsdist.conf
+              subPath: dnsdist.conf
+              readOnly: true
+            - name: certs
+              mountPath: /certs
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi
+      volumes:
+        - name: certs
+          secret:
+            secretName: dns-cert
+        - name: dnsmasq-conf
+          configMap:
+            name: dnsmasq-conf
+        - name: dnsdist-conf
+          configMap:
+            name: dnsdist-conf

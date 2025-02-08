@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dns-cert
+  namespace: dns
+spec:
+  secretName: dns-cert
+  dnsNames:
+    - dns.akashisn.info
+  issuerRef:
+    name: letsencrypt-cluster-issuer
+    kind: ClusterIssuer

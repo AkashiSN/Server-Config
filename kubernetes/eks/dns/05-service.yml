@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: dns.akashisn.info
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+  labels:
+    service: dns-server
+  name: dns-server
+  namespace: dns
+spec:
+  type: LoadBalancer
+  loadBalancerClass: eks.amazonaws.com/nlb
+  ports:
+    - port: 53
+      protocol: UDP
+      name: dnsdist
+    - port: 443
+      protocol: TCP
+      name: dnsdist-doh
+    - port: 853
+      protocol: TCP
+      name: dnsdist-dot
+  selector:
+    app: dns-server

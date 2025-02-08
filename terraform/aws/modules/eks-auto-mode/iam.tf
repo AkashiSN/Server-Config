@@ -129,12 +129,64 @@ resource "aws_iam_role" "cert_manager_sa_role" {
 }
 
 resource "aws_iam_policy" "cert_manager_sa_policy" {
-  name        = "${var.project}_policy-cert-manager-sa"
-  description = "This policy allows cert-manager to manage ACME DNS01 records in Route53 hosted zones. See https://cert-manager.io/docs/configuration/acme/dns01/route53"
-  policy      = local.cert_manager_sa_policy_json
+  name   = "${var.project}_policy-cert-manager-sa"
+  policy = local.cert_manager_sa_policy_json
 }
 
 resource "aws_iam_role_policy_attachment" "cert_manager_sa_policy" {
   role       = aws_iam_role.cert_manager_sa_role.name
   policy_arn = aws_iam_policy.cert_manager_sa_policy.arn
+}
+
+
+# external-dns service account IAM role
+data "aws_iam_policy_document" "external_dns_sa_role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.eks_auto_mode.arn]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "${trimprefix(aws_iam_openid_connect_provider.eks_auto_mode.url, "https://")}:sub"
+      values   = ["system:serviceaccount:external-dns:external-dns"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "external_dns_sa_policy" {
+  statement {
+    actions   = ["route53:ChangeResourceRecordSets"]
+    resources = ["arn:aws:route53:::hostedzone/*"]
+  }
+
+  statement {
+    actions = [
+      "route53:ListHostedZones",
+      "route53:ListResourceRecordSets",
+      "route53:ListTagsForResource"
+    ]
+    resources = ["*"]
+  }
+}
+
+locals {
+  external_dns_sa_role_json   = data.aws_iam_policy_document.external_dns_sa_role.json
+  external_dns_sa_policy_json = data.aws_iam_policy_document.external_dns_sa_policy.json
+}
+
+resource "aws_iam_role" "external_dns_sa_role" {
+  name               = "${var.project}_role-external-dns-sa"
+  assume_role_policy = local.external_dns_sa_role_json
+}
+
+resource "aws_iam_policy" "external_dns_sa_policy" {
+  name   = "${var.project}_policy-external-dns-sa"
+  policy = local.external_dns_sa_policy_json
+}
+
+resource "aws_iam_role_policy_attachment" "external_dns_sa_policy" {
+  role       = aws_iam_role.external_dns_sa_role.name
+  policy_arn = aws_iam_policy.external_dns_sa_policy.arn
 }

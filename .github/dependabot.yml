@@ -21,13 +21,13 @@ updates:
     directory: "/docker/wordpress"
     schedule:
       interval: "weekly"
-  # k8s manifests
+  # k8s manifests - k8s
   - package-ecosystem: "docker"
-    directory: "/ansible/k8s/manifests/dns"
+    directory: "/kubernetes/k8s/dns"
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker"
-    directory: "/ansible/k8s/manifests/nextcloud"
+    directory: "/kubernetes/k8s/nextcloud"
     schedule:
       interval: "weekly"
     ignore:
@@ -36,15 +36,20 @@ updates:
           - "version-update:semver-major"
           - "version-update:semver-minor"
   - package-ecosystem: "docker"
-    directory: "/ansible/k8s/manifests/wordpress"
+    directory: "/kubernetes/k8s/wordpress"
     schedule:
       interval: "weekly"
     ignore:
       - dependency-name: "mariadb"
         update-types:
           - "version-update:semver-major"
+  # k8s manifests - eks
+  - package-ecosystem: "docker"
+    directory: "/kubernetes/eks/dns"
+    schedule:
+      interval: "weekly"
   # - package-ecosystem: "docker"
-  #   directory: "/ansible/k8s/manifests/immich"
+  #   directory: "/kubernetes/k8s/immich"
   #   schedule:
   #     interval: "weekly"
   #   ignore:
@@ -56,7 +61,7 @@ updates:
   #       update-types:
   #         - "version-update:semver-major"
   # - package-ecosystem: "docker"
-  #   directory: "/ansible/k8s/manifests/tv"
+  #   directory: "/kubernetes/k8s/tv"
   #   schedule:
   #     interval: "weekly"
   #   ignore:
@@ -65,6 +70,6 @@ updates:
   #         - "version-update:semver-major"
   #         - "version-update:semver-minor"
   # - package-ecosystem: "docker"
-  #   directory: "/ansible/k8s/manifests/palworld"
+  #   directory: "/kubernetes/k8s/palworld"
   #   schedule:
   #     interval: "weekly"
