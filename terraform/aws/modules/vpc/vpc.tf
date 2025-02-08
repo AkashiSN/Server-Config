@@ -14,6 +14,8 @@ resource "aws_subnet" "public_a" {
 
   tags = {
     Name = "${var.project}_public-a"
+
+    "kubernetes.io/role/elb" = "1"
   }
 }
 
@@ -24,6 +26,8 @@ resource "aws_subnet" "public_c" {
 
   tags = {
     Name = "${var.project}_public-c"
+
+    "kubernetes.io/role/elb" = "1"
   }
 }
 

@@ -63,8 +63,8 @@ module "eks_auto_mode" {
 }
 
 module "helm" {
-  source               = "./modules/helm"
-  vpc_id               = module.vpc.vpc_id
-  eks_cluster_name     = module.eks_auto_mode.eks_cluster_name
-  eks_albc_sa_role_arn = module.eks_auto_mode.eks_albc_sa_role_arn
+  source           = "./modules/helm"
+  vpc_id           = module.vpc.vpc_id
+  eks_cluster_name = module.eks_auto_mode.eks_cluster_name
+  # eks_albc_sa_role_arn = module.eks_auto_mode.eks_albc_sa_role_arn
 }

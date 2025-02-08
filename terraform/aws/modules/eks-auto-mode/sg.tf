@@ -29,6 +29,14 @@ resource "aws_security_group" "eks_worker_nodes" {
   description = "${var.project}_sg-eks-worker_nodes"
   vpc_id      = var.vpc.id
 
+  ingress {
+    description = "allow-all-from-self-sg"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self        = true
+  }
+
   egress {
     description = "allow-all-outbound"
     from_port   = 0
