@@ -25,21 +25,6 @@ spec:
         path: "ansible/k8s/manifests/{{name}}"
         repoURL: https://github.com/AkashiSN/Server-Config.git
         targetRevision: main
-        # kustomize:
-        #   patches:
-        #     - target:
-        #         kind: Service
-        #         name: dns-server
-        #       patch: |-
-        #         - op: replace
-        #           path: /spec/type
-        #           value: NodePort
-        #         - op: add
-        #           path: /spec/ports/0/nodePort
-        #           value: 53
-        #         - op: add
-        #           path: /spec/ports/2/nodePort
-        #           value: 853
       syncPolicy:
         automated: {}
         syncOptions:
