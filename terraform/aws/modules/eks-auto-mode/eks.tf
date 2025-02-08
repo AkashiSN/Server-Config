@@ -59,3 +59,16 @@ resource "aws_eks_access_policy_association" "eks_admin" {
 
   depends_on = [aws_eks_access_entry.eks_admin]
 }
+
+data "tls_certificate" "eks_auto_mode" {
+  url = aws_eks_cluster.eks_auto_mode.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks_auto_mode" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = data.tls_certificate.eks_auto_mode.certificates[*].sha1_fingerprint
+  url             = data.tls_certificate.eks_auto_mode.url
+  tags = {
+    eks_cluster = aws_eks_cluster.eks_auto_mode.name
+  }
+}
