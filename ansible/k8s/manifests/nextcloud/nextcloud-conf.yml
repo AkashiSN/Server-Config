@@ -47,6 +47,7 @@ data:
     #!/bin/sh
     set -eu
 
+    php /var/www/html/occ app:enable user_oidc
     php /var/www/html/occ app:enable files_external
     php /var/www/html/occ app:enable twofactor_totp
     php /var/www/html/occ app:enable suspicious_login
