@@ -7,7 +7,7 @@ spec:
   generators:
     - list:
         elements:
-          - name: dns
+          # - name: dns
           # - name: minecraft
           - name: nextcloud
           # - name: wordpress
@@ -22,7 +22,7 @@ spec:
         namespace: "{{name}}"
       project: default
       source:
-        path: "ansible/k8s/manifests/{{name}}"
+        path: "kubernetes/k8s/{{name}}"
         repoURL: https://github.com/AkashiSN/Server-Config.git
         targetRevision: main
       syncPolicy:
