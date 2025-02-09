@@ -5,3 +5,4 @@
 *.gpg
 vault.yml
 !.gitkeep
+.kubeconfig

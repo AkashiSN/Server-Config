@@ -1,0 +1,7 @@
+resources:
+  - dns/01-namespace.yml
+  - dns/02-certificate.yml
+  - dns/03-configmap.yml
+  - dns/04-deployment.yml
+  - dns/05-service.yml
+  - dns/06-cronjob.yml

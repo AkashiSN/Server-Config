@@ -35,6 +35,3 @@ terraform.rc
 
 # Template output dir
 .tmp/
-
-# Kubeconfig
-.kubeconfig

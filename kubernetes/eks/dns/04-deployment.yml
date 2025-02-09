@@ -7,7 +7,12 @@ spec:
   selector:
     matchLabels:
       app: dns-server
-  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 5
+  replicas: 5
   template:
     metadata:
       labels:
@@ -56,6 +61,16 @@ spec:
             limits:
               cpu: 200m
               memory: 200Mi
+          readinessProbe:
+            tcpSocket:
+              port: 443
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 443
+            initialDelaySeconds: 20
+            periodSeconds: 5
       volumes:
         - name: certs
           secret:
