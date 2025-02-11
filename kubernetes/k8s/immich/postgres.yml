@@ -23,19 +23,6 @@ spec:
           ports:
             - containerPort: 5432
               name: postgres
-          livenessProbe:
-            exec:
-              command:
-              - sh
-              - -c
-              - |
-                pg_isready --dbname="${POSTGRES_DB}" --username="${POSTGRES_USER}" || exit 1;
-                Chksum="$(psql --dbname="${POSTGRES_DB}" --username="${POSTGRES_USER}" --tuples-only --no-align --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')";
-                echo "checksum failure count is $Chksum";
-                [ "$Chksum" = '0' ] || exit 1
-            initialDelaySeconds: 30
-            periodSeconds: 30
-            failureThreshold: 10
           env:
             - name: TZ
               value: Asia/Tokyo
@@ -66,6 +53,32 @@ spec:
               mountPath: /var/lib/postgresql/data
             - name: immich-secrets
               mountPath: /secrets
+          readinessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - |
+                pg_isready --dbname="${POSTGRES_DB}" --username="${POSTGRES_USER}" || exit 1;
+                Chksum="$(psql --dbname="${POSTGRES_DB}" --username="${POSTGRES_USER}" --tuples-only --no-align --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')";
+                echo "checksum failure count is $Chksum";
+                [ "$Chksum" = '0' ] || exit 1
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - |
+                pg_isready --dbname="${POSTGRES_DB}" --username="${POSTGRES_USER}" || exit 1;
+                Chksum="$(psql --dbname="${POSTGRES_DB}" --username="${POSTGRES_USER}" --tuples-only --no-align --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')";
+                echo "checksum failure count is $Chksum";
+                [ "$Chksum" = '0' ] || exit 1
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 10
       volumes:
         - name: immich-secrets
           secret:
