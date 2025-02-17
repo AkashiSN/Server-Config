@@ -30,9 +30,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: immich-env
+          env:
+            - name: IMMICH_WORKERS_INCLUDE
+              value: api
           volumeMounts:
             - name: immich-photos
-              mountPath: /usr/src/app/upload
+              mountPath: /mnt/photos
             - name: immich-secrets
               mountPath: /secrets
           readinessProbe:

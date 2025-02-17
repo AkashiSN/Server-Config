@@ -7,4 +7,5 @@ resources:
   - postgres.yml
   - immich-config.yml
   - immich-machine-learning.yml
+  - immich-microservices.yml
   - immich-server.yml
