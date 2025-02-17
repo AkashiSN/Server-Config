@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: wordpress
-          image: ghcr.io/akashisn/wordpress@sha256:74706be36503d9634066a7a590d91f52abffdf52c17fe27d74e81f6aa082c98e
+          image: ghcr.io/akashisn/wordpress@sha256:9cc56ce3ba1ba7fa44051745c2de81a7ed947b083e0a88af8b6f03e0b9217a14
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
       restartPolicy: Never
