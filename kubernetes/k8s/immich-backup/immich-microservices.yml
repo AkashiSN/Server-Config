@@ -43,4 +43,4 @@ spec:
                   name: immich-secrets
         - name: immich-photos
           persistentVolumeClaim:
-            claimName: immich-photos-pvc
+            claimName: immich-photos-backup-pvc
