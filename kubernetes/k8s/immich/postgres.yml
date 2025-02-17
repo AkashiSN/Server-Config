@@ -94,7 +94,7 @@ spec:
         storageClassName: iscsi-ssd-storage
         resources:
           requests:
-            storage: 50Gi
+            storage: 128Gi
 ---
 apiVersion: v1
 kind: Service
