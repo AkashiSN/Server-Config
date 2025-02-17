@@ -32,7 +32,7 @@ spec:
               value: api
           volumeMounts:
             - name: immich-photos
-              mountPath: /mnt/photos
+              mountPath: /usr/src/app/upload
             - name: immich-secrets
               mountPath: /secrets
       volumes:
