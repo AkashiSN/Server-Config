@@ -26,7 +26,6 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3003
-              name: immich-machine-learning
           envFrom:
             - configMapRef:
                 name: immich-env
@@ -55,6 +54,6 @@ spec:
   ports:
     - name: immich-machine-learning
       port: 3003
-      targetPort: immich-machine-learning
+      targetPort: 3003
   selector:
     app: immich-machine-learning
