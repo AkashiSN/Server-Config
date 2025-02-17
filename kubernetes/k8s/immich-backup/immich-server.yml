@@ -4,7 +4,7 @@ metadata:
   labels:
     app: immich-server
   name: immich-server
-  namespace: immich
+  namespace: immich-backup
 spec:
   selector:
     matchLabels:
@@ -66,7 +66,7 @@ metadata:
   labels:
     service: immich-server
   name: immich-server
-  namespace: immich
+  namespace: immich-backup
 spec:
   ports:
     - name: immich-server
@@ -79,17 +79,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-immich
-  namespace: immich
+  namespace: immich-backup
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - photos-new.akashisn.info
+        - photos.akashisn.info
       secretName: immich-cert
   rules:
-    - host: photos-new.akashisn.info
+    - host: photos.akashisn.info
       http:
         paths:
           - path: /

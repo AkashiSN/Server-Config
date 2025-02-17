@@ -9,9 +9,10 @@ spec:
         elements:
           # - name: dns
           # - name: minecraft
-          - name: nextcloud
+          # - name: nextcloud
           # - name: wordpress
-          - name: immich
+          - name: immich-backup
+          # - name: immich
           # - name: tv
   template:
     metadata:

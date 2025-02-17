@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-photos-backup-pv
+spec:
+  capacity:
+    storage: 2Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-hdd-storage
+  nfs:
+    server: 172.16.255.1
+    path: /mnt/hdd/nfs/immich-photos-backup
+  mountOptions:
+    - nfsvers=4.2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-postgres-backup-pv
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: iscsi-ssd-storage
+  claimRef:
+    namespace: immich-backup
+    name: data-immich-postgres-0
+  iscsi:
+    targetPortal: 172.16.255.1:3260
+    iqn: iqn.2005-10.org.freenas.ctl:immich-postgres-backup
+    lun: 0
+    fsType: xfs
+    readOnly: false
