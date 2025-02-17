@@ -8,11 +8,8 @@ spec:
     matchLabels:
       app: immich-redis
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 2
-  replicas: 2
+    type: Recreate
+  replicas: 1
   template:
     metadata:
       labels:
