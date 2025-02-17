@@ -86,10 +86,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - photos-new.akashisn.info
+        - photos.akashisn.info
       secretName: immich-cert
   rules:
-    - host: photos-new.akashisn.info
+    - host: photos.akashisn.info
       http:
         paths:
           - path: /
