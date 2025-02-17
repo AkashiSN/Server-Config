@@ -29,6 +29,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: immich-env
+          env:
+            - name: IMMICH_PORT
+              value: "3003"
           volumeMounts:
             - name: model-cache
               mountPath: /cache
