@@ -24,12 +24,12 @@ spec:
         - name: immich-machine-learning
           image: ghcr.io/immich-app/immich-machine-learning:v1.125.7
           imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3003
+              name: immich-machine-learning
           envFrom:
             - configMapRef:
                 name: immich-env
-          env:
-            - name: IMMICH_PORT
-              value: "2283"
           volumeMounts:
             - name: model-cache
               mountPath: /cache
@@ -43,3 +43,18 @@ spec:
                   name: immich-secrets
         - name : model-cache
           emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: immich-machine-learning
+  name: immich-machine-learning
+  namespace: immich
+spec:
+  ports:
+    - name: immich-machine-learning
+      port: 3003
+      targetPort: immich-machine-learning
+  selector:
+    app: immich-machine-learning
