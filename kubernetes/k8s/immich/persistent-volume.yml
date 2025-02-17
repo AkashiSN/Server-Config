@@ -21,7 +21,7 @@ metadata:
   name: immich-postgres-pv
 spec:
   capacity:
-    storage: 128Gi
+    storage: 50Gi
   accessModes:
     - ReadWriteOncePod
   persistentVolumeReclaimPolicy: Retain
