@@ -14,7 +14,7 @@
     - role: common
       vars:
         os: "xUbuntu_24.04"
-        k8s_major_version: "1.31"
+        k8s_major_version: "1.32"
       when: inventory_hostname != "k3s"
 
 - name: Setup cluster by kubeadm
@@ -31,4 +31,6 @@
     - role: cluster
       vars:
         target_env: "staging" # staging or production
+        pod_subnet: "10.132.0.0/16"
+        service_subnet: "11.132.0.0/16"
       when: inventory_hostname != "k3s"

@@ -27,11 +27,6 @@
     wait: true
     atomic: true
     release_values:
-      ipam:
-        mode: cluster-pool
-        operator:
-          clusterPoolIPv4PodCIDRList: ["10.244.0.0/16"]
-          clusterPoolIPv4MaskSize: 2
       ipv4:
         enabled: true
       k8sServiceHost: "{{ node_ip.stdout }}"
