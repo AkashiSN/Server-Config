@@ -54,7 +54,7 @@
     - name: Create the storage class
       kubernetes.core.k8s:
         state: present
-        definition: "{{ lookup('file', 'manifests/storage-class.yml') | from_yaml_all }}"
+        definition: "{{ lookup('file', '../kubernetes/k8s/storage-class.yml') | from_yaml_all }}"
       become: false
 
 - name: Wait for all pods to be ready

@@ -10,7 +10,7 @@
   kubernetes.core.helm:
     release_name: oauth2-proxy
     chart_ref: oauth2-proxy/oauth2-proxy
-    chart_version: "7.10.*"
+    chart_version: "7.12.*"
     release_namespace: auth
     create_namespace: true
     update_repo_cache: true

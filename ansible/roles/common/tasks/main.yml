@@ -16,12 +16,19 @@
       - open-iscsi
       - nfs-common
       - python3-pip
-      - python3-yaml
-      - python3-kubernetes
       - jq
       - sysstat
     state: present
     update_cache: true
+  become: true
+
+- name: Install pip packages
+  ansible.builtin.pip:
+    name:
+      - kubernetes
+      - pyyaml
+    extra_args: --break-system-packages
+    executable: pip3.12
   become: true
 
 - name: Remove dependencies that are no longer required
