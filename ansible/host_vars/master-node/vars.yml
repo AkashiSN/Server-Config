@@ -1,14 +1,9 @@
 # domain
 domain: "akashisn.info"
-# k8s
-ipv6_pod_cider: "cafe:0::/96"
-ipv6_service_cider: "cafe:1::/112"
 # metallb
 metallb_ipv4_range: "172.16.254.130-172.16.254.150"
-metallb_ipv6_cider: "ffff:fac:ade::/112"
 # nginx-ingress
 nginx_ingress_lb_v4_addr: "172.16.254.100"
-nginx_ingress_lb_v6_host_addr: "ffff:fac:ade:100"
 # acme
 cloudflare_token: "{{ vault_cloudflare_token }}"
 email: "{{ vault_email }}"
@@ -31,7 +26,5 @@ hashicorp_vault_organization_id: "{{ vault_hashicorp_vault_organization_id }}"
 hashicorp_vault_project_id: "{{ vault_hashicorp_vault_project_id }}"
 # dns
 dns_lb_v4_addr: "172.16.254.110"
-dns_lb_v6_host_addr: "ffff:fac:ade:110"
 # minecraft
 minecraft_lb_v4_addr: "172.16.254.120"
-minecraft_lb_v6_host_addr: "ffff:fac:ade:120"

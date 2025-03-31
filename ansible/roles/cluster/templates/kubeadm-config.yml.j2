@@ -9,14 +9,12 @@ kind: ClusterConfiguration
 clusterName: "k8s-cluster"
 controlPlaneEndpoint: "{{ node_ip.stdout }}"
 networking:
-  podSubnet: "10.244.0.0/16,{{ ipv6_prefix }}:{{ ipv6_pod_cider }}"
-  serviceSubnet: "10.96.0.0/16,{{ ipv6_prefix }}:{{ ipv6_service_cider }}"
+  podSubnet: "10.244.0.0/16"
+  serviceSubnet: "10.96.0.0/16"
 controllerManager:
   extraArgs:
     - name: "node-cidr-mask-size-ipv4"
       value: "24"
-    - name: "node-cidr-mask-size-ipv6"
-      value: "112"
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration

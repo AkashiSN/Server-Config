@@ -3,12 +3,12 @@ virtualmachines:
     master:
       hosts:
         master-node:
-          ansible_host: k8s-v131-control-plane
+          ansible_host: k8s-v132-control-plane
         k3s:
           ansible_host: k3s
     worker:
       hosts:
         worker-node01:
-          ansible_host: k8s-v131-worker-node-01
+          ansible_host: k8s-v132-worker-node-01
         worker-node02:
-          ansible_host: k8s-v131-worker-node-02
+          ansible_host: k8s-v132-worker-node-02
