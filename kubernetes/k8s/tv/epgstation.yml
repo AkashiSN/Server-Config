@@ -17,7 +17,7 @@ spec:
         app: epgstation
     spec:
       nodeSelector:
-        kubernetes.io/hostname: worker-node-01
+        kubernetes.io/hostname: k8s-v132-worker-node-01
       securityContext:
         fsGroup: 33
         fsGroupChangePolicy: OnRootMismatch

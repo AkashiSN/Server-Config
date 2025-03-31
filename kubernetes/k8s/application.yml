@@ -12,7 +12,7 @@ spec:
           - name: nextcloud
           # - name: wordpress
           - name: immich
-          # - name: tv
+          - name: tv
   template:
     metadata:
       name: "{{name}}"
