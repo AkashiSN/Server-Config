@@ -62,9 +62,6 @@ updates:
       interval: "weekly"
     ignore:
       - dependency-name: "tensorchord/pgvecto-rs"
-        update-types:
-          - "version-update:semver-major"
-          - "version-update:semver-minor"
       - dependency-name: "redis"
         update-types:
           - "version-update:semver-major"
