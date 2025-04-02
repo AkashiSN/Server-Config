@@ -1,4 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+spec:
+  syncWindows:
+  - kind: allow
+    schedule: '0 2 * * *'
+    timeZone: "Asia/Tokyo"
+    duration: 1h
+    applications:
+    - '*'
+---
+apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: server-config

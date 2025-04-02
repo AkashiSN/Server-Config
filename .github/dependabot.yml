@@ -56,18 +56,18 @@ updates:
     directory: "/kubernetes/eks/dns"
     schedule:
       interval: "weekly"
-  # - package-ecosystem: "docker"
-  #   directory: "/kubernetes/k8s/immich"
-  #   schedule:
-  #     interval: "weekly"
-  #   ignore:
-  #     - dependency-name: "pgvecto-rs"
-  #       update-types:
-  #         - "version-update:semver-major"
-  #         - "version-update:semver-minor"
-  #     - dependency-name: "redis"
-  #       update-types:
-  #         - "version-update:semver-major"
+  - package-ecosystem: "docker"
+    directory: "/kubernetes/k8s/immich"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "pgvecto-rs"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+      - dependency-name: "redis"
+        update-types:
+          - "version-update:semver-major"
   # - package-ecosystem: "docker"
   #   directory: "/kubernetes/k8s/tv"
   #   schedule:
