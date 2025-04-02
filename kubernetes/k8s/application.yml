@@ -2,14 +2,16 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: default
+  namespace: argo-cd
 spec:
   syncWindows:
-  - kind: allow
-    schedule: '0 2 * * *'
-    timeZone: "Asia/Tokyo"
-    duration: 1h
-    applications:
-    - '*'
+    - kind: allow
+      schedule: '0 2 * * *'
+      timeZone: "Asia/Tokyo"
+      duration: 1h
+      manualSync: true
+      applications:
+        - '*'
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
