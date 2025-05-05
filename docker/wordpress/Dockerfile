@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.4
-FROM wordpress:6.8.0-php8.2-fpm
+FROM wordpress:6.8.1-php8.2-fpm
 
 SHELL ["/bin/bash", "-e", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
