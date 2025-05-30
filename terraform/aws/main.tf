@@ -83,13 +83,13 @@ module "eks_auto_mode" {
   }
 }
 
-module "helm" {
-  source                       = "./modules/helm"
-  email                        = var.email
-  vpc_id                       = module.vpc.vpc_id
-  eks_cluster_name             = module.eks_auto_mode.eks_cluster_name
-  eks_cert_manager_sa_role_arn = module.eks_auto_mode.eks_cert_manager_sa_role_arn
-  eks_external_dns_sa_role_arn = module.eks_auto_mode.eks_external_dns_sa_role_arn
-  host_zone_id                 = module.route53.host_zone_id
-  target_env                   = "production" # staging or production
-}
+# module "helm" {
+#   source                       = "./modules/helm"
+#   email                        = var.email
+#   vpc_id                       = module.vpc.vpc_id
+#   eks_cluster_name             = module.eks_auto_mode.eks_cluster_name
+#   eks_cert_manager_sa_role_arn = module.eks_auto_mode.eks_cert_manager_sa_role_arn
+#   eks_external_dns_sa_role_arn = module.eks_auto_mode.eks_external_dns_sa_role_arn
+#   host_zone_id                 = module.route53.host_zone_id
+#   target_env                   = "production" # staging or production
+# }

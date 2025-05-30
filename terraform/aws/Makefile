@@ -32,6 +32,10 @@ terraform.tfvars:
 	@echo "iam_user=\"$$(pass infra/aws/$(AWS_PROFILE)/iam-user 2>/dev/null)\"" >> $(CURDIR)/terraform.tfvars
 	@echo "email=\"$$(pass email 2>/dev/null)\"" >> $(CURDIR)/terraform.tfvars
 
+.kubeconfig: .env
+	@. $(CURDIR)/.env; \
+	aws eks update-kubeconfig --kubeconfig .kubeconfig --name su-nishi_eks-auto-mode
+
 .PHONY: aws
 aws: terraform.tfvars .env
 	@. $(CURDIR)/.env; \

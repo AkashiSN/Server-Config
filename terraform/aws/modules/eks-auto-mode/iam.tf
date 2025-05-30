@@ -124,12 +124,12 @@ locals {
 }
 
 resource "aws_iam_role" "cert_manager_sa_role" {
-  name               = "${var.project}_role-cert-manager-sa"
+  name               = "${var.project}_eks-v133-role-cert-manager-sa"
   assume_role_policy = local.cert_manager_sa_role_json
 }
 
 resource "aws_iam_policy" "cert_manager_sa_policy" {
-  name   = "${var.project}_policy-cert-manager-sa"
+  name   = "${var.project}_eks-v133-policy-cert-manager-sa"
   policy = local.cert_manager_sa_policy_json
 }
 
@@ -138,19 +138,16 @@ resource "aws_iam_role_policy_attachment" "cert_manager_sa_policy" {
   policy_arn = aws_iam_policy.cert_manager_sa_policy.arn
 }
 
-
 # external-dns service account IAM role
 data "aws_iam_policy_document" "external_dns_sa_role" {
   statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
     principals {
-      type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.eks_auto_mode.arn]
-    }
-    condition {
-      test     = "StringEquals"
-      variable = "${trimprefix(aws_iam_openid_connect_provider.eks_auto_mode.url, "https://")}:sub"
-      values   = ["system:serviceaccount:external-dns:external-dns"]
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
     }
   }
 }
@@ -177,12 +174,12 @@ locals {
 }
 
 resource "aws_iam_role" "external_dns_sa_role" {
-  name               = "${var.project}_role-external-dns-sa"
+  name               = "${var.project}_eks-v133-role-external-dns-sa"
   assume_role_policy = local.external_dns_sa_role_json
 }
 
 resource "aws_iam_policy" "external_dns_sa_policy" {
-  name   = "${var.project}_policy-external-dns-sa"
+  name   = "${var.project}_eks-v133-policy-external-dns-sa"
   policy = local.external_dns_sa_policy_json
 }
 

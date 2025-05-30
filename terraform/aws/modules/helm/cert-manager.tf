@@ -1,24 +1,3 @@
-resource "helm_release" "cert_manager" {
-  name             = "cert-manager"
-  chart            = "cert-manager"
-  repository       = "https://charts.jetstack.io"
-  version          = "1.17.0"
-  namespace        = "cert-manager"
-  create_namespace = true
-  atomic           = true
-  wait             = true
-  values = [<<EOT
-crds:
-  enabled: true
-serviceAccount:
-  create: true
-  name: cert-manager
-  annotations:
-    eks.amazonaws.com/role-arn: ${var.eks_cert_manager_sa_role_arn}
-EOT
-  ]
-}
-
 resource "local_file" "cert_manager_cluster_issuer" {
   content = templatefile("${path.module}/template/clusterissuer-lets-encrypt-${var.target_env}.yml.tfpl", {
     email                        = var.email

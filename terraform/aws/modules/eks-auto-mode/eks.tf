@@ -1,6 +1,6 @@
 resource "aws_eks_cluster" "eks_auto_mode" {
-  name     = "${var.project}_eks-auto-mode"
-  version  = "1.32"
+  name     = "${var.project}_eks-v133-auto-mode"
+  version  = "1.33"
   role_arn = aws_iam_role.eks_auto_cluster_role.arn
 
   bootstrap_self_managed_addons = false
@@ -71,4 +71,36 @@ resource "aws_iam_openid_connect_provider" "eks_auto_mode" {
   tags = {
     eks_cluster = aws_eks_cluster.eks_auto_mode.name
   }
+}
+
+resource "aws_eks_addon" "eks_pod_identity_agent" {
+  cluster_name  = aws_eks_cluster.eks_auto_mode.name
+  addon_name    = "eks-pod-identity-agent"
+  addon_version = "v1.3.7-eksbuild.2"
+}
+
+resource "aws_eks_addon" "external_dns" {
+  cluster_name  = aws_eks_cluster.eks_auto_mode.name
+  addon_name    = "external-dns"
+  addon_version = "v0.17.0-eksbuild.1"
+  pod_identity_association {
+    role_arn        = aws_iam_role.external_dns_sa_role.arn
+    service_account = "external-dns"
+  }
+  depends_on = [aws_eks_addon.eks_pod_identity_agent]
+}
+
+resource "aws_eks_addon" "cert_manager" {
+  cluster_name             = aws_eks_cluster.eks_auto_mode.name
+  addon_name               = "cert-manager"
+  addon_version            = "v1.17.2-eksbuild.1"
+  service_account_role_arn = aws_iam_role.cert_manager_sa_role.arn
+  depends_on               = [aws_eks_addon.eks_pod_identity_agent]
+}
+
+resource "aws_eks_addon" "metrics_server" {
+  cluster_name  = aws_eks_cluster.eks_auto_mode.name
+  addon_name    = "metrics-server"
+  addon_version = "v0.7.2-eksbuild.3"
+  depends_on    = [aws_eks_addon.eks_pod_identity_agent]
 }

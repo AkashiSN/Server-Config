@@ -1,5 +1,6 @@
 resources:
   - storage-class.yml
+  - ingress-class.yml
   - dns/01-namespace.yml
   - dns/02-certificate.yml
   - dns/03-configmap.yml
