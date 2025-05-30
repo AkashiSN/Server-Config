@@ -14,11 +14,11 @@ spec:
     spec:
       containers:
         - name: immich-server
-          image: ghcr.io/immich-app/immich-server:v1.133.1
+          image: ghcr.io/immich-app/immich-server:v1.134.0
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
         - name: immich-machine-learning
-          image: ghcr.io/immich-app/immich-machine-learning:v1.133.1
+          image: ghcr.io/immich-app/immich-machine-learning:v1.134.0
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
       restartPolicy: Never
