@@ -8,6 +8,23 @@ module "route53" {
   source = "./modules/route53"
 }
 
+module "kms" {
+  source   = "./modules/kms"
+  project  = local.project
+  iam_user = var.iam_user
+}
+
+module "efs" {
+  source      = "./modules/efs"
+  project     = local.project
+  kms_key_arn = module.kms.kms_key_arn
+  vpc = {
+    id        = module.vpc.vpc_id
+    cidr      = module.vpc.vpc_cidr
+    subnet_id = module.vpc.subnet_private_a_id
+  }
+}
+
 # module "vpn" {
 #   source  = "./modules/vpn"
 #   project = local.project
