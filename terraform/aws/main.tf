@@ -1,7 +1,6 @@
 module "vpc" {
   source  = "./modules/vpc"
   project = local.project
-
 }
 
 module "route53" {
@@ -14,16 +13,16 @@ module "kms" {
   iam_user = var.iam_user
 }
 
-module "efs" {
-  source      = "./modules/efs"
-  project     = local.project
-  kms_key_arn = module.kms.kms_key_arn
-  vpc = {
-    id        = module.vpc.vpc_id
-    cidr      = module.vpc.vpc_cidr
-    subnet_id = module.vpc.subnet_private_a_id
-  }
-}
+# module "efs" {
+#   source      = "./modules/efs"
+#   project     = local.project
+#   kms_key_arn = module.kms.kms_key_arn
+#   vpc = {
+#     id        = module.vpc.vpc_id
+#     cidr      = module.vpc.vpc_cidr
+#     subnet_id = module.vpc.subnet_private_a_id
+#   }
+# }
 
 # module "vpn" {
 #   source  = "./modules/vpn"
@@ -92,4 +91,9 @@ module "eks_auto_mode" {
 #   eks_external_dns_sa_role_arn = module.eks_auto_mode.eks_external_dns_sa_role_arn
 #   host_zone_id                 = module.route53.host_zone_id
 #   target_env                   = "production" # staging or production
+# }
+
+# module "lightsail" {
+#   source  = "./modules/lightsail"
+#   project = local.project
 # }
