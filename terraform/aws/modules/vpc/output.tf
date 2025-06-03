@@ -11,17 +11,17 @@ output "route_table_main_id" {
 }
 
 output "route_table_private_a_id" {
-  value = aws_route_table.private_a.id
+  value = aws_route_table.private[0].id
 }
 
 output "route_table_private_c_id" {
-  value = aws_route_table.private_c.id
+  value = aws_route_table.private[1].id
 }
 
 output "subnet_private_a_id" {
-  value = aws_subnet.private_a.id
+  value = aws_subnet.main[0].id
 }
 
 output "subnet_private_c_id" {
-  value = aws_subnet.private_c.id
+  value = aws_subnet.main[1].id
 }

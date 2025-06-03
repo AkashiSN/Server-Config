@@ -2,43 +2,24 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 }
 
-resource "aws_eip" "ngw_a" {
+resource "aws_eip" "ngw" {
+  count  = 2
   domain = "vpc"
 
   tags = {
-    Name = "${var.project}_ngw-a"
+    Name = "${var.project}_eip-ngw-${local.az_suffix[count.index]}"
   }
 
   depends_on = [aws_internet_gateway.igw]
 }
 
-resource "aws_eip" "ngw_c" {
-  domain = "vpc"
+resource "aws_nat_gateway" "ngw" {
+  count         = 2
+  allocation_id = aws_eip.ngw[count.index].id
+  subnet_id     = aws_subnet.main[count.index + 2].id
 
   tags = {
-    Name = "${var.project}_ngw-c"
-  }
-
-  depends_on = [aws_internet_gateway.igw]
-}
-
-resource "aws_nat_gateway" "ngw_a" {
-  allocation_id = aws_eip.ngw_a.id
-  subnet_id     = aws_subnet.public_a.id
-
-  tags = {
-    Name = "${var.project}_ngw-a"
-  }
-
-  depends_on = [aws_internet_gateway.igw]
-}
-
-resource "aws_nat_gateway" "ngw_c" {
-  allocation_id = aws_eip.ngw_c.id
-  subnet_id     = aws_subnet.public_c.id
-
-  tags = {
-    Name = "${var.project}_ngw-c"
+    Name = "${var.project}_ngw-${local.az_suffix[count.index]}"
   }
 
   depends_on = [aws_internet_gateway.igw]

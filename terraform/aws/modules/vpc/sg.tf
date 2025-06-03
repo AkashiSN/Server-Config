@@ -18,9 +18,9 @@ resource "aws_default_security_group" "default" {
   }
 }
 
-resource "aws_security_group" "ssm" {
-  name        = "${var.project}_sg-ssm"
-  description = "${var.project}_sg-ssm"
+resource "aws_security_group" "ssm_endpoint" {
+  name        = "${var.project}_sg-ssm_endpoint"
+  description = "${var.project}_sg-ssm_endpoint"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -34,6 +34,24 @@ resource "aws_security_group" "ssm" {
   }
 
   tags = {
-    Name = "${var.project}_sg-ssm"
+    Name = "${var.project}_sg-ssm_endpoint"
+  }
+}
+
+resource "aws_security_group" "eic_endpoint" {
+  name        = "${var.project}_sg-eic_endpoint"
+  description = "${var.project}_sg-eic_endpoint"
+  vpc_id      = aws_vpc.main.id
+
+  egress {
+    description = "allow-all-outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project}_sg-eic_endpoint"
   }
 }

@@ -10,18 +10,27 @@ data "aws_iam_policy_document" "vpc_endpoint" {
   }
 }
 
+resource "aws_ec2_instance_connect_endpoint" "eic" {
+  subnet_id          = aws_subnet.main[0].id
+  security_group_ids = [aws_security_group.eic_endpoint.id]
+
+  tags = {
+    Name = "${var.project}_eice"
+  }
+}
+
 resource "aws_vpc_endpoint" "ssm" {
   vpc_endpoint_type = "Interface"
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.ap-northeast-1.ssm"
   policy            = data.aws_iam_policy_document.vpc_endpoint.json
   subnet_ids = [
-    aws_subnet.private_a.id,
-    aws_subnet.private_c.id
+    aws_subnet.main[0].id,
+    aws_subnet.main[1].id
   ]
   private_dns_enabled = true
   security_group_ids = [
-    aws_security_group.ssm.id
+    aws_security_group.ssm_endpoint.id
   ]
 
   tags = {
@@ -35,12 +44,12 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   service_name      = "com.amazonaws.ap-northeast-1.ssmmessages"
   policy            = data.aws_iam_policy_document.vpc_endpoint.json
   subnet_ids = [
-    aws_subnet.private_a.id,
-    aws_subnet.private_c.id
+    aws_subnet.main[0].id,
+    aws_subnet.main[1].id
   ]
   private_dns_enabled = true
   security_group_ids = [
-    aws_security_group.ssm.id
+    aws_security_group.ssm_endpoint.id
   ]
   tags = {
     Name = "${var.project}_vpce-ssmmessages"
@@ -53,12 +62,12 @@ resource "aws_vpc_endpoint" "ec2messages" {
   service_name      = "com.amazonaws.ap-northeast-1.ec2messages"
   policy            = data.aws_iam_policy_document.vpc_endpoint.json
   subnet_ids = [
-    aws_subnet.private_a.id,
-    aws_subnet.private_c.id
+    aws_subnet.main[0].id,
+    aws_subnet.main[1].id
   ]
   private_dns_enabled = true
   security_group_ids = [
-    aws_security_group.ssm.id
+    aws_security_group.ssm_endpoint.id
   ]
   tags = {
     Name = "${var.project}_vpce-ec2messages"
@@ -75,12 +84,8 @@ resource "aws_vpc_endpoint" "s3" {
   }
 }
 
-resource "aws_vpc_endpoint_route_table_association" "s3_private_a" {
-  route_table_id  = aws_route_table.private_a.id
-  vpc_endpoint_id = aws_vpc_endpoint.s3.id
-}
-
-resource "aws_vpc_endpoint_route_table_association" "s3_private_c" {
-  route_table_id  = aws_route_table.private_c.id
+resource "aws_vpc_endpoint_route_table_association" "s3_private" {
+  count           = 2
+  route_table_id  = aws_route_table.private[count.index].id
   vpc_endpoint_id = aws_vpc_endpoint.s3.id
 }
