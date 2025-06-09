@@ -7,11 +7,11 @@ module "route53" {
   source = "./modules/route53"
 }
 
-module "kms" {
-  source   = "./modules/kms"
-  project  = local.project
-  iam_user = var.iam_user
-}
+# module "kms" {
+#   source   = "./modules/kms"
+#   project  = local.project
+#   iam_user = var.iam_user
+# }
 
 # module "efs" {
 #   source      = "./modules/efs"
