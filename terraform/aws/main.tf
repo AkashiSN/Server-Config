@@ -93,7 +93,7 @@ module "eks_auto_mode" {
 #   target_env                   = "production" # staging or production
 # }
 
-# module "lightsail" {
-#   source  = "./modules/lightsail"
-#   project = local.project
-# }
+module "lightsail" {
+  source  = "./modules/lightsail"
+  project = local.project
+}
