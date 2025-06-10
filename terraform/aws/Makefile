@@ -14,7 +14,7 @@ clean:
 	\
 	echo "Fetching MFA device serial number for the user..."; \
 	UserName=$$(pass infra/aws/$(AWS_PROFILE)/iam-user 2>/dev/null); \
-	SerialNumber=$$(aws --profile $(AWS_PROFILE) iam list-mfa-devices --user-name $$UserName | jq -r '.MFADevices[].SerialNumber'); \
+	SerialNumber=$$(aws --profile $(AWS_PROFILE) iam list-mfa-devices --user-name $$UserName | jq -r '.MFADevices[0].SerialNumber'); \
 	echo "MFA Serial Number: $$SerialNumber"; \
 	read -p 'Enter MFA Code: ' code; \
 	aws --profile $(AWS_PROFILE) sts get-session-token --serial-number $$SerialNumber --token-code $$code > $(CURDIR)/.credential; \
