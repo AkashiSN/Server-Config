@@ -7,6 +7,7 @@ data "template_file" "cloud_init_vpn_userdata" {
     user_name       = var.userdata.user_name
     hashed_password = var.userdata.hashed_password
     github_id       = var.userdata.github_id
+    wireguard_ip    = local.vpn.wireguard_ip
   }
 }
 

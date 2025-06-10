@@ -67,8 +67,8 @@ keyboard:
   model: jp106
 
 runcmd:
-  - [ sh, -c, sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="console=tty1"/' /etc/default/grub.d/50-cloudimg-settings.cfg ]
-  - [ sh, -c, update-grub ]
+  - sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="console=tty1"/' /etc/default/grub.d/50-cloudimg-settings.cfg
+  - update-grub
 EOF
 
 export ipv4_address="172.16.254.40/24"

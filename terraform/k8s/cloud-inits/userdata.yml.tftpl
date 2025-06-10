@@ -40,7 +40,11 @@ keyboard:
   model: jp106
 
 runcmd:
-  - [ sh, -c, sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="console=tty1"/' /etc/default/grub.d/50-cloudimg-settings.cfg ]
-  - [ sh, -c, echo "GRUB_GFXPAYLOAD_LINUX=1024x768" | tee -a /etc/default/grub ]
-  - [ sh, -c, update-grub ]
-  - [ sh, -c, service qemu-guest-agent restart ]
+  # Update grub
+  - sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="console=tty1"/' /etc/default/grub.d/50-cloudimg-settings.cfg
+  - echo "GRUB_GFXPAYLOAD_LINUX=1024x768" | tee -a /etc/default/grub
+  - update-grub
+
+  # Restart qemu guest agent
+  - systemctl daemon-reload
+  - service qemu-guest-agent restart

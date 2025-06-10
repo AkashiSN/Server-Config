@@ -30,5 +30,6 @@ locals {
     ipv4_prefix          = "24"
     ipv4_default_gateway = "172.16.254.1"
     ipv6_address_token   = "::254:100"
+    wireguard_ip         = "10.254.0.2"
   }
 }
