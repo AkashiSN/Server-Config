@@ -1,0 +1,34 @@
+variable "proxmox" {
+  type = object({
+    endpoint = string
+    username = string
+    password = string
+  })
+  sensitive = true
+}
+
+variable "userdata" {
+  type = object({
+    user_name       = string
+    hashed_password = string # mkpasswd --method=yescrypt (via whois)
+    github_id       = string
+  })
+  sensitive = true
+}
+
+locals {
+  vpn = {
+    vmid                 = 100
+    template_vmid        = 9000
+    memory               = 8192
+    cores                = 4
+    onboot               = true
+    proxmox_node         = "pve-n100"
+    proxmox_address      = "172.16.254.2"
+    hostname             = "vpn"
+    ipv4_address         = "172.16.254.100"
+    ipv4_prefix          = "24"
+    ipv4_default_gateway = "172.16.254.1"
+    ipv6_address_token   = "::254:100"
+  }
+}

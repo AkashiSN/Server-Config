@@ -8,7 +8,7 @@
 /sbin/iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8006
 /sbin/iptables -t nat -A OUTPUT -p tcp -o lo --dport 443 -j REDIRECT --to-ports 8006
 # install iptables-persistent
-apt install iptables-persistent -y
+apt-get install iptables-persistent -y
 ```
 
 ## Kernel module config
@@ -110,6 +110,20 @@ pvenode acme cert order
 systemctl restart pveproxy
 
 rm /tmp/dns-cf-token
+```
+
+## Cloudflared
+```bash
+# Add cloudflare gpg key
+mkdir -p --mode=0755 /usr/share/keyrings
+curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+
+# Add this repo to your apt repositories
+echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
+
+# install cloudflared
+apt-get update
+apt-get install cloudflared
 ```
 
 ## Tailscale

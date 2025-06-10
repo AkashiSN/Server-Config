@@ -40,15 +40,15 @@ endif
 
 .PHONY: template
 template:
-# pve
-	$(MAKE) download-cloudimg PROXMOX_NODE=pve
-	$(MAKE) create-template PROXMOX_NODE=pve TEMPLATE_VMID=9000
-# pve01
-	$(MAKE) download-cloudimg PROXMOX_NODE=pve01
-	$(MAKE) create-template PROXMOX_NODE=pve01 TEMPLATE_VMID=9001
-# pve02
-	$(MAKE) download-cloudimg PROXMOX_NODE=pve02
-	$(MAKE) create-template PROXMOX_NODE=pve02 TEMPLATE_VMID=9002
+# pve-n100
+	$(MAKE) download-cloudimg PROXMOX_NODE=pve-n100
+	$(MAKE) create-template PROXMOX_NODE=pve-n100 TEMPLATE_VMID=9000
+# # pve01
+# 	$(MAKE) download-cloudimg PROXMOX_NODE=pve01
+# 	$(MAKE) create-template PROXMOX_NODE=pve01 TEMPLATE_VMID=9001
+# # pve02
+# 	$(MAKE) download-cloudimg PROXMOX_NODE=pve02
+# 	$(MAKE) create-template PROXMOX_NODE=pve02 TEMPLATE_VMID=9002
 
 .PHONY: update-template
 update-template:
@@ -58,14 +58,14 @@ update-template:
 	$(MAKE) destroy-template PROXMOX_NODE=pve TEMPLATE_VMID=9000
 	$(MAKE) create-template PROXMOX_NODE=pve TEMPLATE_VMID=9000
 
-# pve01
-	$(MAKE) cleanup-cloudimg PROXMOX_NODE=pve01
-	$(MAKE) download-cloudimg PROXMOX_NODE=pve01
-	$(MAKE) destroy-template PROXMOX_NODE=pve01 TEMPLATE_VMID=9001
-	$(MAKE) create-template PROXMOX_NODE=pve01 TEMPLATE_VMID=9001
+# # pve01
+# 	$(MAKE) cleanup-cloudimg PROXMOX_NODE=pve01
+# 	$(MAKE) download-cloudimg PROXMOX_NODE=pve01
+# 	$(MAKE) destroy-template PROXMOX_NODE=pve01 TEMPLATE_VMID=9001
+# 	$(MAKE) create-template PROXMOX_NODE=pve01 TEMPLATE_VMID=9001
 
-# pve02
-	$(MAKE) cleanup-cloudimg PROXMOX_NODE=pve02
-	$(MAKE) download-cloudimg PROXMOX_NODE=pve02
-	$(MAKE) destroy-template PROXMOX_NODE=pve02 TEMPLATE_VMID=9002
-	$(MAKE) create-template PROXMOX_NODE=pve02 TEMPLATE_VMID=9002
+# # pve02
+# 	$(MAKE) cleanup-cloudimg PROXMOX_NODE=pve02
+# 	$(MAKE) download-cloudimg PROXMOX_NODE=pve02
+# 	$(MAKE) destroy-template PROXMOX_NODE=pve02 TEMPLATE_VMID=9002
+# 	$(MAKE) create-template PROXMOX_NODE=pve02 TEMPLATE_VMID=9002

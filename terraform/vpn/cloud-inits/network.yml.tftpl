@@ -1,0 +1,17 @@
+#cloud-config
+version: 2
+ethernets:
+  ens18:
+    dhcp4: false
+    dhcp6: false
+    ipv6-privacy: false
+    ipv6-address-token: "${ipv6_address_token}"
+    addresses:
+      - ${ipv4_address}/${ipv4_prefix}
+    routes:
+      - to: default
+        via: ${ipv4_default_gateway}
+    nameservers:
+      addresses:
+        - 1.1.1.1
+        - 8.8.8.8
