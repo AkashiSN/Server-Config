@@ -7,7 +7,12 @@ data "template_file" "cloud_init_vpn_userdata" {
     user_name       = var.userdata.user_name
     hashed_password = var.userdata.hashed_password
     github_id       = var.userdata.github_id
-    wireguard_ip    = local.vpn.wireguard_ip
+
+    wg_if_ip              = local.vpn.wg_if_ip
+    wg_peer_if_ip         = local.vpn.wg_peer_if_ip
+    wg_peer_private_ip    = data.terraform_remote_state.aws.outputs.s2s_vpn_private_ipv4
+    wg_peer_pubkey        = data.terraform_remote_state.aws.outputs.s2s_vpn_wg_pubkey
+    wg_peer_ipv6_endpoint = data.terraform_remote_state.aws.outputs.s2s_vpn_public_ipv6
   }
 }
 
@@ -138,8 +143,8 @@ resource "proxmox_virtual_environment_vm" "vm_vpn" {
   }
 }
 
-# Wait for cloud-init completed, reboot vm
-resource "null_resource" "vm_vpn_reboot" {
+# Wait for cloud-init completed
+resource "terraform_data" "wait_for_clout_init" {
   depends_on = [proxmox_virtual_environment_vm.vm_vpn]
 
   provisioner "remote-exec" {
@@ -149,9 +154,75 @@ resource "null_resource" "vm_vpn_reboot" {
       agent = true
       host  = local.vpn.ipv4_address
     }
+    inline = ["sudo cloud-init status --wait || true"]
+  }
+}
+
+data "external" "wg_pubkey" {
+  depends_on = [terraform_data.wait_for_clout_init]
+
+  program = ["bash", "${path.module}/scripts/read_file.sh"]
+
+  query = {
+    host = local.vpn.ipv4_address
+    user = var.userdata.user_name
+    key  = "~/.ssh/gpg.pub"
+    path = "/etc/wireguard/public.key"
+  }
+}
+
+data "external" "wg_pskey" {
+  depends_on = [terraform_data.wait_for_clout_init]
+
+  program = ["bash", "${path.module}/scripts/read_file.sh"]
+
+  query = {
+    host = local.vpn.ipv4_address
+    user = var.userdata.user_name
+    key  = "~/.ssh/gpg.pub"
+    path = "/etc/wireguard/preshared.key"
+  }
+}
+
+resource "terraform_data" "reboot" {
+  depends_on = [data.external.wg_pubkey]
+
+  provisioner "remote-exec" {
+    connection {
+      type  = "ssh"
+      user  = var.userdata.user_name
+      agent = true
+      host  = local.vpn.ipv4_address
+    }
+    inline = ["sudo shutdown -r +0"]
+  }
+}
+
+resource "terraform_data" "add_peer_to_server" {
+  depends_on = [data.external.wg_pubkey]
+  triggers_replace = [
+    data.external.wg_pubkey.result.content
+  ]
+
+  provisioner "remote-exec" {
+    connection {
+      type  = "ssh"
+      user  = "ubuntu"
+      agent = true
+      host  = data.terraform_remote_state.aws.outputs.s2s_vpn_public_ipv4
+    }
     inline = [
-      "sudo cloud-init status --wait",
-      "sudo shutdown -r +0"
+      <<EOF
+cat << EOS | sudo tee -a /etc/wireguard/wg0.conf
+[Peer]
+PublicKey = ${data.external.wg_pubkey.result.content}
+AllowedIPs = ${local.vpn.wg_if_ip}/24,172.16.254.0/24
+PresharedKey = ${data.external.wg_pskey.result.content}
+PersistentKeepalive = 25
+
+EOS
+sudo service wg-quick@wg0 restart
+      EOF
     ]
   }
 }

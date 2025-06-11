@@ -47,8 +47,14 @@ write_files:
       cat > /etc/wireguard/wg0.conf << EOF
       [Interface]
       PrivateKey =`cat /etc/wireguard/private.key`
-      Address = ${wireguard_ip}/24
+      Address = ${wg_if_ip}/24
 
+      [Peer]
+      PublicKey = ${wg_peer_pubkey}
+      Endpoint = [${wg_peer_ipv6_endpoint}]:51820
+      AllowedIPs = ${wg_peer_if_ip}/24,${wg_peer_private_ip}/32
+      PresharedKey = `cat /etc/wireguard/preshared.key`
+      PersistentKeepalive = 25
       EOF
 
 runcmd:
@@ -57,14 +63,15 @@ runcmd:
   - sysctl -p
 
   # Setup wireguard
-  - wg genkey | tee /etc/wireguard/private.key
+  - wg genkey > /etc/wireguard/private.key
   - chmod go= /etc/wireguard/private.key
-  - cat /etc/wireguard/private.key | wg pubkey | tee /etc/wireguard/public.key
+  - wg genpsk > /etc/wireguard/preshared.key
+  - chmod go= /etc/wireguard/preshared.key
+  - cat /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
   - /tmp/gen_wg_conf.sh
 
-  # Enable and start wireguard
+  # Enable wireguard
   - systemctl enable wg-quick@wg0
-  - systemctl start wg-quick@wg0
 
   # Update grub
   - sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="console=tty1"/' /etc/default/grub.d/50-cloudimg-settings.cfg

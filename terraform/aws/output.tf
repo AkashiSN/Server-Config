@@ -21,3 +21,19 @@ output "vpc_id" {
 # output "eks_hybrid_nodes_ssm_activation_code" {
 #   value = module.eks_hybrid_nodes.ssm_activation_code
 # }
+
+output "s2s_vpn_private_ipv4" {
+  value = module.lightsail.s2s_vpn_private_ipv4
+}
+
+output "s2s_vpn_public_ipv4" {
+  value = module.lightsail.s2s_vpn_public_ipv4
+}
+
+output "s2s_vpn_public_ipv6" {
+  value = module.lightsail.s2s_vpn_public_ipv6
+}
+
+output "s2s_vpn_wg_pubkey" {
+  value = module.lightsail.s2s_vpn_wg_pubkey
+}

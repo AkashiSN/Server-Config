@@ -1,0 +1,51 @@
+#!/bin/bash
+set -ex
+
+# Set DEBIAN_FRONTEND
+export DEBIAN_FRONTEND=noninteractive
+
+# Download ssh pubkey
+curl https://raw.githubusercontent.com/AkashiSN/dotfiles/refs/heads/main/ssh/gpg.pub > /home/ubuntu/.ssh/authorized_keys
+
+# Install wireguard
+apt-get update
+apt-get upgrade -y
+apt-get install -y wireguard
+
+# Server
+# Generate private key
+wg genkey > /etc/wireguard/private.key
+# Change permission
+chmod go= /etc/wireguard/private.key
+# Generate public key
+cat /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
+
+# Set env
+export WIREGUARD_SERVER_IP=${wireguard_server_ip}
+export WIREGUARD_SERVER_DEFAULT_IF=`ip route show default | sed -nE -e 's/.*dev (\w+).*/\1/p'`
+
+# Generate server config
+cat > /etc/wireguard/wg0.conf << EOF
+[Interface]
+PrivateKey = `cat /etc/wireguard/private.key`
+Address = $${WIREGUARD_SERVER_IP}/24
+ListenPort = 51820
+
+PostUp = iptables -A FORWARD -i %i -j ACCEPT
+PostUp = iptables -A FORWARD -o %i -j ACCEPT
+PostUp = iptables -t nat -A POSTROUTING -o %i -j MASQUERADE
+# PostUp = iptables -t nat -A PREROUTING -i $${WIREGUARD_SERVER_DEFAULT_IF} -p tcp --dport 443 -j DNAT --to-destination <Ingress IP>
+
+PostDown = iptables -D FORWARD -i %i -j ACCEPT
+PostDown = iptables -D FORWARD -o %i -j ACCEPT
+PostDown = iptables -t nat -D POSTROUTING -o %i -j MASQUERADE
+# PostDown = iptables -t nat -D PREROUTING -i $${WIREGUARD_SERVER_DEFAULT_IF} -p tcp --dport 443 -j DNAT --to-destination <Ingress IP>
+
+EOF
+
+# Setting ipv4 forward
+echo "net.ipv4.ip_forward=1" | tee -a /etc/sysctl.conf
+sysctl -p
+
+# Enable wireguard
+systemctl enable wg-quick@wg0
