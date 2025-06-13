@@ -52,6 +52,7 @@ resource "aws_lightsail_instance_public_ports" "site_to_site_vpn" {
     protocol   = "udp"
     from_port  = 51820
     to_port    = 51820
+    cidrs      = ["0.0.0.0/0"]
     ipv6_cidrs = ["::/0"]
   }
 

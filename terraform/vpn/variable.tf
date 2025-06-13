@@ -25,7 +25,7 @@ locals {
     onboot               = true
     proxmox_node         = "pve-n100"
     proxmox_address      = "172.16.254.3"
-    hostname             = "vpn-server"
+    hostname             = "vpn-pve"
     ipv4_address         = "172.16.254.100"
     ipv4_prefix          = "24"
     ipv4_default_gateway = "172.16.254.1"

@@ -7,6 +7,9 @@ export DEBIAN_FRONTEND=noninteractive
 # Download ssh pubkey
 curl https://raw.githubusercontent.com/AkashiSN/dotfiles/refs/heads/main/ssh/gpg.pub > /home/ubuntu/.ssh/authorized_keys
 
+# Set hostname
+hostnamectl set-hostname s2s-vpn-lightsail
+
 # Install wireguard
 apt-get update
 apt-get upgrade -y
