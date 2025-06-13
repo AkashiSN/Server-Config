@@ -6,6 +6,7 @@ resource "aws_lightsail_instance" "site_to_site_vpn" {
   ip_address_type   = "dualstack"
   key_pair_name     = aws_lightsail_key_pair.main.name
   user_data = templatefile("${path.module}/template/s2s_vpn_userdata.sh.tftpl", {
+    hostname            = "s2s-vpn-lightsail"
     wireguard_server_ip = "10.254.0.1"
   })
 

@@ -8,7 +8,8 @@ export DEBIAN_FRONTEND=noninteractive
 curl https://raw.githubusercontent.com/AkashiSN/dotfiles/refs/heads/main/ssh/gpg.pub > /home/ubuntu/.ssh/authorized_keys
 
 # Set hostname
-hostnamectl set-hostname s2s-vpn-lightsail
+hostnamectl set-hostname ${hostname}
+echo 127.0.1.1 ${hostname} >> /etc/hosts
 
 # Install wireguard
 apt-get update
