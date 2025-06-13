@@ -20,8 +20,9 @@ locals {
   vpn = {
     vmid                 = 100
     template_vmid        = 9000
-    memory               = 8192
+    memory               = 2048
     cores                = 4
+    disk_size            = 32
     onboot               = true
     proxmox_node         = "pve-n100"
     proxmox_address      = "172.16.254.3"

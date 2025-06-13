@@ -125,7 +125,7 @@ resource "proxmox_virtual_environment_vm" "vm_vpn" {
     datastore_id = "local-zfs"
     file_format  = "raw"
     interface    = "scsi0"
-    size         = 64
+    size         = local.vpn.disk_size
     ssd          = true
   }
 
