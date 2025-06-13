@@ -9,7 +9,7 @@ curl https://raw.githubusercontent.com/AkashiSN/dotfiles/refs/heads/main/ssh/gpg
 
 # Set hostname
 hostnamectl set-hostname ${hostname}
-echo 127.0.1.1 ${hostname} >> /etc/hosts
+echo "127.0.1.1 ${hostname}" >> /etc/hosts
 
 # Install wireguard
 apt-get update
