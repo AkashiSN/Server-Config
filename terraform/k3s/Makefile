@@ -1,6 +1,7 @@
 .PHONY: clean
 clean:
 	rm -rf $(CURDIR)/.tmp
+	rm -rf $(CURDIR)/.terraform
 	rm -f $(CURDIR)/*.tfvars*
 	rm -f $(CURDIR)/*.tfstate*
 

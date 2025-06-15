@@ -6,7 +6,7 @@
     - variable
     - role: common
       vars:
-        k8s_major_version: "1.29"
+        k8s_major_version: "1.32"
 
 - name: Setup cluster by k3s
   hosts: k3s

@@ -15,9 +15,12 @@ data "template_file" "cloud_init_k3s_network" {
   template = file("${path.module}/cloud-inits/network.yml.tftpl")
 
   vars = {
-    ipv4_address         = local.k3s.ipv4_address
-    ipv4_prefix          = local.k3s.ipv4_prefix
-    ipv4_default_gateway = local.k3s.ipv4_default_gateway
+    ipv4_address          = local.k3s.ipv4_address
+    ipv4_prefix           = local.k3s.ipv4_prefix
+    ipv4_default_gateway  = local.k3s.ipv4_default_gateway
+    nas_interface_address = local.k3s.nas_interface_address
+    nas_network_address   = local.k3s.nas_network_address
+    nas_network_gateway   = local.k3s.nas_network_gateway
   }
 }
 
@@ -58,7 +61,6 @@ resource "proxmox_virtual_environment_file" "cloud_init_k3s_network" {
     file_name = "cloud_init_k3s_network.yml"
   }
 }
-
 
 resource "proxmox_virtual_environment_vm" "vm_k3s" {
   # Wait for the cloud-config file to exist
@@ -124,6 +126,12 @@ resource "proxmox_virtual_environment_vm" "vm_k3s" {
   network_device {
     model  = "virtio"
     bridge = "vmbr0"
+  }
+
+  hostpci {
+    # Intel Corporation 82599 10 Gigabit Network Connection
+    device = "hostpci1"
+    id     = "0000:01:00"
   }
 
   # Ignore changes

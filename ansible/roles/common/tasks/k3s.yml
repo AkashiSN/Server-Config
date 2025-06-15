@@ -5,7 +5,7 @@
     cmd: |
       set -o pipefail
       curl -sfL https://get.k3s.io | \
-        INSTALL_K3S_CHANNEL="latest" \
+        INSTALL_K3S_CHANNEL="v{{ k8s_major_version }}" \
         K3S_KUBECONFIG_MODE="644" \
         INSTALL_K3S_EXEC="server --disable=traefik,servicelb,local-storage" \
         sh -s -
