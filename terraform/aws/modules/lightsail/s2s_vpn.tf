@@ -105,7 +105,7 @@ resource "terraform_data" "s2s_vpn_provisioner" {
 }
 
 data "external" "wg_pubkey" {
-  depends_on = [terraform_data.setup_s2s_vpn]
+  depends_on = [terraform_data.s2s_vpn_provisioner]
 
   program = ["bash", "${path.module}/scripts/read_file.sh"]
 
