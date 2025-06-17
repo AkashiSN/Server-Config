@@ -1,6 +1,9 @@
 #!/bin/bash
 set -ex
 
+# Exec as root
+[ "$(id -u)" != "0" ] && exec sudo "$0" "$@"
+
 # Set DEBIAN_FRONTEND
 export DEBIAN_FRONTEND=noninteractive
 
