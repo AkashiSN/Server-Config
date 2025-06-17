@@ -5,10 +5,11 @@ resource "aws_lightsail_instance" "site_to_site_vpn" {
   bundle_id         = "small_3_0"
   ip_address_type   = "dualstack"
   key_pair_name     = aws_lightsail_key_pair.main.name
-  user_data = templatefile("${path.module}/template/s2s_vpn_userdata.sh.tftpl", {
-    hostname            = "s2s-vpn-lightsail"
-    wireguard_server_ip = "10.254.0.1"
-  })
+  user_data         = <<EOF
+curl https://github.com/AkashiSN.keys > /home/ubuntu/.ssh/authorized_keys
+sed -i 's/^TrustedUserCAKeys/# TrustedUserCAKeys/g' /etc/ssh/sshd_config
+service ssh restart
+EOF
 
   tags = {
     Name = "${var.project}_s2s_vpn_instance"
@@ -82,8 +83,29 @@ resource "terraform_data" "wait_for_clout_init" {
   }
 }
 
-data "external" "wg_pubkey" {
+resource "local_file" "s2s_vpn_provisioner" {
   depends_on = [terraform_data.wait_for_clout_init]
+  filename   = "${path.module}/.tmp/s2s_vpn_provisioner.sh"
+  content = templatefile("${path.module}/template/s2s_vpn_provisioner.sh.tftpl", {
+    hostname            = "s2s-vpn-lightsail"
+    wireguard_server_ip = "10.254.0.1"
+  })
+}
+
+resource "terraform_data" "s2s_vpn_provisioner" {
+  provisioner "remote-exec" {
+    connection {
+      type  = "ssh"
+      user  = "ubuntu"
+      agent = true
+      host  = aws_lightsail_static_ip.site_to_site_vpn.ip_address
+    }
+    script = local_file.s2s_vpn_provisioner.filename
+  }
+}
+
+data "external" "wg_pubkey" {
+  depends_on = [terraform_data.setup_s2s_vpn]
 
   program = ["bash", "${path.module}/scripts/read_file.sh"]
 
