@@ -83,7 +83,7 @@ resource "terraform_data" "wait_for_clout_init" {
   }
 }
 
-resource "local_file" "s2s_vpn_provisioner" {
+resource "local_file" "site_to_site_vpn_provisioner" {
   depends_on = [terraform_data.wait_for_clout_init]
   filename   = "${path.module}/.tmp/s2s_vpn_provisioner.sh"
   content = templatefile("${path.module}/template/s2s_vpn_provisioner.sh.tftpl", {
@@ -92,7 +92,7 @@ resource "local_file" "s2s_vpn_provisioner" {
   })
 }
 
-resource "terraform_data" "s2s_vpn_provisioner" {
+resource "terraform_data" "site_to_site_vpn_provisioner" {
   provisioner "remote-exec" {
     connection {
       type  = "ssh"
@@ -100,12 +100,12 @@ resource "terraform_data" "s2s_vpn_provisioner" {
       agent = true
       host  = aws_lightsail_static_ip.site_to_site_vpn.ip_address
     }
-    script = local_file.s2s_vpn_provisioner.filename
+    script = local_file.site_to_site_vpn_provisioner.filename
   }
 }
 
 data "external" "wg_pubkey" {
-  depends_on = [terraform_data.s2s_vpn_provisioner]
+  depends_on = [terraform_data.site_to_site_vpn_provisioner]
 
   program = ["bash", "${path.module}/scripts/read_file.sh"]
 
