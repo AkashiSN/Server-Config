@@ -216,7 +216,7 @@ resource "terraform_data" "add_peer_to_server" {
 cat << EOS | sudo tee -a /etc/wireguard/wg0.conf
 [Peer]
 PublicKey = ${data.external.wg_pubkey.result.content}
-AllowedIPs = ${local.vpn.wg_if_ip}/24,172.16.254.0/24
+AllowedIPs = ${local.vpn.wg_if_ip}/32,172.16.254.0/24
 PresharedKey = ${data.external.wg_pskey.result.content}
 PersistentKeepalive = 25
 
