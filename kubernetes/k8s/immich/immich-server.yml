@@ -87,20 +87,9 @@ spec:
   tls:
     - hosts:
         - photos.akashisn.info
-        - photos-local.akashisn.info
       secretName: immich-cert
   rules:
     - host: photos.akashisn.info
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: immich-server
-                port:
-                  name: immich-server
-    - host: photos-local.akashisn.info
       http:
         paths:
           - path: /
