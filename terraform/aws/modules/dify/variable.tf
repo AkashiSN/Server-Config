@@ -53,17 +53,17 @@ variable "dify_resource" {
   })
   default = {
     api = {
-      cpu           = 2048
+      cpu           = 1024
       memory        = 2048
       desired_count = 1
     }
     worker = {
-      cpu           = 2048
+      cpu           = 1024
       memory        = 2048
       desired_count = 1
     }
     web = {
-      cpu           = 2048
+      cpu           = 1024
       memory        = 2048
       desired_count = 1
     }

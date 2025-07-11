@@ -65,7 +65,6 @@ resource "aws_security_group" "alb" {
 }
 
 ## Security group rule
-
 # Database
 # S3 バックアップなどでインターネットへのアクセスが必要な場合は egress を追加する。
 # VPC Endpoint や Managed Prefix List を使ってインターネットへのアクセスを制限するのがベター。
@@ -154,6 +153,16 @@ resource "aws_security_group_rule" "worker_to_redis" {
 }
 
 # Web
+resource "aws_security_group_rule" "web_to_internet" {
+  security_group_id = aws_security_group.web.id
+  type              = "egress"
+  description       = "Internet"
+  protocol          = "all"
+  from_port         = 0
+  to_port           = 0
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
 resource "aws_security_group_rule" "alb_to_web" {
   security_group_id        = aws_security_group.web.id
   type                     = "ingress"

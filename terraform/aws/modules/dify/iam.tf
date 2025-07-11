@@ -35,6 +35,23 @@ resource "aws_iam_policy" "ecs_cloudwatch_logs" {
   }
 }
 
+# SSM Parameter store
+data "aws_iam_policy_document" "get_secret" {
+  statement {
+    actions   = ["ssm:GetParameter", "ssm:GetParameters"]
+    resources = ["arn:aws:ssm:*:${local.account_id}:parameter/*"]
+  }
+}
+
+resource "aws_iam_policy" "get_secret" {
+  name   = "${var.project}-dify-ssm-policy"
+  policy = data.aws_iam_policy_document.get_secret.json
+
+  tags = {
+    Name = "${var.project}-dify-ssm-policy"
+  }
+}
+
 # S3 policy
 data "aws_iam_policy_document" "ecs_s3" {
   statement {
@@ -74,6 +91,27 @@ resource "aws_iam_policy" "ecs_bedrock" {
   }
 }
 
+# ECR Policy
+data "aws_iam_policy_document" "ecr" {
+  statement {
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchImportUpstreamImage",
+      "ecr:GetImageCopyStatus"
+    ]
+    resources = ["arn:aws:ecr:${local.region}:${local.account_id}:repository/*"]
+  }
+}
+resource "aws_iam_policy" "ecr" {
+  name   = "${var.project}-dify-ecr-policy"
+  policy = data.aws_iam_policy_document.ecr.json
+
+  tags = {
+    Name = "${var.project}-dify-ecr-policy"
+  }
+}
+
 # Execution Role
 resource "aws_iam_role" "ecs_execution" {
   name               = "${var.project}-dify-task-execution-role"
@@ -84,6 +122,16 @@ resource "aws_iam_role" "ecs_execution" {
 resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
   role       = aws_iam_role.ecs_execution.id
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_get_secret_policy" {
+  role       = aws_iam_role.ecs_execution.id
+  policy_arn = aws_iam_policy.get_secret.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_ecr_policy" {
+  role       = aws_iam_role.ecs_execution.id
+  policy_arn = aws_iam_policy.ecr.arn
 }
 
 # App task role

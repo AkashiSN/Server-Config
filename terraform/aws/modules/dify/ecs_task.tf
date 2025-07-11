@@ -1,5 +1,4 @@
 locals {
-  ecr_pull_though_cache_repo = "${local.account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/ecr-public/"
   dify_base_env = {
     # The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
     LOG_LEVEL = "INFO"
@@ -98,7 +97,7 @@ resource "aws_ecs_task_definition" "dify_api" {
   container_definitions = jsonencode([
     {
       name      = "dify-api"
-      image     = "${local.ecr_pull_though_cache_repo}langgenius/dify-api:${var.dify_version.api}"
+      image     = "langgenius/dify-api:${var.dify_version.api}"
       essential = true
       portMappings = [
         {
@@ -145,7 +144,7 @@ resource "aws_ecs_task_definition" "dify_api" {
     },
     {
       name      = "dify-sandbox"
-      image     = "${local.ecr_pull_though_cache_repo}langgenius/dify-sandbox:${var.dify_version.sandbox}"
+      image     = "langgenius/dify-sandbox:${var.dify_version.sandbox}"
       essential = true
       mountPoints = [
         {
@@ -209,7 +208,7 @@ resource "aws_ecs_task_definition" "dify_worker" {
   container_definitions = jsonencode([
     {
       name      = "dify-worker"
-      image     = "${local.ecr_pull_though_cache_repo}langgenius/dify-api:${var.dify_version.api}"
+      image     = "langgenius/dify-api:${var.dify_version.api}"
       essential = true
       environment = [
         for name, value in local.dify_worker_env : { name = name, value = tostring(value) }
@@ -265,7 +264,7 @@ resource "aws_ecs_task_definition" "dify_web" {
   container_definitions = jsonencode([
     {
       name      = "dify-web"
-      image     = "${local.ecr_pull_though_cache_repo}langgenius/dify-web:${var.dify_version.web}"
+      image     = "langgenius/dify-web:${var.dify_version.web}"
       essential = true
       environment = [
         for name, value in {
@@ -298,7 +297,6 @@ resource "aws_ecs_task_definition" "dify_web" {
       mountPoints = []
     },
   ])
-
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "ARM64"
