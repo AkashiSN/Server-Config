@@ -25,3 +25,11 @@ output "subnet_private_a_id" {
 output "subnet_private_c_id" {
   value = aws_subnet.main[1].id
 }
+
+output "subnet_public_a_id" {
+  value = aws_subnet.main[2].id
+}
+
+output "subnet_public_c_id" {
+  value = aws_subnet.main[3].id
+}

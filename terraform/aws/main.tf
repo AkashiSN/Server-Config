@@ -7,6 +7,10 @@ module "route53" {
   source = "./modules/route53"
 }
 
+module "ecr" {
+  source = "./modules/ecr"
+}
+
 # module "kms" {
 #   source   = "./modules/kms"
 #   project  = local.project
@@ -96,4 +100,20 @@ module "eks_auto_mode" {
 module "lightsail" {
   source  = "./modules/lightsail"
   project = local.project
+}
+
+module "dify" {
+  source  = "./modules/dify"
+  project = local.project
+  vpc = {
+    id = module.vpc.vpc_id
+    private_subnet_ids = [
+      module.vpc.subnet_private_a_id,
+      module.vpc.subnet_private_c_id
+    ]
+    public_subnet_ids = [
+      module.vpc.subnet_public_a_id,
+      module.vpc.subnet_public_c_id
+    ]
+  }
 }

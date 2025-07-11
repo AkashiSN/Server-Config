@@ -89,3 +89,54 @@ resource "aws_vpc_endpoint_route_table_association" "s3_private" {
   route_table_id  = aws_route_table.private[count.index].id
   vpc_endpoint_id = aws_vpc_endpoint.s3.id
 }
+
+resource "aws_vpc_endpoint" "logs" {
+  vpc_endpoint_type   = "Interface"
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.ap-northeast-1.logs"
+  policy              = data.aws_iam_policy_document.vpc_endpoint.json
+  private_dns_enabled = true
+  subnet_ids = [
+    aws_subnet.main[0].id,
+    aws_subnet.main[1].id
+  ]
+  security_group_ids = [
+    aws_security_group.logs_endpoint.id
+  ]
+}
+
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_endpoint_type = "Interface"
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-northeast-1.ecr.api"
+  policy            = data.aws_iam_policy_document.vpc_endpoint.json
+  subnet_ids = [
+    aws_subnet.main[0].id,
+    aws_subnet.main[1].id
+  ]
+  private_dns_enabled = true
+  security_group_ids = [
+    aws_security_group.ecr_endpoint.id
+  ]
+  tags = {
+    Name = "${var.project}_vpce-ecr_api"
+  }
+}
+
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_endpoint_type = "Interface"
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-northeast-1.ecr.dkr"
+  policy            = data.aws_iam_policy_document.vpc_endpoint.json
+  subnet_ids = [
+    aws_subnet.main[0].id,
+    aws_subnet.main[1].id
+  ]
+  private_dns_enabled = true
+  security_group_ids = [
+    aws_security_group.ecr_endpoint.id
+  ]
+  tags = {
+    Name = "${var.project}_vpce-ecr_dkr"
+  }
+}
