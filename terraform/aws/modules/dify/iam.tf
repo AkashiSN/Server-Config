@@ -35,32 +35,71 @@ resource "aws_iam_policy" "ecs_cloudwatch_logs" {
   }
 }
 
-# SSM Parameter store
-data "aws_iam_policy_document" "get_secret" {
+# ECS Exec policy
+data "aws_iam_policy_document" "ecs_ssm_policy" {
   statement {
-    actions   = ["ssm:GetParameter", "ssm:GetParameters"]
-    resources = ["arn:aws:ssm:*:${local.account_id}:parameter/*"]
+    actions = [
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel"
+    ]
+    resources = ["*"]
   }
 }
 
-resource "aws_iam_policy" "get_secret" {
-  name   = "${var.project}-dify-ssm-policy"
-  policy = data.aws_iam_policy_document.get_secret.json
+resource "aws_iam_policy" "ecs_ssm_policy" {
+  name        = "${var.project}-dify-ssm-policy"
+  description = "SSM access policy for Dify ECS tasks"
+  policy      = data.aws_iam_policy_document.ecs_ssm_policy.json
 
   tags = {
     Name = "${var.project}-dify-ssm-policy"
   }
 }
 
+# SSM Parameter store
+data "aws_iam_policy_document" "get_secret" {
+  statement {
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters"
+    ]
+    resources = ["arn:aws:ssm:*:${local.account_id}:parameter/*"]
+  }
+  statement {
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = ["${aws_rds_cluster.dify.master_user_secret[0].secret_arn}"]
+  }
+}
+
+resource "aws_iam_policy" "get_secret" {
+  name   = "${var.project}-dify-get-secret-policy"
+  policy = data.aws_iam_policy_document.get_secret.json
+
+  tags = {
+    Name = "${var.project}-dify-get-secret-policy"
+  }
+}
+
 # S3 policy
 data "aws_iam_policy_document" "ecs_s3" {
   statement {
-    actions   = ["s3:ListBucket"]
-    resources = [aws_s3_bucket.storage.arn]
+    actions = ["s3:ListBucket"]
+    resources = [
+      aws_s3_bucket.storage.arn,
+      aws_s3_bucket.plugin_storage.arn,
+    ]
   }
   statement {
-    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-    resources = ["${aws_s3_bucket.storage.arn}/*"]
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+    "s3:DeleteObject"]
+    resources = [
+      "${aws_s3_bucket.storage.arn}/*",
+      "${aws_s3_bucket.plugin_storage.arn}/*"
+    ]
   }
 }
 
@@ -129,6 +168,11 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_get_secret_policy"
   policy_arn = aws_iam_policy.get_secret.arn
 }
 
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_ssm_policy" {
+  role       = aws_iam_role.ecs_execution.id
+  policy_arn = aws_iam_policy.ecs_ssm_policy.arn
+}
+
 resource "aws_iam_role_policy_attachment" "ecs_execution_role_ecr_policy" {
   role       = aws_iam_role.ecs_execution.id
   policy_arn = aws_iam_policy.ecr.arn
@@ -160,6 +204,11 @@ resource "aws_iam_role_policy_attachment" "ecs_app_bedrock" {
   policy_arn = aws_iam_policy.ecs_bedrock.arn
 }
 
+resource "aws_iam_role_policy_attachment" "ecs_app_ssm" {
+  role       = aws_iam_role.ecs_app.id
+  policy_arn = aws_iam_policy.ecs_ssm_policy.arn
+}
+
 # Web task role
 resource "aws_iam_role" "ecs_web" {
   name               = "${var.project}-dify-web"
@@ -174,4 +223,9 @@ resource "aws_iam_role" "ecs_web" {
 resource "aws_iam_role_policy_attachment" "ecs_web_cloudwatch_logs" {
   role       = aws_iam_role.ecs_web.name
   policy_arn = aws_iam_policy.ecs_cloudwatch_logs.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_web_ssm" {
+  role       = aws_iam_role.ecs_web.id
+  policy_arn = aws_iam_policy.ecs_ssm_policy.arn
 }

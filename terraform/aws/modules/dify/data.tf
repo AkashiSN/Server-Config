@@ -12,18 +12,21 @@ data "aws_ssm_parameter" "session_secret_key" {
   name = "/${var.project}/dify/SESSION_SECRET_KEY"
 }
 
-# Database password for dify user.
-# You can generate a strong key using `openssl rand -base64 42`.
-data "aws_ssm_parameter" "db_password" {
-  name = "/${var.project}/dify/DB_PASSWORD"
-}
-
-# The DifySandbox configurations
-# Make sure you are changing this key for your deployment with a strong key.
-# You can generate a strong key using `openssl rand -base64 42`.
+# DifySandbox api key
 data "aws_ssm_parameter" "sandbox_key" {
   name = "/${var.project}/dify/SANDBOX_API_KEY"
 }
+
+# Plugin daemon server key
+data "aws_ssm_parameter" "plugin_daemon_key" {
+  name = "/${var.project}/dify/PLUGIN_DAEMON_KEY"
+}
+
+# API Key for plugin daemon
+data "aws_ssm_parameter" "dify_inner_api_key" {
+  name = "/${var.project}/dify/DIFY_INNER_API_KEY"
+}
+
 
 locals {
   account_id = data.aws_caller_identity.current.account_id

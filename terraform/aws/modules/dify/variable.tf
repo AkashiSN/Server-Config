@@ -21,14 +21,16 @@ variable "allowed_cidr_blocks" {
 # image version
 variable "dify_version" {
   type = object({
-    api     = string
-    web     = string
-    sandbox = string
+    api           = string
+    web           = string
+    sandbox       = string
+    plugin_daemon = string
   })
   default = {
-    api     = "1.5.1"
-    web     = "1.5.1"
-    sandbox = "0.2.12"
+    api           = "1.6.0"
+    web           = "1.6.0"
+    sandbox       = "0.2.12"
+    plugin_daemon = "0.1.3-local"
   }
 }
 

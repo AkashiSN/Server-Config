@@ -16,19 +16,10 @@ resource "aws_rds_cluster" "dify" {
   db_cluster_parameter_group_name = "default.aurora-postgresql16"
   vpc_security_group_ids          = [aws_security_group.database.id]
 
-  master_username             = "postgres"
+  database_name               = "dify"
+  master_username             = "dify"
   manage_master_user_password = true
-
-  # データベースは後から構築する
-  # -- CREATE ROLE dify WITH LOGIN PASSWORD 'password';
-  # -- GRANT dify TO postgres;
-  # -- CREATE DATABASE dify WITH OWNER dify;
-  # -- \c dify
-  # -- CREATE EXTENSION vector;
-
-  # 上記 SQL をマネジメントコンソールのクエリエディタで実行する場合は HTTP エンドポイントを有効にする。
-  # エンドポイントを有効にしない場合は踏み台インスタンスなどを用意して上記 SQL を実行する。
-  enable_http_endpoint = true
+  enable_http_endpoint        = true
 
   backup_retention_period  = 7
   delete_automated_backups = true

@@ -2,42 +2,42 @@ locals {
   dify_base_env = {
     # The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
     LOG_LEVEL = "INFO"
+
     # enable DEBUG mode to output more logs
-    # DEBUG  = "true"
-    # The configurations of postgres database connection.
-    # It is consistent with the configuration in the 'db' service below.
+    # DEBUG = "true"
+
+    # Database
     DB_USERNAME = "dify"
     DB_HOST     = aws_rds_cluster.dify.endpoint
     DB_PORT     = aws_rds_cluster.dify.port
     DB_DATABASE = "dify"
-    # The configurations of redis connection.
-    # It is consistent with the configuration in the 'redis' service below.
+
+    # Cache
     REDIS_HOST    = aws_elasticache_serverless_cache.dify.endpoint[0].address
     REDIS_PORT    = aws_elasticache_serverless_cache.dify.endpoint[0].port
     REDIS_USE_SSL = true
-    # use redis db 0 for redis cache
-    REDIS_DB = 0
+    REDIS_DB      = 0 # use redis db 0 for redis cache
+
     # The configurations of celery broker.
     # Use redis as the broker, and redis db 1 for celery broker.
     CELERY_BROKER_URL = "rediss://:@${aws_elasticache_serverless_cache.dify.endpoint[0].address}:${aws_elasticache_serverless_cache.dify.endpoint[0].port}/1"
     BROKER_USE_SSL    = true
-    # The type of storage to use for storing user files. Supported values are `local` and `s3` and `azure-blob` and `google-storage`, Default = `local`
-    STORAGE_TYPE = "s3"
-    # The S3 storage configurations, only available when STORAGE_TYPE is `s3`.
-    S3_USE_AWS_MANAGED_IAM = true
+
+    # Service storage
+    STORAGE_TYPE           = "s3"
     S3_BUCKET_NAME         = aws_s3_bucket.storage.bucket
     S3_REGION              = local.region
-    # The type of vector store to use.
-    VECTOR_STORE = "opensearch"
-    # open search configuration, only available when VECTOR_STORE is `opensearch`
+    S3_USE_AWS_MANAGED_IAM = true
+
+    # Vector store
+    VECTOR_STORE            = "opensearch"
     OPENSEARCH_HOST         = aws_opensearchserverless_collection.dify.collection_endpoint
     OPENSEARCH_PORT         = 9200
     OPENSEARCH_SECURE       = true
     OPENSEARCH_VERIFY_CERTS = true
     OPENSEARCH_AUTH_METHOD  = "basic"
-    # If using AWS managed IAM, e.g. Managed Cluster or OpenSearch Serverless
-    OPENSEARCH_AWS_REGION  = local.region
-    OPENSEARCH_AWS_SERVICE = "aoss"
+    OPENSEARCH_AWS_REGION   = local.region
+    OPENSEARCH_AWS_SERVICE  = "aoss"
     # Indexing configuration
     INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH = 1000
   }
@@ -61,7 +61,7 @@ locals {
       # Specifies the allowed origins for cross-origin requests to the console API, e.g. https://cloud.dify.ai or * for all origins.
       CONSOLE_CORS_ALLOW_ORIGINS = "*"
       # The sandbox service endpoint.
-      CODE_EXECUTION_ENDPOINT       = "http://localhost:8194" # Fargate の task 内通信は localhost 宛
+      CODE_EXECUTION_ENDPOINT       = "http://localhost:8194"
       CODE_MAX_NUMBER               = "9223372036854775807"
       CODE_MIN_NUMBER               = "-9223372036854775808"
       CODE_MAX_STRING_LENGTH        = 80000
@@ -69,6 +69,36 @@ locals {
       CODE_MAX_STRING_ARRAY_LENGTH  = 30
       CODE_MAX_OBJECT_ARRAY_LENGTH  = 30
       CODE_MAX_NUMBER_ARRAY_LENGTH  = 1000
+      # Plugin daemon
+      PLUGIN_DAEMON_URL          = "http://localhost:5002"
+      PLUGIN_MAX_PACKAGE_SIZE    = 15728640
+      PLUGIN_REMOTE_INSTALL_HOST = "localhost"
+      PLUGIN_REMOTE_INSTALL_PORT = "5003"
+    },
+    local.dify_base_env
+  )
+  dify_plugin_daemon_env = merge(
+    {
+      SERVER_PORT = 5002
+
+      DIFY_INNER_API_URL = "http://localhost:5001"
+
+      PLUGIN_REMOTE_INSTALLING_ENABLED = true
+      PLUGIN_REMOTE_INSTALLING_HOST    = "localhost"
+      PLUGIN_REMOTE_INSTALLING_PORT    = 5003
+
+      # services storage
+      S3_USE_AWS                = true
+      S3_USE_AWS_MANAGED_IAM    = true
+      PLUGIN_STORAGE_TYPE       = "s3"
+      PLUGIN_STORAGE_OSS_BUCKET = aws_s3_bucket.plugin_storage.bucket
+      # where the plugin finally installed
+      PLUGIN_INSTALLED_PATH = "plugin"
+      # where the plugin finally running and working
+      PLUGIN_WORKING_PATH = "cwd"
+
+      # Database
+      DB_DATABASE = "dify_plugin"
     },
     local.dify_base_env
   )
@@ -90,25 +120,19 @@ resource "aws_ecs_task_definition" "dify_api" {
   execution_role_arn       = aws_iam_role.ecs_execution.arn
   task_role_arn            = aws_iam_role.ecs_app.arn
 
-  volume {
-    name = "dependencies"
-  }
+  volume { name = "plugin_storage" }
 
   container_definitions = jsonencode([
     {
       name      = "dify-api"
       image     = "langgenius/dify-api:${var.dify_version.api}"
       essential = true
-      portMappings = [
-        {
-          hostPort      = 5001
-          protocol      = "tcp"
-          containerPort = 5001
-        }
-      ]
-      environment = [
-        for name, value in local.dify_api_env : { name = name, value = tostring(value) }
-      ]
+      portMappings = [{
+        hostPort      = 5001
+        protocol      = "tcp"
+        containerPort = 5001
+      }]
+      environment = [for name, value in local.dify_api_env : { name = name, value = tostring(value) }]
       secrets = [
         {
           name      = "SECRET_KEY"
@@ -116,7 +140,15 @@ resource "aws_ecs_task_definition" "dify_api" {
         },
         {
           name      = "DB_PASSWORD"
-          valueFrom = data.aws_ssm_parameter.db_password.name
+          valueFrom = "${aws_rds_cluster.dify.master_user_secret[0].secret_arn}:password::"
+        },
+        {
+          name      = "INNER_API_KEY_FOR_PLUGIN"
+          valueFrom = data.aws_ssm_parameter.dify_inner_api_key.name
+        },
+        {
+          name      = "PLUGIN_DAEMON_KEY"
+          valueFrom = data.aws_ssm_parameter.plugin_daemon_key.name
         },
         {
           name      = "CODE_EXECUTION_API_KEY"
@@ -143,22 +175,68 @@ resource "aws_ecs_task_definition" "dify_api" {
       mountPoints = []
     },
     {
+      name      = "dify-plugin-daemon"
+      image     = "langgenius/dify-plugin-daemon:${var.dify_version.plugin_daemon}"
+      essential = true
+      dependsOn = [{
+        containerName = "dify-api"
+        condition     = "START"
+      }]
+      portMappings = [
+        {
+          hostPort      = 5002
+          protocol      = "tcp"
+          containerPort = 5002
+        },
+        {
+          hostPort      = 5003
+          protocol      = "tcp"
+          containerPort = 5003
+        }
+      ]
+      environment = [for name, value in local.dify_plugin_daemon_env : { name = name, value = tostring(value) }]
+      secrets = [
+        {
+          name      = "SERVER_KEY"
+          valueFrom = data.aws_ssm_parameter.plugin_daemon_key.name
+        },
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = "${aws_rds_cluster.dify.master_user_secret[0].secret_arn}:password::"
+        },
+        {
+          name      = "DIFY_INNER_API_KEY"
+          valueFrom = data.aws_ssm_parameter.dify_inner_api_key.name
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.dify.name
+          "awslogs-region"        = local.region
+          "awslogs-stream-prefix" = "dify-plugin-daemon"
+        }
+      }
+      healthCheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:5002/health/check || exit 1"]
+        interval    = 10
+        timeout     = 5
+        retries     = 3
+        startPeriod = 30
+      }
+      cpu         = 0
+      volumesFrom = []
+      mountPoints = []
+    },
+    {
       name      = "dify-sandbox"
       image     = "langgenius/dify-sandbox:${var.dify_version.sandbox}"
       essential = true
-      mountPoints = [
-        {
-          sourceVolume  = "dependencies"
-          containerPath = "/dependencies"
-        }
-      ]
-      portMappings = [
-        {
-          hostPort      = 8194
-          protocol      = "tcp"
-          containerPort = 8194
-        }
-      ]
+      portMappings = [{
+        hostPort      = 8194
+        protocol      = "tcp"
+        containerPort = 8194
+      }]
       environment = [
         for name, value in {
           GIN_MODE       = "release"
@@ -167,12 +245,10 @@ resource "aws_ecs_task_definition" "dify_api" {
           SANDBOX_PORT   = 8194
         } : { name = name, value = tostring(value) }
       ]
-      secrets = [
-        {
-          name      = "API_KEY"
-          valueFrom = data.aws_ssm_parameter.sandbox_key.name
-        }
-      ]
+      secrets = [{
+        name      = "API_KEY"
+        valueFrom = data.aws_ssm_parameter.sandbox_key.name
+      }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -181,10 +257,19 @@ resource "aws_ecs_task_definition" "dify_api" {
           "awslogs-stream-prefix" = "dify-sandbox"
         }
       }
+      healthCheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:8194/health || exit 1"]
+        interval    = 10
+        timeout     = 5
+        retries     = 3
+        startPeriod = 30
+      }
       cpu         = 0
       volumesFrom = []
-    }
+      mountPoints = []
+    },
   ])
+
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "ARM64"
@@ -207,12 +292,10 @@ resource "aws_ecs_task_definition" "dify_worker" {
 
   container_definitions = jsonencode([
     {
-      name      = "dify-worker"
-      image     = "langgenius/dify-api:${var.dify_version.api}"
-      essential = true
-      environment = [
-        for name, value in local.dify_worker_env : { name = name, value = tostring(value) }
-      ]
+      name        = "dify-worker"
+      image       = "langgenius/dify-api:${var.dify_version.api}"
+      essential   = true
+      environment = [for name, value in local.dify_worker_env : { name = name, value = tostring(value) }]
       secrets = [
         {
           name      = "SECRET_KEY"
@@ -220,7 +303,7 @@ resource "aws_ecs_task_definition" "dify_worker" {
         },
         {
           name      = "DB_PASSWORD"
-          valueFrom = data.aws_ssm_parameter.db_password.name
+          valueFrom = "${aws_rds_cluster.dify.master_user_secret[0].secret_arn}:password::"
         },
         {
           name      = "CODE_EXECUTION_API_KEY"
