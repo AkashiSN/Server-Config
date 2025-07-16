@@ -9,34 +9,8 @@ data "aws_iam_policy_document" "ecs_task" {
   }
 }
 
-# Cloudwatch logs policy
-data "aws_iam_policy_document" "ecs_cloudwatch_logs" {
-  statement {
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:DescribeLogStreams",
-      "logs:DescribeLogGroups",
-      "logs:PutLogEvents",
-      "xray:PutTelemetryRecords",
-      "xray:PutTraceSegments",
-    ]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_policy" "ecs_cloudwatch_logs" {
-  name        = "${var.project}-dify-cloudwatch-policy"
-  description = "Cloudwatch access policy for Dify ECS tasks"
-  policy      = data.aws_iam_policy_document.ecs_cloudwatch_logs.json
-
-  tags = {
-    Name = "${var.project}-dify-cloudwatch-policy"
-  }
-}
-
 # ECS Exec policy
-data "aws_iam_policy_document" "ecs_ssm_policy" {
+data "aws_iam_policy_document" "ecs_ssm" {
   statement {
     actions = [
       "ssmmessages:CreateControlChannel",
@@ -48,10 +22,10 @@ data "aws_iam_policy_document" "ecs_ssm_policy" {
   }
 }
 
-resource "aws_iam_policy" "ecs_ssm_policy" {
+resource "aws_iam_policy" "ecs_ssm" {
   name        = "${var.project}-dify-ssm-policy"
   description = "SSM access policy for Dify ECS tasks"
-  policy      = data.aws_iam_policy_document.ecs_ssm_policy.json
+  policy      = data.aws_iam_policy_document.ecs_ssm.json
 
   tags = {
     Name = "${var.project}-dify-ssm-policy"
@@ -82,6 +56,32 @@ resource "aws_iam_policy" "get_secret" {
   }
 }
 
+# Cloudwatch logs policy
+data "aws_iam_policy_document" "ecs_cloudwatch_logs" {
+  statement {
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:DescribeLogStreams",
+      "logs:DescribeLogGroups",
+      "logs:PutLogEvents",
+      "xray:PutTelemetryRecords",
+      "xray:PutTraceSegments",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "ecs_cloudwatch_logs" {
+  name        = "${var.project}-dify-cloudwatch-policy"
+  description = "Cloudwatch access policy for Dify ECS tasks"
+  policy      = data.aws_iam_policy_document.ecs_cloudwatch_logs.json
+
+  tags = {
+    Name = "${var.project}-dify-cloudwatch-policy"
+  }
+}
+
 # S3 policy
 data "aws_iam_policy_document" "ecs_s3" {
   statement {
@@ -95,7 +95,8 @@ data "aws_iam_policy_document" "ecs_s3" {
     actions = [
       "s3:GetObject",
       "s3:PutObject",
-    "s3:DeleteObject"]
+      "s3:DeleteObject"
+    ]
     resources = [
       "${aws_s3_bucket.storage.arn}/*",
       "${aws_s3_bucket.plugin_storage.arn}/*"
@@ -130,24 +131,23 @@ resource "aws_iam_policy" "ecs_bedrock" {
   }
 }
 
-# ECR Policy
-data "aws_iam_policy_document" "ecr" {
+# Elasticache policy
+data "aws_iam_policy_document" "ecs_elasticache" {
   statement {
-    actions = [
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:BatchImportUpstreamImage",
-      "ecr:GetImageCopyStatus"
+    actions = ["elasticache:Connect"]
+    resources = [
+      aws_elasticache_replication_group.dify.arn,
+      aws_elasticache_user.dify.arn
     ]
-    resources = ["arn:aws:ecr:${local.region}:${local.account_id}:repository/*"]
   }
 }
-resource "aws_iam_policy" "ecr" {
-  name   = "${var.project}-dify-ecr-policy"
-  policy = data.aws_iam_policy_document.ecr.json
+
+resource "aws_iam_policy" "ecs_elasticache" {
+  name   = "${var.project}-dify-elasticache-policy"
+  policy = data.aws_iam_policy_document.ecs_elasticache.json
 
   tags = {
-    Name = "${var.project}-dify-ecr-policy"
+    Name = "${var.project}-dify-elasticache-policy"
   }
 }
 
@@ -158,24 +158,24 @@ resource "aws_iam_role" "ecs_execution" {
   assume_role_policy = data.aws_iam_policy_document.ecs_task.json
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
+resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
   role       = aws_iam_role.ecs_execution.id
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_execution_role_get_secret_policy" {
+resource "aws_iam_role_policy_attachment" "ecs_execution_ecr_policy" {
   role       = aws_iam_role.ecs_execution.id
-  policy_arn = aws_iam_policy.get_secret.arn
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_execution_role_ssm_policy" {
   role       = aws_iam_role.ecs_execution.id
-  policy_arn = aws_iam_policy.ecs_ssm_policy.arn
+  policy_arn = aws_iam_policy.ecs_ssm.arn
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_execution_role_ecr_policy" {
+resource "aws_iam_role_policy_attachment" "ecs_execution_get_secret_policy" {
   role       = aws_iam_role.ecs_execution.id
-  policy_arn = aws_iam_policy.ecr.arn
+  policy_arn = aws_iam_policy.get_secret.arn
 }
 
 # App task role
@@ -187,6 +187,11 @@ resource "aws_iam_role" "ecs_app" {
   tags = {
     Name = "${var.project}-dify-app"
   }
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_app_ssm" {
+  role       = aws_iam_role.ecs_app.id
+  policy_arn = aws_iam_policy.ecs_ssm.arn
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_app_cloudwatch_logs" {
@@ -204,10 +209,11 @@ resource "aws_iam_role_policy_attachment" "ecs_app_bedrock" {
   policy_arn = aws_iam_policy.ecs_bedrock.arn
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_app_ssm" {
+resource "aws_iam_role_policy_attachment" "ecs_app_elasticache" {
   role       = aws_iam_role.ecs_app.id
-  policy_arn = aws_iam_policy.ecs_ssm_policy.arn
+  policy_arn = aws_iam_policy.ecs_elasticache.arn
 }
+
 
 # Web task role
 resource "aws_iam_role" "ecs_web" {
@@ -220,12 +226,12 @@ resource "aws_iam_role" "ecs_web" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "ecs_web_ssm" {
+  role       = aws_iam_role.ecs_web.id
+  policy_arn = aws_iam_policy.ecs_ssm.arn
+}
+
 resource "aws_iam_role_policy_attachment" "ecs_web_cloudwatch_logs" {
   role       = aws_iam_role.ecs_web.name
   policy_arn = aws_iam_policy.ecs_cloudwatch_logs.arn
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_web_ssm" {
-  role       = aws_iam_role.ecs_web.id
-  policy_arn = aws_iam_policy.ecs_ssm_policy.arn
 }

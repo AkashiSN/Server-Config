@@ -9,9 +9,11 @@ resource "aws_ecs_task_definition" "dify_api" {
 
   container_definitions = jsonencode([
     {
-      name      = "dify-api"
-      image     = "langgenius/dify-api:${var.dify_version.api}"
-      essential = true
+      name       = "dify-api"
+      image      = "${local.dify_repo_url.api}:${var.dify_version.api}"
+      essential  = true
+      entryPoint = ["/bin/sh"]
+      command    = ["-c", local.app_command]
       portMappings = [{
         hostPort      = 5001
         protocol      = "tcp"
@@ -22,6 +24,14 @@ resource "aws_ecs_task_definition" "dify_api" {
         {
           name      = "SECRET_KEY"
           valueFrom = data.aws_ssm_parameter.session_secret_key.name
+        },
+        {
+          name      = "REDIS_PASSWORD"
+          valueFrom = data.aws_ssm_parameter.elasticache_dify_password.name
+        },
+        {
+          name      = "CELERY_BROKER_URL"
+          valueFrom = aws_ssm_parameter.celery_broker_url.name
         },
         {
           name      = "DB_PASSWORD"
@@ -53,7 +63,7 @@ resource "aws_ecs_task_definition" "dify_api" {
         interval    = 10
         timeout     = 5
         retries     = 3
-        startPeriod = 30
+        startPeriod = 60
       }
       cpu         = 0
       volumesFrom = []
@@ -61,7 +71,7 @@ resource "aws_ecs_task_definition" "dify_api" {
     },
     {
       name      = "dify-plugin-daemon"
-      image     = "langgenius/dify-plugin-daemon:${var.dify_version.plugin_daemon}"
+      image     = "${local.dify_repo_url.plugin_daemon}:${var.dify_version.plugin_daemon}"
       essential = true
       dependsOn = [{
         containerName = "dify-api"
@@ -86,6 +96,10 @@ resource "aws_ecs_task_definition" "dify_api" {
           valueFrom = data.aws_ssm_parameter.plugin_daemon_key.name
         },
         {
+          name      = "REDIS_PASSWORD"
+          valueFrom = data.aws_ssm_parameter.elasticache_dify_password.name
+        },
+        {
           name      = "DB_PASSWORD"
           valueFrom = "${aws_rds_cluster.dify.master_user_secret[0].secret_arn}:password::"
         },
@@ -107,7 +121,7 @@ resource "aws_ecs_task_definition" "dify_api" {
         interval    = 10
         timeout     = 5
         retries     = 3
-        startPeriod = 30
+        startPeriod = 60
       }
       cpu         = 0
       volumesFrom = []
@@ -115,7 +129,7 @@ resource "aws_ecs_task_definition" "dify_api" {
     },
     {
       name      = "dify-sandbox"
-      image     = "langgenius/dify-sandbox:${var.dify_version.sandbox}"
+      image     = "${local.dify_repo_url.sandbox}:${var.dify_version.sandbox}"
       essential = true
       portMappings = [{
         hostPort      = 8194
@@ -140,7 +154,7 @@ resource "aws_ecs_task_definition" "dify_api" {
         interval    = 10
         timeout     = 5
         retries     = 3
-        startPeriod = 30
+        startPeriod = 60
       }
       cpu         = 0
       volumesFrom = []
@@ -156,6 +170,11 @@ resource "aws_ecs_task_definition" "dify_api" {
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [
+    aws_rds_cluster_instance.dify,
+    terraform_data.pull_and_push_image
+  ]
 }
 
 # Dify Worker Task
@@ -171,13 +190,21 @@ resource "aws_ecs_task_definition" "dify_worker" {
   container_definitions = jsonencode([
     {
       name        = "dify-worker"
-      image       = "langgenius/dify-api:${var.dify_version.api}"
+      image       = "${local.dify_repo_url.api}:${var.dify_version.api}"
       essential   = true
       environment = [for name, value in local.dify_worker_env : { name = name, value = tostring(value) }]
       secrets = [
         {
           name      = "SECRET_KEY"
           valueFrom = data.aws_ssm_parameter.session_secret_key.name
+        },
+        {
+          name      = "REDIS_PASSWORD"
+          valueFrom = data.aws_ssm_parameter.elasticache_dify_password.name
+        },
+        {
+          name      = "CELERY_BROKER_URL"
+          valueFrom = aws_ssm_parameter.celery_broker_url.name
         },
         {
           name      = "DB_PASSWORD"
@@ -210,6 +237,11 @@ resource "aws_ecs_task_definition" "dify_worker" {
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [
+    aws_rds_cluster_instance.dify,
+    terraform_data.pull_and_push_image
+  ]
 }
 
 resource "aws_ecs_task_definition" "dify_web" {
@@ -224,7 +256,7 @@ resource "aws_ecs_task_definition" "dify_web" {
   container_definitions = jsonencode([
     {
       name        = "dify-web"
-      image       = "langgenius/dify-web:${var.dify_version.web}"
+      image       = "${local.dify_repo_url.web}:${var.dify_version.web}"
       essential   = true
       environment = [for name, value in local.dify_web_env : { name = name, value = tostring(value) }]
       portMappings = [{
@@ -254,4 +286,6 @@ resource "aws_ecs_task_definition" "dify_web" {
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [terraform_data.pull_and_push_image]
 }

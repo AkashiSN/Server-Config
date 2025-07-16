@@ -15,6 +15,9 @@ locals {
     # Web APP base URL
     APP_WEB_URL = "http://${aws_lb.dify.dns_name}"
 
+    # Enable migration
+    MIGRATION_ENABLED = true
+
     # The time in seconds after the signature is rejected
     FILES_ACCESS_TIMEOUT = 300
 
@@ -25,16 +28,14 @@ locals {
     REFRESH_TOKEN_EXPIRE_DAYS = 30
 
     # redis configuration
-    REDIS_HOST     = local.redis_serverless_host
-    REDIS_PORT     = local.redis_serverless_port
-    REDIS_USERNAME = ""
-    REDIS_PASSWORD = ""
+    REDIS_HOST     = local.dify_cache_host
+    REDIS_PORT     = 6379
+    REDIS_USERNAME = "dify"
     REDIS_USE_SSL  = true
     REDIS_DB       = 0 # use redis db 0 for redis cache
 
     # celery configuration
-    CELERY_BROKER_URL = "rediss://:@${local.redis_serverless_host}:${local.redis_serverless_port}/1"
-    BROKER_USE_SSL    = true
+    BROKER_USE_SSL = true
 
     # PostgreSQL database configuration
     DB_USERNAME = "dify"
@@ -77,7 +78,7 @@ locals {
     PLUGIN_BASED_TOKEN_COUNTING_ENABLED = false
 
     # CODE EXECUTION CONFIGURATION
-    CODE_EXECUTION_ENDPOINT       = "http://127.0.0.1:8194"
+    CODE_EXECUTION_ENDPOINT       = "http://localhost:8194"
     CODE_MAX_NUMBER               = 9223372036854775807
     CODE_MIN_NUMBER               = -9223372036854775808
     CODE_MAX_STRING_LENGTH        = 80000
@@ -105,7 +106,7 @@ locals {
     INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH = 4000
 
     # Plugin configuration
-    PLUGIN_DAEMON_URL          = "http://127.0.0.1:5002"
+    PLUGIN_DAEMON_URL          = "http://localhost:5002"
     PLUGIN_REMOTE_INSTALL_PORT = 5003
     PLUGIN_REMOTE_INSTALL_HOST = "localhost"
     PLUGIN_MAX_PACKAGE_SIZE    = 15728640
@@ -152,10 +153,11 @@ locals {
       PLUGIN_WORKING_PATH = "cwd"
 
       # redis configuration
-      REDIS_HOST    = local.redis_serverless_host
-      REDIS_PORT    = local.redis_serverless_port
-      REDIS_USE_SSL = true
-      REDIS_DB      = 0 # use redis db 0 for redis cache
+      REDIS_HOST     = local.dify_cache_host
+      REDIS_PORT     = 6379
+      REDIS_USERNAME = "dify"
+      REDIS_USE_SSL  = true
+      REDIS_DB       = 0 # use redis db 0 for redis cache
 
       # PostgreSQL database configuration
       DB_USERNAME = "dify"
@@ -177,4 +179,12 @@ locals {
     # API APP base URL
     APP_API_URL = "http://${aws_lb.dify.dns_name}"
   }
+}
+
+locals {
+  app_command = <<CMD
+pip install --no-cache-dir psycopg2-binary && \
+python -c 'import psycopg2; print("psycopg2 ready")' && \
+exec /bin/bash /entrypoint.sh
+CMD
 }

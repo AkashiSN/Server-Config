@@ -5,9 +5,21 @@ data "aws_vpc" "this" {
   id = var.vpc.id
 }
 
+# You can generate a strong key using `openssl rand -base64 42`.
+
+# Elasticache user password
+data "aws_ssm_parameter" "elasticache_dify_password" {
+  name = "/${var.project}/dify/ELASTICACHE_PASSWORD"
+}
+
+resource "aws_ssm_parameter" "celery_broker_url" {
+  name  = "/${var.project}/dify/CELERY_BROKER_URL"
+  type  = "SecureString"
+  value = "rediss://dify:${data.aws_ssm_parameter.elasticache_dify_password.value}@${local.dify_cache_host}:6379/1"
+}
+
 # A secret key that is used for securely signing the session cookie
 # and encrypting sensitive information on the database.
-# You can generate a strong key using `openssl rand -base64 42`.
 data "aws_ssm_parameter" "session_secret_key" {
   name = "/${var.project}/dify/SESSION_SECRET_KEY"
 }

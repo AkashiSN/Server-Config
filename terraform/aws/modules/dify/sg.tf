@@ -1,11 +1,11 @@
-# Redis
-resource "aws_security_group" "redis" {
-  name        = "${var.project}-dify-redis"
-  description = "Redis for Dify"
+# Elasticache
+resource "aws_security_group" "elasticache" {
+  name        = "${var.project}-dify-elasticache"
+  description = "elasticache for Dify"
   vpc_id      = var.vpc.id
 
   tags = {
-    Name = "${var.project}-dify-redis"
+    Name = "${var.project}-dify-elasticache"
   }
 }
 
@@ -65,22 +65,8 @@ resource "aws_security_group" "alb" {
 }
 
 ## Security group rule
-# Database
-# S3 バックアップなどでインターネットへのアクセスが必要な場合は egress を追加する。
-# VPC Endpoint や Managed Prefix List を使ってインターネットへのアクセスを制限するのがベター。
-resource "aws_security_group_rule" "database_to_internet" {
-  security_group_id = aws_security_group.database.id
-  type              = "egress"
-  description       = "Internet"
-  protocol          = "all"
-  from_port         = 0
-  to_port           = 0
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
 # API
-# TODO: 公式では SSRF 対策のために Forward Proxy として squid をプロビジョニングしているが、
-# 本構成では SSRF 対策の Forward Proxy は省略している。必要な場合は squid のタスクを用意したり、Firewall Manager などを利用する。
+# TODO: SSRF proxy
 resource "aws_security_group_rule" "api_to_internet" {
   security_group_id = aws_security_group.api.id
   type              = "egress"
@@ -111,10 +97,10 @@ resource "aws_security_group_rule" "api_to_database" {
   source_security_group_id = aws_security_group.api.id
 }
 
-resource "aws_security_group_rule" "api_to_redis" {
-  security_group_id        = aws_security_group.redis.id
+resource "aws_security_group_rule" "api_to_elasticache" {
+  security_group_id        = aws_security_group.elasticache.id
   type                     = "ingress"
-  description              = "API to Redis"
+  description              = "API to Elasticache"
   protocol                 = "tcp"
   from_port                = 6379
   to_port                  = 6379
@@ -142,10 +128,10 @@ resource "aws_security_group_rule" "worker_to_database" {
   source_security_group_id = aws_security_group.worker.id
 }
 
-resource "aws_security_group_rule" "worker_to_redis" {
-  security_group_id        = aws_security_group.redis.id
+resource "aws_security_group_rule" "worker_to_elasticache" {
+  security_group_id        = aws_security_group.elasticache.id
   type                     = "ingress"
-  description              = "Worker to Redis"
+  description              = "Worker to Elasticache"
   protocol                 = "tcp"
   from_port                = 6379
   to_port                  = 6379
