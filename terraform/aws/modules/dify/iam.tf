@@ -114,23 +114,6 @@ resource "aws_iam_policy" "ecs_s3" {
   }
 }
 
-# Bedrock policy
-data "aws_iam_policy_document" "ecs_bedrock" {
-  statement {
-    actions   = ["bedrock:InvokeModel"]
-    resources = ["arn:aws:bedrock:*::foundation-model/*"]
-  }
-}
-
-resource "aws_iam_policy" "ecs_bedrock" {
-  name   = "${var.project}-dify-bedrock-policy"
-  policy = data.aws_iam_policy_document.ecs_bedrock.json
-
-  tags = {
-    Name = "${var.project}-dify-bedrock-policy"
-  }
-}
-
 # Elasticache policy
 data "aws_iam_policy_document" "ecs_elasticache" {
   statement {
@@ -189,6 +172,11 @@ resource "aws_iam_role" "ecs_app" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "ecs_app_bedrock" {
+  role       = aws_iam_role.ecs_app.id
+  policy_arn = "arn:aws:iam::aws:policy/AmazonBedrockLimitedAccess"
+}
+
 resource "aws_iam_role_policy_attachment" "ecs_app_ssm" {
   role       = aws_iam_role.ecs_app.id
   policy_arn = aws_iam_policy.ecs_ssm.arn
@@ -202,11 +190,6 @@ resource "aws_iam_role_policy_attachment" "ecs_app_cloudwatch_logs" {
 resource "aws_iam_role_policy_attachment" "ecs_app_s3" {
   role       = aws_iam_role.ecs_app.name
   policy_arn = aws_iam_policy.ecs_s3.arn
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_app_bedrock" {
-  role       = aws_iam_role.ecs_app.id
-  policy_arn = aws_iam_policy.ecs_bedrock.arn
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_app_elasticache" {
