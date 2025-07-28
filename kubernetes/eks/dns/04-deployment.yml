@@ -35,7 +35,7 @@ spec:
               cpu: 200m
               memory: 200Mi
         - name: dnsdist
-          image: ghcr.io/akashisn/dnsdist@sha256:ad2533f8e3ff4ee0a559a676df8843f3d8df6bc6c5eeb12ca1f1cdb942fe472e
+          image: ghcr.io/akashisn/dnsdist@sha256:496f9ac73feaefa8056cb1b4df636a4b5a2889385c87aebbef1c346605f36ee2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 53
