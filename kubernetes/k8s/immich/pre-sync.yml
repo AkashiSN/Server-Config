@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: immich-server
-          image: ghcr.io/immich-app/immich-server:v1.136.0
+          image: ghcr.io/immich-app/immich-server:v1.137.3
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
         - name: immich-machine-learning
