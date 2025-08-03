@@ -20,7 +20,7 @@ updates:
   - package-ecosystem: "docker"
     directory: "/docker/nextcloud"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     ignore:
       - dependency-name: "nextcloud"
         update-types:
@@ -59,7 +59,7 @@ updates:
   - package-ecosystem: "docker"
     directory: "/kubernetes/k8s/immich"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     ignore:
       - dependency-name: "tensorchord/pgvecto-rs"
       - dependency-name: "redis"
