@@ -1,5 +1,9 @@
 hostAliases:
+{% if inventory_hostname == "k3s-vps" %}
+  - ip: "{{ external_ip.stdout }}"
+{% else %}
   - ip: "{{ nginx_ingress_lb_v4_addr }}"
+{% endif %}
     hostnames:
       - "{{ oauth2_proxy_fqdn }}"
 extraArgs:

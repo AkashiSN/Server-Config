@@ -6,6 +6,8 @@ virtualmachines:
           ansible_host: k8s-v132-control-plane
         k3s:
           ansible_host: k3s
+        k3s-vps:
+          ansible_host: k3s-lightsail
     worker:
       hosts:
         worker-node01:

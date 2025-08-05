@@ -5,6 +5,14 @@
     name: Asia/Tokyo
   become: true
 
+- name: Install systemd-timesyncd
+  ansible.builtin.apt:
+    name:
+      - systemd-timesyncd
+    state: present
+    update_cache: true
+  become: true
+
 - name: Enable and configure NTP
   ansible.builtin.lineinfile:
     path: /etc/systemd/timesyncd.conf

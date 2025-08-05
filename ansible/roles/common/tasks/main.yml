@@ -63,7 +63,8 @@
         file: helm.yml
 
 - name: For kubeadm
-  when: inventory_hostname != "k3s"
+  when: inventory_hostname != "k3s" and
+        inventory_hostname != "k3s-vps"
   become: true
   block:
     - name: Import crio.yml
@@ -77,7 +78,8 @@
 - name: For k3s
   ansible.builtin.import_tasks:
     file: k3s.yml
-  when: inventory_hostname == "k3s"
+  when: inventory_hostname == "k3s" or
+        inventory_hostname == "k3s-vps"
 
 - name: For dddvb
   ansible.builtin.import_tasks:

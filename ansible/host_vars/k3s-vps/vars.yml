@@ -1,0 +1,30 @@
+# domain
+domain: "akashisn.info"
+# metallb
+metallb_ipv4_range: "172.16.254.80-172.16.254.99"
+# nginx-ingress
+nginx_ingress_lb_v4_addr: "172.16.254.50"
+# acme
+cloudflare_token: "{{ vault_cloudflare_token }}"
+email: "{{ vault_email }}"
+# oauth2-proxy
+oauth2_proxy_fqdn: "auth.{{ domain }}"
+oauth2_proxy_cloudflare_issuer: "{{ vault_oauth2_proxy_cloudflare_issuer }}"
+oauth2_proxy_cloudflare_client_id: "{{ vault_oauth2_proxy_cloudflare_client_id }}"
+oauth2_proxy_cloudflare_client_secret: "{{ vault_oauth2_proxy_cloudflare_client_secret }}"
+oauth2_proxy_cookie_secret: "{{ vault_oauth2_proxy_cookie_secret }}"
+# argo-cd
+argocd_fqdn: "argocd.{{ domain }}"
+argocd_cloudflare_issuer: "{{ vault_argocd_cloudflare_issuer }}"
+argocd_cloudflare_client_id: "{{ vault_argocd_cloudflare_client_id }}"
+argocd_cloudflare_client_secret: "{{ vault_argocd_cloudflare_client_secret }}"
+argocd_webhook_github_secret: "{{ vault_argocd_webhook_github_secret }}"
+# hashicorp vault
+hashicorp_vault_client_id: "{{ vault_hashicorp_vault_client_id }}"
+hashicorp_vault_client_secret: "{{ vault_hashicorp_vault_client_secret }}"
+hashicorp_vault_organization_id: "{{ vault_hashicorp_vault_organization_id }}"
+hashicorp_vault_project_id: "{{ vault_hashicorp_vault_project_id }}"
+# dns
+dns_lb_v4_addr: "172.16.254.60"
+# minecraft
+minecraft_lb_v4_addr:  "172.16.254.70"
