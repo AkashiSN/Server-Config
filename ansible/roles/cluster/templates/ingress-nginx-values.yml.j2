@@ -13,6 +13,7 @@ controller:
       metallb.universe.tf/address-pool: ingress-pool
 {% endif %}
   config:
+    use-http2: true
     ssl-redirect: true
     proxy-connect-timeout: 3600
     proxy-send-timeout: 3600
