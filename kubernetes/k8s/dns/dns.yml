@@ -115,7 +115,6 @@ spec:
       protocol: UDP
       name: dnsdist
     - port: 443
-      nodePort: 443
       protocol: TCP
       name: dnsdist-doh
     - port: 853
