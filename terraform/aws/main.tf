@@ -3,13 +3,13 @@ module "vpc" {
   project = local.project
 }
 
-module "route53" {
-  source = "./modules/route53"
-}
+# module "route53" {
+#   source = "./modules/route53"
+# }
 
-module "ecr" {
-  source = "./modules/ecr"
-}
+# module "ecr" {
+#   source = "./modules/ecr"
+# }
 
 # module "kms" {
 #   source   = "./modules/kms"
@@ -70,21 +70,21 @@ module "ec2" {
 #   }
 # }
 
-module "eks_auto_mode" {
-  source   = "./modules/eks-auto-mode"
-  project  = local.project
-  iam_user = var.iam_user
-  homelab = {
-    global_ip_address = var.homelab_global_ip_address
-  }
-  vpc = {
-    id = module.vpc.vpc_id
-    subnet_ids = [
-      module.vpc.subnet_private_a_id,
-      module.vpc.subnet_private_c_id
-    ]
-  }
-}
+# module "eks_auto_mode" {
+#   source   = "./modules/eks-auto-mode"
+#   project  = local.project
+#   iam_user = var.iam_user
+#   homelab = {
+#     global_ip_address = var.homelab_global_ip_address
+#   }
+#   vpc = {
+#     id = module.vpc.vpc_id
+#     subnet_ids = [
+#       module.vpc.subnet_private_a_id,
+#       module.vpc.subnet_private_c_id
+#     ]
+#   }
+# }
 
 # module "helm" {
 #   source                       = "./modules/helm"
@@ -102,18 +102,18 @@ module "lightsail" {
   project = local.project
 }
 
-module "dify" {
-  source  = "./modules/dify"
-  project = local.project
-  vpc = {
-    id = module.vpc.vpc_id
-    private_subnet_ids = [
-      module.vpc.subnet_private_a_id,
-      module.vpc.subnet_private_c_id
-    ]
-    public_subnet_ids = [
-      module.vpc.subnet_public_a_id,
-      module.vpc.subnet_public_c_id
-    ]
-  }
-}
+# module "dify" {
+#   source  = "./modules/dify"
+#   project = local.project
+#   vpc = {
+#     id = module.vpc.vpc_id
+#     private_subnet_ids = [
+#       module.vpc.subnet_private_a_id,
+#       module.vpc.subnet_private_c_id
+#     ]
+#     public_subnet_ids = [
+#       module.vpc.subnet_public_a_id,
+#       module.vpc.subnet_public_c_id
+#     ]
+#   }
+# }

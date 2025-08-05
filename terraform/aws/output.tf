@@ -37,3 +37,11 @@ output "s2s_vpn_public_ipv6" {
 output "s2s_vpn_wg_pubkey" {
   value = module.lightsail.s2s_vpn_wg_pubkey
 }
+
+output "k3s_public_ipv4" {
+  value = module.lightsail.k3s_public_ipv4
+}
+
+output "k3s_public_ipv6" {
+  value = module.lightsail.k3s_public_ipv6
+}

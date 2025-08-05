@@ -1,0 +1,27 @@
+#!/bin/bash
+set -ex
+
+# Exec as root
+[ "$(id -u)" != "0" ] && exec sudo "$0" "$@"
+
+# Set DEBIAN_FRONTEND
+export DEBIAN_FRONTEND=noninteractive
+
+# Set hostname
+hostnamectl set-hostname ${hostname}
+echo "127.0.1.1 ${hostname}" >> /etc/hosts
+
+# Upgrade
+apt-get update
+apt-get upgrade -y
+
+# Obtain default interface
+DEFAULT_INTERFACE=$(ip route show default | sed -nE -e 's/.*dev (\w+).*/\1/p')
+
+# Change dns setting
+netplan set "ethernets.$${DEFAULT_INTERFACE}.nameservers.addresses=[1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001]"
+netplan set "ethernets.$${DEFAULT_INTERFACE}.dhcp4-overrides={use-dns: false}"
+netplan set "ethernets.$${DEFAULT_INTERFACE}.dhcp6-overrides={use-dns: false}"
+
+# Apply
+netplan apply
