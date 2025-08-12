@@ -13,7 +13,7 @@ spec:
     namespace: tv
     name: epg-mirakc-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:mirakc-epg
     lun: 0
     fsType: xfs
@@ -34,7 +34,7 @@ spec:
     namespace: tv
     name: data-epgstation-mariadb-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:epgstation-mariadb
     lun: 0
     fsType: xfs
@@ -55,7 +55,7 @@ spec:
     namespace: tv
     name: recorded-epgstation-0
   nfs:
-    server: 172.16.255.1
+    server: 10.254.0.2
     path: /mnt/hdd/nfs/recorded
   mountOptions:
     - nfsvers=4.2

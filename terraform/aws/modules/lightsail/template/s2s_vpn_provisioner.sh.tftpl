@@ -17,12 +17,14 @@ apt-get upgrade -y
 apt-get install -y wireguard
 
 # Server
-# Generate private key
-wg genkey > /etc/wireguard/private.key
-# Change permission
-chmod go= /etc/wireguard/private.key
-# Generate public key
-cat /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
+if [ ! -e /etc/wireguard/private.key ]; then
+    # Generate private key
+    wg genkey > /etc/wireguard/private.key
+    # Change permission
+    chmod go= /etc/wireguard/private.key
+    # Generate public key
+    cat /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
+fi
 
 # Set env
 export WIREGUARD_SERVER_IP=${wireguard_server_ip}

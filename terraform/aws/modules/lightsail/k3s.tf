@@ -1,8 +1,8 @@
 resource "aws_lightsail_instance" "k3s" {
-  name              = "${var.project}-k3s"
+  name              = "${var.project}_k3s"
   availability_zone = "ap-northeast-1a"
   blueprint_id      = "ubuntu_24_04"
-  bundle_id         = "medium_3_0"
+  bundle_id         = "xlarge_3_0"
   ip_address_type   = "dualstack"
   key_pair_name     = aws_lightsail_key_pair.main.name
   user_data         = <<EOF
@@ -12,12 +12,12 @@ service ssh restart
 EOF
 
   tags = {
-    Name = "${var.project}-k3s"
+    Name = "${var.project}_k3s"
   }
 }
 
 resource "aws_lightsail_static_ip" "k3s" {
-  name = "${var.project}-k3s-ip"
+  name = "${var.project}_k3s-ip"
 }
 
 resource "aws_lightsail_static_ip_attachment" "k3s" {
@@ -34,13 +34,13 @@ resource "aws_lightsail_static_ip_attachment" "k3s" {
 resource "aws_lightsail_instance_public_ports" "k3s" {
   instance_name = aws_lightsail_instance.k3s.name
 
-  port_info {
-    protocol   = "tcp"
-    from_port  = 22
-    to_port    = 22
-    cidrs      = ["0.0.0.0/0"]
-    ipv6_cidrs = ["::/0"]
-  }
+  # port_info {
+  #   protocol   = "tcp"
+  #   from_port  = 22
+  #   to_port    = 22
+  #   cidrs      = ["0.0.0.0/0"]
+  #   ipv6_cidrs = ["::/0"]
+  # }
 
   port_info {
     protocol   = "udp"
@@ -62,6 +62,14 @@ resource "aws_lightsail_instance_public_ports" "k3s" {
     protocol   = "tcp"
     from_port  = 853
     to_port    = 853
+    cidrs      = ["0.0.0.0/0"]
+    ipv6_cidrs = ["::/0"]
+  }
+
+  port_info {
+    protocol   = "udp"
+    from_port  = 51820
+    to_port    = 51820
     cidrs      = ["0.0.0.0/0"]
     ipv6_cidrs = ["::/0"]
   }
@@ -96,10 +104,13 @@ resource "local_file" "k3s_provisioner" {
   filename   = "${path.module}/.tmp/k3s_provisioner.sh"
   content = templatefile("${path.module}/template/k3s_provisioner.sh.tftpl", {
     hostname = "k3s-lightsail"
+    wireguard_server_ip = "10.254.0.10"
   })
 }
 
 resource "terraform_data" "k3s_provisioner" {
+  triggers_replace = [local_file.k3s_provisioner.content_md5]
+
   provisioner "remote-exec" {
     connection {
       type  = "ssh"

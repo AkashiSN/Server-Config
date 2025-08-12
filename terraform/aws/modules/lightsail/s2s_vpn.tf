@@ -93,6 +93,8 @@ resource "local_file" "site_to_site_vpn_provisioner" {
 }
 
 resource "terraform_data" "site_to_site_vpn_provisioner" {
+  triggers_replace = [local_file.site_to_site_vpn_provisioner.content_md5]
+
   provisioner "remote-exec" {
     connection {
       type  = "ssh"

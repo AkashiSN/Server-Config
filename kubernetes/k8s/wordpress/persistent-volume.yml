@@ -13,7 +13,7 @@ spec:
     namespace: wordpress
     name: app-wordpress-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:wordpress
     lun: 0
     fsType: xfs
@@ -34,7 +34,7 @@ spec:
     namespace: wordpress
     name: data-wordpress-mariadb-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:wordpress-mariadb
     lun: 0
     fsType: xfs

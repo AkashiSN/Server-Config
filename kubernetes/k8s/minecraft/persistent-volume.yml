@@ -13,7 +13,7 @@ spec:
     namespace: minecraft
     name: data-minecraft-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:minecraft
     lun: 0
     fsType: xfs
@@ -34,7 +34,7 @@ spec:
     namespace: minecraft
     name: backup-minecraft-0
   nfs:
-    server: 172.16.255.1
+    server: 10.254.0.2
     path: /mnt/hdd/nfs/minecraft-backup
   mountOptions:
     - nfsvers=4.2

@@ -13,7 +13,7 @@ spec:
     namespace: nextcloud
     name: app-nextcloud-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:nextcloud
     lun: 0
     fsType: xfs
@@ -34,7 +34,7 @@ spec:
     namespace: nextcloud
     name: data-nextcloud-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:nextcloud-data
     lun: 0
     fsType: xfs
@@ -55,7 +55,7 @@ spec:
     namespace: nextcloud
     name: data-nextcloud-mariadb-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:nextcloud-mariadb
     lun: 0
     fsType: xfs
@@ -76,7 +76,7 @@ spec:
     namespace: nextcloud
     name: static-nextcloud-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:static-files
     lun: 0
     fsType: xfs
@@ -97,7 +97,7 @@ spec:
     namespace: nextcloud
     name: musics-nextcloud-0
   nfs:
-    server: 172.16.255.1
+    server: 10.254.0.2
     path: /mnt/hdd/nfs/musics
   mountOptions:
     - nfsvers=4.2
@@ -117,7 +117,7 @@ spec:
     namespace: nextcloud
     name: musics-aac-nextcloud-0
   nfs:
-    server: 172.16.255.1
+    server: 10.254.0.2
     path: /mnt/hdd/nfs/musics-aac
   mountOptions:
     - nfsvers=4.2
@@ -137,7 +137,7 @@ spec:
     namespace: nextcloud
     name: musics-opus-nextcloud-0
   nfs:
-    server: 172.16.255.1
+    server: 10.254.0.2
     path: /mnt/hdd/nfs/musics-opus
   mountOptions:
     - nfsvers=4.2
@@ -157,7 +157,7 @@ spec:
     namespace: nextcloud
     name: videos-nextcloud-0
   nfs:
-    server: 172.16.255.1
+    server: 10.254.0.2
     path: /mnt/hdd/nfs/videos
   mountOptions:
     - nfsvers=4.2
@@ -177,7 +177,7 @@ spec:
     namespace: nextcloud
     name: photos-nextcloud-0
   nfs:
-    server: 172.16.255.1
+    server: 10.254.0.2
     path: /mnt/hdd/nfs/photos
   mountOptions:
     - nfsvers=4.2

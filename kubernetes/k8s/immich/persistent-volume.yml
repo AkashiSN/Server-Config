@@ -10,7 +10,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs-hdd-storage
   nfs:
-    server: 172.16.255.1
+    server: 10.254.0.2
     path: /mnt/hdd/nfs/immich-photos
   mountOptions:
     - nfsvers=4.2
@@ -30,7 +30,7 @@ spec:
     namespace: immich
     name: data-immich-postgres-0
   iscsi:
-    targetPortal: 172.16.255.1:3260
+    targetPortal: 10.254.0.2:3260
     iqn: iqn.2005-10.org.freenas.ctl:immich-postgres
     lun: 0
     fsType: xfs
