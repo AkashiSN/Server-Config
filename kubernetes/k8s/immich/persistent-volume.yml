@@ -34,3 +34,6 @@ spec:
     path: /mnt/ssd/nfs/immich-postgres
   mountOptions:
     - nfsvers=4.2
+    - sync
+    - no_subtree_check
+    - no_root_squash
