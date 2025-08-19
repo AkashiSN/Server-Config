@@ -31,3 +31,11 @@ spec:
     name: data-immich-postgres-0
   local:
     path: /pool/immich-postgres
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - k3s-lightsail
