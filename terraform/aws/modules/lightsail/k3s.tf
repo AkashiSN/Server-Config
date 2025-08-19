@@ -16,6 +16,18 @@ EOF
   }
 }
 
+resource "aws_lightsail_disk" "k3s_zfs" {
+  name              = "${var.project}_k3s-zfs"
+  size_in_gb        = 1024
+  availability_zone = "ap-northeast-1a"
+}
+
+resource "aws_lightsail_disk_attachment" "k3s_zfs" {
+  disk_name     = aws_lightsail_disk.k3s_zfs.name
+  instance_name = aws_lightsail_instance.k3s.name
+  disk_path     = "/dev/xvdf"
+}
+
 resource "aws_lightsail_static_ip" "k3s" {
   name = "${var.project}_k3s-ip"
 }
@@ -103,7 +115,7 @@ resource "local_file" "k3s_provisioner" {
   depends_on = [terraform_data.k3s_wait_for_clout_init]
   filename   = "${path.module}/.tmp/k3s_provisioner.sh"
   content = templatefile("${path.module}/template/k3s_provisioner.sh.tftpl", {
-    hostname = "k3s-lightsail"
+    hostname            = "k3s-lightsail"
     wireguard_server_ip = "10.254.0.10"
   })
 }
