@@ -29,8 +29,5 @@ spec:
   claimRef:
     namespace: immich
     name: data-immich-postgres-0
-  nfs:
-    server: 10.254.0.2
-    path: /mnt/ssd/nfs/immich-postgres
-  mountOptions:
-    - nfsvers=4.2
+  local:
+    path: /pool/immich-postgres
