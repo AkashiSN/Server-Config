@@ -8,4 +8,4 @@ spec:
   resources:
     requests:
       storage: 2Ti
-  storageClassName: nfs-hdd-storage
+  storageClassName: local-storage

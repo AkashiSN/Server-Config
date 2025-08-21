@@ -8,12 +8,20 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: nfs-hdd-storage
-  nfs:
-    server: 10.254.0.2
-    path: /mnt/hdd/nfs/immich-photos
-  mountOptions:
-    - nfsvers=4.2
+  storageClassName: local-storage
+  claimRef:
+    namespace: immich
+    name: immich-photos-pvc
+  local:
+    path: /pool/immich-postgres
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - k3s-lightsail
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -25,7 +33,7 @@ spec:
   accessModes:
     - ReadWriteOncePod
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: iscsi-ssd-storage
+  storageClassName: local-storage
   claimRef:
     namespace: immich
     name: data-immich-postgres-0
