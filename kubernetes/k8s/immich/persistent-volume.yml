@@ -13,7 +13,7 @@ spec:
     namespace: immich
     name: immich-photos-pvc
   local:
-    path: /pool/immich-postgres
+    path: /pool/immich-photos
   nodeAffinity:
     required:
       nodeSelectorTerms:
