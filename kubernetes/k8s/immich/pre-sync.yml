@@ -18,7 +18,7 @@ spec:
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
         - name: immich-machine-learning
-          image: ghcr.io/immich-app/immich-machine-learning:v1.138.1
+          image: ghcr.io/immich-app/immich-machine-learning:v1.139.4
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
       restartPolicy: Never
