@@ -1,6 +1,7 @@
 resources:
   - pre-sync.yml
   - persistent-volume.yml
+  - secret.yml
   - redis.yml
   - mariadb.yml
   - nginx-conf.yml
