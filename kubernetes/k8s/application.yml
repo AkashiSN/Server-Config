@@ -23,11 +23,8 @@ spec:
     - list:
         elements:
           - name: dns
-          # - name: minecraft
           - name: nextcloud
-          # - name: wordpress
           - name: immich
-          # - name: tv
   template:
     metadata:
       name: "{{name}}"
