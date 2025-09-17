@@ -4,6 +4,14 @@ metadata:
   name: default
   namespace: argo-cd
 spec:
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: '*'
+      server: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
   syncWindows:
     - kind: allow
       schedule: '0 2 * * *'
@@ -34,7 +42,7 @@ spec:
         namespace: "{{name}}"
       project: default
       source:
-        path: "kubernetes/k8s/{{name}}"
+        path: "kubernetes/{{name}}"
         repoURL: https://github.com/AkashiSN/Server-Config.git
         targetRevision: main
       syncPolicy:
