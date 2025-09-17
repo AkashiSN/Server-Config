@@ -31,11 +31,11 @@ updates:
       interval: "weekly"
   # k8s manifests - k8s
   - package-ecosystem: "docker"
-    directory: "/kubernetes/k8s/dns"
+    directory: "/kubernetes/dns"
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker"
-    directory: "/kubernetes/k8s/nextcloud"
+    directory: "/kubernetes/nextcloud"
     schedule:
       interval: "weekly"
     ignore:
@@ -44,7 +44,7 @@ updates:
           - "version-update:semver-major"
           - "version-update:semver-minor"
   - package-ecosystem: "docker"
-    directory: "/kubernetes/k8s/wordpress"
+    directory: "/kubernetes/wordpress"
     schedule:
       interval: "weekly"
     ignore:
@@ -57,7 +57,7 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker"
-    directory: "/kubernetes/k8s/immich"
+    directory: "/kubernetes/immich"
     schedule:
       interval: "daily"
     ignore:
@@ -66,7 +66,7 @@ updates:
         update-types:
           - "version-update:semver-major"
   # - package-ecosystem: "docker"
-  #   directory: "/kubernetes/k8s/tv"
+  #   directory: "/kubernetes/tv"
   #   schedule:
   #     interval: "weekly"
   #   ignore:
