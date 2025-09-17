@@ -24,7 +24,7 @@ spec:
         elements:
           - name: dns
           - name: nextcloud
-          - name: immich
+          # - name: immich
   template:
     metadata:
       name: "{{name}}"
