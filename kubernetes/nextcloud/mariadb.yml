@@ -63,7 +63,7 @@ spec:
       spec:
         accessModes:
           - ReadWriteOncePod
-        storageClassName: iscsi-ssd-storage
+        storageClassName: local-storage
         resources:
           requests:
             storage: 30Gi
