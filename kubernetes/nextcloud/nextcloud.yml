@@ -65,10 +65,6 @@ spec:
               mountPath: /mnt/static
             - name: musics
               mountPath: /mnt/musics
-            - name: musics-aac
-              mountPath: /mnt/musics_aac
-            - name: musics-opus
-              mountPath: /mnt/musics_opus
             - name: videos
               mountPath: /mnt/videos
             - name: photos
@@ -176,24 +172,6 @@ spec:
             storage: 8Ti
     - metadata:
         name: musics
-      spec:
-        accessModes:
-          - ReadWriteOncePod
-        storageClassName: nfs-hdd-storage
-        resources:
-          requests:
-            storage: 500Gi
-    - metadata:
-        name: musics-aac
-      spec:
-        accessModes:
-          - ReadWriteOncePod
-        storageClassName: nfs-hdd-storage
-        resources:
-          requests:
-            storage: 500Gi
-    - metadata:
-        name: musics-opus
       spec:
         accessModes:
           - ReadWriteOncePod
