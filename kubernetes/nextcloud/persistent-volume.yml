@@ -12,12 +12,16 @@ spec:
   claimRef:
     namespace: nextcloud
     name: app-nextcloud-0
-  iscsi:
-    targetPortal: 10.254.0.2:3260
-    iqn: iqn.2005-10.org.freenas.ctl:nextcloud
-    lun: 0
-    fsType: xfs
-    readOnly: false
+  local:
+    path: /pool/nextcloud/nextcloud-app
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - k3s-lightsail
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -54,12 +58,16 @@ spec:
   claimRef:
     namespace: nextcloud
     name: data-nextcloud-mariadb-0
-  iscsi:
-    targetPortal: 10.254.0.2:3260
-    iqn: iqn.2005-10.org.freenas.ctl:nextcloud-mariadb
-    lun: 0
-    fsType: xfs
-    readOnly: false
+  local:
+    path: /pool/nextcloud/nextcloud-mariadb
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - k3s-lightsail
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -75,12 +83,16 @@ spec:
   claimRef:
     namespace: nextcloud
     name: static-nextcloud-0
-  iscsi:
-    targetPortal: 10.254.0.2:3260
-    iqn: iqn.2005-10.org.freenas.ctl:static-files
-    lun: 0
-    fsType: xfs
-    readOnly: false
+  local:
+    path: /pool/nextcloud/static-files
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - k3s-lightsail
 ---
 apiVersion: v1
 kind: PersistentVolume
