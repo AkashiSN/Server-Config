@@ -110,7 +110,7 @@ spec:
     name: musics-nextcloud-0
   nfs:
     server: 10.254.0.2
-    path: /mnt/hdd/nfs/musics
+    path: /mnt/ssd/musics
   mountOptions:
     - nfsvers=4.2
 ---
