@@ -1,0 +1,92 @@
+#!/bin/bash
+set -ex
+
+# Exec as root
+[ "$(id -u)" != "0" ] && exec sudo "$0" "$@"
+
+# Set DEBIAN_FRONTEND
+export DEBIAN_FRONTEND=noninteractive
+
+# Set hostname
+hostnamectl set-hostname ${hostname}
+echo "127.0.1.1 ${hostname}" >> /etc/hosts
+
+# Wait for another apt
+LOCK_FILES=(
+    "/var/lib/apt/lists/lock"
+    "/var/lib/dpkg/lock"
+    "/var/lib/dpkg/lock-frontend"
+)
+for lock_file in "$${LOCK_FILES[@]}"; do
+    if [ -f "$lock_file" ]; then
+        while fuser "$lock_file" >/dev/null 2>&1; do
+        sleep 5
+        done
+    fi
+done
+
+# Upgrade
+apt-get update
+apt-get upgrade -y
+
+# Obtain default interface
+export DEFAULT_INTERFACE=$(ip route show default | sed -nE -e 's/.*dev (\w+).*/\1/p')
+
+# Change dns setting
+netplan set "ethernets.$${DEFAULT_INTERFACE}.nameservers.addresses=[1.1.1.1, 1.0.0.1]"
+netplan set "ethernets.$${DEFAULT_INTERFACE}.dhcp4-overrides={use-dns: false}"
+
+# Apply
+netplan apply
+
+# Install cloudflared
+# Add cloudflare gpg key
+mkdir -p --mode=0755 /usr/share/keyrings
+curl -fsSL --retry 10 https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+
+# Add this repo to your apt repositories
+echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
+
+# install cloudflared
+apt-get update
+apt-get install -y cloudflared
+
+# Install wireguard
+apt-get install -y wireguard
+
+# Generate Server Key
+if [ ! -e /etc/wireguard/private.key ]; then
+    # Generate private key
+    wg genkey > /etc/wireguard/private.key
+    # Change permission
+    chmod go= /etc/wireguard/private.key
+    # Generate public key
+    cat /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
+
+    # Set env
+    export WIREGUARD_SERVER_IP=${wireguard_server_ip}
+
+    # Generate server config
+    cat > /etc/wireguard/wg0.conf << EOF
+[Interface]
+PrivateKey = `cat /etc/wireguard/private.key`
+Address = $${WIREGUARD_SERVER_IP}/24
+ListenPort = 51820
+
+PostUp = iptables -A FORWARD -i %i -j ACCEPT
+PostUp = iptables -A FORWARD -o %i -j ACCEPT
+PostUp = iptables -t nat -A POSTROUTING -o %i -j MASQUERADE
+
+PostDown = iptables -D FORWARD -i %i -j ACCEPT
+PostDown = iptables -D FORWARD -o %i -j ACCEPT
+PostDown = iptables -t nat -D POSTROUTING -o %i -j MASQUERADE
+
+EOF
+fi
+
+# Setting ipv4 forward/etc/sysctl.conf
+sed -i -e '/^#net.ipv4.ip_forward/s/^#//g' /etc/sysctl.conf
+sysctl -p
+
+# Enable wireguard
+systemctl enable wg-quick@wg0

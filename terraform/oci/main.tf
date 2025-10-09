@@ -1,4 +1,3 @@
-# VCN（仮想クラウドネットワーク）を作成
 resource "oci_core_virtual_network" "main" {
   compartment_id = var.compartment_id
 
@@ -127,11 +126,11 @@ resource "oci_core_instance" "ubuntu_instance" {
   }
 
   metadata = {
-    user_data = base64encode(<<EOF
-curl https://github.com/AkashiSN.keys > /home/ubuntu/.ssh/authorized_keys
-service ssh restart
-EOF
-    )
+    ssh_authorized_keys = var.ssh_public_key
+    user_data = base64encode(templatefile("${path.module}/template/k3s_userdata.sh.tftpl", {
+      hostname            = "k3s-oci"
+      wireguard_server_ip = "10.254.0.1"
+    }))
   }
 }
 
