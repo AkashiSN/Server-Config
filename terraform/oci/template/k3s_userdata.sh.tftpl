@@ -51,23 +51,24 @@ echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudf
 apt-get update
 apt-get install -y cloudflared
 
+# Install zfs
+apt-get install -y zfsutils-linux zfsnap
+
 # Install wireguard
 apt-get install -y wireguard
 
-# Generate Server Key
-if [ ! -e /etc/wireguard/private.key ]; then
-    # Generate private key
-    wg genkey > /etc/wireguard/private.key
-    # Change permission
-    chmod go= /etc/wireguard/private.key
-    # Generate public key
-    cat /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
+# Generate private key
+wg genkey > /etc/wireguard/private.key
+# Change permission
+chmod go= /etc/wireguard/private.key
+# Generate public key
+cat /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
 
-    # Set env
-    export WIREGUARD_SERVER_IP=${wireguard_server_ip}
+# Set env
+export WIREGUARD_SERVER_IP=${wireguard_server_ip}
 
-    # Generate server config
-    cat > /etc/wireguard/wg0.conf << EOF
+# Generate server config
+cat > /etc/wireguard/wg0.conf << EOF
 [Interface]
 PrivateKey = `cat /etc/wireguard/private.key`
 Address = $${WIREGUARD_SERVER_IP}/24
@@ -82,7 +83,6 @@ PostDown = iptables -D FORWARD -o %i -j ACCEPT
 PostDown = iptables -t nat -D POSTROUTING -o %i -j MASQUERADE
 
 EOF
-fi
 
 # Setting ipv4 forward/etc/sysctl.conf
 sed -i -e '/^#net.ipv4.ip_forward/s/^#//g' /etc/sysctl.conf
