@@ -5,20 +5,24 @@ configs:
     create: true
     url: "https://{{ argocd_fqdn }}"
     admin.enabled: false
+    exec.enabled: true
     statusbadge.enabled: true
-    oidc.config: |-
-      name: cloudflare
-      issuer: "{{ argocd_cloudflare_issuer }}"
-      clientID: "{{ argocd_cloudflare_client_id }}"
-      clientSecret: "{{ argocd_cloudflare_client_secret }}"
-      requestedIDTokenClaims:
-        email:
-          essential: true
-      requestedScopes:
-        - openid
-        - profile
-        - email
-        - groups
+    dex.config: |-
+      connectors:
+        - type: oidc
+          id: oidc
+          name: cloudflare
+          config:
+            issuer: "{{ argocd_cloudflare_issuer }}"
+            clientID: "{{ argocd_cloudflare_client_id }}"
+            clientSecret: "{{ argocd_cloudflare_client_secret }}"
+            insecureSkipEmailVerified: true
+            getUserInfo: true
+            requestedScopes:
+              - openid
+              - profile
+              - email
+              - groups
   params:
     server.insecure: true
   rbac:
@@ -27,7 +31,7 @@ configs:
   secret:
     githubSecret: "{{ argocd_webhook_github_secret }}"
 dex:
-  enabled: false
+  enabled: true
 server:
   ingress:
     enabled: true
