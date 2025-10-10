@@ -10,7 +10,7 @@
   kubernetes.core.helm:
     release_name: argo-cd
     chart_ref: argo/argo-cd
-    chart_version: "7.8.*"
+    chart_version: "8.6.*"
     release_namespace: argo-cd
     create_namespace: true
     update_repo_cache: true
