@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
         - name: dnsmasq
-          image: ghcr.io/akashisn/dnsmasq@sha256:454b4b37d22b47865b4becd99da5e764e52de2ab13fabd4a2019dfb14f1edbc9
+          image: ghcr.io/akashisn/dnsmasq@sha256:5c3ebf69fbae0945ce810d13dd113d238b2bd09e640bf395dda7721f2052f895
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: dnsmasq-conf
