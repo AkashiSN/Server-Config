@@ -7,7 +7,7 @@ virtualmachines:
         k3s:
           ansible_host: k3s
         k3s-vps:
-          ansible_host: k3s-lightsail
+          ansible_host: k3s-oci
     worker:
       hosts:
         worker-node01:

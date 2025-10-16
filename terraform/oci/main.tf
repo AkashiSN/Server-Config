@@ -13,70 +13,7 @@ resource "oci_core_subnet" "main" {
   vcn_id            = oci_core_virtual_network.main.id
   display_name      = "main-subnet"
   dns_label         = "mainsubnet"
-  security_list_ids = [oci_core_security_list.main.id]
   route_table_id    = oci_core_route_table.main.id
-}
-
-resource "oci_core_security_list" "main" {
-  compartment_id = var.compartment_id
-
-  vcn_id       = oci_core_virtual_network.main.id
-  display_name = "main-security-list"
-
-  ingress_security_rules {
-    protocol = "6" # TCP
-    source   = "0.0.0.0/0"
-    tcp_options {
-      max = 22 # SSH
-      min = 22
-    }
-  }
-
-  ingress_security_rules {
-    protocol = "17" # UDP
-    source   = "0.0.0.0/0"
-    udp_options {
-      max = 53 # DNS
-      min = 53
-    }
-  }
-
-  ingress_security_rules {
-    protocol = "6" # TCP
-    source   = "0.0.0.0/0"
-    tcp_options {
-      min = 443 # HTTPS
-      max = 443
-    }
-  }
-
-  ingress_security_rules {
-    protocol = "6" # TCP
-    source   = "0.0.0.0/0"
-    tcp_options {
-      min = 853 # DoH
-      max = 853
-    }
-  }
-
-  ingress_security_rules {
-    protocol = "17" # UDP
-    source   = "0.0.0.0/0"
-    udp_options {
-      max = 51820 # Wireguard
-      min = 51820
-    }
-  }
-
-  ingress_security_rules {
-    protocol = "1" # ICMP
-    source   = "0.0.0.0/0"
-  }
-
-  egress_security_rules {
-    protocol    = "all"
-    destination = "0.0.0.0/0"
-  }
 }
 
 resource "oci_core_route_table" "main" {
@@ -95,8 +32,92 @@ resource "oci_core_internet_gateway" "main" {
   compartment_id = var.compartment_id
 
   vcn_id = oci_core_virtual_network.main.id
-
   display_name = "main-internet-gateway"
+}
+
+resource "oci_core_network_security_group" "main" {
+  compartment_id = var.compartment_id
+  vcn_id         = oci_core_virtual_network.main.id
+
+  display_name = "main-security-group"
+}
+
+resource "oci_core_network_security_group_security_rule" "ingress_ssh" {
+  network_security_group_id = oci_core_network_security_group.main.id
+
+  direction = "INGRESS"
+  protocol  = "6" # TCP
+  source    = "0.0.0.0/0"
+  tcp_options {
+    destination_port_range {
+      max = 22 # SSH
+      min = 22
+    }
+  }
+}
+
+resource "oci_core_network_security_group_security_rule" "ingress_dns" {
+  network_security_group_id = oci_core_network_security_group.main.id
+
+  direction = "INGRESS"
+  protocol  = "17" # UDP
+  source    = "0.0.0.0/0"
+  udp_options {
+    destination_port_range {
+      max = 53 # DNS
+      min = 53
+    }
+  }
+}
+
+resource "oci_core_network_security_group_security_rule" "ingress_https" {
+  network_security_group_id = oci_core_network_security_group.main.id
+
+  direction = "INGRESS"
+  protocol  = "6" # TCP
+  source    = "0.0.0.0/0"
+  tcp_options {
+    destination_port_range {
+      max = 443 # HTTPS
+      min = 443
+    }
+  }
+}
+
+resource "oci_core_network_security_group_security_rule" "ingress_doh" {
+  network_security_group_id = oci_core_network_security_group.main.id
+
+  direction = "INGRESS"
+  protocol  = "6" # TCP
+  source    = "0.0.0.0/0"
+  tcp_options {
+    destination_port_range {
+      max = 853 # DoH
+      min = 853
+    }
+  }
+}
+
+resource "oci_core_network_security_group_security_rule" "ingress_wireguard" {
+  network_security_group_id = oci_core_network_security_group.main.id
+
+  direction = "INGRESS"
+  protocol  = "17" # UDP
+  source    = "0.0.0.0/0"
+  udp_options {
+    destination_port_range {
+      max = 51820 # Wireguard
+      min = 51820
+    }
+  }
+}
+
+resource "oci_core_network_security_group_security_rule" "egress_all" {
+  network_security_group_id = oci_core_network_security_group.main.id
+
+  direction   = "EGRESS"
+  protocol    = "all" # 全てのプロトコル
+  destination = "0.0.0.0/0"
 }
 
 resource "oci_core_instance" "ubuntu_instance" {
@@ -123,6 +144,7 @@ resource "oci_core_instance" "ubuntu_instance" {
   create_vnic_details {
     assign_public_ip = true
     subnet_id        = oci_core_subnet.main.id
+    nsg_ids          = [oci_core_network_security_group.main.id]
   }
 
   metadata = {

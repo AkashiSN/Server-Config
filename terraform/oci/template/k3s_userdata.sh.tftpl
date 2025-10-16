@@ -33,11 +33,9 @@ apt-get upgrade -y
 export DEFAULT_INTERFACE=$(ip route show default | sed -nE -e 's/.*dev (\w+).*/\1/p')
 
 # Change dns setting
-netplan set "ethernets.$${DEFAULT_INTERFACE}.nameservers.addresses=[1.1.1.1, 1.0.0.1]"
-netplan set "ethernets.$${DEFAULT_INTERFACE}.dhcp4-overrides={use-dns: false}"
-
-# Apply
-netplan apply
+echo -e "nameserver 1.1.1.1\nnameserver 1.0.0.1" | tee /etc/resolv.conf
+systemctl stop systemd-resolved.service
+systemctl disable systemd-resolved.service
 
 # Install cloudflared
 # Add cloudflare gpg key

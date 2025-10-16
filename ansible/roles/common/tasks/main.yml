@@ -38,10 +38,6 @@
 
 - name: For common
   block:
-    - name: Import dns.yml
-      ansible.builtin.import_tasks:
-        file: dns.yml
-
     - name: Import timezone.yml
       ansible.builtin.import_tasks:
         file: timezone.yml
@@ -67,6 +63,10 @@
         inventory_hostname != "k3s-vps"
   become: true
   block:
+    - name: Import dns.yml
+      ansible.builtin.import_tasks:
+        file: dns.yml
+
     - name: Import crio.yml
       ansible.builtin.import_tasks:
         file: crio.yml
