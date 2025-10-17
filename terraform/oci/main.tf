@@ -9,11 +9,11 @@ resource "oci_core_virtual_network" "main" {
 resource "oci_core_subnet" "main" {
   compartment_id = var.compartment_id
 
-  cidr_block        = "10.0.1.0/24"
-  vcn_id            = oci_core_virtual_network.main.id
-  display_name      = "main-subnet"
-  dns_label         = "mainsubnet"
-  route_table_id    = oci_core_route_table.main.id
+  cidr_block     = "10.0.1.0/24"
+  vcn_id         = oci_core_virtual_network.main.id
+  display_name   = "main-subnet"
+  dns_label      = "mainsubnet"
+  route_table_id = oci_core_route_table.main.id
 }
 
 resource "oci_core_route_table" "main" {
@@ -31,7 +31,7 @@ resource "oci_core_route_table" "main" {
 resource "oci_core_internet_gateway" "main" {
   compartment_id = var.compartment_id
 
-  vcn_id = oci_core_virtual_network.main.id
+  vcn_id       = oci_core_virtual_network.main.id
   display_name = "main-internet-gateway"
 }
 
@@ -142,7 +142,7 @@ resource "oci_core_instance" "ubuntu_instance" {
   display_name = "k3s-server"
 
   create_vnic_details {
-    assign_public_ip = true
+    assign_public_ip = false
     subnet_id        = oci_core_subnet.main.id
     nsg_ids          = [oci_core_network_security_group.main.id]
   }
@@ -154,6 +154,27 @@ resource "oci_core_instance" "ubuntu_instance" {
       wireguard_server_ip = "10.254.0.1"
     }))
   }
+}
+
+data "oci_core_vnic_attachments" "ubuntu_instance" {
+  compartment_id      = var.compartment_id
+  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
+  instance_id         = oci_core_instance.ubuntu_instance.id
+}
+
+data "oci_core_vnic" "ubuntu_instance_primary_vnic" {
+  vnic_id = data.oci_core_vnic_attachments.ubuntu_instance.vnic_attachments[0].vnic_id
+}
+
+data "oci_core_private_ips" "ubuntu_instance_private_ips" {
+  vnic_id = data.oci_core_vnic.ubuntu_instance_primary_vnic.id
+}
+
+resource "oci_core_public_ip" "ubuntu_instance_reserved_public_ip" {
+  compartment_id = var.compartment_id
+  lifetime       = "RESERVED"
+  display_name   = "k3s-public-ip"
+  private_ip_id  = data.oci_core_private_ips.ubuntu_instance_private_ips.private_ips[0].id
 }
 
 resource "oci_core_volume" "main" {

@@ -1,6 +1,6 @@
 # Outputs for compute instance
-output "public-ip-for-compute-instance" {
-  value = oci_core_instance.ubuntu_instance.public_ip
+output "instance-reserved-public-ip" {
+  value = oci_core_public_ip.ubuntu_instance_reserved_public_ip.ip_address
 }
 
 output "instance-name" {

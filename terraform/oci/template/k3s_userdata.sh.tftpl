@@ -1,6 +1,24 @@
 #!/bin/bash
 set -ex
 
+function wait-apt () {
+    # Wait for another apt
+    LOCK_FILES=(
+        "/var/lib/apt/lists/lock"
+        "/var/lib/dpkg/lock"
+        "/var/lib/dpkg/lock-frontend"
+    )
+    for lock_file in "$${LOCK_FILES[@]}"; do
+        if [ -f "$lock_file" ]; then
+            while fuser "$lock_file" >/dev/null 2>&1; do
+            sleep 5
+            done
+        fi
+    done
+
+    apt-get $@
+}
+
 # Exec as root
 [ "$(id -u)" != "0" ] && exec sudo "$0" "$@"
 
@@ -11,31 +29,29 @@ export DEBIAN_FRONTEND=noninteractive
 hostnamectl set-hostname ${hostname}
 echo "127.0.1.1 ${hostname}" >> /etc/hosts
 
-# Wait for another apt
-LOCK_FILES=(
-    "/var/lib/apt/lists/lock"
-    "/var/lib/dpkg/lock"
-    "/var/lib/dpkg/lock-frontend"
-)
-for lock_file in "$${LOCK_FILES[@]}"; do
-    if [ -f "$lock_file" ]; then
-        while fuser "$lock_file" >/dev/null 2>&1; do
-        sleep 5
-        done
-    fi
-done
-
 # Upgrade
-apt-get update
-apt-get upgrade -y
+wait-apt update
+wait-apt upgrade -y
 
 # Obtain default interface
 export DEFAULT_INTERFACE=$(ip route show default | sed -nE -e 's/.*dev (\w+).*/\1/p')
 
 # Change dns setting
-echo -e "nameserver 1.1.1.1\nnameserver 1.0.0.1" | tee /etc/resolv.conf
-systemctl stop systemd-resolved.service
-systemctl disable systemd-resolved.service
+netplan set "ethernets.$${DEFAULT_INTERFACE}.nameservers.addresses=[1.1.1.1, 1.0.0.1]"
+netplan set "ethernets.$${DEFAULT_INTERFACE}.dhcp4-overrides={use-dns: false}"
+
+# Apply
+netplan apply
+
+# Allow iptables
+iptables -I INPUT 5 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+iptables -I INPUT 6 -m state --state NEW -p udp --dport 53 -j ACCEPT
+iptables -I INPUT 7 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+iptables -I INPUT 8 -m state --state NEW -p tcp --dport 853 -j ACCEPT
+iptables -I INPUT 9 -m state --state NEW -p udp --dport 51820 -j ACCEPT
+
+# Save iptables
+netfilter-persistent save
 
 # Install cloudflared
 # Add cloudflare gpg key
@@ -46,14 +62,14 @@ curl -fsSL --retry 10 https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/
 echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
 
 # install cloudflared
-apt-get update
-apt-get install -y cloudflared
+wait-apt update
+wait-apt install -y cloudflared
 
 # Install zfs
-apt-get install -y zfsutils-linux zfsnap
+wait-apt install -y zfsutils-linux zfsnap
 
 # Install wireguard
-apt-get install -y wireguard
+wait-apt install -y wireguard
 
 # Generate private key
 wg genkey > /etc/wireguard/private.key
