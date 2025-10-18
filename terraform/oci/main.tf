@@ -143,6 +143,7 @@ resource "oci_core_instance" "ubuntu_instance" {
 
   create_vnic_details {
     assign_public_ip = false
+    private_ip       = "10.0.1.10"
     subnet_id        = oci_core_subnet.main.id
     nsg_ids          = [oci_core_network_security_group.main.id]
   }
