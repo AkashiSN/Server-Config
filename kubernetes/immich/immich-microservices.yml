@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: immich-microservices
-          image: ghcr.io/immich-app/immich-server:v2.1.0
+          image: ghcr.io/immich-app/immich-server:v2.2.0
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
