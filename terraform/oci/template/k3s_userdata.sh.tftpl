@@ -65,9 +65,6 @@ echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudf
 wait-apt update
 wait-apt install -y cloudflared
 
-# setting cloudflare tunnel
-cloudflared service install ${cloudflare_tunnel_token}
-
 # Install zfs
 wait-apt install -y zfsutils-linux zfsnap
 

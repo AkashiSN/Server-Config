@@ -5,8 +5,3 @@ variable "compartment_id" {
 variable "ssh_public_key" {
   type = string
 }
-
-variable "cloudflare_tunnel_token" {
-  type      = string
-  sensitive = true
-}

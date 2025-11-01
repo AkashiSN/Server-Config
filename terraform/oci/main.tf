@@ -42,19 +42,19 @@ resource "oci_core_network_security_group" "main" {
   display_name = "main-security-group"
 }
 
-resource "oci_core_network_security_group_security_rule" "ingress_ssh" {
-  network_security_group_id = oci_core_network_security_group.main.id
+# resource "oci_core_network_security_group_security_rule" "ingress_ssh" {
+#   network_security_group_id = oci_core_network_security_group.main.id
 
-  direction = "INGRESS"
-  protocol  = "6" # TCP
-  source    = "0.0.0.0/0"
-  tcp_options {
-    destination_port_range {
-      max = 22 # SSH
-      min = 22
-    }
-  }
-}
+#   direction = "INGRESS"
+#   protocol  = "6" # TCP
+#   source    = "0.0.0.0/0"
+#   tcp_options {
+#     destination_port_range {
+#       max = 22 # SSH
+#       min = 22
+#     }
+#   }
+# }
 
 resource "oci_core_network_security_group_security_rule" "ingress_dns" {
   network_security_group_id = oci_core_network_security_group.main.id
@@ -151,9 +151,8 @@ resource "oci_core_instance" "ubuntu_instance" {
   metadata = {
     ssh_authorized_keys = var.ssh_public_key
     user_data = base64encode(templatefile("${path.module}/template/k3s_userdata.sh.tftpl", {
-      hostname                = "k3s-oci"
-      cloudflare_tunnel_token = var.cloudflare_tunnel_token
-      wireguard_server_ip     = "10.254.0.1"
+      hostname            = "k3s-oci"
+      wireguard_server_ip = "10.254.0.1"
     }))
   }
 }
