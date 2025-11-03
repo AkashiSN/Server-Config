@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: immich-redis
-          image: redis:6.2-alpine
+          image: redis:6.2.21-alpine
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 6379
