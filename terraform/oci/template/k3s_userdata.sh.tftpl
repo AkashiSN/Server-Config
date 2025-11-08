@@ -87,6 +87,7 @@ cat > /etc/wireguard/wg0.conf << EOF
 PrivateKey = `cat /etc/wireguard/private.key`
 Address = $${WIREGUARD_SERVER_IP}/24
 ListenPort = 51820
+MTU = 1280
 
 PostUp = iptables -A FORWARD -i %i -j ACCEPT
 PostUp = iptables -A FORWARD -o %i -j ACCEPT

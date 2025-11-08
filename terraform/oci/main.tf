@@ -155,6 +155,10 @@ resource "oci_core_instance" "ubuntu_instance" {
       wireguard_server_ip = "10.254.0.1"
     }))
   }
+
+  lifecycle {
+    ignore_changes = [metadata]
+  }
 }
 
 data "oci_core_vnic_attachments" "ubuntu_instance" {
