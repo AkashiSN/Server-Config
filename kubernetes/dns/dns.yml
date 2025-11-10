@@ -113,12 +113,27 @@ spec:
     - port: 53
       protocol: UDP
       name: dnsdist
-    - port: 443
-      protocol: TCP
-      name: dnsdist-doh
     - port: 853
       protocol: TCP
       name: dnsdist-dot
+  selector:
+    app: dns-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    metallb.universe.tf/address-pool: dns-pool
+  labels:
+    service: dns-server-doh
+  name: dns-server-doh
+  namespace: dns
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      protocol: TCP
+      name: dnsdist-doh
   selector:
     app: dns-server
 ---
@@ -157,6 +172,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: dns-server
+                name: dns-server-doh
                 port:
                   name: dnsdist-doh
