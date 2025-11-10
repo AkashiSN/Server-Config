@@ -21,7 +21,7 @@ spec:
           - key: kubernetes.io/hostname
             operator: In
             values:
-              - k3s-lightsail
+              - k3s-oci
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -67,7 +67,7 @@ spec:
           - key: kubernetes.io/hostname
             operator: In
             values:
-              - k3s-lightsail
+              - k3s-oci
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -92,7 +92,7 @@ spec:
           - key: kubernetes.io/hostname
             operator: In
             values:
-              - k3s-lightsail
+              - k3s-oci
 ---
 apiVersion: v1
 kind: PersistentVolume
