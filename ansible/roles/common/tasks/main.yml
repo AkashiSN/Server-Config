@@ -58,15 +58,15 @@
       ansible.builtin.import_tasks:
         file: helm.yml
 
+    - name: Import dns.yml
+      ansible.builtin.import_tasks:
+        file: dns.yml
+
 - name: For kubeadm
   when: inventory_hostname != "k3s" and
         inventory_hostname != "k3s-vps"
   become: true
   block:
-    - name: Import dns.yml
-      ansible.builtin.import_tasks:
-        file: dns.yml
-
     - name: Import crio.yml
       ansible.builtin.import_tasks:
         file: crio.yml
