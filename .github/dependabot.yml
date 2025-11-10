@@ -25,10 +25,10 @@ updates:
       - dependency-name: "nextcloud"
         update-types:
           - "version-update:semver-major"
-  - package-ecosystem: "docker"
-    directory: "/docker/wordpress"
-    schedule:
-      interval: "weekly"
+  # - package-ecosystem: "docker"
+  #   directory: "/docker/wordpress"
+  #   schedule:
+  #     interval: "weekly"
   # k8s manifests - k8s
   - package-ecosystem: "docker"
     directory: "/kubernetes/dns"
@@ -43,19 +43,14 @@ updates:
         update-types:
           - "version-update:semver-major"
           - "version-update:semver-minor"
-  - package-ecosystem: "docker"
-    directory: "/kubernetes/wordpress"
-    schedule:
-      interval: "weekly"
-    ignore:
-      - dependency-name: "mariadb"
-        update-types:
-          - "version-update:semver-major"
-  # k8s manifests - eks
-  - package-ecosystem: "docker"
-    directory: "/kubernetes/eks/dns"
-    schedule:
-      interval: "weekly"
+  # - package-ecosystem: "docker"
+  #   directory: "/kubernetes/wordpress"
+  #   schedule:
+  #     interval: "weekly"
+  #   ignore:
+  #     - dependency-name: "mariadb"
+  #       update-types:
+  #         - "version-update:semver-major"
   - package-ecosystem: "docker"
     directory: "/kubernetes/immich"
     schedule:
