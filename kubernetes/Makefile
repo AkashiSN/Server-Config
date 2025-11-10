@@ -1,5 +1,5 @@
 K3S_HOST		:= k3s
-K3S_VPS_HOST	:= k3s-lightsail
+K3S_VPS_HOST	:= k3s-oci.akashisn.info
 K8S_HOST		:= k8s-v132-control-plane
 
 .PHONY: app-k3s

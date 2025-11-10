@@ -7,7 +7,7 @@ virtualmachines:
         k3s:
           ansible_host: k3s
         k3s-vps:
-          ansible_host: k3s-oci
+          ansible_host: k3s-oci.akashisn.info
     worker:
       hosts:
         worker-node01:

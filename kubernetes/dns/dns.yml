@@ -108,17 +108,15 @@ metadata:
   name: dns-server
   namespace: dns
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - port: 53
-      nodePort: 53
       protocol: UDP
       name: dnsdist
     - port: 443
       protocol: TCP
       name: dnsdist-doh
     - port: 853
-      nodePort: 853
       protocol: TCP
       name: dnsdist-dot
   selector:
