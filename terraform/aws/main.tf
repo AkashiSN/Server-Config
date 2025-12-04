@@ -8,7 +8,7 @@
 #   project = local.project
 # }
 
-module "lightsail" {
-  source  = "./modules/lightsail"
-  project = local.project
-}
+# module "lightsail" {
+#   source  = "./modules/lightsail"
+#   project = local.project
+# }
