@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: immich-server
-          image: ghcr.io/immich-app/immich-server:v2.3.1
+          image: ghcr.io/immich-app/immich-server:v2.4.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 2283
