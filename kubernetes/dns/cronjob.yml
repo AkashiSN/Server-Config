@@ -52,7 +52,7 @@ spec:
           serviceAccount: dns
           containers:
             - name: kubectl
-              image: ghcr.io/akashisn/kubectl@sha256:fdc3cd9ae72cef86acdfeaefb52ecc9c4e773f88c76bbe468b1bef89dc664cb4
+              image: ghcr.io/akashisn/kubectl@sha256:a1ba6129255f5396b811ea428c16a5a8dea3f21e4d69a2ce412455d36777262b
               imagePullPolicy: IfNotPresent
               args:
                 [
