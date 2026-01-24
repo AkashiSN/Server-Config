@@ -81,11 +81,6 @@
   when: inventory_hostname == "k3s" or
         inventory_hostname == "k3s-vps"
 
-- name: For dddvb
-  ansible.builtin.import_tasks:
-    file: dddvb.yml
-  when: inventory_hostname == "worker-node01"
-
 - name: Update all packages to their latest version
   ansible.builtin.apt:
     name: "*"

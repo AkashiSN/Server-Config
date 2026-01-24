@@ -18,10 +18,10 @@ spec:
     required:
       nodeSelectorTerms:
         - matchExpressions:
-          - key: kubernetes.io/hostname
+          - key: storage.immich
             operator: In
             values:
-              - k3s-oci
+              - "true"
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -43,7 +43,7 @@ spec:
     required:
       nodeSelectorTerms:
         - matchExpressions:
-          - key: kubernetes.io/hostname
+          - key: storage.immich
             operator: In
             values:
-              - k3s-oci
+              - "true"

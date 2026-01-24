@@ -20,7 +20,7 @@
       curl -sfL https://get.k3s.io | \
         INSTALL_K3S_CHANNEL="v{{ k8s_major_version }}" \
         K3S_KUBECONFIG_MODE="644" \
-        INSTALL_K3S_EXEC="server --disable=traefik,local-storage" \
+        INSTALL_K3S_EXEC="server --disable=traefik,local-storage --node-label={{ k3s_node_labels }}" \
         sh -s -
     executable: /bin/bash
   when: inventory_hostname == "k3s-vps"

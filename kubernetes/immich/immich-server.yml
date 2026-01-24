@@ -35,21 +35,25 @@ spec:
               value: api
           volumeMounts:
             - name: immich-photos
-              mountPath: /usr/src/app/upload
+              mountPath: /data
             - name: immich-secrets
               mountPath: /secrets
+          startupProbe:
+            exec:
+              command:
+              - immich-healthcheck
+            periodSeconds: 5
+            failureThreshold: 6
           readinessProbe:
-            httpGet:
-              path: /api/server/ping
-              port: 2283
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            exec:
+              command:
+              - immich-healthcheck
+            periodSeconds: 30
           livenessProbe:
-            httpGet:
-              path: /api/server/ping
-              port: 2283
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            exec:
+              command:
+              - immich-healthcheck
+            periodSeconds: 30
       volumes:
         - name: immich-secrets
           projected:

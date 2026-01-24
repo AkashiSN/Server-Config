@@ -10,7 +10,7 @@
   kubernetes.core.helm:
     release_name: metrics-server
     chart_ref: metrics-server/metrics-server
-    chart_version: "3.12.*"
+    chart_version: "3.13.*"
     release_namespace: kube-system
     update_repo_cache: true
     wait: true

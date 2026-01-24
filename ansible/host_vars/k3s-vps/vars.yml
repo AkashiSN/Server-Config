@@ -1,5 +1,7 @@
 # domain
 domain: "akashisn.info"
+# k3s node labels
+k3s_node_labels: "storage.immich=true"
 # metallb
 metallb_ipv4_range: ""
 # nginx-ingress

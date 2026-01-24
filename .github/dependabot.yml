@@ -56,8 +56,10 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      - dependency-name: "tensorchord/pgvecto-rs"
-      - dependency-name: "redis"
+      - dependency-name: "ghcr.io/immich-app/postgres"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "valkey/valkey"
         update-types:
           - "version-update:semver-major"
   # - package-ecosystem: "docker"

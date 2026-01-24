@@ -21,7 +21,7 @@
   kubernetes.core.helm:
     release_name: cilium
     chart_ref: cilium/cilium
-    chart_version: "1.17.*"
+    chart_version: "1.18.*"
     release_namespace: kube-system
     update_repo_cache: true
     wait: true
