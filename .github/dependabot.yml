@@ -57,8 +57,6 @@ updates:
       interval: "daily"
     ignore:
       - dependency-name: "ghcr.io/immich-app/postgres"
-        update-types:
-          - "version-update:semver-major"
       - dependency-name: "valkey/valkey"
         update-types:
           - "version-update:semver-major"
