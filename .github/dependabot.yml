@@ -56,17 +56,8 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      - dependency-name: "ghcr.io/immich-app/postgres"
-        versions:
-          - "15*"
-          - "16*"
-          - "17*"
-          - "18*"
-          - "19*"
-          - "20*"
+      - dependency-name: "immich-app/postgres"
       - dependency-name: "valkey/valkey"
-        update-types:
-          - "version-update:semver-major"
   # - package-ecosystem: "docker"
   #   directory: "/kubernetes/tv"
   #   schedule:
