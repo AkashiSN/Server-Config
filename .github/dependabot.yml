@@ -58,7 +58,12 @@ updates:
     ignore:
       - dependency-name: "ghcr.io/immich-app/postgres"
         versions:
-          - ">= 15"
+          - "15*"
+          - "16*"
+          - "17*"
+          - "18*"
+          - "19*"
+          - "20*"
       - dependency-name: "valkey/valkey"
         update-types:
           - "version-update:semver-major"
