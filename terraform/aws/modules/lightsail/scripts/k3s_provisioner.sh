@@ -98,6 +98,3 @@ sysctl -p
 
 # Enable wireguard
 systemctl enable wg-quick@wg0
-
-5  *    * * *   root    /sbin/zfSnap -r -s -S -d -v -a 3m pool/immich
-#5  *    * * *   root    /sbin/zfSnap -r -s -S -d -v -a 3m pool/nextcloud
