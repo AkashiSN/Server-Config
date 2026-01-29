@@ -77,7 +77,7 @@ if [ ! -e /etc/wireguard/private.key ]; then
     cat > /etc/wireguard/wg0.conf << EOF
 [Interface]
 PrivateKey = `cat /etc/wireguard/private.key`
-Address = 10.254.0.1/24/24
+Address = 10.254.0.1/24
 ListenPort = 51820
 MTU = 1280
 
