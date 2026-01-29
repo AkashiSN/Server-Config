@@ -19,15 +19,17 @@ function wait-apt () {
     apt-get $@
 }
 
-# Exec as root
-[ "$(id -u)" != "0" ] && exec sudo "$0" "$@"
+# Set ssh pubkey
+curl -fsSL https://github.com/AkashiSN.keys > /home/ubuntu/.ssh/authorized_keys
+sed -i 's/^TrustedUserCAKeys/# TrustedUserCAKeys/g' /etc/ssh/sshd_config
+service ssh restart
 
 # Set DEBIAN_FRONTEND
 export DEBIAN_FRONTEND=noninteractive
 
 # Set hostname
-hostnamectl set-hostname ${hostname}
-echo "127.0.1.1 ${hostname}" >> /etc/hosts
+hostnamectl set-hostname k3s-lightsail
+echo "127.0.1.1 k3s-lightsail" >> /etc/hosts
 
 # Upgrade
 wait-apt update
@@ -71,14 +73,11 @@ if [ ! -e /etc/wireguard/private.key ]; then
     # Generate public key
     cat /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
 
-    # Set env
-    export WIREGUARD_SERVER_IP=${wireguard_server_ip}
-
     # Generate server config
     cat > /etc/wireguard/wg0.conf << EOF
 [Interface]
 PrivateKey = `cat /etc/wireguard/private.key`
-Address = $${WIREGUARD_SERVER_IP}/24
+Address = 10.254.0.1/24/24
 ListenPort = 51820
 MTU = 1280
 
@@ -99,3 +98,6 @@ sysctl -p
 
 # Enable wireguard
 systemctl enable wg-quick@wg0
+
+5  *    * * *   root    /sbin/zfSnap -r -s -S -d -v -a 3m pool/immich
+#5  *    * * *   root    /sbin/zfSnap -r -s -S -d -v -a 3m pool/nextcloud
