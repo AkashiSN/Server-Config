@@ -20,7 +20,7 @@ EOT
 
 
 FROM buildpack-base AS mirakc-arib-build
-ENV MIRAKC_ARIB_VERSION=0.24.27
+ENV MIRAKC_ARIB_VERSION=0.24.28
 RUN <<EOT
 git clone --recursive https://github.com/mirakc/mirakc-arib.git -b ${MIRAKC_ARIB_VERSION} --depth=1 /tmp/mirakc-arib
 cd /tmp/mirakc-arib
@@ -88,7 +88,7 @@ EOT
 
 FROM rust:bookworm as mirakc-build
 SHELL ["/bin/bash", "-e", "-c"]
-ENV MIRAKC_VERSION=3.4.49 \
+ENV MIRAKC_VERSION=3.4.54 \
     DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOT
