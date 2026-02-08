@@ -1,3 +1,3 @@
 #!/bin/sh
 
-pass infra/ansible/vault/passphrase
+op read "op://Private/ansible-vault/password"

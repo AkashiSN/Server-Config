@@ -5,13 +5,14 @@ K8S_HOST 		:= `sed -n '/master-node:/,/^ *ansible_host: /s/^ *ansible_host: *\([
 .PHONY: clean
 clean:
 	rm -f $(CURDIR)/host_vars/k3s/vault.yml
+	rm -f $(CURDIR)/host_vars/k3s-vps/vault.yml
 	rm -f $(CURDIR)/host_vars/master-node/vault.yml
 
 .PHONY: credential
 credential:
-	pass infra/ansible/vault.yml > $(CURDIR)/host_vars/k3s/vault.yml
-	pass infra/ansible/vault.yml > $(CURDIR)/host_vars/k3s-vps/vault.yml
-	pass infra/ansible/vault.yml > $(CURDIR)/host_vars/master-node/vault.yml
+	op read "op://Private/ansible-vault/vault.yml" > $(CURDIR)/host_vars/k3s/vault.yml
+	op read "op://Private/ansible-vault/vault.yml" > $(CURDIR)/host_vars/k3s-vps/vault.yml
+	op read "op://Private/ansible-vault/vault.yml" > $(CURDIR)/host_vars/master-node/vault.yml
 
 .PHONY: k3s
 k3s:

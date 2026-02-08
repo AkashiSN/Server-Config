@@ -14,7 +14,7 @@ resource "aws_lightsail_instance" "k3s" {
 
 resource "aws_lightsail_disk" "k3s_zfs" {
   name              = "${var.project}_k3s-zfs"
-  size_in_gb        = 1024
+  size_in_gb        = 2048
   availability_zone = "ap-northeast-1a"
 }
 
