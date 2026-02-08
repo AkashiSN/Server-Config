@@ -91,7 +91,7 @@ spec:
               cpu: 1000m
               memory: 2000Mi
         - name: nginx
-          image: nginx:1.29.4
+          image: nginx:1.29.5
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
