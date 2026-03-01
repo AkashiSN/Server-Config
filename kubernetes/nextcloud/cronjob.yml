@@ -48,7 +48,7 @@ spec:
           serviceAccount: nextcloud
           containers:
             - name: cron
-              image: ghcr.io/akashisn/kubectl@sha256:a1ba6129255f5396b811ea428c16a5a8dea3f21e4d69a2ce412455d36777262b
+              image: ghcr.io/akashisn/kubectl@sha256:61cc425796342c8a73e8fd32c8a1ae551f1d759dcbb5cc9b73cde0b1bc02f1c2
               imagePullPolicy: IfNotPresent
               args:
                 [
@@ -64,7 +64,7 @@ spec:
                   'su www-data --shel=/bin/sh --command="/usr/local/bin/php -f /var/www/html/cron.php"',
                 ]
             - name: preview
-              image: ghcr.io/akashisn/kubectl@sha256:a1ba6129255f5396b811ea428c16a5a8dea3f21e4d69a2ce412455d36777262b
+              image: ghcr.io/akashisn/kubectl@sha256:61cc425796342c8a73e8fd32c8a1ae551f1d759dcbb5cc9b73cde0b1bc02f1c2
               imagePullPolicy: IfNotPresent
               args:
                 [
