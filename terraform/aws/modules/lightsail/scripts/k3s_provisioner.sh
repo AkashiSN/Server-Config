@@ -64,6 +64,9 @@ wait-apt install -y zfsutils-linux zfsnap
 # Install wireguard
 wait-apt install -y wireguard
 
+# Install aws-cli
+wait-apt install -y awscli
+
 # Generate Server Key
 if [ ! -e /etc/wireguard/private.key ]; then
     # Generate private key
