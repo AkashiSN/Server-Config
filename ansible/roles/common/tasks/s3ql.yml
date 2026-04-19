@@ -1,0 +1,50 @@
+---
+# file: roles/common/tasks/s3ql.yml
+- name: Install s3ql packages
+  ansible.builtin.apt:
+    name:
+      - s3ql
+      - fuse3
+      - psmisc
+    state: present
+    update_cache: true
+  become: true
+
+- name: Ensure s3ql directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop:
+    - /root/.s3ql
+    - /var/cache/s3ql
+    - /mnt/s3ql/immich-photos
+  become: true
+
+- name: Deploy s3ql authinfo2
+  ansible.builtin.template:
+    src: authinfo2.j2
+    dest: /root/.s3ql/authinfo2
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+
+- name: Deploy s3ql-immich systemd unit
+  ansible.builtin.template:
+    src: s3ql-immich.service.j2
+    dest: /etc/systemd/system/s3ql-immich.service
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+- name: Enable and start s3ql-immich.service
+  ansible.builtin.systemd:
+    name: s3ql-immich.service
+    daemon_reload: true
+    enabled: true
+    state: started
+  become: true

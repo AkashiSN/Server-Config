@@ -62,6 +62,10 @@
       ansible.builtin.import_tasks:
         file: dns.yml
 
+    - name: Import s3ql.yml
+      ansible.builtin.import_tasks:
+        file: s3ql.yml
+
 - name: For k3s
   ansible.builtin.import_tasks:
     file: k3s.yml

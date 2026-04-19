@@ -54,6 +54,37 @@ make clean
 
 `host_vars/k3s-vps/vault.yml` を削除します（リポジトリ外に漏らさない用）。
 
+## s3ql (Immich 写真用) セットアップ
+
+Immich の `immich-photos` PV は `/mnt/immich-photos` に s3ql でマウントした AWS S3 バケット (`module.s3_immich`) を使います。ansible 実行前に以下の準備が必要です。
+
+### 1. 1Password → vault.yml に登録
+
+以下のキーを `host_vars/k3s-vps/vault.yml` に追加します (1Password 側にも反映)。
+
+| キー | 値 |
+| --- | --- |
+| `vault_s3ql_aws_access_key_id` | IAM アクセスキー |
+| `vault_s3ql_aws_secret_access_key` | IAM シークレットキー |
+| `vault_s3ql_fs_passphrase` | 生成したパスフレーズ |
+| `vault_s3ql_bucket_url` | `s3://<project>-immich-bucket/s3ql` |
+
+### 2. 初回のみ `mkfs.s3ql` を手動実行
+
+ansible は `mkfs.s3ql` を実行しません。最初の 1 回だけノード上で実行します。
+
+```bash
+# 一度 ansible を流して authinfo2 と systemd unit を配置する
+make k3s-vps
+
+# k3s-vps ノードに SSH してマウントを止めてから mkfs
+sudo systemctl stop s3ql-immich.service
+sudo mkfs.s3ql --authfile /root/.s3ql/authinfo2 s3://<project>_immich-bucket/s3ql
+sudo systemctl start s3ql-immich.service
+```
+
+以降は `make k3s-vps` を流すだけで `s3ql-immich.service` が冪等に維持されます。
+
 ## Notes
 
 - Kubernetes 上のアプリ (dns / nextcloud / immich など) は [`../kubernetes/`](../kubernetes/README.md) 側で管理します。
