@@ -2,10 +2,6 @@
 domain: "akashisn.info"
 # k3s node labels
 k3s_node_labels: "storage.immich=true"
-# metallb
-metallb_ipv4_range: ""
-# nginx-ingress
-nginx_ingress_lb_v4_addr: ""
 # acme
 cloudflare_token: "{{ vault_cloudflare_token }}"
 email: "{{ vault_email }}"
@@ -21,10 +17,6 @@ argocd_cloudflare_issuer: "{{ vault_argocd_cloudflare_issuer }}"
 argocd_cloudflare_client_id: "{{ vault_argocd_cloudflare_client_id }}"
 argocd_cloudflare_client_secret: "{{ vault_argocd_cloudflare_client_secret }}"
 argocd_webhook_github_secret: "{{ vault_argocd_webhook_github_secret }}"
-# dns
-dns_lb_v4_addr: ""
-# minecraft
-minecraft_lb_v4_addr:  ""
 
 #
 # Secrets

@@ -1,16 +1,4 @@
-virtualmachines:
-  children:
-    master:
-      hosts:
-        master-node:
-          ansible_host: k8s-v132-control-plane
-        k3s:
-          ansible_host: k3s
-        k3s-vps:
-          ansible_host: k3s-oci.akashisn.info
-    worker:
-      hosts:
-        worker-node01:
-          ansible_host: k8s-v132-worker-node-01
-        worker-node02:
-          ansible_host: k8s-v132-worker-node-02
+k3s-vps:
+  hosts:
+    k3s-vps:
+      ansible_host: k3s-oci.akashisn.info

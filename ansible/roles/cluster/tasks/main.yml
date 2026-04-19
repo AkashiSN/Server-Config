@@ -1,29 +1,11 @@
 ---
 # file: roles/cluster/tasks/main.yml
-- name: Import kubeadm init task
-  ansible.builtin.import_tasks:
-    file: kubeadm.yml
-  when: inventory_hostname != "k3s" and
-        inventory_hostname != "k3s-vps"
-
 - name: Setup cluster
-  when: inventory_hostname in groups["master"]
   become: false
   block:
     - name: Import helm.yml
       ansible.builtin.import_tasks:
         file: helm.yml
-
-    - name: Import cilium.yml
-      ansible.builtin.import_tasks:
-        file: cilium.yml
-      when: inventory_hostname != "k3s" and
-            inventory_hostname != "k3s-vps"
-
-    - name: Import metallb.yml
-      ansible.builtin.import_tasks:
-        file: metallb.yml
-      when: inventory_hostname != "k3s-vps"
 
     - name: Import ingress-nginx.yml
       ansible.builtin.import_tasks:
@@ -32,12 +14,6 @@
     - name: Import cert-manager.yml
       ansible.builtin.import_tasks:
         file: cert-manager.yml
-
-    - name: Import metrics-server.yml
-      ansible.builtin.import_tasks:
-        file: metrics-server.yml
-      when: inventory_hostname != "k3s" and
-            inventory_hostname != "k3s-vps"
 
     - name: Import oauth2-proxy.yml
       ansible.builtin.import_tasks:
@@ -64,6 +40,5 @@
   until: result.stdout.find("False") == -1
   retries: 60
   delay: 10
-  when: inventory_hostname in groups["master"]
   changed_when: false
   become: false

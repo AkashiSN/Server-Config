@@ -62,24 +62,9 @@
       ansible.builtin.import_tasks:
         file: dns.yml
 
-- name: For kubeadm
-  when: inventory_hostname != "k3s" and
-        inventory_hostname != "k3s-vps"
-  become: true
-  block:
-    - name: Import crio.yml
-      ansible.builtin.import_tasks:
-        file: crio.yml
-
-    - name: Import kubeadm.yml
-      ansible.builtin.import_tasks:
-        file: kubeadm.yml
-
 - name: For k3s
   ansible.builtin.import_tasks:
     file: k3s.yml
-  when: inventory_hostname == "k3s" or
-        inventory_hostname == "k3s-vps"
 
 - name: Update all packages to their latest version
   ansible.builtin.apt:

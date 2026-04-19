@@ -5,30 +5,7 @@
 ## Install
 
 ```bash
-make k8s or k3s
-make app-k8s or app-k3s
-```
-
-## Before shutdown
-
-```bash
-make delete-app-k3s or make delete-app-k8s
-```
-
-## After power on
-
-```bash
-make app-k8s or app-k3s
-```
-
-## Node maintenance
-
-```bash
-kubectl drain worker-node-01 --ignore-daemonsets --delete-emptydir-data
-kubectl get pod -A -o wide --watch
-kubectl get node -o wide
-# maintenance e.g. update, reboot
-kubectl uncordon worker-node-01
+make k3s-vps
 ```
 
 ### DNS
@@ -125,28 +102,6 @@ kubectl get -n registry pod,svc
 kubectl exec -it -n registry registry-0 --  registry garbage-collect /etc/docker/registry/config.yml
 ```
 
-# Upgrade kubelet
-
-```bash
-sudo su
-
-export K8S_MAJOR_VERSION="1.29"
-export K8S_APT_VERSION="$(apt-cache show kubelet | grep Version | grep ${K8S_MAJOR_VERSION} | head -n 1 | cut -d ' ' -f 2)"
-
-apt-mark unhold kubelet kubeadm kubectl cri-o
-
-apt-get install -y "kubelet=${K8S_APT_VERSION}" "kubeadm=${K8S_APT_VERSION}" "kubectl=${K8S_APT_VERSION}" "cri-o=${K8S_APT_VERSION}"
-
-apt-mark hold kubelet kubeadm kubectl cri-o
-```
-
-Only master-node
-```bash
-kubeadm upgrade plan
-
-kubeadm upgrade apply VERSION
-```
-
 ## Debug
 
 ```yml
@@ -160,49 +115,4 @@ command: ["/bin/sh", "-c", "sleep infinity"]
 kubectl get cert,cr,order,challenge,secret
 kubectl delete cert <certname>
 kubectl delete secret <secretname>
-```
-
-
-### Switch production to k3s
-
-```
-interface Tunnel0.0
-
-no ip napt static 172.16.254.100 tcp 80
-no ip napt static 172.16.254.100 tcp 443
-no ip napt static 172.16.254.110 udp 53
-no ip napt static 172.16.254.110 tcp 853
-no ip napt static 172.16.254.120 tcp 25565
-no ip napt static 172.16.254.125 udp 8211
-
-ip napt static 172.16.254.50 tcp 80
-ip napt static 172.16.254.50 tcp 443
-ip napt static 172.16.254.60 udp 53
-ip napt static 172.16.254.60 tcp 853
-ip napt static 172.16.254.70 tcp 25565
-ip napt static 172.16.254.75 udp 8211
-
-exit
-```
-
-### Switch k3s to production
-
-```
-interface Tunnel0.0
-
-no ip napt static 172.16.254.50 tcp 80
-no ip napt static 172.16.254.50 tcp 443
-no ip napt static 172.16.254.60 udp 53
-no ip napt static 172.16.254.60 tcp 853
-no ip napt static 172.16.254.70 tcp 25565
-no ip napt static 172.16.254.75 udp 8211
-
-ip napt static 172.16.254.100 tcp 80
-ip napt static 172.16.254.100 tcp 443
-ip napt static 172.16.254.110 udp 53
-ip napt static 172.16.254.110 tcp 853
-ip napt static 172.16.254.120 tcp 25565
-ip napt static 172.16.254.125 udp 8211
-
-exit
 ```
