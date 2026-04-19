@@ -2,15 +2,17 @@
 Description=S3QL mount for Immich photos
 After=network-online.target
 Wants=network-online.target
+Before=k3s.service
 
 [Service]
-Type=simple
+Type=notify
 KillMode=process
 TimeoutStartSec=0
-TimeoutStopSec=5min
-ExecStartPre=/usr/bin/fsck.s3ql --batch --authfile /root/.s3ql/authinfo2 {{ s3ql_bucket_url }}
-ExecStart=/usr/bin/mount.s3ql --allow-other --authfile /root/.s3ql/authinfo2 --cachedir /var/cache/s3ql --cachesize 83886080 --fg --threads 4 --log syslog {{ s3ql_bucket_url }} /mnt/s3ql/immich-photos
-ExecStop=/usr/bin/umount.s3ql /mnt/s3ql/immich-photos
+TimeoutStopSec=infinity
+ExecStartPre=/usr/local/bin/fsck.s3ql --batch --authfile /root/.s3ql/authinfo2 {{ immich_s3ql_bucket_url }}
+ExecStart=/usr/local/bin/mount.s3ql --allow-other --authfile /root/.s3ql/authinfo2 --cachedir /var/cache/s3ql --cachesize 83886080 --metadata-backup-interval 3600 --systemd --max-threads 2 --log syslog {{ immich_s3ql_bucket_url }} /mnt/s3ql/immich-photos
+ExecStop=/usr/local/bin/umount.s3ql /mnt/s3ql/immich-photos
+ExecStopPost=-/usr/bin/fusermount3 -u -z /mnt/s3ql/immich-photos
 Restart=on-failure
 
 [Install]

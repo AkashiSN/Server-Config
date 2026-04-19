@@ -1,4 +1,4 @@
-k3s-vps:
+k3s_vps:
   hosts:
     k3s-vps:
-      ansible_host: k3s-oci.akashisn.info
+      ansible_host: k3s-lightsail.akashisn.info

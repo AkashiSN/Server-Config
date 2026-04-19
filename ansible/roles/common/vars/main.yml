@@ -1,4 +1,4 @@
-dddvb_version: "0.9.40"
+s3ql_version: "6.0.0"
 
 deb_architecture: {
   "armv6l": "armhf",

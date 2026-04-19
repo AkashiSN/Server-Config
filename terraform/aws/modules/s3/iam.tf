@@ -1,8 +1,8 @@
 resource "aws_iam_user" "this" {
-  name = "${var.project}_${var.purpose}-s3-user"
+  name = "${var.project}_${var.purpose}-user"
 
   tags = {
-    Name = "${var.project}_${var.purpose}-s3-user"
+    Name = "${var.project}_${var.purpose}-user"
   }
 }
 

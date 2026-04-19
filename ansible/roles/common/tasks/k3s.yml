@@ -14,7 +14,7 @@
 
 - name: Create .kube directory in the user's home
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.kube"
+    path: "{{ ansible_facts.env.HOME }}/.kube"
     state: directory
     mode: "0700"
   become: false
@@ -23,8 +23,8 @@
   ansible.builtin.copy:
     src: /etc/rancher/k3s/k3s.yaml
     dest: "/tmp/config"
-    owner: "{{ ansible_env.USER }}"
-    group: "{{ ansible_env.USER }}"
+    owner: "{{ ansible_facts.env.USER }}"
+    group: "{{ ansible_facts.env.USER }}"
     mode: "0644"
     remote_src: true
   changed_when: false
@@ -33,9 +33,9 @@
 - name: Copy tmp to user's .kube directory
   ansible.builtin.copy:
     src: /tmp/config
-    dest: "{{ ansible_env.HOME }}/.kube/config"
-    owner: "{{ ansible_env.USER }}"
-    group: "{{ ansible_env.USER }}"
+    dest: "{{ ansible_facts.env.HOME }}/.kube/config"
+    owner: "{{ ansible_facts.env.USER }}"
+    group: "{{ ansible_facts.env.USER }}"
     mode: "0600"
     remote_src: true
   become: false

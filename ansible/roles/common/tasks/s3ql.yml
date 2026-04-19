@@ -1,16 +1,70 @@
 ---
 # file: roles/common/tasks/s3ql.yml
-- name: Install s3ql packages
+- name: Install s3ql build/runtime dependencies
   ansible.builtin.apt:
     name:
-      - s3ql
-      - fuse3
       - psmisc
+      - fuse3
+      - libfuse3-dev
+      - libsqlite3-dev
+      - python3-dev
+      - pipx
+      - pkg-config
     state: present
     update_cache: true
   become: true
 
-- name: Ensure s3ql directories exist
+- name: Check installed s3ql version
+  ansible.builtin.slurp:
+    src: /etc/s3ql/version
+  register: s3ql_installed_version
+  ignore_errors: true
+  become: true
+
+- name: Install s3ql via pipx
+  when:
+    - s3ql_installed_version.failed
+      or (s3ql_installed_version.content | b64decode | trim) != s3ql_version
+  become: true
+  block:
+    - name: Download s3ql release tarball
+      ansible.builtin.get_url:
+        url: "https://github.com/s3ql/s3ql/releases/download/s3ql-{{ s3ql_version }}/s3ql-{{ s3ql_version }}.tar.gz"
+        dest: "/tmp/s3ql-{{ s3ql_version }}.tar.gz"
+        mode: "0644"
+
+    - name: Extract s3ql source
+      ansible.builtin.unarchive:
+        src: "/tmp/s3ql-{{ s3ql_version }}.tar.gz"
+        dest: /tmp
+        remote_src: true
+        creates: "/tmp/s3ql-{{ s3ql_version }}/pyproject.toml"
+
+    - name: Install s3ql globally via pipx
+      ansible.builtin.command: "pipx install --force /tmp/s3ql-{{ s3ql_version }}"
+      environment:
+        PIPX_HOME: /opt/pipx
+        PIPX_BIN_DIR: /usr/local/bin
+        PIPX_MAN_DIR: /usr/local/share/man
+      changed_when: true
+
+    - name: Ensure /etc/s3ql exists
+      ansible.builtin.file:
+        path: /etc/s3ql
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Record installed s3ql version
+      ansible.builtin.copy:
+        dest: /etc/s3ql/version
+        content: "{{ s3ql_version }}\n"
+        owner: root
+        group: root
+        mode: "0644"
+
+- name: Ensure s3ql runtime directories exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -41,10 +95,18 @@
     mode: "0644"
   become: true
 
-- name: Enable and start s3ql-immich.service
+- name: Enable s3ql-immich.service
   ansible.builtin.systemd:
     name: s3ql-immich.service
     daemon_reload: true
     enabled: true
+  become: true
+
+- name: Start s3ql-immich.service
+  ansible.builtin.systemd:
+    name: s3ql-immich.service
     state: started
   become: true
+  when:
+    - not s3ql_installed_version.failed
+    - (s3ql_installed_version.content | b64decode | trim) == s3ql_version
