@@ -1,118 +1,59 @@
-# Setup
-## Environment
-- Ubuntu 22.04
+# Ansible
 
-## Install
+k3s-vps ホスト (Ubuntu 24.04) を k3s クラスタとしてプロビジョニングします。
+
+## Prerequisites
+
+- Ubuntu 24.04 のターゲットホストに SSH で到達できること
+- ローカルに ansible / ansible-playbook がインストール済みであること
+- [1Password CLI (`op`)](https://developer.1password.com/docs/cli/) にサインイン済みで、`op://Private/ansible-vault/password` および `op://Private/ansible-vault/vault.yml` にアクセスできること
+- Ansible collections のインストール
+
+  ```bash
+  ansible-galaxy collection install -r requirements.yml
+  ```
+
+## Layout
+
+| パス | 役割 |
+| --- | --- |
+| `ansible.cfg` | inventory / vault パスワードファイル / python interpreter の設定 |
+| `inventory.yml` | `k3s-vps` ホスト定義 (`ansible_host: k3s-oci.akashisn.info`) |
+| `vault-pass.sh` | 1Password から vault パスワードを読み取るスクリプト (`ansible.cfg` から参照) |
+| `requirements.yml` | 必要な Ansible collections (`community.general`, `kubernetes.core`) |
+| `setup-k3s-vps.yml` | `common` → `cluster` ロールを順に実行する playbook |
+| `host_vars/k3s-vps/vars.yml` | ドメイン / k3s ノードラベル / oauth2-proxy / argo-cd 設定などの変数 |
+| `host_vars/k3s-vps/vault.yml` | 暗号化済み秘密値 (`make credential` で取得) |
+| `roles/variable/` | 共通変数 (cloudflare IP レンジや `external_ip` の取得) |
+| `roles/common/` | OS 基本設定: timezone, swap, logrotate, kernel sysctl, helm, dns, k3s server インストール |
+| `roles/cluster/` | クラスタ内 Helm リリース: ingress-nginx, cert-manager, oauth2-proxy, argo-cd, secrets, storage-class |
+
+## Usage
+
+### 1. Vault credential 取得
+
+1Password から `host_vars/k3s-vps/vault.yml` をローカルに取得します。
+
+```bash
+make credential
+```
+
+### 2. プロビジョニング実行
 
 ```bash
 make k3s-vps
 ```
 
-### DNS
+内部で `ansible-playbook setup-k3s-vps.yml` を実行します。`vault-pass.sh` 経由で vault が復号されるため、事前に `op` のサインインが必要です。
 
-[![argo-cd](https://argocd.akashisn.info/api/badge?name=dns&revision=true)](https://argocd.akashisn.info/applications/argo-cd/dns)
-
-```bash
-kubectl get -n dns pod,svc
-```
-
-### Minecraft
-
-[![argo-cd](https://argocd.akashisn.info/api/badge?name=minecraft&revision=true)](https://argocd.akashisn.info/applications/argo-cd/minecraft)
+### 3. ローカル credential の掃除
 
 ```bash
-kubectl get pod,svc -n minecraft
-kubectl logs -f -n minecraft minecraft-vanilla-0
-kubectl exec -it -n minecraft minecraft-vanilla-0 -- bash
+make clean
 ```
 
-### Palworld
+`host_vars/k3s-vps/vault.yml` を削除します（リポジトリ外に漏らさない用）。
 
-[![argo-cd](https://argocd.akashisn.info/api/badge?name=palworld&revision=true)](https://argocd.akashisn.info/applications/argo-cd/palworld)
+## Notes
 
-```bash
-kubectl get pod,svc -n palworld
-kubectl logs -f -n palworld palworld-server-0
-kubectl exec -it -n palworld palworld-server-0 -- bash
-```
-
-### Nextcloud
-
-[![argo-cd](https://argocd.akashisn.info/api/badge?name=nextcloud&revision=true)](https://argocd.akashisn.info/applications/argo-cd/nextcloud)
-
-```bash
-kubectl get -n nextcloud pod
-kubectl describe -n nextcloud pod nextcloud-0
-kubectl logs -f -n nextcloud nextcloud-0 --tail 10 -c nextcloud
-kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- bash
-kubectl exec -it -n nextcloud nextcloud-0 -c nextcloud -- /bin/sh -c 'su www-data --shel=/bin/sh --command="/usr/local/bin/php occ <command>"'
-```
-
-### Wordpress
-
-[![argo-cd](https://argocd.akashisn.info/api/badge?name=wordpress&revision=true)](https://argocd.akashisn.info/applications/argo-cd/wordpress)
-
-```bash
-kubectl get -n wordpress pod,svc
-kubectl describe -n wordpress pod wordpress-0
-kubectl logs -f -n wordpress wordpress-0 --tail 10 -c wordpress
-kubectl exec -it -n wordpress wordpress-0 -c wordpress -- bash
-kubectl exec -it -n wordpress wordpress-0 -c wordpress -- /bin/sh -c 'su www-data --shel=/bin/sh --command="wp <command>"'
-```
-
-### Buiildkit
-
-```bash
-kubectl create namespace buildkit
-
-cd buildkit/.certs/
-  $env:CAROOT=$(pwd)
-  mkcert -cert-file daemon/cert.pem -key-file daemon/key.pem build.akashisn.info
-  mkcert -client -cert-file client/cert.pem -key-file client/key.pem client
-  cp rootCA.pem daemon/ca.pem
-  cp rootCA.pem client/ca.pem
-  rm -fo rootCA.pem,rootCA-key.pem
-
-  kubectl create secret generic --namespace buildkit --from-file=./daemon buildkit-daemon-certs
-
-  # docker biuldx
-  docker buildx create --name buildkit --driver remote  --driver-opt "cacert=$(pwd)/client/ca.pem,cert=$(pwd)/client/cert.pem,key=$(pwd)/client/key.pem,servername=build.akashisn.info" tcp://build.akashisn.info:2376 --use
-cd ../..
-
-kubectl apply -f buildkit/buildkit.yml
-
-kubectl get pod,svc -n buildkit
-```
-
-### Registry
-
-- registry_http_secrets
-- registry_htapasswd : `htpasswd -B -C 12 -c .htapasswd <user>`
-
-```bash
-kubectl create namespace registry
-
-kubectl create secret generic --namespace registry --from-file=./.secrets/registry_http_secrets --from-file=./.secrets/registry_htapasswd registry-secrets
-
-kubectl apply -f registry/persistent-volume.yml
-kubectl apply -f registry/registry.yml
-kubectl apply -f registry/cronjob.yml
-
-kubectl get -n registry pod,svc
-kubectl exec -it -n registry registry-0 --  registry garbage-collect /etc/docker/registry/config.yml
-```
-
-## Debug
-
-```yml
-image: busybox
-command: ["/bin/sh", "-c", "sleep infinity"]
-```
-
-### Renew certificate
-
-```bash
-kubectl get cert,cr,order,challenge,secret
-kubectl delete cert <certname>
-kubectl delete secret <secretname>
-```
+- Kubernetes 上のアプリ (dns / nextcloud / immich など) は [`../kubernetes/`](../kubernetes/README.md) 側で管理します。
