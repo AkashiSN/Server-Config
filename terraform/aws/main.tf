@@ -4,7 +4,8 @@ module "lightsail" {
 }
 
 module "s3_immich" {
-  source  = "./modules/s3"
-  project = local.project
-  purpose = "immich"
+  source     = "./modules/s3"
+  project    = local.project
+  purpose    = "immich"
+  allowed_ip = module.lightsail.k3s_public_ipv4
 }

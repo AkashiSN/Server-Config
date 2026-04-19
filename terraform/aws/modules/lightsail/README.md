@@ -58,3 +58,16 @@ sudo zfs create pool/nextcloud/nextcloud-mariadb
 ### 4. WireGuardピアの追加
 
 `/etc/wireguard/wg0.conf` を編集してピアを追加する。
+
+### 5. ZFSnapの設定
+
+`/etc/crontab`に以下の設定をする。
+
+```crontab
+# 毎時スナップショット（1週間保持）
+5  *    * * *   root    /sbin/zfSnap -r -s -S -a 1w pool/immich
+# 日次スナップショット（3ヶ月保持）
+0  0    * * *   root    /sbin/zfSnap -r -s -S -a 3m pool/immich
+# 削除
+15 *    * * *   root    /sbin/zfSnap -d
+```
