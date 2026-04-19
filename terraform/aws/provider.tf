@@ -6,12 +6,12 @@
 #   --versioning-configuration Status=Enabled
 
 terraform {
-  required_version = "1.14.3"
+  required_version = "1.14.8"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.30.0"
+      version = "6.41.0"
     }
   }
 

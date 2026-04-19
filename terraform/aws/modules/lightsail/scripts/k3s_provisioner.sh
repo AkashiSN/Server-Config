@@ -8,7 +8,7 @@ function wait-apt () {
         "/var/lib/dpkg/lock"
         "/var/lib/dpkg/lock-frontend"
     )
-    for lock_file in "$${LOCK_FILES[@]}"; do
+    for lock_file in "${LOCK_FILES[@]}"; do
         if [ -f "$lock_file" ]; then
             while fuser "$lock_file" >/dev/null 2>&1; do
             sleep 5
@@ -39,9 +39,9 @@ wait-apt upgrade -y
 export DEFAULT_INTERFACE=$(ip route show default | sed -nE -e 's/.*dev (\w+).*/\1/p')
 
 # Change dns setting
-netplan set "ethernets.$${DEFAULT_INTERFACE}.nameservers.addresses=[1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001]"
-netplan set "ethernets.$${DEFAULT_INTERFACE}.dhcp4-overrides={use-dns: false}"
-netplan set "ethernets.$${DEFAULT_INTERFACE}.dhcp6-overrides={use-dns: false}"
+netplan set "ethernets.${DEFAULT_INTERFACE}.nameservers.addresses=[1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001]"
+netplan set "ethernets.${DEFAULT_INTERFACE}.dhcp4-overrides={use-dns: false}"
+netplan set "ethernets.${DEFAULT_INTERFACE}.dhcp6-overrides={use-dns: false}"
 
 # Apply
 netplan apply

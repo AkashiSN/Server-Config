@@ -12,18 +12,6 @@ resource "aws_lightsail_instance" "k3s" {
   }
 }
 
-resource "aws_lightsail_disk" "k3s_zfs" {
-  name              = "${var.project}_k3s-zfs"
-  size_in_gb        = 2048
-  availability_zone = "ap-northeast-1a"
-}
-
-resource "aws_lightsail_disk_attachment" "k3s_zfs" {
-  disk_name     = aws_lightsail_disk.k3s_zfs.name
-  instance_name = aws_lightsail_instance.k3s.name
-  disk_path     = "/dev/xvdf"
-}
-
 resource "aws_lightsail_static_ip" "k3s" {
   name = "${var.project}_k3s-ip"
 }

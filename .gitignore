@@ -6,3 +6,4 @@
 vault.yml
 !.gitkeep
 .kubeconfig
+*.local.json
