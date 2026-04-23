@@ -14,6 +14,55 @@
     update_cache: true
   become: true
 
+- name: Raise file descriptor limits for s3ql
+  become: true
+  block:
+    - name: Ensure /etc/systemd/system.conf.d exists
+      ansible.builtin.file:
+        path: /etc/systemd/system.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Deploy systemd DefaultLimitNOFILE drop-in
+      ansible.builtin.copy:
+        src: 10-nofile.conf
+        dest: /etc/systemd/system.conf.d/10-nofile.conf
+        owner: root
+        group: root
+        mode: "0644"
+      register: s3ql_systemd_nofile
+
+    - name: Deploy PAM nofile limits
+      ansible.builtin.copy:
+        src: 99-s3ql-limits.conf
+        dest: /etc/security/limits.d/99-s3ql.conf
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Deploy fs.file-max sysctl
+      ansible.builtin.copy:
+        src: 99-s3ql-sysctl.conf
+        dest: /etc/sysctl.d/99-s3ql.conf
+        owner: root
+        group: root
+        mode: "0644"
+      register: s3ql_sysctl
+
+    - name: Reload sysctl
+      ansible.builtin.command:
+        cmd: sysctl --system
+      changed_when: false
+      when: s3ql_sysctl.changed
+
+    - name: Re-execute systemd to apply DefaultLimitNOFILE
+      ansible.builtin.command:
+        cmd: systemctl daemon-reexec
+      changed_when: false
+      when: s3ql_systemd_nofile.changed
+
 - name: Check installed s3ql version
   ansible.builtin.slurp:
     src: /etc/s3ql/version
@@ -95,11 +144,37 @@
     mode: "0644"
   become: true
 
+- name: Deploy s3ql-verify-immich systemd unit
+  ansible.builtin.template:
+    src: s3ql-verify-immich.service.j2
+    dest: /etc/systemd/system/s3ql-verify-immich.service
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+- name: Deploy s3ql-verify-immich systemd timer
+  ansible.builtin.template:
+    src: s3ql-verify-immich.timer.j2
+    dest: /etc/systemd/system/s3ql-verify-immich.timer
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
 - name: Enable s3ql-immich.service
   ansible.builtin.systemd:
     name: s3ql-immich.service
     daemon_reload: true
     enabled: true
+  become: true
+
+- name: Enable and start s3ql-verify-immich.timer
+  ansible.builtin.systemd:
+    name: s3ql-verify-immich.timer
+    daemon_reload: true
+    enabled: true
+    state: started
   become: true
 
 - name: Start s3ql-immich.service
