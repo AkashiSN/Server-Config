@@ -37,16 +37,22 @@ spec:
   claimRef:
     namespace: nextcloud
     name: data-nextcloud-0
-  local:
-    path: /mnt/s3ql/nextcloud-data
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-          - key: storage.nextcloud
-            operator: In
-            values:
-              - "true"
+  iscsi:
+    targetPortal: truenas:3260
+    iqn: iqn.2005-10.org.freenas.ctl:nextcloud-data
+    lun: 0
+    fsType: xfs
+    readOnly: false
+  # local:
+  #   path: /mnt/s3ql/nextcloud-data
+  # nodeAffinity:
+  #   required:
+  #     nodeSelectorTerms:
+  #       - matchExpressions:
+  #         - key: storage.nextcloud
+  #           operator: In
+  #           values:
+  #             - "true"
 ---
 apiVersion: v1
 kind: PersistentVolume
