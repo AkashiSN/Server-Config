@@ -1,41 +1,42 @@
 # S3 Module
 
-s3ql用のS3バケットと、そのバケット専用のIAMユーザを構築するTerraformモジュール。
+S3 バケットと、そのバケットに対する操作だけを許可した専用 IAM ユーザを構築する Terraform モジュール。
+IAM ポリシーは s3ql のバックエンドとして必要な action のみを許可し、`allowed_ip` (`/32`) からのリクエストに限定する。
 
 ## リソース構成
 
 | リソース | 説明 |
-|---|---|
-| S3 Bucket | `${project}-${purpose}-bucket` |
-| Encryption | AES256 (SSE-S3) |
-| Public Access Block | すべてブロック |
-| Lifecycle | 不完全なマルチパートアップロードを7日で中止 |
-| IAM User | `${project}_${purpose}-user` |
-| IAM Access Key | 上記ユーザの access key / secret key |
-| IAM User Policy | `${project}_${purpose}-s3-policy` — 当該バケットに対する s3ql 必要操作のみ許可 (後述) |
+| --- | --- |
+| `aws_s3_bucket.this` | バケット名 `${project}-${purpose}-bucket` |
+| `aws_s3_bucket_server_side_encryption_configuration.this` | デフォルト暗号化 `AES256` (SSE-S3) |
+| `aws_s3_bucket_public_access_block.this` | パブリックアクセスをすべてブロック (`block_public_acls` / `block_public_policy` / `ignore_public_acls` / `restrict_public_buckets`) |
+| `aws_s3_bucket_lifecycle_configuration.this` | 不完全なマルチパートアップロードを開始から 7 日後に中止 |
+| `aws_iam_user.this` | IAM ユーザ `${project}_${purpose}-user` |
+| `aws_iam_access_key.this` | 上記ユーザの access key / secret key |
+| `aws_iam_user_policy.this` | `${project}_${purpose}-s3-policy` — 当該バケットに対する s3ql 必要操作のみ許可 |
 
-## 入力変数
+## 変数
 
-| 変数 | 説明 |
-|---|---|
-| `project` | プロジェクト名 |
-| `purpose` | 用途識別子 (バケット名/ユーザ名に使われる) |
-| `allowed_ip` | IAM ユーザのアクセスを許可する送信元 IPv4 アドレス (`/32` 固定)。Lightsail の static IP を想定 |
+| 変数 | 型 | 説明 |
+| --- | --- | --- |
+| `project` | string | バケット名 / IAM ユーザ名のプレフィックス |
+| `purpose` | string | 用途識別子 (バケット名 / IAM ユーザ名 / IAM ポリシー名に使われる) |
+| `allowed_ip` | string | IAM ユーザのアクセスを許可する送信元 IPv4 (CIDR ではなく単一アドレス。内部で `/32` を付与する) |
 
 ## 出力
 
 | 出力 | 説明 |
-|---|---|
+| --- | --- |
 | `bucket_name` | バケット名 |
 | `bucket_arn` | バケット ARN |
-| `bucket_domain_name` | バケットのリージョン別ドメイン名 |
+| `bucket_domain_name` | バケットのリージョン別ドメイン名 (`bucket_regional_domain_name`) |
 | `iam_user_name` | 作成された IAM ユーザ名 |
 | `iam_access_key_id` | Access Key ID |
 | `iam_secret_access_key` | Secret Access Key (sensitive) |
 
 ## IAM ポリシー
 
-IAM ユーザには以下の action のみが許可される。すべての statement に `aws:SourceIp` = `${allowed_ip}/32` の条件が付与されており、Lightsail のパブリック IP 以外からはアクセスできない。
+すべての statement に `aws:SourceIp` = `${allowed_ip}/32` の `IpAddress` 条件が付与される。
 
 ### Bucket-level (`arn:aws:s3:::${bucket}`)
 
@@ -51,10 +52,10 @@ IAM ユーザには以下の action のみが許可される。すべての stat
 - `s3:AbortMultipartUpload`
 - `s3:ListMultipartUploadParts`
 
-### s3ql との対応
+### s3ql の操作との対応
 
 | s3ql 操作 | 必要な action |
-|---|---|
+| --- | --- |
 | list (ディレクトリ列挙) | `s3:ListBucket` |
 | lookup (HEAD object) | `s3:GetObject` |
 | get | `s3:GetObject` |
@@ -64,10 +65,9 @@ IAM ユーザには以下の action のみが許可される。すべての stat
 | copy (rename) | source: `s3:GetObject` / dest: `s3:PutObject` |
 | region 判定 | `s3:GetBucketLocation` |
 
-SSE-S3 (AES256) のため KMS 権限は不要。バケットは事前に Terraform で作成されるため `s3:CreateBucket` も不要。バージョニングは使用しないため `s3:GetBucketVersioning` も不要。
+SSE-S3 (AES256) のため KMS 権限は不要。バケットは Terraform 側で作成するため `s3:CreateBucket` も不要。バージョニングは使わないため `s3:GetBucketVersioning` も不要。
 
 ## 備考
 
-s3ql はブロック単位でオブジェクトを独自管理するため、S3 のバージョニングは有効化しない。
-
-Secret Access Key は `terraform output -raw s3_${purpose}_iam_secret_access_key` で取得する。
+- s3ql はブロック単位でオブジェクトを独自管理するため、S3 のバージョニングは有効化しない。
+- Secret Access Key は `terraform output -raw <module 名>_iam_secret_access_key` で取得する。

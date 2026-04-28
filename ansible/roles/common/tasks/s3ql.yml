@@ -182,34 +182,11 @@
     label: "{{ item.name }}"
   become: true
 
-- name: Deploy s3ql verify timer units
-  ansible.builtin.template:
-    src: s3ql-verify.timer.j2
-    dest: "/etc/systemd/system/s3ql-verify-{{ item.name }}.timer"
-    owner: root
-    group: root
-    mode: "0644"
-  loop: "{{ s3ql_filesystems }}"
-  loop_control:
-    label: "{{ item.name }}"
-  become: true
-
 - name: Enable s3ql mount services
   ansible.builtin.systemd:
     name: "s3ql-{{ item.name }}.service"
     daemon_reload: true
     enabled: true
-  loop: "{{ s3ql_filesystems }}"
-  loop_control:
-    label: "{{ item.name }}"
-  become: true
-
-- name: Enable and start s3ql verify timers
-  ansible.builtin.systemd:
-    name: "s3ql-verify-{{ item.name }}.timer"
-    daemon_reload: true
-    enabled: true
-    state: started
   loop: "{{ s3ql_filesystems }}"
   loop_control:
     label: "{{ item.name }}"

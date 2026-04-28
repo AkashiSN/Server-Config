@@ -1,7 +1,9 @@
 # domain
 domain: "akashisn.info"
 # k3s node labels
-k3s_node_labels: "storage.immich=true"
+k3s_node_labels:
+  - storage.immich=true
+  - storage.nextcloud=true
 # acme
 cloudflare_token: "{{ vault_cloudflare_token }}"
 email: "{{ vault_email }}"
@@ -28,13 +30,11 @@ s3ql_filesystems:
     storage_url: "s3://{{ s3ql_region }}/{{ s3ql_bucket }}/immich/"
     mount_point: /mnt/s3ql/immich-photos
     fs_passphrase: "{{ vault_immich_s3ql_fs_passphrase }}"
-    verify_schedule: "Sun 03:00"
   - name: nextcloud
     description: Nextcloud data
     storage_url: "s3://{{ s3ql_region }}/{{ s3ql_bucket }}/nextcloud/"
     mount_point: /mnt/s3ql/nextcloud-data
     fs_passphrase: "{{ vault_nextcloud_s3ql_fs_passphrase }}"
-    verify_schedule: "Sun 04:00"
 
 
 #

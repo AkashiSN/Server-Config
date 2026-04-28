@@ -33,16 +33,20 @@ spec:
   accessModes:
     - ReadWriteOncePod
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: iscsi-hdd-storage
+  storageClassName: s3ql-storage
   claimRef:
     namespace: nextcloud
     name: data-nextcloud-0
-  iscsi:
-    targetPortal: 10.254.0.2:3260
-    iqn: iqn.2005-10.org.freenas.ctl:nextcloud-data
-    lun: 0
-    fsType: xfs
-    readOnly: false
+  local:
+    path: /mnt/s3ql/nextcloud-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: storage.nextcloud
+            operator: In
+            values:
+              - "true"
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -64,10 +68,10 @@ spec:
     required:
       nodeSelectorTerms:
         - matchExpressions:
-          - key: kubernetes.io/hostname
+          - key: storage.nextcloud
             operator: In
             values:
-              - k3s-oci
+              - "true"
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -89,10 +93,10 @@ spec:
     required:
       nodeSelectorTerms:
         - matchExpressions:
-          - key: kubernetes.io/hostname
+          - key: storage.nextcloud
             operator: In
             values:
-              - k3s-oci
+              - "true"
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -109,7 +113,7 @@ spec:
     namespace: nextcloud
     name: musics-nextcloud-0
   nfs:
-    server: 10.254.0.2
+    server: truenas
     path: /mnt/ssd/musics
   mountOptions:
     - nfsvers=4.2
@@ -129,7 +133,7 @@ spec:
     namespace: nextcloud
     name: videos-nextcloud-0
   nfs:
-    server: 10.254.0.2
+    server: truenas
     path: /mnt/hdd/nfs/videos
   mountOptions:
     - nfsvers=4.2
@@ -149,7 +153,7 @@ spec:
     namespace: nextcloud
     name: photos-nextcloud-0
   nfs:
-    server: 10.254.0.2
+    server: truenas
     path: /mnt/hdd/nfs/photos
   mountOptions:
     - nfsvers=4.2

@@ -6,7 +6,6 @@ s3ql_default_cache_size: 83886080
 s3ql_default_max_threads: 2
 s3ql_default_metadata_backup_interval: 3600
 s3ql_default_compress: "zlib-1"
-s3ql_default_verify_schedule: "Sun 03:00"
 
 deb_architecture: {
   "armv6l": "armhf",
