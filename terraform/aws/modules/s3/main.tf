@@ -25,6 +25,52 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
+resource "aws_s3_bucket_versioning" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_policy_document" "bucket" {
+  statement {
+    sid    = "DenyDeleteExceptAllowedPrincipals"
+    effect = "Deny"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+
+    actions = [
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion",
+    ]
+
+    resources = ["${aws_s3_bucket.this.arn}/*"]
+
+    condition {
+      test     = "StringNotEquals"
+      variable = "aws:PrincipalArn"
+      values = concat(
+        [
+          aws_iam_user.this.arn,
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.admin_iam_user}",
+        ],
+        var.additional_delete_principals,
+      )
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "this" {
+  bucket = aws_s3_bucket.this.id
+  policy = data.aws_iam_policy_document.bucket.json
+}
+
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
   bucket = aws_s3_bucket.this.id
 
@@ -38,4 +84,28 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
       days_after_initiation = 7
     }
   }
+
+  rule {
+    id     = "expire-noncurrent-versions"
+    status = "Enabled"
+
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = 7
+    }
+  }
+
+  rule {
+    id     = "expire-delete-markers"
+    status = "Enabled"
+
+    filter {}
+
+    expiration {
+      expired_object_delete_marker = true
+    }
+  }
+
+  depends_on = [aws_s3_bucket_versioning.this]
 }
