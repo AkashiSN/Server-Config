@@ -38,7 +38,7 @@ spec:
     namespace: nextcloud
     name: data-nextcloud-0
   iscsi:
-    targetPortal: truenas:3260
+    targetPortal: 100.102.72.106:3260
     iqn: iqn.2005-10.org.freenas.ctl:nextcloud-data
     lun: 0
     fsType: xfs
