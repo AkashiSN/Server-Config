@@ -166,7 +166,7 @@ spec:
       spec:
         accessModes:
           - ReadWriteOncePod
-        storageClassName: iscsi-hdd-storage
+        storageClassName: s3ql-storage
         resources:
           requests:
             storage: 8Ti
