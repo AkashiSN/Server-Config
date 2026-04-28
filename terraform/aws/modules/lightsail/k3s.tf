@@ -2,7 +2,7 @@ resource "aws_lightsail_instance" "k3s" {
   name              = "${var.project}_k3s"
   availability_zone = "ap-northeast-1a"
   blueprint_id      = "ubuntu_24_04"
-  bundle_id         = "large_3_0"
+  bundle_id         = "xlarge_3_0"
   ip_address_type   = "dualstack"
   key_pair_name     = aws_lightsail_key_pair.main.name
   user_data         = "curl -fsSL https://akashisn.info/k3s_lightsail.sh | bash"

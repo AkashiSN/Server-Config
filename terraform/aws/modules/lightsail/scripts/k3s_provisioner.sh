@@ -35,17 +35,6 @@ echo "127.0.1.1 k3s-lightsail" >> /etc/hosts
 wait-apt update
 wait-apt upgrade -y
 
-# Obtain default interface
-export DEFAULT_INTERFACE=$(ip route show default | sed -nE -e 's/.*dev (\w+).*/\1/p')
-
-# Change dns setting
-netplan set "ethernets.${DEFAULT_INTERFACE}.nameservers.addresses=[1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001]"
-netplan set "ethernets.${DEFAULT_INTERFACE}.dhcp4-overrides={use-dns: false}"
-netplan set "ethernets.${DEFAULT_INTERFACE}.dhcp6-overrides={use-dns: false}"
-
-# Apply
-netplan apply
-
 # Install cloudflared
 # Add cloudflare gpg key
 mkdir -p --mode=0755 /usr/share/keyrings
@@ -61,40 +50,9 @@ wait-apt install -y cloudflared
 # Install zfs
 wait-apt install -y zfsutils-linux zfsnap
 
-# Install wireguard
-wait-apt install -y wireguard
-
-# Generate Server Key
-if [ ! -e /etc/wireguard/private.key ]; then
-    # Generate private key
-    wg genkey > /etc/wireguard/private.key
-    # Change permission
-    chmod go= /etc/wireguard/private.key
-    # Generate public key
-    cat /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
-
-    # Generate server config
-    cat > /etc/wireguard/wg0.conf << EOF
-[Interface]
-PrivateKey = `cat /etc/wireguard/private.key`
-Address = 10.254.0.10/24
-ListenPort = 51820
-MTU = 1280
-
-PostUp = iptables -A FORWARD -i %i -j ACCEPT
-PostUp = iptables -A FORWARD -o %i -j ACCEPT
-PostUp = iptables -t nat -A POSTROUTING -o %i -j MASQUERADE
-
-PostDown = iptables -D FORWARD -i %i -j ACCEPT
-PostDown = iptables -D FORWARD -o %i -j ACCEPT
-PostDown = iptables -t nat -D POSTROUTING -o %i -j MASQUERADE
-
-EOF
-fi
+# Install tailscale
+curl -fsSL https://tailscale.com/install.sh | sh
 
 # Setting ipv4 forward/etc/sysctl.conf
 sed -i -e '/^#net.ipv4.ip_forward/s/^#//g' /etc/sysctl.conf
 sysctl -p
-
-# Enable wireguard
-systemctl enable wg-quick@wg0

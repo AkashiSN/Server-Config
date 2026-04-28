@@ -1,5 +1,10 @@
-[s3main]
-storage-url: {{ immich_s3ql_bucket_url }}
-backend-login: {{ immich_s3ql_aws_access_key_id }}
-backend-password: {{ immich_s3ql_aws_secret_access_key }}
-fs-passphrase: {{ immich_s3ql_fs_passphrase }}
+[s3]
+storage-url: s3://
+backend-login: {{ s3ql_access_key_id }}
+backend-password: {{ s3ql_secret_access_key }}
+{% for fs in s3ql_filesystems %}
+
+[{{ fs.name }}]
+storage-url: {{ fs.storage_url }}
+fs-passphrase: {{ fs.fs_passphrase }}
+{% endfor %}

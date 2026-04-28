@@ -1,0 +1,20 @@
+[Unit]
+Description=S3QL mount for {{ item.description }}
+After=network-online.target
+Wants=network-online.target
+Before=k3s.service
+
+[Service]
+Type=notify
+KillMode=process
+TimeoutStartSec=0
+TimeoutStopSec=infinity
+LimitNOFILE=131072
+ExecStartPre=/usr/local/bin/fsck.s3ql --batch --authfile /root/.s3ql/authinfo2 {{ item.storage_url }}
+ExecStart=/usr/local/bin/mount.s3ql --allow-other --authfile /root/.s3ql/authinfo2 --cachedir /var/cache/s3ql/{{ item.name }} --cachesize {{ item.cache_size | default(s3ql_default_cache_size) }} --metadata-backup-interval {{ item.metadata_backup_interval | default(s3ql_default_metadata_backup_interval) }} --systemd --max-threads {{ item.max_threads | default(s3ql_default_max_threads) }} --compress {{ item.compress | default(s3ql_default_compress) }} --keep-cache --log none {{ item.storage_url }} {{ item.mount_point }}
+ExecStop=/usr/local/bin/umount.s3ql {{ item.mount_point }}
+ExecStopPost=-/usr/bin/fusermount3 -u -z {{ item.mount_point }}
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

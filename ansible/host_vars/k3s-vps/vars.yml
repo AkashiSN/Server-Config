@@ -17,6 +17,25 @@ argocd_cloudflare_issuer: "{{ vault_argocd_cloudflare_issuer }}"
 argocd_cloudflare_client_id: "{{ vault_argocd_cloudflare_client_id }}"
 argocd_cloudflare_client_secret: "{{ vault_argocd_cloudflare_client_secret }}"
 argocd_webhook_github_secret: "{{ vault_argocd_webhook_github_secret }}"
+# s3ql
+s3ql_access_key_id: "{{ vault_s3ql_access_key_id }}"
+s3ql_secret_access_key: "{{ vault_s3ql_secret_access_key }}"
+s3ql_region: "ap-northeast-1"
+s3ql_bucket: "{{ vault_s3ql_bucket }}"
+s3ql_filesystems:
+  - name: immich
+    description: Immich photos
+    storage_url: "s3://{{ s3ql_region }}/{{ s3ql_bucket }}/immich/"
+    mount_point: /mnt/s3ql/immich-photos
+    fs_passphrase: "{{ vault_immich_s3ql_fs_passphrase }}"
+    verify_schedule: "Sun 03:00"
+  - name: nextcloud
+    description: Nextcloud data
+    storage_url: "s3://{{ s3ql_region }}/{{ s3ql_bucket }}/nextcloud/"
+    mount_point: /mnt/s3ql/nextcloud-data
+    fs_passphrase: "{{ vault_nextcloud_s3ql_fs_passphrase }}"
+    verify_schedule: "Sun 04:00"
+
 
 #
 # Secrets
@@ -28,12 +47,6 @@ smtp_password: "{{ vault_smtp_password }}"
 
 # immich
 immich_postgres_user_password: "{{ vault_immich_postgres_user_password }}"
-
-# s3ql (immich photos)
-immich_s3ql_aws_access_key_id: "{{ vault_immich_s3ql_aws_access_key_id }}"
-immich_s3ql_aws_secret_access_key: "{{ vault_immich_s3ql_aws_secret_access_key }}"
-immich_s3ql_fs_passphrase: "{{ vault_immich_s3ql_fs_passphrase }}"
-immich_s3ql_bucket_url: "{{ vault_immich_s3ql_bucket_url }}"
 
 # nextcloud
 nextcloud_mariadb_root_password: "{{ vault_nextcloud_mariadb_root_password }}"

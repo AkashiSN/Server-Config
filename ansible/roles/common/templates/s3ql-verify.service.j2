@@ -1,0 +1,10 @@
+[Unit]
+Description=Verify S3QL backend integrity for {{ item.description }}
+Conflicts=s3ql-{{ item.name }}.service
+After=s3ql-{{ item.name }}.service
+
+[Service]
+Type=oneshot
+TimeoutStartSec=infinity
+ExecStart=/usr/local/bin/s3ql_verify --authfile /root/.s3ql/authinfo2 --missing-file /var/log/s3ql-verify-{{ item.name }}-missing.txt --corrupted-file /var/log/s3ql-verify-{{ item.name }}-corrupted.txt {{ item.storage_url }}
+ExecStopPost=/bin/systemctl start s3ql-{{ item.name }}.service

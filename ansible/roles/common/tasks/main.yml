@@ -58,10 +58,6 @@
       ansible.builtin.import_tasks:
         file: helm.yml
 
-    - name: Import dns.yml
-      ansible.builtin.import_tasks:
-        file: dns.yml
-
     - name: Import s3ql.yml
       ansible.builtin.import_tasks:
         file: s3ql.yml

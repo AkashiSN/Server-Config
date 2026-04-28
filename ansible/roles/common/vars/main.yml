@@ -1,5 +1,13 @@
 s3ql_version: "6.0.0"
 
+# Defaults applied to entries in `s3ql_filesystems` when those entries omit
+# the corresponding field. Override per-entry as needed.
+s3ql_default_cache_size: 83886080
+s3ql_default_max_threads: 2
+s3ql_default_metadata_backup_interval: 3600
+s3ql_default_compress: "zlib-1"
+s3ql_default_verify_schedule: "Sun 03:00"
+
 deb_architecture: {
   "armv6l": "armhf",
   "armv7l": "armhf",

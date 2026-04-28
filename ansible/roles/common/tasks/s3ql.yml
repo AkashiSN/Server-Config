@@ -113,7 +113,7 @@
         group: root
         mode: "0644"
 
-- name: Ensure s3ql runtime directories exist
+- name: Ensure s3ql common runtime directories exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -123,7 +123,30 @@
   loop:
     - /root/.s3ql
     - /var/cache/s3ql
-    - /mnt/s3ql/immich-photos
+  become: true
+
+- name: Ensure s3ql per-filesystem cache directories exist
+  ansible.builtin.file:
+    path: "/var/cache/s3ql/{{ item.name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop: "{{ s3ql_filesystems }}"
+  loop_control:
+    label: "{{ item.name }}"
+  become: true
+
+- name: Ensure s3ql mount points exist
+  ansible.builtin.file:
+    path: "{{ item.mount_point }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop: "{{ s3ql_filesystems }}"
+  loop_control:
+    label: "{{ item.name }}"
   become: true
 
 - name: Deploy s3ql authinfo2
@@ -135,52 +158,70 @@
     mode: "0600"
   become: true
 
-- name: Deploy s3ql-immich systemd unit
+- name: Deploy s3ql mount systemd units
   ansible.builtin.template:
-    src: s3ql-immich.service.j2
-    dest: /etc/systemd/system/s3ql-immich.service
+    src: s3ql-mount.service.j2
+    dest: "/etc/systemd/system/s3ql-{{ item.name }}.service"
     owner: root
     group: root
     mode: "0644"
+  loop: "{{ s3ql_filesystems }}"
+  loop_control:
+    label: "{{ item.name }}"
   become: true
 
-- name: Deploy s3ql-verify-immich systemd unit
+- name: Deploy s3ql verify systemd units
   ansible.builtin.template:
-    src: s3ql-verify-immich.service.j2
-    dest: /etc/systemd/system/s3ql-verify-immich.service
+    src: s3ql-verify.service.j2
+    dest: "/etc/systemd/system/s3ql-verify-{{ item.name }}.service"
     owner: root
     group: root
     mode: "0644"
+  loop: "{{ s3ql_filesystems }}"
+  loop_control:
+    label: "{{ item.name }}"
   become: true
 
-- name: Deploy s3ql-verify-immich systemd timer
+- name: Deploy s3ql verify timer units
   ansible.builtin.template:
-    src: s3ql-verify-immich.timer.j2
-    dest: /etc/systemd/system/s3ql-verify-immich.timer
+    src: s3ql-verify.timer.j2
+    dest: "/etc/systemd/system/s3ql-verify-{{ item.name }}.timer"
     owner: root
     group: root
     mode: "0644"
+  loop: "{{ s3ql_filesystems }}"
+  loop_control:
+    label: "{{ item.name }}"
   become: true
 
-- name: Enable s3ql-immich.service
+- name: Enable s3ql mount services
   ansible.builtin.systemd:
-    name: s3ql-immich.service
+    name: "s3ql-{{ item.name }}.service"
     daemon_reload: true
     enabled: true
+  loop: "{{ s3ql_filesystems }}"
+  loop_control:
+    label: "{{ item.name }}"
   become: true
 
-- name: Enable and start s3ql-verify-immich.timer
+- name: Enable and start s3ql verify timers
   ansible.builtin.systemd:
-    name: s3ql-verify-immich.timer
+    name: "s3ql-verify-{{ item.name }}.timer"
     daemon_reload: true
     enabled: true
     state: started
+  loop: "{{ s3ql_filesystems }}"
+  loop_control:
+    label: "{{ item.name }}"
   become: true
 
-- name: Start s3ql-immich.service
+- name: Start s3ql mount services
   ansible.builtin.systemd:
-    name: s3ql-immich.service
+    name: "s3ql-{{ item.name }}.service"
     state: started
+  loop: "{{ s3ql_filesystems }}"
+  loop_control:
+    label: "{{ item.name }}"
   become: true
   when:
     - not s3ql_installed_version.failed

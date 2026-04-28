@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly s3ql_verify for {{ item.description }}
+
+[Timer]
+OnCalendar={{ item.verify_schedule | default(s3ql_default_verify_schedule) }}
+RandomizedDelaySec=1h
+Persistent=true
+Unit=s3ql-verify-{{ item.name }}.service
+
+[Install]
+WantedBy=timers.target
