@@ -6,4 +6,3 @@ resources:
   - nginx-conf.yml
   - nextcloud-conf.yml
   - nextcloud.yml
-  - cronjob.yml

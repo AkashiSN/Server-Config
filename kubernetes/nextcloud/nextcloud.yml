@@ -122,6 +122,82 @@ spec:
             limits:
               cpu: 500m
               memory: 2000Mi
+        - name: cron
+          image: ghcr.io/akashisn/nextcloud@sha256:772a5fda9fd45874d7db15284ccf21c7c15c587c34c710b2874a39555110974e
+          imagePullPolicy: IfNotPresent
+          command: ["/cron.sh"]
+          envFrom:
+            - configMapRef:
+                name: nextcloud-env
+          env:
+            - name: SMTP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: common-secrets
+                  key: email_address
+          volumeMounts:
+            - name: app
+              mountPath: /var/www/html
+            - name: data
+              mountPath: /mnt/nextcloud
+            - name: static
+              mountPath: /mnt/static
+            - name: musics
+              mountPath: /mnt/musics
+            - name: videos
+              mountPath: /mnt/videos
+            - name: photos
+              mountPath: /mnt/photos
+            - name: nextcloud-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+        - name: preview
+          image: ghcr.io/akashisn/nextcloud@sha256:772a5fda9fd45874d7db15284ccf21c7c15c587c34c710b2874a39555110974e
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while :; do
+                su -p www-data -s /bin/sh -c "/usr/local/bin/php /var/www/html/occ preview:pre-generate"
+                sleep 300
+              done
+          envFrom:
+            - configMapRef:
+                name: nextcloud-env
+          env:
+            - name: SMTP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: common-secrets
+                  key: email_address
+          volumeMounts:
+            - name: app
+              mountPath: /var/www/html
+            - name: data
+              mountPath: /mnt/nextcloud
+            - name: static
+              mountPath: /mnt/static
+            - name: musics
+              mountPath: /mnt/musics
+            - name: videos
+              mountPath: /mnt/videos
+            - name: photos
+              mountPath: /mnt/photos
+            - name: nextcloud-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
       volumes:
         - name: nextcloud-secrets
           projected:
