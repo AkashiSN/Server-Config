@@ -16,7 +16,7 @@ jobs:
         id: generate_token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.UPDATE_BOT_APP_ID }}
+          client-id: ${{ secrets.UPDATE_BOT_APP_ID }}
           private-key: ${{ secrets.UPDATE_BOT_PRIVATE_KEY }}
 
       - name: Check for Kubernetes updates
@@ -24,28 +24,28 @@ jobs:
         run: |
           CURRENT_KUBE_VERSION=$(sed -n -r -e "s/.*KUBE_VERSION=\"(.*)\"/\1/p" ./docker/kubectl/Dockerfile)
           LATEST_KUBE_VERSION=$(curl -LS https://dl.k8s.io/release/stable.txt)
-          echo "current=$CURRENT_KUBE_VERSION" >> $GITHUB_ENV
-          echo "latest=$LATEST_KUBE_VERSION" >> $GITHUB_ENV
+          echo "current=$CURRENT_KUBE_VERSION" >> $GITHUB_OUTPUT
+          echo "latest=$LATEST_KUBE_VERSION" >> $GITHUB_OUTPUT
 
       - name: Apply update & Create commit
-        if: env.current != env.latest
+        if: steps.check-update.outputs.current != steps.check-update.outputs.latest
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-          git switch -c actions/kubectl-${{ env.latest }}
+          git switch -c actions/kubectl-${{ steps.check-update.outputs.latest }}
 
-          sed -i -r -e "s/(KUBE_VERSION=)\".*\"/\1\"${{ env.latest }}\"/g" ./docker/kubectl/Dockerfile
+          sed -i -r -e "s/(KUBE_VERSION=)\".*\"/\1\"${{ steps.check-update.outputs.latest }}\"/g" ./docker/kubectl/Dockerfile
 
           git add ./docker/kubectl/Dockerfile
-          git commit -m "Bump kubectl from ${{ env.current }} to ${{ env.latest }} in /docker/kubectl"
-          git push --set-upstream origin actions/kubectl-${{ env.latest }}
+          git commit -m "Bump kubectl from ${{ steps.check-update.outputs.current }} to ${{ steps.check-update.outputs.latest }} in /docker/kubectl"
+          git push --set-upstream origin actions/kubectl-${{ steps.check-update.outputs.latest }}
 
       - name: Create pull request
-        if: env.current != env.latest
+        if: steps.check-update.outputs.current != steps.check-update.outputs.latest
         run: |
-          gh pr create -B main -H actions/kubectl-${{ env.latest }} \
-            --title 'Bump kubectl from ${{ env.current }} to ${{ env.latest }} in /docker/kubectl' \
-            --body 'Bumps kubectl from `${{ env.current }}` to `${{ env.latest }}`.'
+          gh pr create -B main -H actions/kubectl-${{ steps.check-update.outputs.latest }} \
+            --title 'Bump kubectl from ${{ steps.check-update.outputs.current }} to ${{ steps.check-update.outputs.latest }} in /docker/kubectl' \
+            --body 'Bumps kubectl from `${{ steps.check-update.outputs.current }}` to `${{ steps.check-update.outputs.latest }}`.'
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}

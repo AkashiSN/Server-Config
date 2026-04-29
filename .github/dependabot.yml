@@ -4,19 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-  # https://github.com/dependabot/dependabot-core/issues/2178
-  # - package-ecosystem: "docker"
-  #   directory: "/docker/epgstation"
-  #   schedule:
-  #     interval: "weekly"
-  - package-ecosystem: "docker"
-    directory: "/docker/dnsdist"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "docker"
-    directory: "/docker/dnsmasq"
-    schedule:
-      interval: "weekly"
   - package-ecosystem: "docker"
     directory: "/docker/nextcloud"
     schedule:
@@ -25,15 +12,6 @@ updates:
       - dependency-name: "nextcloud"
         update-types:
           - "version-update:semver-major"
-  # - package-ecosystem: "docker"
-  #   directory: "/docker/wordpress"
-  #   schedule:
-  #     interval: "weekly"
-  # k8s manifests - k8s
-  - package-ecosystem: "docker"
-    directory: "/kubernetes/dns"
-    schedule:
-      interval: "weekly"
   - package-ecosystem: "docker"
     directory: "/kubernetes/nextcloud"
     schedule:
@@ -43,14 +21,6 @@ updates:
         update-types:
           - "version-update:semver-major"
           - "version-update:semver-minor"
-  # - package-ecosystem: "docker"
-  #   directory: "/kubernetes/wordpress"
-  #   schedule:
-  #     interval: "weekly"
-  #   ignore:
-  #     - dependency-name: "mariadb"
-  #       update-types:
-  #         - "version-update:semver-major"
   - package-ecosystem: "docker"
     directory: "/kubernetes/immich"
     schedule:
@@ -58,12 +28,3 @@ updates:
     ignore:
       - dependency-name: "immich-app/postgres"
       - dependency-name: "valkey/valkey"
-  # - package-ecosystem: "docker"
-  #   directory: "/kubernetes/tv"
-  #   schedule:
-  #     interval: "weekly"
-  #   ignore:
-  #     - dependency-name: "mariadb"
-  #       update-types:
-  #         - "version-update:semver-major"
-  #         - "version-update:semver-minor"
