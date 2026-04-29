@@ -192,7 +192,7 @@ spec:
       volumes:
         - name: nextcloud-secrets
           secret:
-            secretName: common-secrets
+            secretName: nextcloud-secrets
         - name: nginx-conf
           configMap:
             name: nginx-conf
