@@ -126,7 +126,7 @@ spec:
             - name: SMTP_NAME
               valueFrom:
                 secretKeyRef:
-                  name: common-secrets
+                  name: nextcloud-secrets
                   key: email_address
           volumeMounts:
             - name: data
@@ -191,12 +191,8 @@ spec:
               memory: 500Mi
       volumes:
         - name: nextcloud-secrets
-          projected:
-            sources:
-              - secret:
-                  name: nextcloud-secrets
-              - secret:
-                  name: common-secrets
+          secret:
+            secretName: common-secrets
         - name: nginx-conf
           configMap:
             name: nginx-conf
