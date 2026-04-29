@@ -15,10 +15,6 @@
       ansible.builtin.import_tasks:
         file: cert-manager.yml
 
-    - name: Import oauth2-proxy.yml
-      ansible.builtin.import_tasks:
-        file: oauth2-proxy.yml
-
     - name: Import argo-cd.yml
       ansible.builtin.import_tasks:
         file: argo-cd.yml
