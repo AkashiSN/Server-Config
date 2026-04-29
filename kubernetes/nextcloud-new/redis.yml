@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud-redis
+  namespace: nextcloud
+spec:
+  selector:
+    matchLabels:
+      app: nextcloud-redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nextcloud-redis
+    spec:
+      containers:
+        - name: nextcloud-redis
+          image: redis:8.6.2-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              name: nextcloud-redis
+          resources:
+            requests:
+              cpu: 50m
+              memory: 10Mi
+            limits:
+              cpu: 100m
+              memory: 50Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: nextcloud-redis
+  name: nextcloud-redis
+  namespace: nextcloud
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      name: nextcloud-redis
+  selector:
+    app: nextcloud-redis

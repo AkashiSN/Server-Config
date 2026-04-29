@@ -7,17 +7,11 @@ k3s_node_labels:
 # acme
 cloudflare_token: "{{ vault_cloudflare_token }}"
 email: "{{ vault_email }}"
-# oauth2-proxy
-oauth2_proxy_fqdn: "auth.{{ domain }}"
-oauth2_proxy_cloudflare_issuer: "{{ vault_oauth2_proxy_cloudflare_issuer }}"
-oauth2_proxy_cloudflare_client_id: "{{ vault_oauth2_proxy_cloudflare_client_id }}"
-oauth2_proxy_cloudflare_client_secret: "{{ vault_oauth2_proxy_cloudflare_client_secret }}"
-oauth2_proxy_cookie_secret: "{{ vault_oauth2_proxy_cookie_secret }}"
 # argo-cd
 argocd_fqdn: "argocd.{{ domain }}"
-argocd_cloudflare_issuer: "{{ vault_argocd_cloudflare_issuer }}"
-argocd_cloudflare_client_id: "{{ vault_argocd_cloudflare_client_id }}"
-argocd_cloudflare_client_secret: "{{ vault_argocd_cloudflare_client_secret }}"
+argocd_oidc_issuer: "{{ vault_argocd_oidc_issuer }}"
+argocd_oidc_client_id: "{{ vault_argocd_oidc_client_id }}"
+argocd_oidc_client_secret: "{{ vault_argocd_oidc_client_secret }}"
 argocd_webhook_github_secret: "{{ vault_argocd_webhook_github_secret }}"
 # s3ql
 s3ql_access_key_id: "{{ vault_s3ql_access_key_id }}"
@@ -49,7 +43,9 @@ smtp_password: "{{ vault_smtp_password }}"
 immich_postgres_user_password: "{{ vault_immich_postgres_user_password }}"
 
 # nextcloud
-nextcloud_mariadb_root_password: "{{ vault_nextcloud_mariadb_root_password }}"
-nextcloud_mariadb_user_password: "{{ vault_nextcloud_mariadb_user_password }}"
 nextcloud_admin_user: "{{ vault_nextcloud_admin_user }}"
 nextcloud_admin_password: "{{ vault_nextcloud_admin_password }}"
+nextcloud_postgres_password: "{{ vault_nextcloud_postgres_password }}"
+nextcloud_oidc_issuer: "{{ vault_nextcloud_oidc_issuer }}"
+nextcloud_oidc_client_id: "{{ vault_nextcloud_oidc_client_id }}"
+nextcloud_oidc_client_secret: "{{ vault_nextcloud_oidc_client_secret }}"

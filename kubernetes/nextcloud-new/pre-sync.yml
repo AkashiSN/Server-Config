@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: image-pull-job
+  namespace: nextcloud
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  ttlSecondsAfterFinished: 10
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+        - name: nextcloud
+          image: nextcloud:33.0.2-fpm-alpine
+          command: ["/bin/sh"]
+          args: ["-c", "exit 0"]
+      restartPolicy: Never

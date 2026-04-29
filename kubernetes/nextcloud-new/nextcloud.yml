@@ -1,0 +1,253 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-env
+  namespace: nextcloud
+data:
+  # コンテナのタイムゾーン。ログ表示や date() 計算に効く (system config の
+  # default_timezone とは別物で、こちらは OS レベル)。
+  TZ: "Asia/Tokyo"
+
+  # ----- 初回 install 専用 (entrypoint が maintenance:install に渡す) -----
+  # 既に install 済みの場合は無視される。Secret に admin_user / admin_password
+  # ファイルを置く前提。本番ログインは OIDC なので、ここで作る local admin は
+  # 緊急脱出口 (?direct=1) 専用。
+  NEXTCLOUD_ADMIN_USER_FILE: /secrets/admin_user
+  NEXTCLOUD_ADMIN_PASSWORD_FILE: /secrets/admin_password
+
+  # ユーザデータ (ファイル本体) の保存ディレクトリ。
+  # PVC `data` を /var/www/html/data にマウントしているのと一致させる。
+  NEXTCLOUD_DATA_DIR: /var/www/html/data
+
+  # 信頼するアクセス元 Host ヘッダ (一致しない Host は弾かれる)。
+  # Ingress の host と揃える。
+  NEXTCLOUD_TRUSTED_DOMAINS: files.akashisn.info
+
+  # ブラウザ向け URL 生成 (https に固定し、Host を強制)
+  OVERWRITEPROTOCOL: https
+  OVERWRITEHOST: files.akashisn.info
+  # cron / cli / WebDAV self-check が叩く絶対 URL
+  OVERWRITECLIURL: https://files.akashisn.info
+  # ingress-nginx controller pod から届く X-Forwarded-* を信頼する範囲。
+  # ClusterIP 行きのトラフィックは kube-proxy で DNAT のみされ SNAT されないため、
+  # Nextcloud から見える REMOTE_ADDR は送信元 pod の IP = pod CIDR (k3s デフォルト)。
+  TRUSTED_PROXIES: "10.42.0.0/16"
+
+  # ----- DB 接続先 (postgres.yml の Service / autoconfig.php が拾う env) -----
+  # POSTGRES_PASSWORD_FILE があると _FILE 系として読み込まれる。
+  POSTGRES_HOST: nextcloud-postgres
+  POSTGRES_DB: nextcloud
+  POSTGRES_USER: nextcloud
+  POSTGRES_PASSWORD_FILE: /secrets/postgres_password
+
+  # ----- Redis 接続先 (redis.config.php がこの env を見る) -----
+  # 認証なしの ClusterIP 内通信。ポートは文字列 quote 必須。
+  REDIS_HOST: nextcloud-redis
+  REDIS_HOST_PORT: "6379"
+
+  # ----- SMTP -----
+  # 通知メール / パスワードリセット等で必要。
+  # SMTP_PASSWORD_FILE は Secret 側に smtp_password を追加。
+  SMTP_HOST: smtp.gmail.com
+  SMTP_PORT: "587"
+  SMTP_SECURE: tls
+  MAIL_FROM_ADDRESS: no-reply
+  MAIL_DOMAIN: files.akashisn.info
+  SMTP_PASSWORD_FILE: /secrets/smtp_password
+
+  # ----- Nextcloud system config (NC_<key> 形式で config.php を上書き) -----
+  # entrypoint ではなく Nextcloud 本体 (Config.php) が起動時に NC_ prefix の
+  # env を全部 system config として読み込む。
+  # 重い日次バックグラウンドジョブの 4 時間窓開始時刻 (UTC)。
+  # 15 = UTC 15:00-19:00 = JST 00:00-04:00 (深夜帯)
+  NC_maintenance_window_start: "15"
+  # バックグラウンドジョブ実行方式を ajax から cron に切り替え。
+  # 実体は cron sidecar で `/cron.sh` (busybox crond が 5 分おきに cron.php) が回す。
+  NC_backgroundjobs_mode: cron
+  # 国コード省略時に補完される電話番号の既定地域 (ISO 3166-1 alpha-2)。
+  NC_default_phone_region: JP
+  # 2FA を全ユーザに強制。次回ログイン時にプロバイダ未登録ならセットアップ画面が出る。
+  # 同梱の twofactor_backupcodes が常に使えるためロックアウトはしないが、
+  # 実用には twofactor_totp 等の追加インストールを推奨。
+  NC_twofactor_enforced: "true"
+  # サーバ識別子 (int)。複数 PHP サーバ構成時に一意である必要があるため、
+  # multi-replica にした場合は downwardAPI 等で pod 単位の ID に切替える。
+  # 単一 pod なら任意の int で setup check を満たせる。
+  NC_serverid: "1"
+
+  # ----- OIDC (Cloudflare Zero Trust の OIDC SaaS Application) -----
+  # ZT ダッシュボード > Access > Applications > Add an application > SaaS で
+  # Application type=OIDC を選んだ際に出てくる値を nextcloud-hooks の
+  # `occ user_oidc:provider` に渡すための入力。
+  # client_id / client_secret / issuer は Secret に分離して /secrets から読む。
+  #
+  # provider の identifier。upsert キーになり、Nextcloud 内ログにも出る (例: cloudflare)。
+  OIDC_PROVIDER_ID: cloudflare
+  # 認可リクエストで要求するスコープ。`groups` を増やしておくと将来
+  # --group-provisioning=1 に切り替えるだけでグループ連携できる。
+  OIDC_SCOPE: "openid profile email groups"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: nextcloud
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  replicas: 1
+  serviceName: nextcloud
+  selector:
+    matchLabels:
+      app: nextcloud
+  template:
+    metadata:
+      labels:
+        app: nextcloud
+    spec:
+      securityContext:
+        fsGroup: 82
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: nextcloud
+          image: nextcloud:33.0.2-fpm-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9000
+              name: php-fpm
+          envFrom:
+            - configMapRef:
+                name: nextcloud-env
+          env:
+            - name: SMTP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: common-secrets
+                  key: email_address
+          volumeMounts:
+            - name: data
+              mountPath: /var/www/html
+            - name: nextcloud-secrets
+              mountPath: /secrets
+            - name: nextcloud-hooks
+              mountPath: /docker-entrypoint-hooks.d/before-starting/config.sh
+              subPath: config.sh
+              readOnly: true
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 1500Mi
+        - name: nginx
+          image: nginx:1.30.0-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/nextcloud.conf
+              subPath: nextcloud.conf
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 50Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+        # 5 分おきに cron.php を回す sidecar (NC_backgroundjobs_mode=cron の実体)。
+        # image 同梱の /cron.sh が busybox crond をフォアグラウンド実行する。
+        - name: cron
+          image: nextcloud:33.0.2-fpm-alpine
+          imagePullPolicy: IfNotPresent
+          command: ["/cron.sh"]
+          envFrom:
+            - configMapRef:
+                name: nextcloud-env
+          volumeMounts:
+            - name: data
+              mountPath: /var/www/html
+            - name: nextcloud-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 50Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+      volumes:
+        - name: nextcloud-secrets
+          projected:
+            sources:
+              - secret:
+                  name: nextcloud-secrets
+              - secret:
+                  name: common-secrets
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+        - name: nextcloud-hooks
+          configMap:
+            # 0770: owner / group rwx (entrypoint は root or www-data から実行する)
+            defaultMode: 504
+            name: nextcloud-hooks
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: s3ql-storage
+        resources:
+          requests:
+            storage: 8Ti
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: nextcloud
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  selector:
+    app: nextcloud
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nextcloud
+  namespace: nextcloud
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - files.akashisn.info
+      secretName: nextcloud-cert
+  rules:
+    - host: files.akashisn.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nextcloud
+                port:
+                  name: http

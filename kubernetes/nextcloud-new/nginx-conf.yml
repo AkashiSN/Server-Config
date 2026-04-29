@@ -1,0 +1,207 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+  namespace: nextcloud
+data:
+  nginx.conf: |
+    user             nginx;
+    worker_processes auto;
+
+    error_log /var/log/nginx/error.log warn;
+
+    pid /var/run/nginx.pid;
+
+    events {
+      worker_connections 1024;
+    }
+
+    http {
+      include           mime.types;
+      default_type      application/octet-stream;
+
+      log_format main   '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent"';
+
+      sendfile          on;
+      server_tokens     off;
+      keepalive_timeout 65;
+
+      include /etc/nginx/conf.d/*.conf;
+    }
+  # 出典: https://docs.nextcloud.com/server/33/admin_manual/installation/nginx.html
+  # 「Nextcloud in the webroot of NGINX」バリアント
+  # Version 2025-07-23
+  #
+  # この Kubernetes デプロイ向けの改変点:
+  # - TLS はクラスタの Ingress で終端するため、listen 443 / ssl_* と
+  #   HTTP -> HTTPS リダイレクトの server ブロックは削除している。
+  # - Pod は平文 HTTP (port 80) で待ち受ける。Nextcloud に https:// URL を
+  #   生成させるため fastcgi_param HTTPS on; は維持している。
+  # - root は /var/www/html (Nextcloud Docker image の webroot) に変更。
+  nextcloud.conf: |
+    upstream php-handler {
+      server 127.0.0.1:9000;
+    }
+
+    # キャッシュバスター用の `v` 引数が付いたアセットだけに `immutable` を付与する
+    map $arg_v $asset_immutable {
+      "" "";
+      default ", immutable";
+    }
+
+    server {
+      # Alpine nginx image 同梱の /etc/nginx/conf.d/default.conf より先にこちらを
+      # 既定サーバとして採用させるため default_server を付け、`server_name _;` で
+      # Ingress 経由のあらゆる Host ヘッダを受ける。
+      listen 80 default_server;
+      listen [::]:80 default_server;
+      server_name _;
+
+      # インストール先のルートパス
+      root /var/www/html;
+
+      access_log /var/log/nginx/access.log main;
+      error_log /var/log/nginx/error.log warn;
+
+      # nginx の HTTP サーバ検出を防ぐ
+      server_tokens off;
+
+      # アップロード上限とタイムアウトの設定
+      client_max_body_size 512M;
+      client_body_timeout 300s;
+      fastcgi_buffers 64 4K;
+
+      # gzip を有効にする (ETag は維持)
+      gzip on;
+      gzip_vary on;
+      gzip_comp_level 4;
+      gzip_min_length 256;
+      gzip_proxied expired no-cache no-store private no_last_modified no_etag auth;
+      gzip_types application/atom+xml text/javascript application/javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/wasm application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy;
+
+      # HTTP/2 帯域最適化用の設定
+      # チューニングのヒントは以下を参照:
+      # https://blog.cloudflare.com/delivering-http-2-upload-speed-improvements/
+      client_body_buffer_size 512k;
+
+      # Nextcloud の `.htaccess` 由来のレスポンスヘッダ
+      add_header Referrer-Policy                   "no-referrer"       always;
+      add_header X-Content-Type-Options            "nosniff"           always;
+      add_header X-Frame-Options                   "SAMEORIGIN"        always;
+      add_header X-Permitted-Cross-Domain-Policies "none"              always;
+      add_header X-Robots-Tag                      "noindex, nofollow" always;
+
+      # 情報漏えいになる X-Powered-By を除去
+      fastcgi_hide_header X-Powered-By;
+
+      # server コンテキストに `types { ... }` を置くと http レベルで読み込んだ
+      # mime.types の内容が「継承ではなく上書き」されるため、ここで mime.types を
+      # 再 include して全標準マッピングを server スコープにも展開する。
+      # 同一コンテキスト内の複数の types ブロックはマージされるので、続けて
+      # 追加マッピング (`mjs`) を上乗せする。
+      # nginx 1.30 同梱の mime.types は `application/wasm wasm;` は持っているが
+      # `text/javascript ... mjs;` は含まないため、mjs だけ補う。
+      # (wasm を再宣言すると "duplicate extension" 警告になるので入れない。)
+      include mime.types;
+      types {
+        text/javascript mjs;
+      }
+
+      # ディレクトリの扱い: フォールバックとして `/index.php$request_uri` を指定する
+      # ことで、ディレクトリ要求時に index.php があればそれが配信され、
+      # 無ければフロントコントローラに渡される、という一貫した挙動になる。
+      # この一貫性のおかげで、画像などのアセット、`/updater`、`/ocs-provider` など
+      # 個別パス向けのカスタムルールが不要になり、
+      # `try_files $uri $uri/ /index.php$request_uri` だけで常に意図した動作になる。
+      index index.php index.html /index.php$request_uri;
+
+      # Microsoft DAV クライアントを処理する `.htaccess` 由来のルール
+      location = / {
+        if ( $http_user_agent ~ ^DavClnt ) {
+          return 302 /remote.php/webdav/$is_args$args;
+        }
+      }
+
+      location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+      }
+
+      # `/.well-known` だけ正規表現ルールから除外する。
+      # これがないと下にある `location ~ /(\.|autotest|...)` に飲まれてしまう。
+      location ^~ /.well-known {
+        # ここのルールは `.htaccess` の `/.well-known` 関連の翻訳
+
+        location = /.well-known/carddav { return 301 /remote.php/dav/; }
+        location = /.well-known/caldav  { return 301 /remote.php/dav/; }
+
+        location /.well-known/acme-challenge { try_files $uri $uri/ =404; }
+        location /.well-known/pki-validation { try_files $uri $uri/ =404; }
+
+        # それ以外の `/.well-known` はフロントコントローラに渡して
+        # Nextcloud の API に処理させる
+        return 301 /index.php$request_uri;
+      }
+
+      # `.htaccess` 由来: クライアントから隠すべきパス
+      location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)(?:$|/)  { return 404; }
+      location ~ ^/(?:\.|autotest|occ|issue|indie|db_|console)                { return 404; }
+
+      # PHP ファイルを PHP プロセスに渡すこのブロックは、静的アセットを処理する
+      # ブロックよりも上に置かなければならない。先に宣言しないと、nginx が
+      # `/index.php` をプレフィックスする無限書き換えループに陥り HTTP 500 になる。
+      location ~ \.php(?:$|/) {
+        # レガシーパス用の rewrite
+        rewrite ^/(?!index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|ocs-provider\/.+|.+\/richdocumentscode(_arm64)?\/proxy) /index.php$request_uri;
+
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        set $path_info $fastcgi_path_info;
+
+        try_files $fastcgi_script_name =404;
+
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $path_info;
+        fastcgi_param HTTPS on;
+
+        fastcgi_param modHeadersAvailable true;         # セキュリティヘッダを二重送信しないため
+        fastcgi_param front_controller_active true;     # pretty URL を有効化
+        fastcgi_pass php-handler;
+
+        fastcgi_intercept_errors on;
+        fastcgi_request_buffering on;                   # PHP-FPM はチャンク転送に未対応で Content-Length を要求するため必須
+
+        fastcgi_max_temp_file_size 0;
+      }
+
+      # 静的ファイルの配信
+      location ~ \.(?:css|js|mjs|svg|gif|ico|jpg|png|webp|wasm|tflite|map|ogg|flac|mp4|webm)$ {
+        try_files $uri /index.php$request_uri;
+        # Nextcloud の `.htaccess` 由来のレスポンスヘッダ
+        add_header Cache-Control                     "public, max-age=15778463$asset_immutable";
+        add_header Referrer-Policy                   "no-referrer"       always;
+        add_header X-Content-Type-Options            "nosniff"           always;
+        add_header X-Frame-Options                   "SAMEORIGIN"        always;
+        add_header X-Permitted-Cross-Domain-Policies "none"              always;
+        add_header X-Robots-Tag                      "noindex, nofollow" always;
+        access_log off;     # 任意: アセットへのアクセスログを抑制
+      }
+
+      location ~ \.woff2?$ {
+        try_files $uri /index.php$request_uri;
+        expires 7d;         # `.htaccess` 由来の Cache-Control ポリシー
+        access_log off;     # 任意: アセットへのアクセスログを抑制
+      }
+
+      # `.htaccess` 由来のルール
+      location /remote {
+        return 301 /remote.php$request_uri;
+      }
+
+      location / {
+        try_files $uri $uri/ /index.php$request_uri;
+      }
+    }

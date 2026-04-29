@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: nextcloud-postgres
+  name: nextcloud-postgres
+  namespace: nextcloud
+spec:
+  replicas: 1
+  serviceName: nextcloud-postgres
+  selector:
+    matchLabels:
+      app: nextcloud-postgres
+  template:
+    metadata:
+      labels:
+        app: nextcloud-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:18.3-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+            - name: POSTGRES_DB
+              value: nextcloud
+            - name: POSTGRES_USER
+              value: nextcloud
+            - name: POSTGRES_PASSWORD_FILE
+              value: /secrets/postgres_password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: nextcloud-secrets
+              mountPath: /secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+      volumes:
+        - name: nextcloud-secrets
+          secret:
+            secretName: nextcloud-secrets
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        storageClassName: local-storage
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: nextcloud-postgres
+  name: nextcloud-postgres
+  namespace: nextcloud
+spec:
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+  selector:
+    app: nextcloud-postgres

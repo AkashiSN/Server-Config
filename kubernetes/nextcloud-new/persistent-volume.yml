@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-data-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: s3ql-storage
+  claimRef:
+    namespace: nextcloud
+    name: data-nextcloud-0
+  local:
+    path: /mnt/s3ql/nextcloud-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: storage.nextcloud
+            operator: In
+            values:
+              - "true"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-postgres-pv
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOncePod
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  claimRef:
+    namespace: nextcloud
+    name: data-nextcloud-postgres-0
+  local:
+    path: /pool/nextcloud/nextcloud-postgres
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: storage.nextcloud
+            operator: In
+            values:
+              - "true"

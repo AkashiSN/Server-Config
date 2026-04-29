@@ -13,9 +13,9 @@ configs:
           id: oidc
           name: cloudflare
           config:
-            issuer: "{{ argocd_cloudflare_issuer }}"
-            clientID: "{{ argocd_cloudflare_client_id }}"
-            clientSecret: "{{ argocd_cloudflare_client_secret }}"
+            issuer: "{{ argocd_oidc_issuer }}"
+            clientID: "{{ argocd_oidc_client_id }}"
+            clientSecret: "{{ argocd_oidc_client_secret }}"
             insecureSkipEmailVerified: true
             getUserInfo: true
             requestedScopes:

@@ -1,0 +1,21 @@
+resources:
+  - namespace.yml
+  - persistent-volume.yml
+  - postgres.yml
+  - redis.yml
+  - nginx-conf.yml
+  - nextcloud-hooks.yml
+  - nextcloud.yml
+secretGenerator:
+  - name: nextcloud-secrets
+    namespace: nextcloud
+    envs:
+      - secrets/.env
+    options:
+      disableNameSuffixHash: true
+  - name: common-secrets
+    namespace: nextcloud
+    envs:
+      - secrets/common.env
+    options:
+      disableNameSuffixHash: true
