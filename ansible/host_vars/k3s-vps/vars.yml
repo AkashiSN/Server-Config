@@ -35,14 +35,12 @@ s3ql_filesystems:
 # Secrets
 #
 
-# common
-email_address: "{{ vault_email_address }}"
-smtp_password: "{{ vault_smtp_password }}"
-
 # immich
 immich_postgres_user_password: "{{ vault_immich_postgres_user_password }}"
 
 # nextcloud
+nextcloud_email_address: "{{ vault_nextcloud_email_address }}"
+nextcloud_smtp_password: "{{ vault_nextcloud_smtp_password }}"
 nextcloud_admin_user: "{{ vault_nextcloud_admin_user }}"
 nextcloud_admin_password: "{{ vault_nextcloud_admin_password }}"
 nextcloud_postgres_password: "{{ vault_nextcloud_postgres_password }}"

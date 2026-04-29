@@ -56,7 +56,7 @@ data:
   SMTP_PORT: "587"
   SMTP_SECURE: tls
   MAIL_FROM_ADDRESS: no-reply
-  MAIL_DOMAIN: files.akashisn.info
+  MAIL_DOMAIN: akashisn.info
   SMTP_PASSWORD_FILE: /secrets/smtp_password
 
   # ----- Nextcloud system config (NC_<key> 形式で config.php を上書き) -----
