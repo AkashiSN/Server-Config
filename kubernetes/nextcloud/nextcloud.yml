@@ -147,6 +147,8 @@ spec:
             - containerPort: 80
               name: http
           volumeMounts:
+            - name: data
+              mountPath: /var/www/html
             - name: nginx-conf
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
