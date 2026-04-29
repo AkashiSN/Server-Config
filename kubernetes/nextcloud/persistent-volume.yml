@@ -4,7 +4,7 @@ metadata:
   name: nextcloud-data-pv
 spec:
   capacity:
-    storage: 100Gi
+    storage: 2Ti
   accessModes:
     - ReadWriteOncePod
   persistentVolumeReclaimPolicy: Retain

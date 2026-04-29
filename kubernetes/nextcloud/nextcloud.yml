@@ -210,7 +210,7 @@ spec:
         storageClassName: s3ql-storage
         resources:
           requests:
-            storage: 8Ti
+            storage: 2Ti
 ---
 apiVersion: v1
 kind: Service
