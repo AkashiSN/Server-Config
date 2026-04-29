@@ -61,7 +61,7 @@ spec:
                   "--",
                   "/bin/sh",
                   "-c",
-                  'su www-data --shel=/bin/sh --command="/usr/local/bin/php -f /var/www/html/cron.php"',
+                  'su www-data --shell=/bin/sh --command="/usr/local/bin/php -f /var/www/html/cron.php"',
                 ]
             - name: preview
               image: ghcr.io/akashisn/kubectl@sha256:61cc425796342c8a73e8fd32c8a1ae551f1d759dcbb5cc9b73cde0b1bc02f1c2
@@ -77,6 +77,6 @@ spec:
                   "--",
                   "/bin/sh",
                   "-c",
-                  'su www-data --shel=/bin/sh --command="/usr/local/bin/php /var/www/html/occ preview:pre-generate"',
+                  'su www-data --shell=/bin/sh --command="/usr/local/bin/php /var/www/html/occ preview:pre-generate"',
                 ]
           restartPolicy: Never
