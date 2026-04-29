@@ -4,7 +4,7 @@ metadata:
   labels:
     app: nextcloud-mariadb
   name: nextcloud-mariadb
-  namespace: nextcloud
+  namespace: nextcloud-old
 spec:
   replicas: 1
   serviceName: nextcloud-mariadb
@@ -74,7 +74,7 @@ metadata:
   labels:
     service: nextcloud-mariadb
   name: nextcloud-mariadb
-  namespace: nextcloud
+  namespace: nextcloud-old
 spec:
   ports:
     - name: mariadb

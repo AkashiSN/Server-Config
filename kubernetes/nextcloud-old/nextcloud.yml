@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nextcloud-env
-  namespace: nextcloud
+  namespace: nextcloud-old
 data:
   TZ: "Asia/Tokyo"
   NEXTCLOUD_ADMIN_USER_FILE: /secrets/nextcloud_admin_user
@@ -28,7 +28,7 @@ metadata:
   labels:
     app: nextcloud
   name: nextcloud
-  namespace: nextcloud
+  namespace: nextcloud-old
 spec:
   replicas: 1
   serviceName: nextcloud
@@ -280,7 +280,7 @@ metadata:
   labels:
     service: nextcloud
   name: nextcloud
-  namespace: nextcloud
+  namespace: nextcloud-old
 spec:
   ports:
     - name: nginx-nextcloud
@@ -296,7 +296,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-nextcloud
-  namespace: nextcloud
+  namespace: nextcloud-old
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
 spec:

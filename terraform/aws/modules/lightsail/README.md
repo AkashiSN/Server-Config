@@ -86,7 +86,7 @@ sudo zfs create pool/immich
 sudo zfs create pool/immich/immich-postgres
 sudo zfs create pool/nextcloud
 sudo zfs create pool/nextcloud/nextcloud-app
-sudo zfs create pool/nextcloud/nextcloud-mariadb
+sudo zfs create pool/nextcloud/nextcloud-postgres
 ```
 
 ### 5. ZFSnap の設定

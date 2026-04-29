@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nextcloud-pv
+  name: nextcloud-old-pv
 spec:
   capacity:
     storage: 30Gi
@@ -10,7 +10,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   claimRef:
-    namespace: nextcloud
+    namespace: nextcloud-old
     name: app-nextcloud-0
   local:
     path: /pool/nextcloud/nextcloud-app
@@ -26,7 +26,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nextcloud-data-pv
+  name: nextcloud-old-data-pv
 spec:
   capacity:
     storage: 8Ti
@@ -35,7 +35,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: s3ql-storage
   claimRef:
-    namespace: nextcloud
+    namespace: nextcloud-old
     name: data-nextcloud-0
   iscsi:
     targetPortal: 100.102.72.106:3260
@@ -57,7 +57,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nextcloud-mariadb-pv
+  name: nextcloud-old-mariadb-pv
 spec:
   capacity:
     storage: 30Gi
@@ -66,7 +66,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   claimRef:
-    namespace: nextcloud
+    namespace: nextcloud-old
     name: data-nextcloud-mariadb-0
   local:
     path: /pool/nextcloud/nextcloud-mariadb
@@ -82,7 +82,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nextcloud-static-pv
+  name: nextcloud-old-static-pv
 spec:
   capacity:
     storage: 30Gi
@@ -91,7 +91,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   claimRef:
-    namespace: nextcloud
+    namespace: nextcloud-old
     name: static-nextcloud-0
   local:
     path: /pool/nextcloud/static-files
@@ -107,7 +107,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nextcloud-musics-pv
+  name: nextcloud-old-musics-pv
 spec:
   capacity:
     storage: 500Gi
@@ -116,7 +116,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs-hdd-storage
   claimRef:
-    namespace: nextcloud
+    namespace: nextcloud-old
     name: musics-nextcloud-0
   nfs:
     server: truenas
@@ -127,7 +127,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nextcloud-videos-pv
+  name: nextcloud-old-videos-pv
 spec:
   capacity:
     storage: 2Ti
@@ -136,7 +136,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs-hdd-storage
   claimRef:
-    namespace: nextcloud
+    namespace: nextcloud-old
     name: videos-nextcloud-0
   nfs:
     server: truenas
@@ -147,7 +147,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nextcloud-photos-pv
+  name: nextcloud-old-photos-pv
 spec:
   capacity:
     storage: 2Ti
@@ -156,7 +156,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs-hdd-storage
   claimRef:
-    namespace: nextcloud
+    namespace: nextcloud-old
     name: photos-nextcloud-0
   nfs:
     server: truenas

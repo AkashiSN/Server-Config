@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nextcloud-conf
-  namespace: nextcloud
+  namespace: nextcloud-old
 data:
   nextcloud.ini: |
     memory_limit=1024M
@@ -41,7 +41,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nextcloud-hooks
-  namespace: nextcloud
+  namespace: nextcloud-old
 data:
   config.sh: |
     #!/bin/sh

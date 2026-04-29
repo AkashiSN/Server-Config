@@ -30,6 +30,7 @@ spec:
   generators:
     - list:
         elements:
+          - name: nextcloud-old
           - name: nextcloud
           - name: immich
   template:

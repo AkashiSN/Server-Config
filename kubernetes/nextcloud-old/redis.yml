@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nextcloud-redis
-  namespace: nextcloud
+  namespace: nextcloud-old
 spec:
   selector:
     matchLabels:
@@ -34,7 +34,7 @@ metadata:
   labels:
     service: nextcloud-redis
   name: nextcloud-redis
-  namespace: nextcloud
+  namespace: nextcloud-old
 spec:
   type: ClusterIP
   ports:
