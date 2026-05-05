@@ -223,7 +223,6 @@ LimitNOFILE=131072
 ExecStartPre=/usr/local/bin/fsck.s3ql --batch --authfile /root/.s3ql/authinfo2 ${storage_url}
 ExecStart=/usr/local/bin/mount.s3ql --allow-other --authfile /root/.s3ql/authinfo2 --cachedir /var/cache/s3ql/${name} --cachesize ${cache_size} --metadata-backup-interval ${backup_interval} --systemd --max-threads ${max_threads} --compress ${compress} --keep-cache --log none ${storage_url} ${mount_point}
 ExecStop=/usr/local/sbin/s3ql-wait-and-umount ${mount_point}
-ExecStopPost=-/usr/bin/fusermount3 -u -z ${mount_point}
 Restart=on-failure
 
 [Install]
