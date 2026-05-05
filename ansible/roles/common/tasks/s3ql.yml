@@ -158,6 +158,15 @@
     mode: "0600"
   become: true
 
+- name: Deploy s3ql wait-and-umount wrapper
+  ansible.builtin.copy:
+    src: s3ql-wait-and-umount
+    dest: /usr/local/sbin/s3ql-wait-and-umount
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
 - name: Deploy s3ql mount systemd units
   ansible.builtin.template:
     src: s3ql-mount.service.j2

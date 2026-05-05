@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+mp="${1:?mountpoint required}"
+warned=0
+while fuser -m "$mp" >/dev/null 2>&1; do
+    if [[ $warned -eq 0 ]]; then
+        echo "s3ql: $mp is still in use, waiting for release..." >&2
+        fuser -mv "$mp" 2>&1 | logger -t s3ql-stop || true
+        warned=1
+    fi
+    sleep 5
+done
+if [[ $warned -eq 1 ]]; then
+    echo "s3ql: $mp released, proceeding to umount" >&2
+fi
+exec /usr/local/bin/umount.s3ql "$mp"
