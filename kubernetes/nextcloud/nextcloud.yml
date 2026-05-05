@@ -114,7 +114,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: nextcloud
-          image: nextcloud:33.0.2-fpm-alpine
+          image: nextcloud:33.0.3-fpm-alpine
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9000
@@ -171,7 +171,7 @@ spec:
         # 5 分おきに cron.php を回す sidecar (NC_backgroundjobs_mode=cron の実体)。
         # image 同梱の /cron.sh が busybox crond をフォアグラウンド実行する。
         - name: cron
-          image: nextcloud:33.0.2-fpm-alpine
+          image: nextcloud:33.0.3-fpm-alpine
           imagePullPolicy: IfNotPresent
           command: ["/cron.sh"]
           envFrom:
