@@ -129,7 +129,7 @@ spec:
                   name: nextcloud-secrets
                   key: email_address
           volumeMounts:
-            - name: data
+            - name: storage
               mountPath: /var/www/html
             - name: nextcloud-secrets
               mountPath: /secrets
@@ -151,7 +151,7 @@ spec:
             - containerPort: 80
               name: http
           volumeMounts:
-            - name: data
+            - name: storage
               mountPath: /var/www/html
             - name: nginx-conf
               mountPath: /etc/nginx/nginx.conf
@@ -178,7 +178,7 @@ spec:
             - configMapRef:
                 name: nextcloud-env
           volumeMounts:
-            - name: data
+            - name: storage
               mountPath: /var/www/html
             - name: nextcloud-secrets
               mountPath: /secrets
@@ -205,7 +205,7 @@ spec:
     whenDeleted: Delete
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: storage
       spec:
         accessModes:
           - ReadWriteOncePod

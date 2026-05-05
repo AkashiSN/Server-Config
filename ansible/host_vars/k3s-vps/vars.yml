@@ -20,14 +20,14 @@ s3ql_region: "ap-northeast-1"
 s3ql_bucket: "{{ vault_s3ql_bucket }}"
 s3ql_filesystems:
   - name: immich
-    description: Immich photos
+    description: Immich
     storage_url: "s3://{{ s3ql_region }}/{{ s3ql_bucket }}/immich/"
-    mount_point: /mnt/s3ql/immich-photos
+    mount_point: /mnt/s3ql/immich
     fs_passphrase: "{{ vault_immich_s3ql_fs_passphrase }}"
   - name: nextcloud
-    description: Nextcloud data
+    description: Nextcloud
     storage_url: "s3://{{ s3ql_region }}/{{ s3ql_bucket }}/nextcloud/"
-    mount_point: /mnt/s3ql/nextcloud-data
+    mount_point: /mnt/s3ql/nextcloud
     fs_passphrase: "{{ vault_nextcloud_s3ql_fs_passphrase }}"
 
 
