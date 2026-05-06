@@ -1,8 +1,8 @@
 # Create s3 bucket
-# aws s3api create-bucket --bucket su-nishi-bucket --region ap-northeast-1 \
+# aws s3api create-bucket --bucket su-nishi --region ap-northeast-1 \
 #   --create-bucket-configuration LocationConstraint=ap-northeast-1
 
-# aws s3api put-bucket-versioning --bucket su-nishi-bucket \
+# aws s3api put-bucket-versioning --bucket su-nishi \
 #   --versioning-configuration Status=Enabled
 
 terraform {
@@ -16,7 +16,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "su-nishi-bucket"
+    bucket  = "su-nishi"
     region  = "ap-northeast-1"
     key     = "terraform/ap-northeast-1.tfstate"
     encrypt = true

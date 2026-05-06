@@ -1,8 +1,8 @@
 resource "aws_s3_bucket" "this" {
-  bucket = "${var.project}-${var.purpose}-bucket"
+  bucket = "${var.project}-${var.purpose}"
 
   tags = {
-    Name = "${var.project}-${var.purpose}-bucket"
+    Name = "${var.project}-${var.purpose}"
   }
 }
 

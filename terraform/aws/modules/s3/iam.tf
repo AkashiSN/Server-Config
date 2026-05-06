@@ -1,8 +1,8 @@
 resource "aws_iam_user" "this" {
-  name = "${var.project}_${var.purpose}-user"
+  name = "${var.project}_${var.purpose}"
 
   tags = {
-    Name = "${var.project}_${var.purpose}-user"
+    Name = "${var.project}_${var.purpose}"
   }
 }
 
@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "this" {
 }
 
 resource "aws_iam_user_policy" "this" {
-  name   = "${var.project}_${var.purpose}-s3-policy"
+  name   = "${var.project}_${var.purpose}"
   user   = aws_iam_user.this.name
   policy = data.aws_iam_policy_document.this.json
 }

@@ -33,8 +33,8 @@ fi
 
 # Filesystem definitions (parallel arrays — keep indices aligned).
 FS_NAMES=(immich nextcloud)
-FS_DESCRIPTIONS=("Immich photos" "Nextcloud data")
-FS_MOUNT_POINTS=(/mnt/s3ql/immich-photos /mnt/s3ql/nextcloud-data)
+FS_DESCRIPTIONS=("Immich" "Nextcloud")
+FS_MOUNT_POINTS=(/mnt/s3ql/immich /mnt/s3ql/nextcloud)
 FS_PASSPHRASES=("${S3QL_FS_PASSPHRASE_IMMICH}" "${S3QL_FS_PASSPHRASE_NEXTCLOUD}")
 
 # Defaults from ansible/roles/common/vars/main.yml
