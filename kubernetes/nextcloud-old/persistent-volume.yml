@@ -43,16 +43,6 @@ spec:
     lun: 0
     fsType: xfs
     readOnly: false
-  # local:
-  #   path: /mnt/s3ql/nextcloud-data
-  # nodeAffinity:
-  #   required:
-  #     nodeSelectorTerms:
-  #       - matchExpressions:
-  #         - key: storage.nextcloud
-  #           operator: In
-  #           values:
-  #             - "true"
 ---
 apiVersion: v1
 kind: PersistentVolume

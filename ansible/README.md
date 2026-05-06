@@ -61,7 +61,7 @@ make clean
 | 用途 | バックエンド | マウント先 / 保存先 |
 | --- | --- | --- |
 | Immich Postgres / Nextcloud DB / Nextcloud app | ZFS (Lightsail 追加ディスク `/dev/xvdf` を `pool/` に使用) | `pool/immich/...`, `pool/nextcloud/...` (`terraform/aws/modules/lightsail/README.md` 参照) |
-| Immich 写真 / Nextcloud ユーザデータ | S3QL (AWS S3 バックエンド, `module.s3ql`) | `/mnt/s3ql/immich-photos`, `/mnt/s3ql/nextcloud-data` |
+| Immich 写真 / Nextcloud ユーザデータ | S3QL (AWS S3 バックエンド, `module.s3ql`) | `/mnt/s3ql/immich`, `/mnt/s3ql/nextcloud` |
 
 ZFS プール作成・データセット作成は `terraform/aws/modules/lightsail/README.md` 側で手動実施します。s3ql のセットアップ (パッケージ導入・authinfo2 配置・systemd unit / verify timer の生成) は本 playbook (`roles/common/tasks/s3ql.yml`) が冪等に実施します。
 
@@ -73,14 +73,14 @@ s3ql は `pipx` 経由でソース tarball (`s3ql_version`, デフォルト `6.0
 - `/etc/systemd/system/s3ql-verify-<name>.service` (oneshot。**自動実行はせず手動でのみ叩く**。`Conflicts=s3ql-<name>.service` でマウントを停止し、終了後 `ExecStopPost` で再 mount する)
 - `/usr/local/sbin/s3ql-wait-and-umount` (mount unit と共通。マウントポイントが `fuser -m` で掴まれている間は `umount.s3ql` を呼ばずに待機する)
 - `/var/cache/s3ql/<name>/` (キャッシュ)
-- `<mount_point>` (例: `/mnt/s3ql/immich-photos`, `/mnt/s3ql/nextcloud-data`)
+- `<mount_point>` (例: `/mnt/s3ql/immich`, `/mnt/s3ql/nextcloud`)
 
 現状の `s3ql_filesystems`:
 
 | name | mount_point |
 | --- | --- |
-| immich | `/mnt/s3ql/immich-photos` |
-| nextcloud | `/mnt/s3ql/nextcloud-data` |
+| immich | `/mnt/s3ql/immich` |
+| nextcloud | `/mnt/s3ql/nextcloud` |
 
 S3 backend のデータ整合性チェック (`s3ql_verify`) はマウント中の filesystem を一旦停止する重い処理であり、AWS S3 + SSE-S3 の耐久性に依拠して定期実行は行いません。必要なときだけ手動で起動します。
 
@@ -95,8 +95,8 @@ sudo journalctl -u s3ql-verify-immich.service -f
 `systemctl stop s3ql-<name>.service` と shutdown 時の自動停止はいずれも `ExecStop=/usr/local/sbin/s3ql-wait-and-umount <mount_point>` を経由します。マウントポイントを `cwd` 等で掴んでいるプロセスがある間は `umount.s3ql` を呼ばずに 5 秒間隔でポーリングし、解放されてから `umount.s3ql` に exec します。`TimeoutStopSec=infinity` のため systemd 側は打ち切りません(=cache flush 前に SIGTERM される事故を防ぐ)。
 
 ```bash
-sudo journalctl -t s3ql-stop -f                # 待機中のラッパーが出すログ
-sudo fuser -mv /mnt/s3ql/immich-photos          # 掴んでいるプロセスを確認
+sudo journalctl -t s3ql-stop -f          # 待機中のラッパーが出すログ
+sudo fuser -mv /mnt/s3ql/immich          # 掴んでいるプロセスを確認
 ```
 
 掴んでいる側を `cd /` で移動 (tmux 内シェルの場合は各 pane で実施) するか、対象プロセスを終了させると次のポーリングでアンマウントが進みます。
@@ -128,7 +128,7 @@ sudo systemctl start s3ql-immich.service
 | --- | --- |
 | `vault_s3ql_access_key_id` | s3ql 用 IAM アクセスキー (`terraform output s3ql_iam_access_key_id`) |
 | `vault_s3ql_secret_access_key` | s3ql 用 IAM シークレットキー (`terraform output -raw s3ql_iam_secret_access_key`) |
-| `vault_s3ql_bucket` | バケット名 (`terraform output s3ql_bucket_name`, 例: `su-nishi-s3ql-bucket`) |
+| `vault_s3ql_bucket` | バケット名 (`terraform output s3ql_bucket_name`) |
 | `vault_immich_s3ql_fs_passphrase` | immich ファイルシステム用に生成したパスフレーズ |
 | `vault_nextcloud_s3ql_fs_passphrase` | nextcloud ファイルシステム用に生成したパスフレーズ |
 
@@ -151,7 +151,7 @@ sudo /usr/local/bin/mkfs.s3ql --authfile /root/.s3ql/authinfo2 \
 sudo systemctl start s3ql-immich.service s3ql-nextcloud.service
 ```
 
-以降は `make k3s-vps` を流すだけで `s3ql-<name>.service` が冪等に維持され、`s3ql-verify-<name>.timer` で定期的な fsck も走ります。
+以降は `make k3s-vps` を流すだけで `s3ql-<name>.service` が冪等に維持されます。
 
 ## Notes
 
