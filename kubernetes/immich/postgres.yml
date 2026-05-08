@@ -45,16 +45,19 @@ spec:
               - /usr/local/bin/healthcheck.sh
             periodSeconds: 5
             failureThreshold: 60
+            timeoutSeconds: 10
           readinessProbe:
             exec:
               command:
               - /usr/local/bin/healthcheck.sh
             periodSeconds: 300
+            timeoutSeconds: 10
           livenessProbe:
             exec:
               command:
               - /usr/local/bin/healthcheck.sh
             periodSeconds: 300
+            timeoutSeconds: 10
       volumes:
         - name: immich-secrets
           secret:
