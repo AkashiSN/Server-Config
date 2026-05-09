@@ -43,21 +43,23 @@ spec:
             exec:
               command:
               - /usr/local/bin/healthcheck.sh
-            periodSeconds: 5
-            failureThreshold: 60
-            timeoutSeconds: 10
+            periodSeconds: 10        # 起動中は10秒ごと
+            failureThreshold: 30     # 最大5分待つ (公式の start_period: 5m 相当)
+            timeoutSeconds: 5
           readinessProbe:
             exec:
               command:
               - /usr/local/bin/healthcheck.sh
-            periodSeconds: 300
-            timeoutSeconds: 10
+            periodSeconds: 10        # immich-server がすぐ繋げるように短く
+            timeoutSeconds: 5
+            failureThreshold: 3
           livenessProbe:
             exec:
               command:
               - /usr/local/bin/healthcheck.sh
-            periodSeconds: 300
+            periodSeconds: 300       # 重いクエリなのでここは公式の 5m を維持
             timeoutSeconds: 10
+            failureThreshold: 3
       volumes:
         - name: immich-secrets
           secret:
