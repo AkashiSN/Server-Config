@@ -104,6 +104,29 @@ sudo tar czf - /etc/juicefs/jfs-private.pem /etc/juicefs/jfs-passphrase.txt \
 
 (本リポジトリでは Secrets Manager 用の Terraform リソースは現時点で管理していないため、上記は手動運用扱い)
 
+### アルゴリズム選択 (`--encrypt-algo`)
+
+JuiceFS は 2 つの AEAD 暗号アルゴリズムをサポートする。セキュリティ強度はどちらも 256 bit AEAD で同等のため、**判断軸は CPU 上での性能**。
+
+| アルゴリズム | 想定環境 | 性能の目安 |
+| --- | --- | --- |
+| `aes256gcm-rsa` (default) | AES-NI (x86_64) / ARM Crypto Extensions が効く CPU | 5–7 GB/s 級 |
+| `chacha20-rsa` | AES アクセラレータ非対応 CPU (古い ARM / 組込み / 一部の VM) | ソフト実装で AES より速い |
+
+ChaCha20-Poly1305 はそもそも「モバイル / 旧 ARM で AES が遅すぎる」問題への対処として広まった経緯があり、AES-NI が効く x86 サーバ環境では AES-256-GCM が圧倒的に高速。
+
+**本リポジトリの選択**: `module.lightsail_k3s` の `bundle_id = "xlarge_3_0"` は Lightsail の x86_64 第 3 世代プラン (Intel Xeon または AMD EPYC、いずれも AES-NI 対応) のため `aes256gcm-rsa` を採用する。Go (JuiceFS の実装言語) の `crypto/aes` は AES-NI を自動利用するので、追加チューニングは不要。
+
+apply 後にインスタンス上で AES-NI が露出しているか確認:
+
+```bash
+grep -m1 -o 'aes' /proc/cpuinfo
+# "aes" が表示されれば AES-NI 有効 → aes256gcm-rsa を採用
+# 何も表示されなければ chacha20-rsa を選ぶ
+```
+
+将来 ARM 系 Lightsail プラン (Graviton ベース等) に移行する場合は再確認すること。なお `--encrypt-algo` は **format 時に固定** され後から変更できないため (Section 7 のファイルシステム再作成が必要)、format 直前に上記コマンドで確認するのが望ましい。
+
 ## 4. ファイルシステムの初期化 (`juicefs format`)
 
 メタデータ DB に空のテーブル群を作成し、S3 バケットと紐付ける。**1 つのファイルシステムにつき 1 度だけ** 実行する。**Section 3 で生成した RSA 秘密鍵を `--encrypt-rsa-key` で渡し、暗号化を有効化する**。
@@ -129,7 +152,7 @@ sudo -E juicefs format \
 
 - **`META_PASSWORD` 環境変数** を使って DB パスワードを渡す。URL に `:password@` で埋め込まないこと。プロセス一覧 (`ps`) や履歴に残るリスクを避けるため。
 - **`JFS_RSA_PASSPHRASE` 環境変数** を使って暗号化鍵のパスフレーズを渡す。`--encrypt-rsa-key` の値を読み出すために必要。`sudo -E` で環境変数を引き継ぐ点に注意。
-- **`--encrypt-algo aes256gcm-rsa`** が現状のデフォルト。明示しておくと将来 default 変更があっても挙動が固定される。`chacha20-rsa` も選択可。
+- **`--encrypt-algo aes256gcm-rsa`** — Lightsail x86_64 + AES-NI 前提の選択。判断根拠と確認コマンドは Section 3 「アルゴリズム選択」を参照。format 時固定で後から変更不可。
 - **メタデータ URL の `sslmode=require`** を付ける。Lightsail PostgreSQL は SSL 強制ではないが、付けておくと万一公開設定に変わっても暗号化通信になる。
 - **`--bucket` は仮想ホスト形式の URL** を使う (`https://<bucket>.s3.<region>.amazonaws.com`)。AWS S3 では path-style がレガシー扱いのため。
 - 末尾の `myjfs` は **ファイルシステム名**。マウント時にも参照されるため、覚えやすい名前を付ける (本リポジトリの命名と揃えるなら `juicefs` でも可)。
