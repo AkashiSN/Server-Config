@@ -8,14 +8,14 @@ AWS Lightsail マネージドデータベースを汎用的に 1 台構築する
 
 | リソース | 説明 |
 | --- | --- |
-| `aws_lightsail_database.this` | Lightsail マネージド DB (`${project}_${purpose}`)。blueprint / bundle / 認証情報 / バックアップ / メンテ窓は変数で指定。`master_password` は `lifecycle.ignore_changes` で初回作成後は追従しない |
+| `aws_lightsail_database.this` | Lightsail マネージド DB (`${project}-${purpose}`)。blueprint / bundle / 認証情報 / バックアップ / メンテ窓は変数で指定。`master_password` は `lifecycle.ignore_changes` で初回作成後は追従しない |
 
 ## 変数
 
 | 変数 | 型 | デフォルト | 説明 |
 | --- | --- | --- | --- |
 | `project` | string | (必須) | リソース名のプレフィックス |
-| `purpose` | string | (必須) | リソース名のサフィックス。`${project}_${purpose}` がそのまま `relational_database_name` と `Name` タグになる |
+| `purpose` | string | (必須) | リソース名のサフィックス。`${project}-${purpose}` がそのまま `relational_database_name` と `Name` タグになる (`relational_database_name` が英数字とハイフンのみを許容するため、`lightsail_instance` のアンダースコア連結ではなくハイフン連結) |
 | `availability_zone` | string | `ap-northeast-1a` | DB を配置する AZ |
 | `blueprint_id` | string | (必須) | DB エンジン (例: `postgres_16`, `mysql_8_0`)。一覧は `aws lightsail get-relational-database-blueprints` |
 | `bundle_id` | string | (必須) | DB プラン (例: `micro_2_0`, `small_ha_2_0`)。`_ha_` が付くものは Multi-AZ 高可用構成。一覧は `aws lightsail get-relational-database-bundles` |

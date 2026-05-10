@@ -1,12 +1,12 @@
 locals {
-  name = "${var.project}_${var.purpose}"
+  name = "${var.project}-${var.purpose}"
 }
 
 resource "aws_lightsail_database" "this" {
-  relational_database_name         = local.name
-  availability_zone                = var.availability_zone
-  relational_database_blueprint_id = var.blueprint_id
-  relational_database_bundle_id    = var.bundle_id
+  relational_database_name = local.name
+  availability_zone        = var.availability_zone
+  blueprint_id             = var.blueprint_id
+  bundle_id                = var.bundle_id
 
   master_database_name = var.master_database_name
   master_username      = var.master_username
