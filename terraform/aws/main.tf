@@ -48,7 +48,7 @@ module "s3ql" {
   source         = "./modules/s3"
   project        = local.project
   purpose        = "s3ql"
-  allowed_ip     = module.lightsail_k3s.public_ipv4
+  allowed_ips    = ["${module.lightsail.k3s_public_ipv4}/32"]
   admin_iam_user = var.iam_user
 }
 
@@ -77,6 +77,6 @@ module "juicefs_s3" {
   source         = "./modules/s3"
   project        = local.project
   purpose        = "juicefs"
-  allowed_ip     = module.lightsail_k3s.public_ipv4
+  allowed_ips    = ["${module.lightsail.k3s_public_ipv4}/32"]
   admin_iam_user = var.iam_user
 }

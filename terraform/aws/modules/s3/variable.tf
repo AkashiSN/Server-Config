@@ -6,9 +6,9 @@ variable "purpose" {
   type = string
 }
 
-variable "allowed_ip" {
-  type        = string
-  description = "Source IPv4 address (without CIDR) that is allowed to access the bucket via the IAM user"
+variable "allowed_ips" {
+  type        = list(string)
+  description = "Source IPv4 address (with CIDR) that is allowed to access the bucket via the IAM user"
 }
 
 variable "admin_iam_user" {

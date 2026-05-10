@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "this" {
     condition {
       test     = "IpAddress"
       variable = "aws:SourceIp"
-      values   = ["${var.allowed_ip}/32"]
+      values   = var.allowed_ips
     }
   }
 
@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "this" {
     condition {
       test     = "IpAddress"
       variable = "aws:SourceIp"
-      values   = ["${var.allowed_ip}/32"]
+      values   = var.allowed_ips
     }
   }
 }

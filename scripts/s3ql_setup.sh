@@ -39,9 +39,8 @@ FS_PASSPHRASES=("${S3QL_FS_PASSPHRASE_IMMICH}" "${S3QL_FS_PASSPHRASE_NEXTCLOUD}"
 
 # Defaults from ansible/roles/common/vars/main.yml
 S3QL_DEFAULT_CACHE_SIZE=83886080
-S3QL_DEFAULT_MAX_THREADS=2
 S3QL_DEFAULT_METADATA_BACKUP_INTERVAL=3600
-S3QL_DEFAULT_COMPRESS=zlib-1
+S3QL_DEFAULT_COMPRESS=none
 
 storage_url_for() {
     local name="$1"
@@ -221,7 +220,7 @@ TimeoutStartSec=0
 TimeoutStopSec=infinity
 LimitNOFILE=131072
 ExecStartPre=/usr/local/bin/fsck.s3ql --batch --authfile /root/.s3ql/authinfo2 ${storage_url}
-ExecStart=/usr/local/bin/mount.s3ql --allow-other --authfile /root/.s3ql/authinfo2 --cachedir /var/cache/s3ql/${name} --cachesize ${cache_size} --metadata-backup-interval ${backup_interval} --systemd --max-threads ${max_threads} --compress ${compress} --keep-cache --log none ${storage_url} ${mount_point}
+ExecStart=/usr/local/bin/mount.s3ql --allow-other --authfile /root/.s3ql/authinfo2 --cachedir /var/cache/s3ql/${name} --cachesize ${cache_size} --metadata-backup-interval ${backup_interval} --systemd --compress ${compress} --keep-cache --log none ${storage_url} ${mount_point}
 ExecStop=/usr/local/sbin/s3ql-wait-and-umount ${mount_point}
 Restart=on-failure
 
