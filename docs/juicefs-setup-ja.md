@@ -8,6 +8,7 @@
 | マスターパスワード | `random_password` で生成、output に sensitive 公開 | `random_password.juicefs_db` |
 | オブジェクトストレージ | S3 バケット (private / SSE-AES256 / versioning + 7d lifecycle) | `module.juicefs_s3` |
 | S3 アクセス用 IAM ユーザ | k3s static IPv4 からのみ許可、専用 IAM ユーザ + access key | `module.juicefs_s3` (内部で `./modules/s3` を再利用) |
+| At-Rest Encryption | クライアントサイド AES-GCM + RSA。秘密鍵は k3s インスタンス上で管理 (Terraform 管理外) | (本書 Section 3 で生成) |
 
 JuiceFS そのもののインストールや高度な使い方は公式 [JuiceFS Community Docs](https://juicefs.com/docs/community/) を参照。本書は **このリポジトリで作った AWS リソースをどう繋ぐか** に焦点を当てる。
 
@@ -52,31 +53,92 @@ PGPASSWORD="$JFS_DB_PASS" psql \
 
 `sslmode=require` を付けると AWS が出している自己署名証明書を信頼するだけで接続できる。証明書チェーンまで検証したい場合は `sslmode=verify-full` + AWS RDS の bundled CA を使う (Lightsail でも同じバンドルが流用できる)。
 
-## 3. ファイルシステムの初期化 (`juicefs format`)
+## 3. 暗号化用 RSA 秘密鍵の生成 (At-Rest Encryption)
 
-メタデータ DB に空のテーブル群を作成し、S3 バケットと紐付ける。**1 つのファイルシステムにつき 1 度だけ** 実行すればよい。
+JuiceFS は AES-GCM + RSA のハイブリッド暗号によるクライアントサイド At-Rest Encryption をサポートする。S3 にアップロードされる **すべてのオブジェクトはアップロード前に JuiceFS 自身が暗号化** するため、AWS S3 側の SSE-AES256 とは独立した二重防御になる。本書ではこの暗号化を **必ず有効化する** 前提で進める。
+
+### 仕組み
+
+- ファイルシステムごとに 1 つの **RSA 秘密鍵** (パスフレーズ保護、PEM 形式) を生成し、`juicefs format` 時に登録する
+- 各オブジェクトごとにランダムな AES-256 データ鍵が生成され、本体は AES-GCM、データ鍵は RSA 公開鍵で暗号化されて同じオブジェクトに付与される
+- mount 時は `JFS_RSA_PASSPHRASE` 環境変数だけでよい (秘密鍵自体はフォーマット時にメタデータ DB に格納される)
+- **format 後に暗号化の有効/無効や鍵を変更することはできない**。鍵またはパスフレーズを失うとファイルシステム全体が復号不能になる
+
+### RSA 秘密鍵とパスフレーズの生成
+
+k3s インスタンス上で以下を実行する。鍵もパスフレーズも k3s インスタンス内に閉じて管理し、Lightsail スナップショット任せにせず別経路でもバックアップを取る。
 
 ```bash
-META_PASSWORD="$JFS_DB_PASS" juicefs format \
+# 鍵置き場を root only で用意
+sudo install -d -m 0700 -o root -g root /etc/juicefs
+
+# 強いパスフレーズを生成 (44 文字 base64)
+sudo bash -c 'openssl rand -base64 32 > /etc/juicefs/jfs-passphrase.txt'
+sudo chmod 600 /etc/juicefs/jfs-passphrase.txt
+
+# 2048 bit の RSA 秘密鍵を AES-256-CBC でパスフレーズ暗号化
+sudo bash -c '
+  JFS_RSA_PASSPHRASE=$(cat /etc/juicefs/jfs-passphrase.txt) \
+  openssl genpkey -algorithm RSA -aes256 \
+    -pkeyopt rsa_keygen_bits:2048 \
+    -pass env:JFS_RSA_PASSPHRASE \
+    -out /etc/juicefs/jfs-private.pem
+'
+sudo chmod 600 /etc/juicefs/jfs-private.pem
+```
+
+> **重要 — 鍵紛失=データ消失**
+> `/etc/juicefs/jfs-private.pem` と `/etc/juicefs/jfs-passphrase.txt` の両方を失うとファイルシステム全体が復号不能になる。Lightsail インスタンスのスナップショット任せにせず、**別ホスト or AWS Secrets Manager or 1Password** などにオフサイトコピーを取り、定期的に復号テストを行うこと。
+
+### バックアップ例 (任意)
+
+```bash
+# 鍵 + パスフレーズを 1 ファイルにまとめて Secrets Manager に格納する例
+sudo tar czf - /etc/juicefs/jfs-private.pem /etc/juicefs/jfs-passphrase.txt \
+  | base64 \
+  | aws secretsmanager create-secret \
+      --region ap-northeast-1 \
+      --name juicefs/encryption-bundle \
+      --secret-string file:///dev/stdin
+```
+
+(本リポジトリでは Secrets Manager 用の Terraform リソースは現時点で管理していないため、上記は手動運用扱い)
+
+## 4. ファイルシステムの初期化 (`juicefs format`)
+
+メタデータ DB に空のテーブル群を作成し、S3 バケットと紐付ける。**1 つのファイルシステムにつき 1 度だけ** 実行する。**Section 3 で生成した RSA 秘密鍵を `--encrypt-rsa-key` で渡し、暗号化を有効化する**。
+
+```bash
+# 暗号化鍵のパスフレーズを環境変数に展開 (シェル履歴に直接書かないこと)
+export JFS_RSA_PASSPHRASE=$(sudo cat /etc/juicefs/jfs-passphrase.txt)
+
+META_PASSWORD="$JFS_DB_PASS" \
+JFS_RSA_PASSPHRASE="$JFS_RSA_PASSPHRASE" \
+sudo -E juicefs format \
   --storage s3 \
   --bucket "https://${JFS_S3_BUCKET}.s3.ap-northeast-1.amazonaws.com" \
   --access-key "$JFS_S3_ACCESS_KEY" \
   --secret-key "$JFS_S3_SECRET_KEY" \
+  --encrypt-rsa-key /etc/juicefs/jfs-private.pem \
+  --encrypt-algo aes256gcm-rsa \
   "postgres://${JFS_DB_USER}@${JFS_DB_HOST}:${JFS_DB_PORT}/${JFS_DB_NAME}?sslmode=require" \
   myjfs
 ```
 
 ポイント:
 
-- **`META_PASSWORD` 環境変数** を使ってパスワードを渡す。URL に `:password@` で埋め込まないこと。プロセス一覧 (`ps`) や履歴に残るリスクを避けるため。
-- **メタデータ URL の sslmode=require** を付ける。Lightsail PostgreSQL は SSL 強制ではないが、付けておくと万一公開設定に変わっても暗号化通信になる。
+- **`META_PASSWORD` 環境変数** を使って DB パスワードを渡す。URL に `:password@` で埋め込まないこと。プロセス一覧 (`ps`) や履歴に残るリスクを避けるため。
+- **`JFS_RSA_PASSPHRASE` 環境変数** を使って暗号化鍵のパスフレーズを渡す。`--encrypt-rsa-key` の値を読み出すために必要。`sudo -E` で環境変数を引き継ぐ点に注意。
+- **`--encrypt-algo aes256gcm-rsa`** が現状のデフォルト。明示しておくと将来 default 変更があっても挙動が固定される。`chacha20-rsa` も選択可。
+- **メタデータ URL の `sslmode=require`** を付ける。Lightsail PostgreSQL は SSL 強制ではないが、付けておくと万一公開設定に変わっても暗号化通信になる。
 - **`--bucket` は仮想ホスト形式の URL** を使う (`https://<bucket>.s3.<region>.amazonaws.com`)。AWS S3 では path-style がレガシー扱いのため。
 - 末尾の `myjfs` は **ファイルシステム名**。マウント時にも参照されるため、覚えやすい名前を付ける (本リポジトリの命名と揃えるなら `juicefs` でも可)。
 
-成功すると以下のようなログが出て、PostgreSQL 側に約 14 個のテーブルが作成される。
+成功すると以下のようなログが出て、PostgreSQL 側に約 14 個のテーブルが作成される。`Encrypted: true` の表示があるか必ず確認する。
 
 ```
 <INFO>: Volume is formatted as ...
+<INFO>: Encrypted: true (algorithm: aes256gcm-rsa)
 ```
 
 確認:
@@ -85,34 +147,55 @@ META_PASSWORD="$JFS_DB_PASS" juicefs format \
 PGPASSWORD="$JFS_DB_PASS" psql \
   "host=$JFS_DB_HOST port=$JFS_DB_PORT user=$JFS_DB_USER dbname=$JFS_DB_NAME sslmode=require" \
   -c '\dt'
+
+# format 結果を再確認
+META_PASSWORD="$JFS_DB_PASS" juicefs status \
+  "postgres://${JFS_DB_USER}@${JFS_DB_HOST}:${JFS_DB_PORT}/${JFS_DB_NAME}?sslmode=require" \
+  | grep -i encrypt
 ```
 
-## 4. マウント (`juicefs mount`)
+## 5. マウント (`juicefs mount`)
+
+mount 時は **秘密鍵のパスは指定しない** (フォーマット時にメタデータ DB に保存済みのため)。`JFS_RSA_PASSPHRASE` 環境変数だけ渡せば JuiceFS が DB から鍵を取得し、パスフレーズで復号して使う。
 
 ```bash
 sudo mkdir -p /mnt/juicefs
 
-META_PASSWORD="$JFS_DB_PASS" juicefs mount \
+export JFS_RSA_PASSPHRASE=$(sudo cat /etc/juicefs/jfs-passphrase.txt)
+
+META_PASSWORD="$JFS_DB_PASS" \
+JFS_RSA_PASSPHRASE="$JFS_RSA_PASSPHRASE" \
+sudo -E juicefs mount \
   --background \
   "postgres://${JFS_DB_USER}@${JFS_DB_HOST}:${JFS_DB_PORT}/${JFS_DB_NAME}?sslmode=require" \
   /mnt/juicefs
 ```
 
-`--background` で daemon 化される。`df -h /mnt/juicefs` でマウント済みであることを確認する。`juicefs mount` は `juicefs format` と違い、**全クライアントで都度実行する** (k3s ノードが増えたらそれぞれで mount する)。
+`--background` で daemon 化される。`df -h /mnt/juicefs` でマウント済みであることを確認する。`juicefs mount` は `juicefs format` と違い、**全クライアントで都度実行する** (k3s ノードが増えたらそれぞれで mount する。秘密鍵パスフレーズも各ノードに配布が必要)。
 
-systemd 化する場合は公式 [Mount JuiceFS at boot](https://juicefs.com/docs/community/administration/mount_at_boot) を参照。`META_PASSWORD` を `EnvironmentFile=` で渡し、`/etc/juicefs/<volume>.env` のような分離ファイルを 0600 で配置するのが定石。
+systemd 化する場合は公式 [Mount JuiceFS at boot](https://juicefs.com/docs/community/administration/mount_at_boot) を参照。以下のような `EnvironmentFile=` を 0600 で配置するのが定石:
+
+```ini
+# /etc/juicefs/myjfs.env  (mode 0600, owner root)
+META_PASSWORD=...
+JFS_RSA_PASSPHRASE=...
+```
 
 ### k3s から使う場合
 
 PVC として参照する場合は [JuiceFS CSI Driver](https://juicefs.com/docs/csi/introduction) を入れるのが王道。本リポジトリでは Helm/manifests の追加は本書の範囲外とするが、要点だけ:
 
 - CSI Driver のインストールは `helm install juicefs-csi-driver` または manifests
-- `Secret` に `metaurl` (`postgres://...`)、`access-key`、`secret-key`、`bucket` を入れる
+- `Secret` に以下を入れる:
+  - `metaurl` (`postgres://...?sslmode=require`)
+  - `access-key`, `secret-key`, `bucket`
+  - `envs`: `{"META_PASSWORD": "...", "JFS_RSA_PASSPHRASE": "..."}` (CSI Driver が mount プロセスに渡す)
 - `metaurl` 内のパスワードは URL エンコードして埋め込むか、Secret 内の別フィールドに置いて CSI Driver の `format-options` から渡す
+- 暗号化済みファイルシステムを mount する場合、Secret に `JFS_RSA_PASSPHRASE` を必ず含める。**秘密鍵そのものはメタデータ DB 側にあるため CSI Secret には不要**
 
-詳細は [Use JuiceFS in Kubernetes](https://juicefs.com/docs/csi/getting_started) を参照。
+詳細は [Use JuiceFS in Kubernetes](https://juicefs.com/docs/csi/getting_started) と [JuiceFS CSI: Encrypt Data In Transit and At Rest](https://juicefs.com/docs/csi/guide/encryption) を参照。
 
-## 5. パスワードローテーション運用
+## 6. パスワードローテーション運用
 
 Terraform の仕様上、`master_password` の初回値は tfstate に平文で残る。`module.lightsail_juicefs_db` は `lifecycle.ignore_changes = [master_password]` を持つため、**初回 apply 後に Lightsail コンソール / CLI で別パスワードにローテートしても Terraform 側の差分にはならない**。推奨フロー:
 
@@ -132,7 +215,9 @@ aws lightsail update-relational-database \
 4. `juicefs mount` 実行側 (k3s ノード / systemd unit / Kubernetes Secret) のパスワードを `$NEW_PASS` で更新
 5. 以降のローテートはコンソール / CLI 側のみで完結。Terraform は触らない (state 上の値は使われていない過去のパスワードになる)
 
-## 6. ファイルシステムを作り直す場合
+なお **暗号化用 RSA 秘密鍵そのもの** は `juicefs format` 時点でメタデータ DB に登録された後は変更できない (公式仕様)。鍵をローテートしたい場合はファイルシステムを作り直す (Section 7) しかなく、データを別ファイルシステムにコピーしてから旧 FS を破棄する手順が必要になる。**運用開始前に強いパスフレーズを設定し、以後は鍵自体ではなくパスフレーズを保護する** という設計にすること。
+
+## 7. ファイルシステムを作り直す場合
 
 JuiceFS は **メタデータ DB を空にすればファイルシステムを破棄したのと同義**。S3 バケットに残ったオブジェクトは孤児になるので、明示的に削除する。
 
@@ -146,7 +231,7 @@ PGPASSWORD="$JFS_DB_PASS" psql \
 aws s3 rm "s3://${JFS_S3_BUCKET}" --recursive
 ```
 
-その後 `juicefs format` を再実行する。なお S3 バケット側のバージョニング + 7 日 lifecycle のため、削除直後は noncurrent version として 7 日残る (これは `module.juicefs_s3` のデフォルト)。
+その後 `juicefs format` を再実行する (Section 4)。鍵もローテートしたい場合は Section 3 から作り直す。なお S3 バケット側のバージョニング + 7 日 lifecycle のため、削除直後は noncurrent version として 7 日残る (これは `module.juicefs_s3` のデフォルト)。
 
 ## 制約と注意点
 
@@ -155,6 +240,9 @@ aws s3 rm "s3://${JFS_S3_BUCKET}" --recursive
 - **接続元の制約**: `publicly_accessible=false` で運用しているため、Lightsail アカウント外からは接続できない。同アカウントの他リージョンや別 VPC からの接続も不可。k3s ノード上で `juicefs mount` する以外の経路 (例: ローカルからの調査) を使う場合は、SSH ポートフォワードを使う。
 - **S3 アクセス IP 制限**: `module.juicefs_s3` の IAM ポリシーは `module.lightsail_k3s.public_ipv4` からのみ許可。k3s インスタンスを作り直して static IP が変わると IAM ポリシーは Terraform で自動追従するが、IP が変わっている間 (apply 完了まで) は JuiceFS が S3 にアクセスできず動作不能になる。インスタンス再作成時は `juicefs mount` を停止してから実施するのが安全。
 - **メタデータ消失=FS 消失**: 上述のとおり致命的。Lightsail 自動バックアップ (7 日保持、`backup_retention_enabled = true` がデフォルト有効) に加え、定期スナップショットの取得や、JuiceFS の `juicefs dump` によるメタデータエクスポートを併用するのが望ましい (公式 [Metadata Backup](https://juicefs.com/docs/community/administration/metadata_dump_load) 参照)。
+- **暗号化鍵 / パスフレーズ消失=データ消失**: `juicefs format` 時に登録した RSA 秘密鍵 (パスフレーズ込み) を失うと、メタデータ DB と S3 オブジェクトが両方無事でも復号不能。`/etc/juicefs/jfs-private.pem` と `/etc/juicefs/jfs-passphrase.txt` は Lightsail インスタンス外 (Secrets Manager / 1Password / 別ホスト) にもバックアップを取り、定期的に「別環境にリストアして復号できるか」を検証する。
+- **暗号化設定の変更不可**: `--encrypt-rsa-key` / `--encrypt-algo` は format 時の選択が固定される。後から暗号化方式を切り替えたり鍵をローテートする場合は、Section 7 でファイルシステムを作り直し、データを別 FS 経由でコピーする必要がある。
+- **CPU 負荷とパフォーマンス**: クライアントサイド AES-GCM 暗号化は CPU を消費する。`micro_*` クラスの k3s インスタンスでは大量の小ファイル書き込み時にスループットが頭打ちになる可能性がある。本番採用前に `juicefs bench /mnt/juicefs` で実測しておくこと。
 
 ## 参考
 
@@ -167,4 +255,7 @@ aws s3 rm "s3://${JFS_S3_BUCKET}" --recursive
   - [Set Up Metadata Engine — PostgreSQL](https://juicefs.com/docs/community/databases_for_metadata#postgresql)
   - [Set Up Object Storage — S3](https://juicefs.com/docs/community/how_to_set_up_object_storage#amazon-s3)
   - [Use JuiceFS on AWS](https://juicefs.com/docs/community/clouds/aws)
+  - [Encryption At Rest](https://juicefs.com/docs/community/security/encryption) — `--encrypt-rsa-key` / `JFS_RSA_PASSPHRASE` 仕様の一次情報
+  - [Metadata Backup and Recovery](https://juicefs.com/docs/community/administration/metadata_dump_load)
   - [JuiceFS CSI Driver](https://juicefs.com/docs/csi/introduction)
+  - [JuiceFS CSI: Encrypt Data](https://juicefs.com/docs/csi/guide/encryption)
