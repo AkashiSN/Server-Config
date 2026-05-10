@@ -60,10 +60,10 @@ make clean
 
 | 用途 | バックエンド | マウント先 / 保存先 |
 | --- | --- | --- |
-| Immich Postgres / Nextcloud DB / Nextcloud app | ZFS (Lightsail 追加ディスク `/dev/xvdf` を `pool/` に使用) | `pool/immich/...`, `pool/nextcloud/...` (`terraform/aws/modules/lightsail/README.md` 参照) |
+| Immich Postgres / Nextcloud DB / Nextcloud app | ZFS (Lightsail 追加ディスク `/dev/xvdf` を `pool/` に使用) | `pool/immich/...`, `pool/nextcloud/...` (`terraform/aws/modules/lightsail_instance/README.md` 参照) |
 | Immich 写真 / Nextcloud ユーザデータ | S3QL (AWS S3 バックエンド, `module.s3ql`) | `/mnt/s3ql/immich`, `/mnt/s3ql/nextcloud` |
 
-ZFS プール作成・データセット作成は `terraform/aws/modules/lightsail/README.md` 側で手動実施します。s3ql のセットアップ (パッケージ導入・authinfo2 配置・systemd unit / verify timer の生成) は本 playbook (`roles/common/tasks/s3ql.yml`) が冪等に実施します。
+ZFS プール作成・データセット作成は `terraform/aws/modules/lightsail_instance/README.md` 側で手動実施します。s3ql のセットアップ (パッケージ導入・authinfo2 配置・systemd unit / verify timer の生成) は本 playbook (`roles/common/tasks/s3ql.yml`) が冪等に実施します。
 
 ## s3ql セットアップ
 

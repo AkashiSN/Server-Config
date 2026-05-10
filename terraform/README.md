@@ -14,7 +14,7 @@
 - **Backend**: S3 (`su-nishi-bucket`, `terraform/ap-northeast-1.tfstate`)
 - **Provider**: `hashicorp/aws` 6.41.0 / Terraform 1.14.8
 - **Modules**:
-  - [lightsail](./aws/modules/lightsail) — k3s 用 Lightsail インスタンス + ZFS 用ディスク + Static IP + キーペア
+  - [lightsail_instance](./aws/modules/lightsail_instance) — 汎用 Lightsail インスタンスモジュール (purpose 単位でインスタンス + 追加ディスク + Static IP + キーペア + 公開ポートを構築。現状は k3s 用に呼び出し)
   - [s3](./aws/modules/s3) — s3ql 用 S3 バケット (SSE-S3, Public Access Block, 不完全マルチパートアップロード 7 日で中止)
 
 ### 実行手順

@@ -1,9 +1,9 @@
 output "k3s_public_ipv4" {
-  value = module.lightsail.k3s_public_ipv4
+  value = module.lightsail_k3s.public_ipv4
 }
 
 output "k3s_public_ipv6" {
-  value = module.lightsail.k3s_public_ipv6
+  value = module.lightsail_k3s.public_ipv6
 }
 
 output "s3ql_bucket_name" {
