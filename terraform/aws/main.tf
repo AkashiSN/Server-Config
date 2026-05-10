@@ -51,3 +51,32 @@ module "s3ql" {
   allowed_ip     = module.lightsail_k3s.public_ipv4
   admin_iam_user = var.iam_user
 }
+
+# Lightsail PostgreSQL の master_password は '/', '"', '@', スペースを許可しない。
+# Terraform default の特殊文字セットには '@' が含まれるため override が必須。
+resource "random_password" "juicefs_db" {
+  length           = 32
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+module "lightsail_juicefs_db" {
+  source  = "./modules/lightsail_database"
+  project = local.project
+  purpose = "juicefs"
+
+  blueprint_id = "postgres_18"
+  bundle_id    = "micro_2_0"
+
+  master_database_name = "juicefs"
+  master_username      = "juicefs"
+  master_password      = random_password.juicefs_db.result
+}
+
+module "juicefs_s3" {
+  source         = "./modules/s3"
+  project        = local.project
+  purpose        = "juicefs"
+  allowed_ip     = module.lightsail_k3s.public_ipv4
+  admin_iam_user = var.iam_user
+}
