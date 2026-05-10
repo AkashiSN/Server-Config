@@ -14,23 +14,9 @@ module "lightsail_k3s" {
 
   ports = [
     {
-      protocol   = "udp"
-      from_port  = 53
-      to_port    = 53
-      cidrs      = ["0.0.0.0/0"]
-      ipv6_cidrs = ["::/0"]
-    },
-    {
       protocol   = "tcp"
       from_port  = 443
       to_port    = 443
-      cidrs      = ["0.0.0.0/0"]
-      ipv6_cidrs = ["::/0"]
-    },
-    {
-      protocol   = "tcp"
-      from_port  = 853
-      to_port    = 853
       cidrs      = ["0.0.0.0/0"]
       ipv6_cidrs = ["::/0"]
     },
@@ -42,14 +28,6 @@ module "lightsail_k3s" {
       ipv6_cidrs = ["::/0"]
     },
   ]
-}
-
-module "s3ql" {
-  source         = "./modules/s3"
-  project        = local.project
-  purpose        = "s3ql"
-  allowed_ips    = ["${module.lightsail.k3s_public_ipv4}/32"]
-  admin_iam_user = var.iam_user
 }
 
 # Lightsail PostgreSQL の master_password は '/', '"', '@', スペースを許可しない。
@@ -77,6 +55,6 @@ module "juicefs_s3" {
   source         = "./modules/s3"
   project        = local.project
   purpose        = "juicefs"
-  allowed_ips    = ["${module.lightsail.k3s_public_ipv4}/32"]
+  allowed_ips    = ["${module.lightsail_k3s.public_ipv4}/32"]
   admin_iam_user = var.iam_user
 }
