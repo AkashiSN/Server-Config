@@ -43,7 +43,7 @@ spec:
               command:
               - immich-healthcheck
             periodSeconds: 5
-            failureThreshold: 6
+            failureThreshold: 60
           readinessProbe:
             exec:
               command:
