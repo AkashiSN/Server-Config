@@ -1,0 +1,52 @@
+---
+# アプリ用の namespace + secret をまとめて作成する。
+# 値は group_vars/k3s_cluster/vars.yml 経由で vault.yml 内の vault_* から解決される。
+# アプリを増やす時はこのファイルに loop / namespace / secret を追記する。
+
+- name: Create application namespaces
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ item }}"
+  loop:
+    - immich
+    - nextcloud
+  become: false
+
+- name: Create immich/immich-secrets
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: immich-secrets
+        namespace: immich
+      type: Opaque
+      stringData:
+        immich_postgres_user_password: "{{ immich_postgres_user_password }}"
+  become: false
+
+- name: Create nextcloud/nextcloud-secrets
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: nextcloud-secrets
+        namespace: nextcloud
+      type: Opaque
+      stringData:
+        email_address: "{{ nextcloud_email_address }}"
+        smtp_password: "{{ nextcloud_smtp_password }}"
+        admin_user: "{{ nextcloud_admin_user }}"
+        admin_password: "{{ nextcloud_admin_password }}"
+        postgres_password: "{{ nextcloud_postgres_password }}"
+        oidc_issuer: "{{ nextcloud_oidc_issuer }}"
+        oidc_client_id: "{{ nextcloud_oidc_client_id }}"
+        oidc_client_secret: "{{ nextcloud_oidc_client_secret }}"
+  become: false

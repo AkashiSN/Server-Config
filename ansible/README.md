@@ -158,3 +158,156 @@ sudo systemctl start s3ql-immich.service s3ql-nextcloud.service
 - Kubernetes 上のアプリ (dns / nextcloud / immich など) は [`../kubernetes/`](../kubernetes/README.md) 側で管理します。
 - AWS リソース (Lightsail インスタンス / 追加ディスク / Static IP / s3ql 用 S3 バケット & IAM ユーザ) は [`../terraform/aws/`](../terraform/aws/) で管理します。
 - Ansible 管理外のホストへ s3ql 構成だけ単独で入れたい場合は [`../scripts/s3ql_setup.sh`](../scripts/s3ql_setup.sh) を root で実行できます。`s3ql_filesystems` は immich / nextcloud にハードコードされており、シークレットは環境変数 (`S3QL_ACCESS_KEY_ID` / `S3QL_SECRET_ACCESS_KEY` / `S3QL_BUCKET` / `S3QL_FS_PASSPHRASE_IMMICH` / `S3QL_FS_PASSPHRASE_NEXTCLOUD`) で渡します。スクリプト先頭のコメントを参照してください。
+
+---
+
+# k3s_cluster (multi-node, 並走) のセットアップ
+
+`k3s_cluster` グループ (`k3s-server` + `k3s-agent-{0,1}`) は新規の 3 ノード k3s クラスタです。旧 `k3s-vps` (シングルノード) と並走させて段階移行する想定で、別 inventory グループ・別 playbook (`setup-k3s-cluster.yml`) で扱います。
+
+## ファイル構成
+
+| パス | 役割 |
+| --- | --- |
+| `inventory.yml` の `k3s_cluster` ツリー | server / agent ホスト定義。各 host エントリに `k3s_node_labels` を書けば `--node-label` で適用される |
+| `group_vars/k3s_cluster/vars.yml` | 平文の共通変数 (k3s channel / TLS SAN / ArgoCD / JuiceFS 設定) |
+| `group_vars/k3s_cluster/vault.yml` | 暗号化済み secret (下記の手順で作成) |
+| `setup-k3s-cluster.yml` | エントリ playbook |
+| `roles/node_facts/` | default NIC / IPv4 / IPv6 prefix を register |
+| `roles/node_common/` | hostname 設定 + パッケージ更新 + timezone / swap / logrotate |
+| `roles/helm_cli/` | helm + helm-diff plugin |
+| `roles/k3s_server/` | k3s server インストール + node-token を `k3s_token` fact に bind |
+| `roles/k3s_agent/` | server の node-token (`hostvars['k3s-server'].k3s_token`) と private IP で agent join |
+| `roles/cluster_ingress_nginx/` / `cluster_cert_manager/` / `cluster_argocd/` / `cluster_juicefs_csi/` | Helm リリースと付随リソース |
+| `roles/cluster_app_secrets/` | アプリ用 namespace (`immich`, `nextcloud`) + 各 `*-secrets` (DB / OIDC / SMTP 等) を vault から投入 |
+
+## 構築フロー
+
+### 1. terraform で AWS 側を apply
+
+```bash
+cd ../terraform/aws
+terraform apply
+```
+
+Lightsail インスタンス x3 (server: medium / agent: xlarge) + JuiceFS 用 Lightsail PostgreSQL + JuiceFS 用 S3 バケット & IAM ユーザが作成されます。userdata は `modules/lightsail_instance/scripts/k3s_node_provisioner.sh` が inline で渡され、SSH 鍵 / cloudflared / tailscale のパッケージインストールまでを行います (k3s 本体は ansible 側で導入)。
+
+### 2. 初回ブートストラップ: 22 を一時開放して tailscale / cloudflared 認証
+
+`terraform/aws/main.tf` の `module "k3s_cluster"` の `ports` 内に、コメントアウト済みの **22/TCP** エントリがある。これをアンコメントして `terraform apply` し、public IPv4 経由で各ノードに SSH 接続する:
+
+```bash
+cd ../terraform/aws
+# main.tf の 22/TCP ブロックをアンコメントして apply
+terraform apply
+
+# 各ノードに SSH (公開鍵は provisioner shell が GitHub から流し込む)
+ssh ubuntu@$(terraform output -raw k3s_cluster_server_public_ipv4)
+```
+
+server / agent それぞれで以下 2 つの認証を実施:
+
+```bash
+# Tailscale: tailnet に join (auth key は Tailscale 管理画面で発行)
+sudo tailscale up --authkey=tskey-XXXX
+
+# Cloudflare Tunnel: トンネル token を渡してサービス化
+# (token は Cloudflare Zero Trust > Networks > Tunnels で発行)
+sudo cloudflared service install <TUNNEL_TOKEN>
+```
+
+3 ノード全てで両方が完了したら、`main.tf` の 22/TCP ブロックを **再コメント** して `terraform apply` で port を閉じる。以降の SSH / ansible 接続は Tailscale または Cloudflare Tunnel 経由のみ。
+
+### 3. `group_vars/k3s_cluster/vault.yml` の作成
+
+ansible-vault に登録すべき secret 一覧と取得元:
+
+| キー | 取得元 | 取得コマンド例 |
+| --- | --- | --- |
+| `vault_juicefs_metaurl` | terraform output から組み立て (PostgreSQL DSN、**パスワード抜き**) | 下記スニペット参照 |
+| `vault_juicefs_meta_password` | terraform output (sensitive) | `terraform output -raw juicefs_db_master_password` |
+| `vault_juicefs_s3_bucket` | terraform output | `terraform output -raw juicefs_s3_bucket_name` |
+| `vault_juicefs_s3_access_key_id` | terraform output | `terraform output -raw juicefs_s3_iam_access_key_id` |
+| `vault_juicefs_s3_secret_access_key` | terraform output (sensitive) | `terraform output -raw juicefs_s3_iam_secret_access_key` |
+| `vault_cloudflare_token` | Cloudflare ダッシュボード (DNS Edit 権限) | 旧 `host_vars/k3s-vps/vault.yml` からコピー可 |
+| `vault_email` | ACME 登録用メールアドレス | 旧 vault からコピー可 |
+| `vault_argocd_oidc_issuer` | Cloudflare Zero Trust の OIDC アプリ | 旧 vault からコピー可 |
+| `vault_argocd_oidc_client_id` | 同上 | 旧 vault からコピー可 |
+| `vault_argocd_oidc_client_secret` | 同上 | 旧 vault からコピー可 |
+| `vault_argocd_webhook_github_secret` | GitHub webhook 用シークレット | 旧 vault からコピー可 |
+| `vault_immich_postgres_user_password` | Immich Postgres ユーザパスワード | 旧 vault からコピー可 |
+| `vault_nextcloud_email_address` | Nextcloud 通知メール from アドレス | 旧 vault からコピー可 |
+| `vault_nextcloud_smtp_password` | Nextcloud SMTP パスワード | 旧 vault からコピー可 |
+| `vault_nextcloud_admin_user` | Nextcloud 管理者ユーザ名 | 旧 vault からコピー可 |
+| `vault_nextcloud_admin_password` | Nextcloud 管理者パスワード | 旧 vault からコピー可 |
+| `vault_nextcloud_postgres_password` | Nextcloud Postgres パスワード | 旧 vault からコピー可 |
+| `vault_nextcloud_oidc_issuer` | Nextcloud OIDC issuer URL | 旧 vault からコピー可 |
+| `vault_nextcloud_oidc_client_id` | Nextcloud OIDC client id | 旧 vault からコピー可 |
+| `vault_nextcloud_oidc_client_secret` | Nextcloud OIDC client secret | 旧 vault からコピー可 |
+
+> **`K3S_TOKEN` は vault 登録不要**: k3s server が起動時に `/var/lib/rancher/k3s/server/node-token` を自動生成し、`roles/k3s_server` が slurp で `k3s_token` fact 化、`roles/k3s_agent` が `hostvars['k3s-server'].k3s_token` で参照します。
+
+`vault_juicefs_metaurl` の組み立て例 (terraform/aws ディレクトリで実行)。**パスワードは含めない** こと:
+
+```bash
+JF_USER=$(terraform output -raw juicefs_db_master_username)
+JF_HOST=$(terraform output -raw juicefs_db_endpoint)
+JF_PORT=$(terraform output -raw juicefs_db_port)
+echo "postgres://${JF_USER}@${JF_HOST}:${JF_PORT}/juicefs?sslmode=require"
+```
+
+パスワード (`vault_juicefs_meta_password`) は `terraform output -raw juicefs_db_master_password` で取得し、JuiceFS CSI secret の `envs` フィールド経由で `META_PASSWORD` 環境変数として注入される (URL エンコード不要、平文 secret に metaurl 全体を埋めない)。
+
+vault ファイル作成:
+
+```bash
+cd ../ansible
+ansible-vault create group_vars/k3s_cluster/vault.yml
+# エディタで上記キーを全部書く:
+# ---
+# vault_juicefs_metaurl: "postgres://..."
+# vault_juicefs_s3_bucket: "..."
+# ...
+```
+
+`ansible.cfg` の `vault_password_file = vault-pass.sh` 経由で 1Password (`op://Private/ansible-vault/password`) から復号鍵が自動取得されます。
+
+### 4. クラスタ構築
+
+```bash
+ansible-playbook setup-k3s-cluster.yml
+```
+
+順番:
+1. `node_facts` で default NIC / private IPv4 を register
+2. `node_common` で hostname / OS 基本設定
+3. `k3s_server` で control-plane を起動 → node-token を fact 化
+4. `k3s_agent` が server private IP + token で join
+5. `cluster_ingress_nginx` / `cluster_cert_manager` / `cluster_argocd` / `cluster_juicefs_csi` を helm でデプロイ
+6. 全 pod が Ready になるまで待機
+
+### 5. 動作確認
+
+```bash
+# kubectl を Tailscale 経由で繋ぐ (server から kubeconfig を取得)
+scp k3s-server:.kube/config ~/.kube/config
+sed -i '' "s/127.0.0.1/k3s-server/" ~/.kube/config
+kubectl --kubeconfig ~/.kube/config get nodes -o wide
+
+# k3s API (6443) が Lightsail public 側で閉じていることを確認
+nmap -p 6443 $(cd ../terraform/aws && terraform output -raw k3s_cluster_server_public_ipv4)
+# → filtered / closed であるべき (Tailscale 経由のみ)
+```
+
+## node label の指定
+
+`inventory.yml` の各 host エントリで `k3s_node_labels` を書くと `--node-label` が付与されます。
+
+```yaml
+k3s-agent-0:
+  ansible_host: k3s-agent-0
+  k3s_node_labels:
+    - storage.immich=true
+```
+
+未指定なら何も付きません。

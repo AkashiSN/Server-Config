@@ -1,0 +1,40 @@
+---
+# file: setup-k3s-cluster.yml
+# 新 3 ノードクラスタ (server x1 + agent x2) のセットアップ。
+# `k3s_cluster` (children: k3s_server, k3s_agent) を対象にする。
+- name: Gather facts and apply node-common config to all cluster nodes
+  hosts: k3s_cluster
+  roles:
+    - node_facts
+    - node_common
+
+- name: Install k3s server and helm CLI
+  hosts: k3s_server
+  roles:
+    - helm_cli
+    - k3s_server
+
+- name: Join k3s agents to the cluster
+  hosts: k3s_agent
+  roles:
+    - node_facts
+    - k3s_agent
+
+- name: Bootstrap cluster (ingress / cert-manager / argocd / juicefs csi / app secrets)
+  hosts: k3s_server
+  roles:
+    - cluster_ingress_nginx
+    - cluster_cert_manager
+    - cluster_argocd
+    - cluster_juicefs_csi
+    - cluster_app_secrets
+  tasks:
+    - name: Wait for all pods to be ready
+      ansible.builtin.command:
+        cmd: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
+      register: result
+      until: result.stdout.find("False") == -1
+      retries: 60
+      delay: 10
+      changed_when: false
+      become: false

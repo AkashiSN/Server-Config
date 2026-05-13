@@ -1,0 +1,47 @@
+---
+# 新クラスタ (server x1 + agent x2) 共通変数
+
+# Tailscale MagicDNS
+tailnet_dns_name: "{{ vault_tailnet_dns_name }}"
+
+# k3s
+k3s_channel: "v1.35"
+k3s_tls_sans:
+  - "k3s-server.{{ tailnet_dns_name }}"
+
+# domain
+domain: "akashisn.info"
+target_env: "production"
+
+# acme
+cloudflare_token: "{{ vault_cloudflare_token }}"
+email: "{{ vault_email }}"
+
+# argo-cd
+argocd_fqdn: "argocd.{{ domain }}"
+argocd_oidc_issuer: "{{ vault_argocd_oidc_issuer }}"
+argocd_oidc_client_id: "{{ vault_argocd_oidc_client_id }}"
+argocd_oidc_client_secret: "{{ vault_argocd_oidc_client_secret }}"
+argocd_webhook_github_secret: "{{ vault_argocd_webhook_github_secret }}"
+
+# JuiceFS CSI
+juicefs_name: "juicefs"
+juicefs_metaurl: "{{ vault_juicefs_metaurl }}"
+juicefs_meta_password: "{{ vault_juicefs_meta_password }}"
+juicefs_s3_bucket: "{{ vault_juicefs_s3_bucket }}"
+juicefs_s3_access_key_id: "{{ vault_juicefs_s3_access_key_id }}"
+juicefs_s3_secret_access_key: "{{ vault_juicefs_s3_secret_access_key }}"
+juicefs_storage_class: "juicefs-sc"
+
+# Secrets - immich
+immich_postgres_user_password: "{{ vault_immich_postgres_user_password }}"
+
+# Secrets - nextcloud
+nextcloud_email_address: "{{ vault_nextcloud_email_address }}"
+nextcloud_smtp_password: "{{ vault_nextcloud_smtp_password }}"
+nextcloud_admin_user: "{{ vault_nextcloud_admin_user }}"
+nextcloud_admin_password: "{{ vault_nextcloud_admin_password }}"
+nextcloud_postgres_password: "{{ vault_nextcloud_postgres_password }}"
+nextcloud_oidc_issuer: "{{ vault_nextcloud_oidc_issuer }}"
+nextcloud_oidc_client_id: "{{ vault_nextcloud_oidc_client_id }}"
+nextcloud_oidc_client_secret: "{{ vault_nextcloud_oidc_client_secret }}"

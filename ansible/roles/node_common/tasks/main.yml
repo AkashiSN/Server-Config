@@ -1,0 +1,61 @@
+---
+- name: Set hostname to inventory_hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  become: true
+
+- name: Ensure /etc/hosts has 127.0.1.1 entry for the hostname
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s'
+    line: "127.0.1.1 {{ inventory_hostname }}"
+    state: present
+  become: true
+
+- name: Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest # noqa package-latest
+    update_cache: true
+  become: true
+
+- name: Install a list of common packages
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - open-iscsi
+      - nfs-common
+      - python3-pip
+      - jq
+      - sysstat
+    state: present
+    update_cache: true
+  become: true
+
+- name: Install pip packages
+  ansible.builtin.pip:
+    name:
+      - kubernetes
+      - pyyaml
+    extra_args: --break-system-packages
+    executable: pip3.12
+  become: true
+
+- name: Remove dependencies that are no longer required
+  ansible.builtin.apt:
+    autoremove: true
+  become: true
+
+- name: Import timezone.yml
+  ansible.builtin.import_tasks:
+    file: timezone.yml
+
+- name: Import swap.yml
+  ansible.builtin.import_tasks:
+    file: swap.yml
+
+- name: Import logrotate.yml
+  ansible.builtin.import_tasks:
+    file: logrotate.yml

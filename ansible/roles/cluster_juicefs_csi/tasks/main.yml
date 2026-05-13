@@ -1,0 +1,55 @@
+---
+- name: Add JuiceFS CSI Helm charts repository
+  kubernetes.core.helm_repository:
+    name: juicefs
+    repo_url: https://juicedata.github.io/charts/
+  become: false
+
+- name: Create JuiceFS credentials secret
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ juicefs_name }}-secret"
+        namespace: kube-system
+      type: Opaque
+      stringData:
+        name: "{{ juicefs_name }}"
+        metaurl: "{{ juicefs_metaurl }}"
+        storage: "s3"
+        bucket: "https://{{ juicefs_s3_bucket }}.s3.ap-northeast-1.amazonaws.com"
+        access-key: "{{ juicefs_s3_access_key_id }}"
+        secret-key: "{{ juicefs_s3_secret_access_key }}"
+        # メタDB のパスワードは URL に含めず envs 経由で META_PASSWORD として注入する
+        envs: '{{ {"META_PASSWORD": juicefs_meta_password} | to_json }}'
+  become: false
+
+- name: Deploy juicefs-csi-driver chart
+  kubernetes.core.helm:
+    release_name: juicefs-csi-driver
+    chart_ref: juicefs/juicefs-csi-driver
+    release_namespace: kube-system
+    update_repo_cache: true
+    wait: true
+    atomic: true
+  become: false
+
+- name: Create StorageClass juicefs-sc
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "{{ juicefs_storage_class }}"
+      provisioner: csi.juicefs.com
+      parameters:
+        csi.storage.k8s.io/node-publish-secret-name: "{{ juicefs_name }}-secret"
+        csi.storage.k8s.io/node-publish-secret-namespace: kube-system
+        csi.storage.k8s.io/provisioner-secret-name: "{{ juicefs_name }}-secret"
+        csi.storage.k8s.io/provisioner-secret-namespace: kube-system
+      reclaimPolicy: Retain
+      volumeBindingMode: Immediate
+  become: false

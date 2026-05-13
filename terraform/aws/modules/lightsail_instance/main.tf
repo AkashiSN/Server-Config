@@ -1,6 +1,7 @@
 locals {
   name          = "${var.project}_${var.purpose}"
   user_data_url = coalesce(var.user_data_url, "https://akashisn.info/${var.purpose}_lightsail.sh")
+  user_data     = coalesce(var.user_data, "curl -fsSL ${local.user_data_url} | bash")
 }
 
 resource "aws_lightsail_instance" "this" {
@@ -10,7 +11,7 @@ resource "aws_lightsail_instance" "this" {
   bundle_id         = var.bundle_id
   ip_address_type   = var.ip_address_type
   key_pair_name     = aws_lightsail_key_pair.this.name
-  user_data         = "curl -fsSL ${local.user_data_url} | bash"
+  user_data         = local.user_data
 
   tags = {
     Name = local.name

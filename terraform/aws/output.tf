@@ -6,25 +6,20 @@ output "k3s_public_ipv6" {
   value = module.lightsail_k3s.public_ipv6
 }
 
-output "s3ql_bucket_name" {
-  value = module.s3ql.bucket_name
+output "k3s_cluster_server_public_ipv4" {
+  value = module.k3s_cluster["server"].public_ipv4
 }
 
-output "s3ql_bucket_arn" {
-  value = module.s3ql.bucket_arn
+output "k3s_cluster_server_private_ipv4" {
+  value = module.k3s_cluster["server"].private_ipv4
 }
 
-output "s3ql_iam_user_name" {
-  value = module.s3ql.iam_user_name
+output "k3s_cluster_agent_public_ipv4" {
+  value = [for k, n in module.k3s_cluster : n.public_ipv4 if k != "server"]
 }
 
-output "s3ql_iam_access_key_id" {
-  value = module.s3ql.iam_access_key_id
-}
-
-output "s3ql_iam_secret_access_key" {
-  value     = module.s3ql.iam_secret_access_key
-  sensitive = true
+output "k3s_cluster_agent_private_ipv4" {
+  value = [for k, n in module.k3s_cluster : n.private_ipv4 if k != "server"]
 }
 
 output "juicefs_db_endpoint" {

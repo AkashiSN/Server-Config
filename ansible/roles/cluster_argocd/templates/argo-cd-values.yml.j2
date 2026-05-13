@@ -1,0 +1,45 @@
+global:
+ domain: "{{ argocd_fqdn }}"
+configs:
+  cm:
+    create: true
+    url: "https://{{ argocd_fqdn }}"
+    admin.enabled: false
+    exec.enabled: true
+    statusbadge.enabled: true
+    dex.config: |-
+      connectors:
+        - type: oidc
+          id: oidc
+          name: cloudflare
+          config:
+            issuer: "{{ argocd_oidc_issuer }}"
+            clientID: "{{ argocd_oidc_client_id }}"
+            clientSecret: "{{ argocd_oidc_client_secret }}"
+            insecureSkipEmailVerified: true
+            getUserInfo: true
+            requestedScopes:
+              - openid
+              - profile
+              - email
+              - groups
+  params:
+    server.insecure: true
+  rbac:
+    policy.default: "role:admin"
+    scopes: "[email]"
+  secret:
+    githubSecret: "{{ argocd_webhook_github_secret }}"
+dex:
+  enabled: true
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+    hostname: "{{ argocd_fqdn }}"
+    extraTls:
+      - secretName: argocd-cert
+        hosts:
+          - "{{ argocd_fqdn }}"

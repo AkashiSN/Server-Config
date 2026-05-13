@@ -1,0 +1,26 @@
+---
+- name: Install k3s (agent)
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      curl -sfL https://get.k3s.io | \
+        INSTALL_K3S_CHANNEL="{{ k3s_channel }}" \
+        K3S_URL="https://{{ hostvars['k3s-server'].node_ip.stdout }}:6443" \
+        K3S_TOKEN="{{ hostvars['k3s-server'].k3s_token }}" \
+        INSTALL_K3S_EXEC="agent \
+          --node-ip={{ node_ip.stdout }} \
+          --flannel-iface={{ default_interface.stdout }} \
+          {% for label in k3s_node_labels | default([]) %}--node-label={{ label }} {% endfor %}\
+          --node-name={{ inventory_hostname }}" \
+        sh -s -
+    executable: /bin/bash
+  args:
+    creates: /usr/local/bin/k3s
+  become: true
+
+- name: Ensure k3s-agent service is enabled and started
+  ansible.builtin.systemd:
+    name: k3s-agent
+    state: started
+    enabled: true
+  become: true

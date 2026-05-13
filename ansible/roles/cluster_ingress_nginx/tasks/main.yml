@@ -1,0 +1,24 @@
+---
+- name: Add ingress-nginx Helm charts repository
+  kubernetes.core.helm_repository:
+    name: ingress-nginx
+    repo_url: https://kubernetes.github.io/ingress-nginx
+  become: false
+
+- name: Concat cloudflare_ips strings
+  ansible.builtin.set_fact:
+    real_ip_from: "{{ cloudflare_ips | join(', ') }}, {{ local_ips | join(',') }}, {{ external_ip.stdout }}"
+  become: false
+
+- name: Deploy ingress-nginx chart
+  kubernetes.core.helm:
+    release_name: ingress-nginx
+    chart_ref: ingress-nginx/ingress-nginx
+    chart_version: "4.14.*"
+    release_namespace: ingress-nginx
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    values: "{{ lookup('template', 'ingress-nginx-values.yml.j2') | from_yaml }}"
+  become: false

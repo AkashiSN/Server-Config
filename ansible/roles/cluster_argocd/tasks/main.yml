@@ -1,0 +1,19 @@
+---
+- name: Add argo Helm charts repository
+  kubernetes.core.helm_repository:
+    name: argo
+    repo_url: https://argoproj.github.io/argo-helm
+  become: false
+
+- name: Deploy argocd chart
+  kubernetes.core.helm:
+    release_name: argo-cd
+    chart_ref: argo/argo-cd
+    chart_version: "9.5.*"
+    release_namespace: argo-cd
+    create_namespace: true
+    update_repo_cache: true
+    wait: true
+    atomic: true
+    values: "{{ lookup('template', 'argo-cd-values.yml.j2') | from_yaml }}"
+  become: false
