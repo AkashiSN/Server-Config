@@ -31,7 +31,7 @@ juicefs_meta_password: "{{ vault_juicefs_meta_password }}"
 juicefs_s3_bucket: "{{ vault_juicefs_s3_bucket }}"
 juicefs_s3_access_key_id: "{{ vault_juicefs_s3_access_key_id }}"
 juicefs_s3_secret_access_key: "{{ vault_juicefs_s3_secret_access_key }}"
-juicefs_storage_class: "juicefs-sc"
+juicefs_storage_class: "juicefs"
 
 # Secrets - immich
 immich_postgres_user_password: "{{ vault_immich_postgres_user_password }}"

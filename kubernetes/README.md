@@ -1,6 +1,6 @@
 # Kubernetes
 
-このディレクトリは k3s-vps クラスタ上にデプロイするアプリケーション群のマニフェストを管理しています。
+このディレクトリは k3s クラスタ上にデプロイするアプリケーション群のマニフェストを管理しています。デプロイ先クラスタは `Makefile` の `K3S_VPS_HOST` で切り替えます (現状は `k3s-oci.akashisn.info`)。
 
 ## 構成
 
@@ -17,7 +17,7 @@
 
 ### Argo CD ApplicationSet ( nextcloud / immich)
 
-`application.yml` を k3s-vps クラスタに適用し、Argo CD 側で各アプリを自動同期します。
+`application.yml` を `K3S_VPS_HOST` のクラスタに適用し、Argo CD 側で各アプリを自動同期します。
 
 ```bash
 # Deploy

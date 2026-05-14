@@ -1,11 +1,3 @@
-output "k3s_public_ipv4" {
-  value = module.lightsail_k3s.public_ipv4
-}
-
-output "k3s_public_ipv6" {
-  value = module.lightsail_k3s.public_ipv6
-}
-
 output "k3s_cluster_server_public_ipv4" {
   value = module.k3s_cluster["server"].public_ipv4
 }

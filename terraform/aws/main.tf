@@ -1,35 +1,3 @@
-module "lightsail_k3s" {
-  source  = "./modules/lightsail_instance"
-  project = local.project
-  purpose = "k3s"
-
-  bundle_id = "xlarge_3_0"
-
-  disks = {
-    zfs = {
-      size_in_gb = 128
-      disk_path  = "/dev/xvdf"
-    }
-  }
-
-  ports = [
-    {
-      protocol   = "tcp"
-      from_port  = 443
-      to_port    = 443
-      cidrs      = ["0.0.0.0/0"]
-      ipv6_cidrs = ["::/0"]
-    },
-    {
-      protocol   = "udp"
-      from_port  = 51820
-      to_port    = 51820
-      cidrs      = ["0.0.0.0/0"]
-      ipv6_cidrs = ["::/0"]
-    },
-  ]
-}
-
 module "k3s_cluster" {
   for_each = local.k3s_cluster_nodes
   source   = "./modules/lightsail_instance"
@@ -102,12 +70,9 @@ module "lightsail_juicefs_db" {
 }
 
 module "juicefs_s3" {
-  source  = "./modules/s3"
-  project = local.project
-  purpose = "juicefs"
-  allowed_ips = concat(
-    ["${module.lightsail_k3s.public_ipv4}/32"],
-    [for n in module.k3s_cluster : "${n.public_ipv4}/32"],
-  )
+  source         = "./modules/s3"
+  project        = local.project
+  purpose        = "juicefs"
+  allowed_ips    = [for n in module.k3s_cluster : "${n.public_ipv4}/32"]
   admin_iam_user = var.iam_user
 }

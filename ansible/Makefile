@@ -1,12 +1,12 @@
 .PHONY: clean
 clean:
-	rm -f $(CURDIR)/host_vars/k3s-vps/vault.yml
+	rm -f $(CURDIR)/group_vars/k3s_cluster/vault.yml
 
 .PHONY: credential
 credential:
-	op read "op://Private/ansible-vault/vault.yml" > $(CURDIR)/host_vars/k3s-vps/vault.yml
+	op read "op://Private/ansible-vault/vault.yml" > $(CURDIR)/group_vars/k3s_cluster/vault.yml
 
-.PHONY: k3s-vps
-k3s-vps:
+.PHONY: k3s-cluster
+k3s-cluster:
 	cd $(CURDIR) ; \
-	ansible-playbook setup-k3s-vps.yml
+	ansible-playbook setup-k3s-cluster.yml

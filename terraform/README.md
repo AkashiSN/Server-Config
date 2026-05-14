@@ -6,16 +6,19 @@
 
 | ディレクトリ | クラウド | 用途 |
 |---|---|---|
-| [aws](./aws) | AWS (ap-northeast-1) | Lightsail 上の k3s インスタンスと、s3ql 用の S3 バケット |
+| [aws](./aws) | AWS (ap-northeast-1) | Lightsail 上の k3s クラスタ (server x1 + agent x2) と JuiceFS 用 Lightsail PostgreSQL / S3 バケット |
 | [oci](./oci) | OCI (ap-tokyo-1) | Oracle Cloud k3s インスタンスとネットワーク |
 
 ## aws
 
-- **Backend**: S3 (`su-nishi-bucket`, `terraform/ap-northeast-1.tfstate`)
-- **Provider**: `hashicorp/aws` 6.41.0 / Terraform 1.14.8
+- **Backend**: S3 (`su-nishi`, `terraform/ap-northeast-1.tfstate`)
+- **Provider**: `hashicorp/aws` 6.43.0 / Terraform 1.15.1
 - **Modules**:
-  - [lightsail_instance](./aws/modules/lightsail_instance) — 汎用 Lightsail インスタンスモジュール (purpose 単位でインスタンス + 追加ディスク + Static IP + キーペア + 公開ポートを構築。現状は k3s 用に呼び出し)
-  - [s3](./aws/modules/s3) — s3ql 用 S3 バケット (SSE-S3, Public Access Block, 不完全マルチパートアップロード 7 日で中止)
+  - [lightsail_instance](./aws/modules/lightsail_instance) — 汎用 Lightsail インスタンスモジュール (purpose 単位でインスタンス + 追加ディスク + Static IP + キーペア + 公開ポートを構築。`module.k3s_cluster` から server / agent ノードをまとめて呼び出し)
+  - [lightsail_database](./aws/modules/lightsail_database) — 汎用 Lightsail マネージド DB モジュール (JuiceFS メタデータ用 PostgreSQL 18 を作成)
+  - [s3](./aws/modules/s3) — 任意用途の S3 バケット + 専用 IAM ユーザ (送信元 IP 制限つき。SSE-AES256, Public Access Block, versioning + 7d lifecycle、不完全マルチパートアップロード 7 日で中止)
+
+詳細は [`./aws/README.md`](./aws/README.md) を参照。
 
 ### 実行手順
 

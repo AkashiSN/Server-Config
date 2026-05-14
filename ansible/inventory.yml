@@ -1,10 +1,5 @@
 all:
   children:
-    k3s_vps:
-      hosts:
-        k3s-vps:
-          ansible_host: k3s-lightsail.akashisn.info
-
     k3s_cluster:
       children:
         k3s_server:

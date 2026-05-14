@@ -25,16 +25,9 @@ variable "ip_address_type" {
   default = "dualstack"
 }
 
-variable "user_data_url" {
-  type        = string
-  description = "URL to curl|bash from user_data. When null, https://akashisn.info/$${purpose}_lightsail.sh is used. Ignored if user_data is set."
-  default     = null
-}
-
 variable "user_data" {
   type        = string
-  description = "Raw user_data script. When set, this is passed inline and takes precedence over user_data_url."
-  default     = null
+  description = "Raw user_data script."
 }
 
 variable "disks" {

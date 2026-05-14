@@ -1,22 +1,22 @@
 # JuiceFS セットアップ手順 (Lightsail PostgreSQL + S3)
 
-`terraform/aws/main.tf` で構築した以下のリソースを使い、k3s インスタンス (`module.lightsail_k3s`) 上で JuiceFS をフォーマット・マウントするまでの手順をまとめる。
+`terraform/aws/main.tf` で構築した以下のリソースを使い、k3s クラスタ (`module.k3s_cluster`) 上で JuiceFS をフォーマット・マウントするまでの手順をまとめる。本リポジトリでは k3s クラスタからの常用は [JuiceFS CSI Driver](https://juicefs.com/docs/csi/introduction) 経由 (ansible の `roles/cluster_juicefs_csi`) を想定し、本書のホスト直接 mount 手順は format / 動作確認 / 障害調査用の参考とする。
 
 | 用途 | リソース | Terraform 参照 |
 | --- | --- | --- |
 | メタデータエンジン | Lightsail PostgreSQL 18 (`micro_2_0`, single-AZ) | `module.lightsail_juicefs_db` |
 | マスターパスワード | `random_password` で生成、output に sensitive 公開 | `random_password.juicefs_db` |
 | オブジェクトストレージ | S3 バケット (private / SSE-AES256 / versioning + 7d lifecycle) | `module.juicefs_s3` |
-| S3 アクセス用 IAM ユーザ | k3s static IPv4 からのみ許可、専用 IAM ユーザ + access key | `module.juicefs_s3` (内部で `./modules/s3` を再利用) |
-| At-Rest Encryption | クライアントサイド AES-GCM + RSA。秘密鍵は k3s インスタンス上で管理 (Terraform 管理外) | (本書 Section 3 で生成) |
+| S3 アクセス用 IAM ユーザ | k3s クラスタ各ノードの static IPv4 からのみ許可、専用 IAM ユーザ + access key | `module.juicefs_s3` (内部で `./modules/s3` を再利用) |
+| At-Rest Encryption | クライアントサイド AES-GCM + RSA。秘密鍵は format 実行ノード上で管理 (Terraform 管理外) | (本書 Section 3 で生成) |
 
 JuiceFS そのもののインストールや高度な使い方は公式 [JuiceFS Community Docs](https://juicefs.com/docs/community/) を参照。本書は **このリポジトリで作った AWS リソースをどう繋ぐか** に焦点を当てる。
 
 ## 前提
 
 - `terraform/aws` 配下で `terraform apply` 済み (Lightsail DB / S3 バケット / IAM ユーザ作成済み)
-- k3s インスタンス (`module.lightsail_k3s`) に SSH できる状態
-- k3s インスタンスから JuiceFS Community Edition バイナリ (`juicefs`) を実行できる状態 (インストールは公式 [Quick Start Guide](https://juicefs.com/docs/community/quick_start_guide) または `curl -sSL https://d.juicefs.com/install | sh -` を参照)
+- k3s クラスタの少なくとも 1 ノード (`module.k3s_cluster["server"]` など) に Tailscale 経由で SSH できる状態
+- 当該ノードから JuiceFS Community Edition バイナリ (`juicefs`) を実行できる状態 (インストールは公式 [Quick Start Guide](https://juicefs.com/docs/community/quick_start_guide) または `curl -sSL https://d.juicefs.com/install | sh -` を参照)
 
 ## 1. 認証情報の取得
 
@@ -42,10 +42,10 @@ export JFS_S3_SECRET_KEY=$(terraform output -raw juicefs_s3_iam_secret_access_ke
 
 ## 2. メタデータ DB への接続テスト (任意)
 
-JuiceFS から触る前に、PostgreSQL 接続が成立することを確認しておくとトラブルを切り分けやすい。Lightsail DB は `publicly_accessible=false` で作っているため、**k3s インスタンス上から実行する**。
+JuiceFS から触る前に、PostgreSQL 接続が成立することを確認しておくとトラブルを切り分けやすい。Lightsail DB は `publicly_accessible=false` で作っているため、**k3s クラスタのいずれかのノード上から実行する**。
 
 ```bash
-# k3s インスタンス上で
+# k3s クラスタノード上で
 PGPASSWORD="$JFS_DB_PASS" psql \
   "host=$JFS_DB_HOST port=$JFS_DB_PORT user=$JFS_DB_USER dbname=$JFS_DB_NAME sslmode=require" \
   -c '\conninfo'
@@ -66,7 +66,7 @@ JuiceFS は AES-GCM + RSA のハイブリッド暗号によるクライアント
 
 ### RSA 秘密鍵とパスフレーズの生成
 
-k3s インスタンス上で以下を実行する。鍵もパスフレーズも k3s インスタンス内に閉じて管理し、Lightsail スナップショット任せにせず別経路でもバックアップを取る。
+k3s クラスタのいずれかのノード上で以下を実行する。鍵もパスフレーズもノード内に閉じて管理し、Lightsail スナップショット任せにせず別経路でもバックアップを取る (本リポジトリでは生成後に 1Password に登録し、`group_vars/k3s_cluster/vault.yml` 経由で全ノード / CSI Secret に配布する想定)。
 
 ```bash
 # 鍵置き場を root only で用意
@@ -115,7 +115,7 @@ JuiceFS は 2 つの AEAD 暗号アルゴリズムをサポートする。セキ
 
 ChaCha20-Poly1305 はそもそも「モバイル / 旧 ARM で AES が遅すぎる」問題への対処として広まった経緯があり、AES-NI が効く x86 サーバ環境では AES-256-GCM が圧倒的に高速。
 
-**本リポジトリの選択**: `module.lightsail_k3s` の `bundle_id = "xlarge_3_0"` は Lightsail の x86_64 第 3 世代プラン (Intel Xeon または AMD EPYC、いずれも AES-NI 対応) のため `aes256gcm-rsa` を採用する。Go (JuiceFS の実装言語) の `crypto/aes` は AES-NI を自動利用するので、追加チューニングは不要。
+**本リポジトリの選択**: `module.k3s_cluster` の bundle (server: `medium_3_0` / agent: `xlarge_3_0`) はいずれも Lightsail の x86_64 第 3 世代プラン (Intel Xeon または AMD EPYC、いずれも AES-NI 対応) のため `aes256gcm-rsa` を採用する。Go (JuiceFS の実装言語) の `crypto/aes` は AES-NI を自動利用するので、追加チューニングは不要。
 
 apply 後にインスタンス上で AES-NI が露出しているか確認:
 
@@ -194,7 +194,7 @@ sudo -E juicefs mount \
   /mnt/juicefs
 ```
 
-`--background` で daemon 化される。`df -h /mnt/juicefs` でマウント済みであることを確認する。`juicefs mount` は `juicefs format` と違い、**全クライアントで都度実行する** (k3s ノードが増えたらそれぞれで mount する。秘密鍵パスフレーズも各ノードに配布が必要)。
+`--background` で daemon 化される。`df -h /mnt/juicefs` でマウント済みであることを確認する。`juicefs mount` は `juicefs format` と違い、**各クライアントで都度実行する**。本リポジトリでは k3s クラスタからの常用は JuiceFS CSI Driver が CSI Secret 経由で各 Pod 用の mount プロセスを起動するため、ホスト直接の `juicefs mount` を全ノードに残しておく必要はない (障害調査やバックアップ取得などで一時的に手動 mount する用途を想定)。
 
 systemd 化する場合は公式 [Mount JuiceFS at boot](https://juicefs.com/docs/community/administration/mount_at_boot) を参照。以下のような `EnvironmentFile=` を 0600 で配置するのが定石:
 
@@ -206,17 +206,16 @@ JFS_RSA_PASSPHRASE=...
 
 ### k3s から使う場合
 
-PVC として参照する場合は [JuiceFS CSI Driver](https://juicefs.com/docs/csi/introduction) を入れるのが王道。本リポジトリでは Helm/manifests の追加は本書の範囲外とするが、要点だけ:
+本リポジトリでは [JuiceFS CSI Driver](https://juicefs.com/docs/csi/introduction) を ansible (`roles/cluster_juicefs_csi`) で helm デプロイし、`group_vars/k3s_cluster/vault.yml` の値から CSI Secret を組み立てる。要点:
 
-- CSI Driver のインストールは `helm install juicefs-csi-driver` または manifests
-- `Secret` に以下を入れる:
-  - `metaurl` (`postgres://...?sslmode=require`)
+- Secret に以下を入れる (`vault_juicefs_*` から組み立て):
+  - `metaurl` (`postgres://...?sslmode=require`、**パスワード抜き**)
   - `access-key`, `secret-key`, `bucket`
   - `envs`: `{"META_PASSWORD": "...", "JFS_RSA_PASSPHRASE": "..."}` (CSI Driver が mount プロセスに渡す)
-- `metaurl` 内のパスワードは URL エンコードして埋め込むか、Secret 内の別フィールドに置いて CSI Driver の `format-options` から渡す
+- `metaurl` のパスワードは URL に埋めずに `envs.META_PASSWORD` 経由で注入する (URL エンコード不要、tfstate / Secret 表示時のリスク低減)
 - 暗号化済みファイルシステムを mount する場合、Secret に `JFS_RSA_PASSPHRASE` を必ず含める。**秘密鍵そのものはメタデータ DB 側にあるため CSI Secret には不要**
 
-詳細は [Use JuiceFS in Kubernetes](https://juicefs.com/docs/csi/getting_started) と [JuiceFS CSI: Encrypt Data In Transit and At Rest](https://juicefs.com/docs/csi/guide/encryption) を参照。
+詳細は [Use JuiceFS in Kubernetes](https://juicefs.com/docs/csi/getting_started) と [JuiceFS CSI: Encrypt Data In Transit and At Rest](https://juicefs.com/docs/csi/guide/encryption)、本リポジトリ側の対応は [`../ansible/README.md`](../ansible/README.md) (vault キー一覧と取得元) を参照。
 
 ## 6. パスワードローテーション運用
 
@@ -235,7 +234,7 @@ aws lightsail update-relational-database \
   --apply-immediately
 ```
 
-4. `juicefs mount` 実行側 (k3s ノード / systemd unit / Kubernetes Secret) のパスワードを `$NEW_PASS` で更新
+4. `juicefs mount` 実行側 (`group_vars/k3s_cluster/vault.yml` の `vault_juicefs_meta_password` → JuiceFS CSI Secret の `envs.META_PASSWORD`、および手動 mount 用 systemd unit があればその `EnvironmentFile`) のパスワードを `$NEW_PASS` で更新
 5. 以降のローテートはコンソール / CLI 側のみで完結。Terraform は触らない (state 上の値は使われていない過去のパスワードになる)
 
 なお **暗号化用 RSA 秘密鍵そのもの** は `juicefs format` 時点でメタデータ DB に登録された後は変更できない (公式仕様)。鍵をローテートしたい場合はファイルシステムを作り直す (Section 7) しかなく、データを別ファイルシステムにコピーしてから旧 FS を破棄する手順が必要になる。**運用開始前に強いパスフレーズを設定し、以後は鍵自体ではなくパスフレーズを保護する** という設計にすること。
@@ -260,12 +259,12 @@ aws s3 rm "s3://${JFS_S3_BUCKET}" --recursive
 
 - **single-AZ**: `bundle_id = "micro_2_0"` は single-AZ 構成。AZ 障害でメタデータ DB が消えると JuiceFS のファイルシステムも消える (S3 のオブジェクトは生きていてもメタデータがないので参照不能)。重要データを乗せる場合は `micro_ha_2_0` への移行 (Multi-AZ、約 2 倍コスト) を検討する。なお `bundle_id` の変更は destroy + create を伴うので、本番運用前に `skip_final_snapshot=false` + `final_snapshot_name` を設定してから移行すること。
 - **拡張機能不可**: Lightsail マネージド DB は `shared_preload_libraries` を変更できないので、`pgvector` などの追加 extension は使えない。JuiceFS のメタデータエンジンは追加 extension を要求しないため問題はないが、同 DB を別用途に流用するのは避けた方がよい。
-- **接続元の制約**: `publicly_accessible=false` で運用しているため、Lightsail アカウント外からは接続できない。同アカウントの他リージョンや別 VPC からの接続も不可。k3s ノード上で `juicefs mount` する以外の経路 (例: ローカルからの調査) を使う場合は、SSH ポートフォワードを使う。
-- **S3 アクセス IP 制限**: `module.juicefs_s3` の IAM ポリシーは `module.lightsail_k3s.public_ipv4` からのみ許可。k3s インスタンスを作り直して static IP が変わると IAM ポリシーは Terraform で自動追従するが、IP が変わっている間 (apply 完了まで) は JuiceFS が S3 にアクセスできず動作不能になる。インスタンス再作成時は `juicefs mount` を停止してから実施するのが安全。
+- **接続元の制約**: `publicly_accessible=false` で運用しているため、Lightsail アカウント外からは接続できない。同アカウントの他リージョンや別 VPC からの接続も不可。k3s クラスタノード上で `juicefs mount` / CSI 経由の mount を使う以外の経路 (例: ローカルからの調査) を使う場合は、SSH ポートフォワードを使う。
+- **S3 アクセス IP 制限**: `module.juicefs_s3` の IAM ポリシーは `module.k3s_cluster` 全ノードの `public_ipv4` からのみ許可。いずれかのノードを作り直して static IP が変わると IAM ポリシーは Terraform で自動追従するが、IP が変わっている間 (apply 完了まで) は当該ノードから JuiceFS が S3 にアクセスできず動作不能になる。ノード再作成時は対象ノード側の mount を停止 (Pod を別 agent ノードに退避) してから実施するのが安全。
 - **メタデータ消失=FS 消失**: 上述のとおり致命的。Lightsail 自動バックアップ (7 日保持、`backup_retention_enabled = true` がデフォルト有効) に加え、定期スナップショットの取得や、JuiceFS の `juicefs dump` によるメタデータエクスポートを併用するのが望ましい (公式 [Metadata Backup](https://juicefs.com/docs/community/administration/metadata_dump_load) 参照)。
-- **暗号化鍵 / パスフレーズ消失=データ消失**: `juicefs format` 時に登録した RSA 秘密鍵 (パスフレーズ込み) を失うと、メタデータ DB と S3 オブジェクトが両方無事でも復号不能。`/etc/juicefs/jfs-private.pem` と `/etc/juicefs/jfs-passphrase.txt` は Lightsail インスタンス外 (Secrets Manager / 1Password / 別ホスト) にもバックアップを取り、定期的に「別環境にリストアして復号できるか」を検証する。
+- **暗号化鍵 / パスフレーズ消失=データ消失**: `juicefs format` 時に登録した RSA 秘密鍵 (パスフレーズ込み) を失うと、メタデータ DB と S3 オブジェクトが両方無事でも復号不能。`/etc/juicefs/jfs-private.pem` と `/etc/juicefs/jfs-passphrase.txt` は format 実行ノード外 (Secrets Manager / 1Password / 別ホスト) にもバックアップを取り、定期的に「別環境にリストアして復号できるか」を検証する。
 - **暗号化設定の変更不可**: `--encrypt-rsa-key` / `--encrypt-algo` は format 時の選択が固定される。後から暗号化方式を切り替えたり鍵をローテートする場合は、Section 7 でファイルシステムを作り直し、データを別 FS 経由でコピーする必要がある。
-- **CPU 負荷とパフォーマンス**: クライアントサイド AES-GCM 暗号化は CPU を消費する。`micro_*` クラスの k3s インスタンスでは大量の小ファイル書き込み時にスループットが頭打ちになる可能性がある。本番採用前に `juicefs bench /mnt/juicefs` で実測しておくこと。
+- **CPU 負荷とパフォーマンス**: クライアントサイド AES-GCM 暗号化は CPU を消費する。`medium_3_0` (server) は AES-NI 対応とはいえコア数が少ないため、ストレージ Pod は `xlarge_3_0` の agent ノードに寄せる前提。本番採用前に `juicefs bench /mnt/juicefs` で実測しておくこと。
 
 ## 参考
 
