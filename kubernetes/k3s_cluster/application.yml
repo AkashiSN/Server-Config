@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argo-cd
+spec:
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: '*'
+      server: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  syncWindows:
+    - kind: allow
+      schedule: '0 2 * * *'
+      timeZone: "Asia/Tokyo"
+      duration: 1h
+      manualSync: true
+      applications:
+        - '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: server-config-k3s-cluster
+  namespace: argo-cd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: immich
+  template:
+    metadata:
+      name: "{{name}}"
+    spec:
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{name}}"
+      project: default
+      source:
+        path: "kubernetes/k3s_cluster/{{name}}"
+        repoURL: https://github.com/AkashiSN/Server-Config.git
+        targetRevision: main
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - ApplyOutOfSyncOnly=true
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true
+      ignoreDifferences:
+        - kind: Secret
+          jsonPointers:
+            - /data

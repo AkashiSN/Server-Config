@@ -12,8 +12,8 @@ all:
           hosts:
             k3s-agent-0:
               ansible_host: k3s-agent-0.akashisn.info
-              # k3s_node_labels:
-              #   - storage.immich=true
+              k3s_node_labels:
+                - storage.immich-db=true
             k3s-agent-1:
               ansible_host: k3s-agent-1.akashisn.info
               # k3s_node_labels:

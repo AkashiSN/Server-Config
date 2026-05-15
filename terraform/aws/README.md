@@ -6,7 +6,7 @@ AWS Lightsail 上で稼働する k3s クラスタ (server x1 + agent x2) と、J
 | --- | --- | --- |
 | [`./modules/lightsail_instance`](./modules/lightsail_instance/README.md) | 汎用 Lightsail インスタンス (Lightsail インスタンス / 任意の追加ディスク / Static IP / Key Pair / 公開ポート) を `purpose` 単位で構築 | `module.k3s_cluster["server" / "agent-0" / "agent-1"]` |
 | [`./modules/lightsail_database`](./modules/lightsail_database/README.md) | 汎用 Lightsail マネージド DB を `purpose` 単位で構築 | `module.lightsail_juicefs_db` (purpose=`juicefs`) |
-| [`./modules/s3`](./modules/s3/README.md) | 任意用途の S3 バケットと専用 IAM ユーザ (送信元 IP 制限つき) | `module.juicefs_s3` (purpose=`juicefs`) |
+| [`./modules/s3`](./modules/s3/README.md) | 任意用途の S3 バケットと専用 IAM ユーザ (送信元 IP 制限つき) | `module.juicefs_s3` (purpose=`juicefs`) / `module.postgres_backup_s3` (purpose=`postgres-backup`) |
 
 ## main.tf で作成されるリソース
 
@@ -111,8 +111,13 @@ aws s3api put-bucket-versioning --bucket su-nishi \
 | `juicefs_s3_iam_user_name` | JuiceFS 用 IAM ユーザ名 |
 | `juicefs_s3_iam_access_key_id` | JuiceFS 用 IAM Access Key ID |
 | `juicefs_s3_iam_secret_access_key` | JuiceFS 用 IAM Secret Access Key (sensitive) |
+| `postgres_backup_s3_bucket_name` | Postgres バックアップ (WAL-G) 用 S3 バケット名 |
+| `postgres_backup_s3_bucket_arn` | Postgres バックアップ用 S3 バケット ARN |
+| `postgres_backup_s3_iam_user_name` | Postgres バックアップ用 IAM ユーザ名 |
+| `postgres_backup_s3_iam_access_key_id` | Postgres バックアップ用 IAM Access Key ID |
+| `postgres_backup_s3_iam_secret_access_key` | Postgres バックアップ用 IAM Secret Access Key (sensitive) |
 
-これらの値は ansible 側の `group_vars/k3s_cluster/vault.yml` に登録して JuiceFS CSI Driver から利用します ([`../../ansible/README.md`](../../ansible/README.md) と [`../../docs/juicefs-setup-ja.md`](../../docs/juicefs-setup-ja.md) を参照)。
+これらの値は ansible 側の `group_vars/k3s_cluster/vault.yml` に登録して JuiceFS CSI Driver / WAL-G sidecar から利用します ([`../../ansible/README.md`](../../ansible/README.md), [`../../docs/juicefs-setup-ja.md`](../../docs/juicefs-setup-ja.md), [`../../docs/postgres-walg-backup-ja.md`](../../docs/postgres-walg-backup-ja.md) を参照)。
 
 ## Variables
 

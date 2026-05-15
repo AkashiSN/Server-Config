@@ -59,3 +59,24 @@ output "juicefs_s3_iam_secret_access_key" {
   value     = module.juicefs_s3.iam_secret_access_key
   sensitive = true
 }
+
+output "postgres_backup_s3_bucket_name" {
+  value = module.postgres_backup_s3.bucket_name
+}
+
+output "postgres_backup_s3_bucket_arn" {
+  value = module.postgres_backup_s3.bucket_arn
+}
+
+output "postgres_backup_s3_iam_user_name" {
+  value = module.postgres_backup_s3.iam_user_name
+}
+
+output "postgres_backup_s3_iam_access_key_id" {
+  value = module.postgres_backup_s3.iam_access_key_id
+}
+
+output "postgres_backup_s3_iam_secret_access_key" {
+  value     = module.postgres_backup_s3.iam_secret_access_key
+  sensitive = true
+}

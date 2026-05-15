@@ -8,7 +8,6 @@
         K3S_KUBECONFIG_MODE="644" \
         INSTALL_K3S_EXEC="server \
           --disable=traefik \
-          --disable=local-storage \
           --node-ip={{ node_ip.stdout }} \
           --advertise-address={{ node_ip.stdout }} \
           --flannel-iface={{ default_interface.stdout }} \

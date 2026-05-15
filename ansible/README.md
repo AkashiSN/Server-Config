@@ -90,6 +90,10 @@ vault に登録すべき secret 一覧と取得元:
 | `vault_juicefs_s3_bucket` | terraform output | `terraform output -raw juicefs_s3_bucket_name` |
 | `vault_juicefs_s3_access_key_id` | terraform output | `terraform output -raw juicefs_s3_iam_access_key_id` |
 | `vault_juicefs_s3_secret_access_key` | terraform output (sensitive) | `terraform output -raw juicefs_s3_iam_secret_access_key` |
+| `vault_postgres_backup_s3_bucket` | terraform output | `terraform output -raw postgres_backup_s3_bucket_name` |
+| `vault_postgres_backup_s3_access_key_id` | terraform output | `terraform output -raw postgres_backup_s3_iam_access_key_id` |
+| `vault_postgres_backup_s3_secret_access_key` | terraform output (sensitive) | `terraform output -raw postgres_backup_s3_iam_secret_access_key` |
+| `vault_immich_walg_libsodium_key` | base64 32 byte (生成 + 1Password 登録 + 紙 QR 二重保管) | `openssl rand -base64 32` (詳細は [`../docs/postgres-walg-backup-ja.md`](../docs/postgres-walg-backup-ja.md)) |
 | `vault_cloudflare_token` | Cloudflare ダッシュボード (DNS Edit 権限) | — |
 | `vault_email` | ACME 登録用メールアドレス | — |
 | `vault_argocd_oidc_issuer` | Cloudflare Zero Trust の OIDC アプリ | — |
@@ -172,13 +176,15 @@ k3s-agent-0:
 
 ## ストレージ構成の概要
 
-`k3s_cluster` 上のアプリ用永続データは [JuiceFS](https://juicefs.com/docs/community/introduction) (S3 backed, クライアントサイド AES-GCM 暗号化) に統一します。Pod からは `roles/cluster_juicefs_csi` がデプロイする CSI Driver 経由で `juicefs` StorageClass の PVC として参照します。
+`k3s_cluster` 上のアプリ用永続データは原則 [JuiceFS](https://juicefs.com/docs/community/introduction) (S3 backed, クライアントサイド AES-GCM 暗号化) に集約しますが、**Postgres は例外として local-path-provisioner (root SSD 直接) に置きます**。理由は WAL fsync のレイテンシ要件で、JuiceFS (FUSE → S3) 上では commit/sec が大幅に劣化するため。
 
 | 用途 | バックエンド | アクセス経路 |
 | --- | --- | --- |
-| Immich 写真 / DB / Nextcloud ユーザデータ / DB | JuiceFS (Lightsail PostgreSQL メタデータ + S3 オブジェクト) | JuiceFS CSI Driver (`storageClassName: juicefs`) |
+| Immich 写真 / Nextcloud ユーザデータ | JuiceFS (Lightsail PostgreSQL メタデータ + S3 オブジェクト) | JuiceFS CSI Driver (`storageClassName: juicefs`) |
+| Immich Postgres / Nextcloud Postgres | k3s 同梱 local-path-provisioner (agent ノード root SSD) | `storageClassName: local-path` + `nodeSelector` で固定 (例: `storage.immich-db=true`) |
+| Immich Postgres バックアップ (WAL-G) | 専用 S3 バケット (`module.postgres_backup_s3`、SSE-S3 + libsodium 二重暗号化) | StatefulSet 内 sidecar コンテナ + `archive_command` |
 
-JuiceFS の `juicefs format` (一度だけ手動) / 暗号化鍵生成 / パスワードローテーション運用は [`../docs/juicefs-setup-ja.md`](../docs/juicefs-setup-ja.md) を参照してください。
+JuiceFS の `juicefs format` (一度だけ手動) / 暗号化鍵生成 / パスワードローテーション運用は [`../docs/juicefs-setup-ja.md`](../docs/juicefs-setup-ja.md)、Postgres バックアップ (WAL-G) の運用は [`../docs/postgres-walg-backup-ja.md`](../docs/postgres-walg-backup-ja.md) を参照してください。
 
 ## Notes
 

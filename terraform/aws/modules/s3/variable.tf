@@ -21,3 +21,9 @@ variable "additional_delete_principals" {
   description = "Additional IAM principal ARNs allowed to delete objects (the module's own IAM user and admin_iam_user are always allowed)"
   default     = []
 }
+
+variable "noncurrent_days" {
+  type        = number
+  description = "Days to retain noncurrent object versions before lifecycle expiration. Set higher (e.g. 35) for buckets that store WAL-G basebackups so external retention tools (wal-g delete retain FULL N) are not truncated by this lifecycle rule."
+  default     = 7
+}

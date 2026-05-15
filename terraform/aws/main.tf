@@ -76,3 +76,12 @@ module "juicefs_s3" {
   allowed_ips    = [for n in module.k3s_cluster : "${n.public_ipv4}/32"]
   admin_iam_user = var.iam_user
 }
+
+module "postgres_backup_s3" {
+  source          = "./modules/s3"
+  project         = local.project
+  purpose         = "postgres-backup"
+  allowed_ips     = [for n in module.k3s_cluster : "${n.public_ipv4}/32"]
+  admin_iam_user  = var.iam_user
+  noncurrent_days = 35
+}

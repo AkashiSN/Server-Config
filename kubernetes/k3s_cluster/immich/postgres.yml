@@ -1,0 +1,189 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: immich-postgres
+  name: immich-postgres
+  namespace: immich
+spec:
+  replicas: 1
+  serviceName: immich-postgres
+  selector:
+    matchLabels:
+      app: immich-postgres
+  template:
+    metadata:
+      labels:
+        app: immich-postgres
+    spec:
+      # agent-0 に固定 (inventory.yml の k3s_node_labels で `storage.immich-db=true` を付与)。
+      # local-path-provisioner は WaitForFirstConsumer なので Pod がスケジュールされたノード上に PV を作る。
+      nodeSelector:
+        storage.immich-db: "true"
+      # postgres user (uid 999) が pg-socket emptyDir に書き込めるよう、全 volume の group を 999 に。
+      securityContext:
+        fsGroup: 999
+      initContainers:
+        # WAL-G 公式リリース (ubuntu-22.04-amd64, glibc) を /shared に展開。
+        # postgres / wal-g-sidecar コンテナ (どちらも glibc 系) に readOnly マウントして共有。
+        - name: wal-g-installer
+          image: alpine:3.20
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              VERSION=v3.0.5
+              cd /tmp
+              wget -q "https://github.com/wal-g/wal-g/releases/download/${VERSION}/wal-g-pg-ubuntu-22.04-amd64.tar.gz" -O wal-g.tar.gz
+              tar -xzf wal-g.tar.gz
+              install -m 0755 wal-g-pg-ubuntu-22.04-amd64 /shared/wal-g
+              ls -l /shared/wal-g
+          volumeMounts:
+            - name: wal-g-bin
+              mountPath: /shared
+      containers:
+        - name: immich-postgres
+          image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+          imagePullPolicy: IfNotPresent
+          # ENTRYPOINT (docker-entrypoint.sh) は維持し args のみ上書き。
+          # archive_command は WAL-G を呼び、archive_timeout=300s で WAL の強制切替 → RPO 5 分。
+          # 60s だと WAL ファイル数増 + S3 PUT 課金が増えるため緩めに設定。
+          args:
+            - postgres
+            - -c
+            - archive_mode=on
+            - -c
+            - archive_command=/usr/local/wal-g/wal-g wal-push %p
+            - -c
+            - archive_timeout=300
+            - -c
+            - wal_level=replica
+            - -c
+            - max_wal_senders=3
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: TZ
+              value: Asia/Tokyo
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD_FILE
+              value: /secrets/immich_postgres_user_password
+            - name: POSTGRES_DB
+              value: immich
+            - name: POSTGRES_INITDB_ARGS
+              value: "--data-checksums"
+          envFrom:
+            # WAL-G 用環境変数 (S3 接続情報 + libsodium key) を注入。
+            # archive_command が wal-push を呼ぶ際に postgres プロセスがこれらを継承する。
+            - secretRef:
+                name: immich-postgres-walg
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: immich-secrets
+              mountPath: /secrets
+            - name: wal-g-bin
+              mountPath: /usr/local/wal-g
+              readOnly: true
+            - name: pg-socket
+              mountPath: /var/run/postgresql
+          startupProbe:
+            exec:
+              command:
+              - /usr/local/bin/healthcheck.sh
+            periodSeconds: 10
+            failureThreshold: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+              - /usr/local/bin/healthcheck.sh
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command:
+              - /usr/local/bin/healthcheck.sh
+            periodSeconds: 300
+            timeoutSeconds: 10
+            failureThreshold: 3
+        # 常駐 sidecar: 週次 basebackup + retention prune を Pod 内ループで実行。
+        # 同じ image (libc / libpq 整合) を使い、Unix socket (peer 認証) で postgres に接続。
+        - name: wal-g-sidecar
+          image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -eu
+              echo "[wal-g-sidecar] waiting for postgres socket..."
+              for i in $(seq 1 360); do
+                if [ -S /var/run/postgresql/.s.PGSQL.5432 ]; then
+                  echo "[wal-g-sidecar] postgres socket ready after $((i * 5))s"
+                  break
+                fi
+                sleep 5
+              done
+              # 起動直後の自動 basebackup は取らない (initdb / Immich 初回 import 中の重複起動を回避)。
+              # 初回 basebackup は手動で `kubectl exec ... -- /usr/local/wal-g/wal-g backup-push ...` を実行する。
+              while true; do
+                echo "[wal-g-sidecar $(date -Is)] sleeping 7 days until next basebackup"
+                sleep 604800
+                echo "[wal-g-sidecar $(date -Is)] backup-push start"
+                /usr/local/wal-g/wal-g backup-push /var/lib/postgresql/data || echo "[wal-g-sidecar] backup-push FAILED"
+                echo "[wal-g-sidecar $(date -Is)] retain FULL 4 (delete older basebackups + WAL)"
+                /usr/local/wal-g/wal-g delete retain FULL 4 --confirm || echo "[wal-g-sidecar] retain FAILED"
+              done
+          envFrom:
+            - secretRef:
+                name: immich-postgres-walg
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+              # WAL-G non-exclusive backup mode は backup_label を $PGDATA に書かないため readOnly で OK。
+              readOnly: true
+            - name: wal-g-bin
+              mountPath: /usr/local/wal-g
+              readOnly: true
+            - name: pg-socket
+              mountPath: /var/run/postgresql
+      volumes:
+        - name: immich-secrets
+          secret:
+            secretName: immich-secrets
+        - name: wal-g-bin
+          emptyDir: {}
+        - name: pg-socket
+          emptyDir: {}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOncePod
+        # k3s 同梱 local-path-provisioner で agent-0 root SSD に動的プロビジョニング。
+        # WAL fsync を NVMe 直下に保つため (JuiceFS は写真/ファイル専用)。
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: immich-postgres
+  name: immich-postgres
+  namespace: immich
+spec:
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+  selector:
+    app: immich-postgres

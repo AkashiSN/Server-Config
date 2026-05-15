@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: immich-server
+  name: immich-server
+  namespace: immich
+spec:
+  selector:
+    matchLabels:
+      app: immich-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: immich-server
+    spec:
+      containers:
+        - name: immich-server
+          image: ghcr.io/immich-app/immich-server:v2.7.5
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 2283
+              name: immich-server
+          envFrom:
+            - configMapRef:
+                name: immich-env
+          env:
+            - name: IMMICH_WORKERS_INCLUDE
+              value: api
+          volumeMounts:
+            - name: immich-photos
+              mountPath: /data
+            - name: immich-secrets
+              mountPath: /secrets
+          startupProbe:
+            exec:
+              command:
+              - immich-healthcheck
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            exec:
+              command:
+              - immich-healthcheck
+            periodSeconds: 30
+          livenessProbe:
+            exec:
+              command:
+              - immich-healthcheck
+            periodSeconds: 30
+      volumes:
+        - name: immich-secrets
+          projected:
+            sources:
+              - secret:
+                  name: immich-secrets
+        - name: immich-photos
+          persistentVolumeClaim:
+            claimName: immich-photos-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: immich-server
+  name: immich-server
+  namespace: immich
+spec:
+  ports:
+    - name: immich-server
+      port: 2283
+      targetPort: immich-server
+  selector:
+    app: immich-server
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-immich
+  namespace: immich
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "86400"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "86400"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - photos.akashisn.info
+      secretName: immich-cert
+  rules:
+    - host: photos.akashisn.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: immich-server
+                port:
+                  name: immich-server

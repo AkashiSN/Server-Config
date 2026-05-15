@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-photos-pvc
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Ti
+  # JuiceFS CSI Driver が動的プロビジョニング (cluster_juicefs_csi role 経由)
+  storageClassName: juicefs

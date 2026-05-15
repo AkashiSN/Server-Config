@@ -30,6 +30,31 @@
         immich_postgres_user_password: "{{ immich_postgres_user_password }}"
   become: false
 
+- name: Create immich/immich-postgres-walg
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: immich-postgres-walg
+        namespace: immich
+      type: Opaque
+      stringData:
+        WALG_S3_PREFIX: "s3://{{ postgres_backup_s3_bucket }}/immich"
+        AWS_REGION: "ap-northeast-1"
+        AWS_ACCESS_KEY_ID: "{{ postgres_backup_s3_access_key_id }}"
+        AWS_SECRET_ACCESS_KEY: "{{ postgres_backup_s3_secret_access_key }}"
+        WALG_LIBSODIUM_KEY: "{{ immich_walg_libsodium_key }}"
+        WALG_LIBSODIUM_KEY_TRANSFORM: "base64"
+        WALG_COMPRESSION_METHOD: "zstd"
+        WALG_DELTA_MAX_STEPS: "6"
+        PGHOST: "/var/run/postgresql"
+        PGUSER: "postgres"
+        PGPASSWORD: "{{ immich_postgres_user_password }}"
+        PGDATABASE: "postgres"
+  become: false
+
 - name: Create nextcloud/nextcloud-secrets
   kubernetes.core.k8s:
     state: present

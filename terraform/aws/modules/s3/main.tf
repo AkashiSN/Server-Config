@@ -92,7 +92,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
     filter {}
 
     noncurrent_version_expiration {
-      noncurrent_days = 7
+      noncurrent_days = var.noncurrent_days
     }
   }
 

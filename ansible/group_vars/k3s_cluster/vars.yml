@@ -33,8 +33,14 @@ juicefs_s3_access_key_id: "{{ vault_juicefs_s3_access_key_id }}"
 juicefs_s3_secret_access_key: "{{ vault_juicefs_s3_secret_access_key }}"
 juicefs_storage_class: "juicefs"
 
+# Postgres backup (WAL-G)
+postgres_backup_s3_bucket: "{{ vault_postgres_backup_s3_bucket }}"
+postgres_backup_s3_access_key_id: "{{ vault_postgres_backup_s3_access_key_id }}"
+postgres_backup_s3_secret_access_key: "{{ vault_postgres_backup_s3_secret_access_key }}"
+
 # Secrets - immich
 immich_postgres_user_password: "{{ vault_immich_postgres_user_password }}"
+immich_walg_libsodium_key: "{{ vault_immich_walg_libsodium_key }}"
 
 # Secrets - nextcloud
 nextcloud_email_address: "{{ vault_nextcloud_email_address }}"
