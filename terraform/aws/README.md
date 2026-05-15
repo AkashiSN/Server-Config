@@ -1,6 +1,6 @@
 # Terraform / AWS (ap-northeast-1)
 
-AWS Lightsail 上で稼働する k3s クラスタ (server x1 + agent x2) と、JuiceFS のメタデータエンジン用 Lightsail PostgreSQL、オブジェクトストレージ用 S3 バケットを Terraform で管理します。`main.tf` から呼び出されるモジュールはサブディレクトリの README を参照してください。
+AWS Lightsail 上で稼働する k3s クラスタ (server x1 + agent x2)、JuiceFS のメタデータエンジン用 Lightsail PostgreSQL、オブジェクトストレージ用 S3 バケット、および Postgres バックアップ (WAL-G) 用 S3 バケットを Terraform で管理します。`main.tf` から呼び出されるモジュールはサブディレクトリの README を参照してください。
 
 | モジュール | 役割 | 詳細 |
 | --- | --- | --- |
@@ -60,6 +60,18 @@ module "juicefs_s3" {
   allowed_ips    = [for n in module.k3s_cluster : "${n.public_ipv4}/32"]
   admin_iam_user = var.iam_user
 }
+
+module "postgres_backup_s3" {
+  source         = "./modules/s3"
+  project        = local.project
+  purpose        = "postgres-backup"
+  allowed_ips    = [for n in module.k3s_cluster : "${n.public_ipv4}/32"]
+  admin_iam_user = var.iam_user
+  # WAL-G の `wal-g delete retain FULL N` で削除した世代が、対応する WAL も
+  # 含めて 35 日間ロールバック可能になるよう noncurrent version の保持期間を
+  # 既定 (7 日) から拡張する。
+  noncurrent_days = 35
+}
 ```
 
 - `local.project = "su-nishi"` (`locals.tf`) — リソース名のプレフィックス。
@@ -68,7 +80,9 @@ module "juicefs_s3" {
 - `ports` で 6443 / 8472 / 10250 を public 開放してはいけない (kubectl は Tailscale 経由で `--tls-san` に登録した DNS / IP からのみ繋ぐ)。443 は ingress-nginx を載せる agent ノードのみ、41641 は tailscale 用に全ノードで開ける。22/TCP は初回ブートストラップ時のみ一時的にアンコメントして apply → tailscale / cloudflared 認証 → 再コメントして apply で塞ぐ。
 - `module.lightsail_juicefs_db` で JuiceFS のメタデータエンジン用 Lightsail PostgreSQL 18 (`micro_2_0` プラン、single-AZ) を作成する。マスターパスワードは `random_password.juicefs_db` で生成し、output 経由でのみ取得できる。`lifecycle.ignore_changes = [master_password]` のため、初回 apply 後に Lightsail コンソールでローテートしても Terraform 側で drift にならない。
 - `module.juicefs_s3` で JuiceFS のオブジェクトストレージ用 S3 バケット (`su-nishi-juicefs`) と、k3s クラスタ各ノードの static IPv4 からのみアクセス可能な IAM ユーザを作成する (private / SSE-AES256 / versioning + 7 日 lifecycle / IP 制限)。`allowed_ips` には `module.k3s_cluster` 全ノードの `public_ipv4/32` を渡しているため、いずれかのノードを作り直して static IP が変わると IAM ポリシーも追従する。
+- `module.postgres_backup_s3` で Immich Postgres (将来的には Nextcloud Postgres も) の WAL-G バックアップ用 S3 バケット (`su-nishi-postgres-backup`) と、同じく k3s クラスタ各ノードの static IPv4 からのみアクセス可能な IAM ユーザを作成する。基本構成は `juicefs_s3` と同じ (`./modules/s3` を再利用) が、`noncurrent_days = 35` を渡して WAL-G 側の `wal-g delete retain FULL 4` (週次フル × 4 世代) と整合させる点が異なる。default の 7 日のままだと WAL-G が DELETE した古い basebackup が 7 日後に hard delete されて PITR 可能期間が暗黙に縮む問題があるため (`./modules/s3/README.md` の `noncurrent_days` 節参照)。`SSE-S3 (AES256)` のサーバサイド暗号化に加え、WAL-G 側で `WALG_LIBSODIUM_KEY` によるクライアントサイド AES-XChaCha20-Poly1305 暗号化を併用する **二重暗号化** 構成。
 - 実際に JuiceFS を `juicefs format` / `juicefs mount` する手順は [`../../docs/juicefs-setup-ja.md`](../../docs/juicefs-setup-ja.md) を参照。クラスタへの helm デプロイは ansible 側 ([`../../ansible/README.md`](../../ansible/README.md)) で管理。
+- WAL-G による Postgres バックアップの初期セットアップ (libsodium key 生成 + 1Password 二重保管) / 状態確認 / PITR restore / 鍵ローテートの運用手順は [`../../docs/postgres-walg-backup-ja.md`](../../docs/postgres-walg-backup-ja.md) を参照。
 
 ## Provider / Backend
 
@@ -140,6 +154,11 @@ terraform apply
 terraform output -raw juicefs_db_master_password
 # JuiceFS の S3 Secret Access Key を取り出す
 terraform output -raw juicefs_s3_iam_secret_access_key
+
+# Postgres バックアップ (WAL-G) 用バケット情報を取り出す
+terraform output -raw postgres_backup_s3_bucket_name
+terraform output -raw postgres_backup_s3_iam_access_key_id
+terraform output -raw postgres_backup_s3_iam_secret_access_key
 
 # tfvars を消す
 make clean
