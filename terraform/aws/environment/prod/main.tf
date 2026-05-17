@@ -1,11 +1,11 @@
 module "k3s_cluster" {
   for_each = local.k3s_cluster_nodes
-  source   = "./modules/lightsail_instance"
+  source   = "../../modules/lightsail_instance"
   project  = local.project
   purpose  = each.value.purpose
 
   bundle_id = each.value.bundle_id
-  user_data = file("${path.module}/modules/lightsail_instance/scripts/k3s_node_provisioner.sh")
+  user_data = file("${path.module}/../../modules/lightsail_instance/scripts/k3s_node_provisioner.sh")
 
   disks = {}
 
@@ -57,7 +57,7 @@ resource "random_password" "juicefs_db" {
 }
 
 module "lightsail_juicefs_db" {
-  source  = "./modules/lightsail_database"
+  source  = "../../modules/lightsail_database"
   project = local.project
   purpose = "juicefs"
 
@@ -70,7 +70,7 @@ module "lightsail_juicefs_db" {
 }
 
 module "juicefs_s3" {
-  source         = "./modules/s3"
+  source         = "../../modules/s3"
   project        = local.project
   purpose        = "juicefs"
   allowed_ips    = [for n in module.k3s_cluster : "${n.public_ipv4}/32"]
@@ -78,7 +78,7 @@ module "juicefs_s3" {
 }
 
 module "postgres_backup_s3" {
-  source          = "./modules/s3"
+  source          = "../../modules/s3"
   project         = local.project
   purpose         = "postgres-backup"
   allowed_ips     = [for n in module.k3s_cluster : "${n.public_ipv4}/32"]

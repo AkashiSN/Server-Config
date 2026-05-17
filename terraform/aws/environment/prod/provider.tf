@@ -22,7 +22,7 @@ terraform {
   backend "s3" {
     bucket  = "su-nishi"
     region  = "ap-northeast-1"
-    key     = "terraform/ap-northeast-1.tfstate"
+    key     = "terraform/prod/ap-northeast-1.tfstate"
     encrypt = true
   }
 }

@@ -11,20 +11,23 @@
 
 ## aws
 
-- **Backend**: S3 (`su-nishi`, `terraform/ap-northeast-1.tfstate`)
 - **Provider**: `hashicorp/aws` 6.43.0 / Terraform 1.15.1
-- **Modules**:
-  - [lightsail_instance](./aws/modules/lightsail_instance) — 汎用 Lightsail インスタンスモジュール (purpose 単位でインスタンス + 追加ディスク + Static IP + キーペア + 公開ポートを構築。`module.k3s_cluster` から server / agent ノードをまとめて呼び出し)
-  - [lightsail_database](./aws/modules/lightsail_database) — 汎用 Lightsail マネージド DB モジュール (JuiceFS メタデータ用 PostgreSQL 18 を作成)
-  - [s3](./aws/modules/s3) — 任意用途の S3 バケット + 専用 IAM ユーザ (送信元 IP 制限つき。SSE-AES256, Public Access Block, versioning + 7d lifecycle、不完全マルチパートアップロード 7 日で中止)
+- **Environments** (`./aws/environment/<env>` 配下にそれぞれ独立した tfstate):
+  - [prod](./aws/environment/prod) — 本番 k3s クラスタ (server×1 + agent×2) + JuiceFS 用 Lightsail PostgreSQL + S3 群。Backend: S3 (`su-nishi`, `terraform/prod/ap-northeast-1.tfstate`)
+  - [dev](./aws/environment/dev) — リモート SSH 開発用 Lightsail 1 台 (`small_3_0`)。Backend: S3 (`su-nishi`, `terraform/dev/ap-northeast-1.tfstate`)
+  - [secrets](./aws/environment/secrets) — 別 AWS アカウントの SSM Parameter Store に ansible-vault を put。direnv で `AWS_PROFILE` を切替。Backend: 別アカウントの S3
+- **Modules** (環境間で共有):
+  - [lightsail_instance](./aws/modules/lightsail_instance) — 汎用 Lightsail インスタンスモジュール (purpose 単位でインスタンス + 追加ディスク + Static IP + キーペア + 公開ポートを構築)
+  - [lightsail_database](./aws/modules/lightsail_database) — 汎用 Lightsail マネージド DB モジュール
+  - [s3](./aws/modules/s3) — 任意用途の S3 バケット + 専用 IAM ユーザ (送信元 IP 制限つき)
 
 詳細は [`./aws/README.md`](./aws/README.md) を参照。
 
 ### 実行手順
 
 ```bash
-cd terraform/aws
-make terraform.tfvars   # 実行中のIAMユーザー名を tfvars に書き出す
+cd terraform/aws/environment/<env>   # prod / dev / secrets
+make terraform.tfvars                # 実行中のIAMユーザー名を tfvars に書き出す (secrets は direnv allow も)
 terraform init
 terraform plan
 terraform apply
