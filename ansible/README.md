@@ -54,7 +54,7 @@ cd ../terraform/aws
 terraform apply
 
 # 各ノードに SSH (公開鍵は provisioner shell が GitHub から流し込む)
-ssh ubuntu@$(terraform output -raw k3s_cluster_server_public_ipv4)
+ssh ubuntu@$(terraform output -json k3s_cluster | jq -r '.server.public_ipv4')
 ```
 
 server / agent それぞれで以下 2 つの認証を実施:
@@ -86,13 +86,13 @@ vault に登録すべき secret 一覧と取得元:
 | --- | --- | --- |
 | `vault_tailnet_dns_name` | Tailscale 管理画面 (Tailnet name + `.ts.net`) | — |
 | `vault_juicefs_metaurl` | terraform output から組み立て (PostgreSQL DSN、**パスワード抜き**) | 下記スニペット参照 |
-| `vault_juicefs_meta_password` | terraform output (sensitive) | `terraform output -raw juicefs_db_master_password` |
-| `vault_juicefs_s3_bucket` | terraform output | `terraform output -raw juicefs_s3_bucket_name` |
-| `vault_juicefs_s3_access_key_id` | terraform output | `terraform output -raw juicefs_s3_iam_access_key_id` |
-| `vault_juicefs_s3_secret_access_key` | terraform output (sensitive) | `terraform output -raw juicefs_s3_iam_secret_access_key` |
-| `vault_postgres_backup_s3_bucket` | terraform output | `terraform output -raw postgres_backup_s3_bucket_name` |
-| `vault_postgres_backup_s3_access_key_id` | terraform output | `terraform output -raw postgres_backup_s3_iam_access_key_id` |
-| `vault_postgres_backup_s3_secret_access_key` | terraform output (sensitive) | `terraform output -raw postgres_backup_s3_iam_secret_access_key` |
+| `vault_juicefs_meta_password` | `juicefs_db` output (sensitive) | `terraform output -json juicefs_db \| jq -r '.master_password'` |
+| `vault_juicefs_s3_bucket` | `juicefs_s3` output | `terraform output -json juicefs_s3 \| jq -r '.bucket_name'` |
+| `vault_juicefs_s3_access_key_id` | `juicefs_s3` output | `terraform output -json juicefs_s3 \| jq -r '.iam_access_key_id'` |
+| `vault_juicefs_s3_secret_access_key` | `juicefs_s3` output (sensitive) | `terraform output -json juicefs_s3 \| jq -r '.iam_secret_access_key'` |
+| `vault_postgres_backup_s3_bucket` | `postgres_backup_s3` output | `terraform output -json postgres_backup_s3 \| jq -r '.bucket_name'` |
+| `vault_postgres_backup_s3_access_key_id` | `postgres_backup_s3` output | `terraform output -json postgres_backup_s3 \| jq -r '.iam_access_key_id'` |
+| `vault_postgres_backup_s3_secret_access_key` | `postgres_backup_s3` output (sensitive) | `terraform output -json postgres_backup_s3 \| jq -r '.iam_secret_access_key'` |
 | `vault_immich_walg_libsodium_key` | base64 32 byte (生成 + 1Password 登録 + 紙 QR 二重保管) | `openssl rand -base64 32` (詳細は [`../docs/postgres-walg-backup-ja.md`](../docs/postgres-walg-backup-ja.md)) |
 | `vault_cloudflare_token` | Cloudflare ダッシュボード (DNS Edit 権限) | — |
 | `vault_email` | ACME 登録用メールアドレス | — |
@@ -115,13 +115,13 @@ vault に登録すべき secret 一覧と取得元:
 `vault_juicefs_metaurl` の組み立て例 (terraform/aws ディレクトリで実行)。**パスワードは含めない** こと:
 
 ```bash
-JF_USER=$(terraform output -raw juicefs_db_master_username)
-JF_HOST=$(terraform output -raw juicefs_db_endpoint)
-JF_PORT=$(terraform output -raw juicefs_db_port)
+JF_USER=$(terraform output -json juicefs_db | jq -r '.master_username')
+JF_HOST=$(terraform output -json juicefs_db | jq -r '.endpoint')
+JF_PORT=$(terraform output -json juicefs_db | jq -r '.port')
 echo "postgres://${JF_USER}@${JF_HOST}:${JF_PORT}/juicefs?sslmode=require"
 ```
 
-パスワード (`vault_juicefs_meta_password`) は `terraform output -raw juicefs_db_master_password` で取得し、JuiceFS CSI secret の `envs` フィールド経由で `META_PASSWORD` 環境変数として注入される (URL エンコード不要、平文 secret に metaurl 全体を埋めない)。
+パスワード (`vault_juicefs_meta_password`) は `terraform output -json juicefs_db | jq -r '.master_password'` で取得し、JuiceFS CSI secret の `envs` フィールド経由で `META_PASSWORD` 環境変数として注入される (URL エンコード不要、平文 secret に metaurl 全体を埋めない)。
 
 ### 4. プロビジョニング実行
 
@@ -149,7 +149,7 @@ sed -i '' "s/127.0.0.1/k3s-server/" ~/.kube/config
 kubectl --kubeconfig ~/.kube/config get nodes -o wide
 
 # k3s API (6443) が Lightsail public 側で閉じていることを確認
-nmap -p 6443 $(cd ../terraform/aws && terraform output -raw k3s_cluster_server_public_ipv4)
+nmap -p 6443 $(cd ../terraform/aws && terraform output -json k3s_cluster | jq -r '.server.public_ipv4')
 # → filtered / closed であるべき (Tailscale 経由のみ)
 ```
 

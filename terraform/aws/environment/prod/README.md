@@ -27,12 +27,21 @@
 
 | Output | 内容 |
 | --- | --- |
-| `k3s_cluster_server_public_ipv4` / `k3s_cluster_server_private_ipv4` | server ノードの Lightsail static / private IPv4 |
-| `k3s_cluster_agent_public_ipv4` / `k3s_cluster_agent_private_ipv4` | agent ノードの IPv4 (list) |
-| `juicefs_db_endpoint` / `juicefs_db_port` / `juicefs_db_engine` / `juicefs_db_engine_version` | JuiceFS メタデータ DB の接続情報 |
-| `juicefs_db_master_username` / `juicefs_db_master_password` | JuiceFS DB の認証情報 (password は sensitive) |
-| `juicefs_s3_bucket_name` / `juicefs_s3_bucket_arn` / `juicefs_s3_iam_user_name` / `juicefs_s3_iam_access_key_id` / `juicefs_s3_iam_secret_access_key` | JuiceFS 用 S3 と IAM (secret は sensitive) |
-| `postgres_backup_s3_*` | Postgres バックアップ用 S3 と IAM (上記と同形、secret は sensitive) |
+| `k3s_cluster` | k3s クラスタ各ノードの情報を `local.k3s_cluster_nodes` のキー (`server` / `agent-0` / `agent-1`) ごとに `{ instance_name, public_ipv4, public_ipv6, private_ipv4 }` でまとめたオブジェクト |
+| `juicefs_db` | JuiceFS メタデータ用 Lightsail PostgreSQL の `{ endpoint, port, engine, engine_version, master_username, master_password }` をまとめたオブジェクト (`master_password` を含むため output 全体 sensitive) |
+| `juicefs_s3` | JuiceFS object storage 用 S3 と IAM の `{ bucket_name, bucket_arn, iam_user_name, iam_access_key_id, iam_secret_access_key }` をまとめたオブジェクト (sensitive) |
+| `postgres_backup_s3` | Postgres WAL-G バックアップ用 S3 と IAM の同形オブジェクト (sensitive) |
+
+取り出し例 (sensitive output は `-json` 経由で `jq` に渡す):
+
+```bash
+# 個別属性を取り出す
+terraform output -json k3s_cluster      | jq -r '.server.public_ipv4'
+terraform output -json juicefs_db       | jq -r '.endpoint'
+terraform output -json juicefs_db       | jq -r '.master_password'
+terraform output -json juicefs_s3       | jq -r '.iam_secret_access_key'
+terraform output -json postgres_backup_s3 | jq -r '.bucket_name'
+```
 
 これらの値は ansible 側の `group_vars/k3s_cluster/vault.yml` に登録して JuiceFS CSI Driver / WAL-G sidecar から利用します。
 
