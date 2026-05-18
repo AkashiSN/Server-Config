@@ -4,10 +4,10 @@
 
 | 項目 | 値 |
 | --- | --- |
-| Backend | S3: `su-nishi` / `terraform/dev/ap-northeast-1.tfstate` |
+| Backend | S3: `su-nishi-tfstate` / `terraform/dev/ap-northeast-1.tfstate` |
 | プロファイル | 自アカウントの default プロファイル |
-| `terraform` required_version | `1.15.1` |
-| `hashicorp/aws` | `6.43.0` |
+| `terraform` required_version | `1.15.3"` |
+| `hashicorp/aws` | `6.45.0` |
 | Region | `ap-northeast-1` |
 | Default tags | `CreatedBy = var.iam_user` |
 

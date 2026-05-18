@@ -6,7 +6,7 @@
 | --- | --- |
 | Backend | S3: `akashisn-tfstate` (別アカウント) / `terraform/secrets/ap-northeast-1.tfstate` |
 | プロファイル | `sylc` |
-| `terraform` required_version | `1.15.1` |
+| `terraform` required_version | `1.15.3"` |
 | `hashicorp/aws` | `6.43.0` |
 | Region | `ap-northeast-1` |
 | Default tags | `CreatedBy = var.iam_user` |
