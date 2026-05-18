@@ -30,7 +30,7 @@
 | `roles/helm_cli/` | helm + helm-diff plugin |
 | `roles/k3s_server/` | k3s server インストール + node-token を `k3s_token` fact に bind |
 | `roles/k3s_agent/` | server の node-token (`hostvars['k3s-server'].k3s_token`) と private IP で agent join |
-| `roles/cluster_ingress_nginx/` / `cluster_cert_manager/` / `cluster_argocd/` / `cluster_juicefs_csi/` | Helm リリースと付随リソース |
+| `roles/cluster_gateway_api/` / `cluster_cert_manager/` / `cluster_traefik/` / `cluster_argocd/` / `cluster_juicefs_csi/` | Helm リリースと付随リソース。`cluster_gateway_api` は Gateway API (Standard channel) CRD を最初に投入。`cluster_cert_manager` は Helm values の `config.enableGatewayAPI: true` で Gateway shim を有効化し、`Gateway` の `cert-manager.io/cluster-issuer` annotation 経由で listener 用 Secret を自動発行する。`cluster_traefik` は k3s 同梱 Traefik v3 の values を HelmChartConfig で上書きする (Gateway / HTTPRoute は各アプリ namespace に自前で持つ方針)。`cluster_argocd` は `argo-cd` namespace の Gateway 投入 + helm release |
 | `roles/cluster_app_secrets/` | アプリ用 namespace (`immich`, `nextcloud`) + 各 `*-secrets` (DB / OIDC / SMTP 等) を vault から投入 |
 
 ## 構築フロー
@@ -136,7 +136,7 @@ make k3s-cluster
 2. `node_common` で hostname / OS 基本設定
 3. `k3s_server` で control-plane を起動 → node-token を fact 化
 4. `k3s_agent` が server private IP + token で join
-5. `cluster_ingress_nginx` / `cluster_cert_manager` / `cluster_argocd` / `cluster_juicefs_csi` を helm でデプロイ
+5. `cluster_gateway_api` → `cluster_cert_manager` → `cluster_traefik` → `cluster_argocd` → `cluster_juicefs_csi` の順で helm / マニフェストをデプロイ (Gateway API CRD → cert-manager (Gateway shim 有効) + ClusterIssuer → Traefik HelmChartConfig → `argo-cd` namespace の Gateway + ArgoCD chart (HTTPRoute も含む) の順序が前提)
 6. `cluster_app_secrets` で `immich` / `nextcloud` namespace と `*-secrets` を投入
 7. 全 pod が Ready になるまで待機
 

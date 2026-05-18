@@ -79,30 +79,22 @@ spec:
   selector:
     app: immich-server
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+# Immich の大ファイル upload (request body 受信が長時間継続) や重い処理待ち
+# (backend からの応答ヘッダ到達が遅い) は、Traefik HelmChartConfig の
+# entryPoints / serversTransport で default 86400s に設定済みなのでカバーされる。
+# 旧 nginx の `proxy-request-buffering: off` 相当も Traefik default (request streaming) で済む。
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
-  name: ingress-immich
+  name: immich
   namespace: immich
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "86400"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "86400"
-    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
 spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - photos.akashisn.info
-      secretName: immich-cert
+  parentRefs:
+    - name: immich
+      sectionName: https
+  hostnames:
+    - photos.akashisn.info
   rules:
-    - host: photos.akashisn.info
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: immich-server
-                port:
-                  name: immich-server
+    - backendRefs:
+        - name: immich-server
+          port: 2283

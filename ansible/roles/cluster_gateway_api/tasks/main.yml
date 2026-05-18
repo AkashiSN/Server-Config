@@ -1,0 +1,27 @@
+---
+# Gateway API Standard channel CRD を最初に install する。
+# cert-manager の Gateway shim (`Gateway` annotation で Certificate 自動発行) は
+# cert-manager pod 起動時に Gateway API CRD の有無を discovery するため、
+# cert-manager / Traefik より前に CRD を入れておく必要がある。
+- name: Fetch Gateway API Standard channel CRD manifest
+  ansible.builtin.get_url:
+    url: "{{ gateway_api_crd_url }}"
+    dest: "/tmp/gateway-api-standard-install.yaml"
+    mode: "0644"
+    force: true
+  become: false
+
+- name: Apply Gateway API Standard channel CRD
+  kubernetes.core.k8s:
+    state: present
+    src: "/tmp/gateway-api-standard-install.yaml"
+    apply: true
+    wait: true
+  become: false
+
+- name: Cleanup Gateway API CRD manifest tempfile
+  ansible.builtin.file:
+    path: "/tmp/gateway-api-standard-install.yaml"
+    state: absent
+  changed_when: false
+  become: false

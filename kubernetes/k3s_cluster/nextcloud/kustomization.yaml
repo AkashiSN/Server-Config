@@ -1,0 +1,9 @@
+resources:
+  - namespace.yml
+  - gateway.yml
+  - persistent-volume.yml
+  - postgres.yml
+  - redis.yml
+  - nginx-conf.yml
+  - nextcloud-hooks.yml
+  - nextcloud.yml

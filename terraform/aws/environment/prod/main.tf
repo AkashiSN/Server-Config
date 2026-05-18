@@ -10,8 +10,9 @@ module "k3s_cluster" {
   disks = {}
 
   # 6443 / 8472 / 10250 を public 開放してはいけない。kubectl は Tailscale
-  # 経由で `--tls-san` に登録した DNS / IP からのみ繋ぐ。443 は ingress-nginx
-  # を載せる agent ノードのみ。41641 は tailscale 用に全ノード開けておく。
+  # 経由で `--tls-san` に登録した DNS / IP からのみ繋ぐ。443 は Traefik
+  # (k3s 同梱、Gateway API provider) を載せる agent ノードのみ (80 は受けない)。
+  # 41641 は tailscale 用に全ノード開けておく。
   #
   # 22/TCP は初回ブートストラップ時のみ一時開放するため、下の {{ }} ブロックを
   # アンコメントして `terraform apply` → tailscale / cloudflared 認証を済ませ →

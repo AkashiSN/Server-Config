@@ -17,6 +17,14 @@
     atomic: true
     release_values:
       installCRDs: true
+      # cert-manager の Gateway shim を有効化する。Gateway リソースに
+      # `cert-manager.io/cluster-issuer: <name>` annotation を付けるだけで、
+      # listener の `tls.certificateRefs` が指す Secret を自動発行してくれる。
+      # Gateway API CRD は本 role より先 (cluster_gateway_api) で install 済み。
+      config:
+        apiVersion: controller.config.cert-manager.io/v1alpha1
+        kind: ControllerConfiguration
+        enableGatewayAPI: true
   become: false
 
 - name: Create a cert-manager secret (Cloudflare DNS-01 API token)

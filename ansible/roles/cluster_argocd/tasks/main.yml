@@ -5,13 +5,56 @@
     repo_url: https://argoproj.github.io/argo-helm
   become: false
 
+# Gateway は helm chart の対象外なので、argo-cd namespace の作成と Gateway の
+# 投入を helm install より前にこのロールで担当する。Certificate は cert-manager
+# Gateway shim (cluster_cert_manager で enableGatewayAPI: true) が Gateway annotation
+# を見て自動発行する。
+- name: Ensure argo-cd namespace exists
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: argo-cd
+  become: false
+
+- name: Apply ArgoCD Gateway (cert-manager auto-issues argocd-cert in argo-cd namespace)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: Gateway
+      metadata:
+        name: argo-cd
+        namespace: argo-cd
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+      spec:
+        gatewayClassName: traefik
+        listeners:
+          - name: https
+            protocol: HTTPS
+            port: 443
+            hostname: "{{ argocd_fqdn }}"
+            tls:
+              mode: Terminate
+              certificateRefs:
+                - kind: Secret
+                  name: argocd-cert
+            allowedRoutes:
+              namespaces:
+                from: Same
+  become: false
+
 - name: Deploy argocd chart
   kubernetes.core.helm:
     release_name: argo-cd
     chart_ref: argo/argo-cd
     chart_version: "9.5.*"
     release_namespace: argo-cd
-    create_namespace: true
+    create_namespace: false
     update_repo_cache: true
     wait: true
     atomic: true

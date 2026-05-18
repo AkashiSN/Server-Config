@@ -1,0 +1,56 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    providers:
+      kubernetesGateway:
+        enabled: true
+      kubernetesIngress:
+        enabled: false
+    gateway:
+      enabled: false
+    gatewayClass:
+      enabled: true
+    ports:
+      # 80 は受けない (HTTP→HTTPS redirect も不要との方針)。entryPoint 自体を
+      # disable してファイアウォール / LoadBalancer Service からも 80 を外す。
+      web:
+        expose:
+          default: false
+      websecure:
+        tls:
+          enabled: true
+    service:
+      type: LoadBalancer
+      spec:
+        externalTrafficPolicy: Local
+    deployment:
+      replicas: 2
+    nodeSelector:
+      traefik: "true"
+    # client ↔ Traefik (entryPoint) と Traefik ↔ backend (serversTransport) の両方を
+    # 86400s に伸ばし、クラスタ全体の default として扱う。アプリ単位の per-Service
+    # ServersTransport は持たない方針。
+    additionalArguments:
+      - "--entryPoints.websecure.transport.respondingTimeouts.readTimeout=86400s"
+      - "--entryPoints.websecure.transport.respondingTimeouts.writeTimeout=86400s"
+      - "--entryPoints.websecure.transport.respondingTimeouts.idleTimeout=86400s"
+      - "--serversTransport.forwardingTimeouts.responseHeaderTimeout=86400s"
+      - "--serversTransport.forwardingTimeouts.idleConnTimeout=86400s"
+    forwardedHeaders:
+      trustedIPs:
+{% for ip in cloudflare_ips %}
+        - {{ ip }}
+{% endfor %}
+{% for ip in local_ips %}
+        - {{ ip }}
+{% endfor %}
+        - {{ external_ip.stdout }}
+    logs:
+      access:
+        enabled: true
+        format: json

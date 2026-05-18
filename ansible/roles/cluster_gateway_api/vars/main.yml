@@ -1,0 +1,5 @@
+---
+# Gateway API Standard channel CRD (HTTPRoute / Gateway / ReferenceGrant)
+# https://gateway-api.sigs.k8s.io/
+gateway_api_version: "v1.5.1"
+gateway_api_crd_url: "https://github.com/kubernetes-sigs/gateway-api/releases/download/{{ gateway_api_version }}/standard-install.yaml"

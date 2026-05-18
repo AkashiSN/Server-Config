@@ -14,7 +14,9 @@ all:
               ansible_host: k3s-agent-0.akashisn.info
               k3s_node_labels:
                 - storage.immich-db=true
+                - traefik=true
             k3s-agent-1:
               ansible_host: k3s-agent-1.akashisn.info
-              # k3s_node_labels:
-              #   - storage.nextcloud=true
+              k3s_node_labels:
+                - traefik=true
+                # - storage.nextcloud=true

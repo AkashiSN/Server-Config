@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+  annotations:
+    # cert-manager Gateway shim が listener の certificateRefs (nextcloud-cert) を見て、
+    # 同 namespace の Secret として Certificate を自動発行する。
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: files.akashisn.info
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: nextcloud-cert
+      allowedRoutes:
+        namespaces:
+          from: Same

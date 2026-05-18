@@ -33,13 +33,13 @@ configs:
 dex:
   enabled: true
 server:
-  ingress:
+  # argo-cd namespace の Gateway `argo-cd` (cluster_argocd role が apply 済み) の
+  # https listener に attach する HTTPRoute を chart 側で生成する。Gateway API CRD は
+  # cluster_gateway_api で先に install 済み。
+  httproute:
     enabled: true
-    ingressClassName: nginx
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
-    hostname: "{{ argocd_fqdn }}"
-    extraTls:
-      - secretName: argocd-cert
-        hosts:
-          - "{{ argocd_fqdn }}"
+    parentRefs:
+      - name: argo-cd
+        sectionName: https
+    hostnames:
+      - "{{ argocd_fqdn }}"

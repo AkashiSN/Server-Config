@@ -1,0 +1,43 @@
+---
+# Gateway API Standard channel CRD は事前に `cluster_gateway_api` role で install 済み、
+# ClusterIssuer は `cluster_cert_manager` role で配置済み (annotation で自動 Certificate 発行)。
+# このロールは k3s 同梱 Traefik の values を HelmChartConfig で上書きすることに専念する。
+# Gateway / HTTPRoute は各アプリ namespace で自前に持つ方針 (cluster_argocd 内 / kubernetes/k3s_cluster/<app>/)。
+
+# k3s 同梱の Traefik HelmChart が一度 install されるのを待ってから HelmChartConfig を流す。
+# 同時投入だと初回 values が default で固定されてしまうケースが報告されているため。
+- name: Wait for default Traefik HelmChart job to complete
+  ansible.builtin.command:
+    cmd: kubectl -n kube-system get job helm-install-traefik -o jsonpath='{.status.succeeded}'
+  register: traefik_helm_job
+  retries: 60
+  delay: 5
+  until: traefik_helm_job.stdout == "1"
+  changed_when: false
+  become: false
+
+- name: Wait for default Traefik deployment to roll out
+  ansible.builtin.command:
+    cmd: kubectl -n kube-system rollout status deploy/traefik --timeout=300s
+  changed_when: false
+  become: false
+
+- name: Apply HelmChartConfig to override Traefik values
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', 'traefik-helm-chart-config.yml.j2') | from_yaml }}"
+    apply: true
+  become: false
+
+# k3s Helm Controller が HelmChartConfig を検知して helm upgrade Job を再 schedule
+# するのに数秒〜十数秒のラグがあるため、即時 rollout status だと旧 Deployment が
+# 即 success を返す。少し待ってから rollout を確認する。
+- name: Allow Helm Controller to reconcile HelmChartConfig
+  ansible.builtin.pause:
+    seconds: 15
+
+- name: Wait for Traefik deployment to roll out with new values
+  ansible.builtin.command:
+    cmd: kubectl -n kube-system rollout status deploy/traefik --timeout=300s
+  changed_when: false
+  become: false

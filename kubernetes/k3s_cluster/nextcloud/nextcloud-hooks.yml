@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-hooks
+  namespace: nextcloud
+data:
+  # upstream entrypoint の `run_path before-starting` が起動時に
+  # /docker-entrypoint-hooks.d/before-starting/*.sh を `run_as`
+  # (= 必要なら www-data に su) で実行する。
+  #
+  # ここには NC_<key> 形式の env では表現できない宣言的設定を集約する。
+  # 主に `occ app:enable` や `occ user_oidc:provider` (upsert) など。
+  # `occ app:enable` は未インストールなら appstore から自動 install するうえ
+  # 既に enable 済みでもエラーにならないので、毎回起動時に流して問題ない。
+  config.sh: |
+    #!/bin/sh
+    set -eu
+
+    occ() { php /var/www/html/occ "$@"; }
+
+    # ---- 期待する入力 ----
+    # ConfigMap (nextcloud-env) から envFrom 経由で注入される env:
+    #   OIDC_PROVIDER_ID    - provider の identifier。upsert キー、ログ表示にも出る (例: cloudflare)
+    #   OIDC_PROVIDER_NAME  - 表示用ラベル (現状 provider テーブル固定列ではないので補助的)
+    #   OIDC_SCOPE          - リクエストスコープ (例: "openid profile email")
+    #
+    # Secret (nextcloud-secrets) を /secrets にマウントして使うファイル:
+    #   /secrets/oidc_client_id      - Cloudflare ZT OIDC SaaS App の Client ID
+    #   /secrets/oidc_client_secret  - 同 Client Secret
+    #   /secrets/oidc_issuer         - 末尾スラッシュなしの issuer URL。
+    #                                  例: https://<team>.cloudflareaccess.com/cdn-cgi/access/sso/oidc/<aud>
+    #                                  これに /.well-known/openid-configuration を後付けして discoveryuri にする
+
+    # 2FA 強制対象を admin グループのみに絞る (全ユーザ強制ではなく)。
+    # NC_twofactor_enforced=true と組み合わせて「twofactor_enforced=true かつ
+    # twofactor_enforced_groups=[admin] のメンバーだけ強制」になる。
+    # 配列 config は NC env で表現できないので occ で書く必要あり。
+    # `0` は配列の添字 (= 配列の 1 要素目)。
+    occ config:system:set twofactor_enforced_groups 0 --value=admin
+
+    # ----- 追加アプリの有効化 -----
+    # `app:enable` は冪等で、未インストールなら appstore から自動取得 + enable する。
+    # twofactor_totp     : 2FA の TOTP プロバイダ (NC_twofactor_enforced=true 強制下の実用手段)
+    # files_external     : SMB / S3 / FTP / WebDAV など外部ストレージのマウント
+    # suspicious_login   : 異常なログイン (異国 IP 等) の検知通知
+    # user_oidc          : OIDCのサポート追加
+    occ app:enable twofactor_totp
+    occ app:enable files_external
+    occ app:enable suspicious_login
+    occ app:enable user_oidc
+
+    # Cloudflare proxy (orange cloud) のリクエストボディ上限 100 MB を踏まえ、
+    # WebDAV / 同期クライアントのチャンクサイズを 90 MiB に引き上げ。
+    # デフォルト 10 MB だと CF を通るが大きいファイルで chunk 数が増えて遅い。
+    # 100 MB 超 (e.g. 200 MB, 0=unlimited) にすると CF で 413 になるので不可。
+    occ config:app:set files max_chunk_size --value=94371840
+
+    # OIDC: Cloudflare Zero Trust の OIDC SaaS App を唯一のログイン手段にする
+    # provider 登録 (identifier=$OIDC_PROVIDER_ID で upsert)。
+    # client_id / client_secret / issuer は Secret 側に置く。
+    # 各フラグの選択 (Cloudflare ZT 単一 IdP / 個人利用前提):
+    #   --mapping-uid=email                  : sub は CF 内部 UUID なので、人間可読で安定な email を UID に
+    #   --unique-uid=0                       : 単一プロバイダなので UID をハッシュ化する必要なし
+    #   --group-provisioning=0               : 個人利用、Cloudflare 側 groups クレームを使っていない
+    #     ↑ 1 にしたら --group-restrict-login-to-whitelist と --group-whitelist-regex も検討
+    #   --check-bearer=0                     : 同期クライアントはアプリパスワードで運用
+    #   --bearer-provisioning=0              : check-bearer=0 のため無効でよい
+    #   --send-id-token-hint=1               : Cloudflare 側 SLO で id_token_hint が要るため有効化
+    # 注: 「ID プレフィックスにプロバイダ識別子」(provider_based_id) は CLI 引数で
+    # 渡せず、provider テーブルに直接持つ列。デフォルト 0 (プレフィックスなし) で
+    # 個人運用には問題ないので明示しない。変えるなら UI から。
+    occ user_oidc:provider "${OIDC_PROVIDER_ID}" \
+      --clientid="$(cat /secrets/oidc_client_id)" \
+      --clientsecret="$(cat /secrets/oidc_client_secret)" \
+      --discoveryuri="$(cat /secrets/oidc_issuer)/.well-known/openid-configuration" \
+      --scope="${OIDC_SCOPE}" \
+      --mapping-uid=email \
+      --mapping-display-name=name \
+      --mapping-email=email \
+      --unique-uid=0 \
+      --group-provisioning=0 \
+      --check-bearer=0 \
+      --bearer-provisioning=0 \
+      --send-id-token-hint=1
+
+    # ローカルログインフォームを隠して OIDC 一択にする。
+    # `allow_multiple_user_backends=0` で他バックエンドのフォームを非表示にし、
+    # かつ provider が 1 件なら user_oidc の registerRedirect が自動で
+    # OIDC ログインに 302 する (この単一キーで「隠す」と「自動リダイレクト」両方を兼ねる)。
+    # 緊急脱出口は `https://files.akashisn.info/login?direct=1`。
+    occ config:app:set user_oidc allow_multiple_user_backends --value=0
+    # ID4me (分散 OpenID 検索) は使わない。単一の特定プロバイダ運用のため無効。
+    occ config:app:set user_oidc id4me_enabled --value=0
+    # OIDC ログイントークンを DB に保持しない。Office/Talk 等への token exchange を
+    # 使うなら 1 に。攻撃面を最小化したいので個人運用は 0。
+    occ config:app:set user_oidc store_login_token --value=0

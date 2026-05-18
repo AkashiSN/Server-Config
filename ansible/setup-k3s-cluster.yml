@@ -20,11 +20,12 @@
     - node_facts
     - k3s_agent
 
-- name: Bootstrap cluster (ingress / cert-manager / argocd / juicefs csi / app secrets)
+- name: Bootstrap cluster (gateway-api crd / cert-manager / traefik gateway / argocd / juicefs csi / app secrets)
   hosts: k3s_server
   roles:
-    - cluster_ingress_nginx
+    - cluster_gateway_api
     - cluster_cert_manager
+    - cluster_traefik
     - cluster_argocd
     - cluster_juicefs_csi
     - cluster_app_secrets
