@@ -1,6 +1,6 @@
 # Immich Postgres バックアップ運用 (WAL-G + 専用 S3 バケット)
 
-`terraform/aws/main.tf` の `module "postgres_backup_s3"` で作成した専用 S3 バケットに、Immich Postgres (PG 14 + vectorchord + pgvector) のバックアップを **WAL-G** で取得・運用する手順をまとめる。Immich の admin UI から実行できる論理 dump (`pg_dumpall`) は併用継続。
+`terraform/aws/environment/prod/main.tf` の `module "postgres_backup_s3"` で作成した専用 S3 バケットに、Immich Postgres (PG 14 + vectorchord + pgvector) のバックアップを **WAL-G** で取得・運用する手順をまとめる。Immich の admin UI から実行できる論理 dump (`pg_dumpall`) は併用継続。
 
 | 役割 | 仕組み | RPO | 操作経路 |
 | --- | --- | --- | --- |
@@ -46,12 +46,14 @@
 ### 1. Terraform で S3 バケット + IAM ユーザ作成
 
 ```bash
-cd terraform/aws
+cd terraform/aws/environment/prod
 terraform plan         # juicefs_s3 が non-destructive (noncurrent_days=7 維持) を確認
 terraform apply
-terraform output -raw postgres_backup_s3_bucket_name
-terraform output -raw postgres_backup_s3_iam_access_key_id
-terraform output -raw postgres_backup_s3_iam_secret_access_key
+
+# postgres_backup_s3 は sensitive object output なので -json | jq -r で取り出す
+terraform output -json postgres_backup_s3 | jq -r '.bucket_name'
+terraform output -json postgres_backup_s3 | jq -r '.iam_access_key_id'
+terraform output -json postgres_backup_s3 | jq -r '.iam_secret_access_key'
 ```
 
 ### 2. libsodium 暗号化キー生成 + 二重保管
@@ -77,15 +79,23 @@ shred -u /tmp/walg-key.txt /tmp/walg-key.png
 
 ### 3. Ansible vault に登録 → ノードラベル & Secret 投入
 
+vault は用途別に分割されているので、`postgres_backup` 系は `vault_postgres_backup.yml`、libsodium key は `vault_immich.yml` に書く ([`../ansible/README.md`](../ansible/README.md) の vault キー一覧参照)。
+
 ```bash
 cd ansible
 make credential
-ansible-vault edit group_vars/k3s_cluster/vault.yml
+ansible-vault edit group_vars/k3s_cluster/vault_postgres_backup.yml
 # 以下を追加:
 #   vault_postgres_backup_s3_bucket: "<terraform output 値>"
 #   vault_postgres_backup_s3_access_key_id: "<terraform output 値>"
 #   vault_postgres_backup_s3_secret_access_key: "<terraform output 値>"
+
+ansible-vault edit group_vars/k3s_cluster/vault_immich.yml
+# 以下を追加:
 #   vault_immich_walg_libsodium_key: "<openssl rand で生成した base64 値>"
+
+# SSM Parameter Store に反映 (terraform/aws/environment/secrets が for_each で管理)
+cd ../terraform/aws/environment/secrets && terraform apply && cd -
 
 make k3s-cluster   # node label (storage.immich-db=true) + immich-postgres-walg Secret 投入
 
@@ -141,8 +151,8 @@ kubectl exec -n immich immich-postgres-0 -c wal-g-sidecar -- \
 kubectl exec -n immich immich-postgres-0 -c immich-postgres -- \
   du -sh /var/lib/postgresql/data/pg_wal
 
-# S3 側の object 一覧 (terraform/aws ディレクトリで)
-aws s3 ls s3://$(terraform output -raw postgres_backup_s3_bucket_name)/immich/ --recursive --human-readable
+# S3 側の object 一覧 (terraform/aws/environment/prod ディレクトリで)
+aws s3 ls "s3://$(terraform output -json postgres_backup_s3 | jq -r '.bucket_name')/immich/" --recursive --human-readable
 ```
 
 ## PITR Restore 手順
@@ -234,14 +244,15 @@ psql -U postgres -d immich -c 'SELECT count(*) FROM assets'
 
 1. 新鍵を生成 (`openssl rand -base64 32`)
 2. 1Password に **新キー名** で登録 (例: `Immich WAL-G Libsodium 2026Q3`)、紙 QR バックアップも更新
-3. `vault.yml` を編集して `vault_immich_walg_libsodium_key` を新値に
-4. `make k3s-cluster` で Secret 更新 → `kubectl rollout restart -n immich statefulset/immich-postgres`
-5. **手動 basebackup 実行** (新鍵で取り直し):
+3. `ansible-vault edit group_vars/k3s_cluster/vault_immich.yml` で `vault_immich_walg_libsodium_key` を新値に
+4. `cd terraform/aws/environment/secrets && terraform apply` で SSM に反映 (→ 必要に応じて `make upload-credential` で 1Password 添付も更新)
+5. `make k3s-cluster` で Secret 更新 → `kubectl rollout restart -n immich statefulset/immich-postgres`
+6. **手動 basebackup 実行** (新鍵で取り直し):
    ```bash
    kubectl exec -n immich immich-postgres-0 -c wal-g-sidecar -- \
      /usr/local/wal-g/wal-g backup-push /var/lib/postgresql/data
    ```
-6. 旧鍵で取った basebackup は引き続き S3 上に残るが、**新鍵では復号できない**。35 日 + 1 週で旧鍵を破棄して可。
+7. 旧鍵で取った basebackup は引き続き S3 上に残るが、**新鍵では復号できない**。35 日 + 1 週で旧鍵を破棄して可。
 
 ## 四半期 Restore Drill
 
@@ -297,7 +308,8 @@ vectorchord / pgvectors の C 拡張バイナリは PG メジャー + extension 
 - [WAL-G PostgreSQL Configuration](https://github.com/wal-g/wal-g/blob/master/docs/PostgreSQL.md)
 - [WAL-G Encryption (libsodium)](https://github.com/wal-g/wal-g/blob/master/docs/STORAGES.md#libsodium-encryption)
 - 本リポジトリ
-  - [`../terraform/aws/README.md`](../terraform/aws/README.md) (`module.postgres_backup_s3` の outputs)
+  - [`../terraform/aws/README.md`](../terraform/aws/README.md) — 全体構成 / backend
+  - [`../terraform/aws/environment/prod/README.md`](../terraform/aws/environment/prod/README.md) — `module.postgres_backup_s3` の outputs と取り出し例
   - [`../terraform/aws/modules/s3/README.md`](../terraform/aws/modules/s3/README.md) (`noncurrent_days` の使い分け)
   - [`../ansible/README.md`](../ansible/README.md) (vault キー一覧と `cluster_app_secrets` ロール)
   - [`../kubernetes/k3s_cluster/immich/postgres.yml`](../kubernetes/k3s_cluster/immich/postgres.yml) (StatefulSet 実体)

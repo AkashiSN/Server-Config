@@ -1,0 +1,31 @@
+---
+# JuiceFS Community Edition CLI を k3s server ノードに導入する。format / status /
+# dump 等の管理用途で使う (Pod 内 mount は cluster_juicefs_csi の CSI Driver が担当)。
+# https://github.com/juicedata/juicefs/releases
+
+# ansible_facts['architecture'] (x86_64 / aarch64) を JuiceFS リリースの命名規則
+# (amd64 / arm64) に変換する。Lightsail は現状 x86_64 だが Graviton 系へ移行しても
+# 動くようマッピングを持っておく。
+- name: Map architecture to juicefs release naming
+  ansible.builtin.set_fact:
+    juicefs_arch: >-
+      {{
+        {
+          'x86_64': 'amd64',
+          'aarch64': 'arm64',
+        }[ansible_facts['architecture']]
+      }}
+
+- name: Install juicefs CLI (Community Edition, version pinned)
+  ansible.builtin.unarchive:
+    src: "https://github.com/juicedata/juicefs/releases/download/v{{ juicefs_version }}/juicefs-{{ juicefs_version }}-linux-{{ juicefs_arch }}.tar.gz"
+    dest: /usr/local/bin
+    remote_src: true
+    include:
+      - juicefs
+    mode: "0755"
+    owner: root
+    group: root
+  args:
+    creates: /usr/local/bin/juicefs
+  become: true

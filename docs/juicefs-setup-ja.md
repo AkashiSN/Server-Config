@@ -1,6 +1,6 @@
 # JuiceFS セットアップ手順 (Lightsail PostgreSQL + S3)
 
-`terraform/aws/main.tf` で構築した以下のリソースを使い、k3s クラスタ (`module.k3s_cluster`) 上で JuiceFS をフォーマット・マウントするまでの手順をまとめる。本リポジトリでは k3s クラスタからの常用は [JuiceFS CSI Driver](https://juicefs.com/docs/csi/introduction) 経由 (ansible の `roles/cluster_juicefs_csi`) を想定し、本書のホスト直接 mount 手順は format / 動作確認 / 障害調査用の参考とする。
+`terraform/aws/environment/prod/main.tf` で構築した以下のリソースを使い、k3s クラスタ (`module.k3s_cluster`) 上で JuiceFS をフォーマット・マウントするまでの手順をまとめる。本リポジトリでは k3s クラスタからの常用は [JuiceFS CSI Driver](https://juicefs.com/docs/csi/introduction) 経由 (ansible の `roles/cluster_juicefs_csi`) を想定し、本書のホスト直接 mount 手順は format / 動作確認 / 障害調査用の参考とする。
 
 | 用途 | リソース | Terraform 参照 |
 | --- | --- | --- |
@@ -14,31 +14,34 @@ JuiceFS そのもののインストールや高度な使い方は公式 [JuiceFS
 
 ## 前提
 
-- `terraform/aws` 配下で `terraform apply` 済み (Lightsail DB / S3 バケット / IAM ユーザ作成済み)
+- `terraform/aws/environment/prod` 配下で `terraform apply` 済み (Lightsail DB / S3 バケット / IAM ユーザ作成済み)
 - k3s クラスタの少なくとも 1 ノード (`module.k3s_cluster["server"]` など) に Tailscale 経由で SSH できる状態
-- 当該ノードから JuiceFS Community Edition バイナリ (`juicefs`) を実行できる状態 (インストールは公式 [Quick Start Guide](https://juicefs.com/docs/community/quick_start_guide) または `curl -sSL https://d.juicefs.com/install | sh -` を参照)
+- 本リポジトリでは ansible `roles/juicefs_cli` が k3s server ノードに JuiceFS Community Edition CLI (`/usr/local/bin/juicefs`) を pin install するため、`make k3s-cluster` 実行後に server ノード上で `juicefs` コマンドが使える。バージョンは `group_vars/k3s_cluster/vars.yml` の `juicefs_version` で固定 (リリース一覧: <https://github.com/juicedata/juicefs/releases>)
+- 別ノードや手元で実行したい場合は公式 [Quick Start Guide](https://juicefs.com/docs/community/quick_start_guide) または `curl -sSL https://d.juicefs.com/install | sh -` を参照
 
 ## 1. 認証情報の取得
 
-`terraform/aws` ディレクトリで以下を実行し、JuiceFS 接続に必要な値をすべて取得する。secret 系は sensitive output のため `-raw` で取り出す。
+`terraform/aws/environment/prod` ディレクトリで以下を実行し、JuiceFS 接続に必要な値をすべて取得する。output は `juicefs_db` / `juicefs_s3` の 2 つの sensitive object に集約されているため、`-json | jq -r` でフィールドを取り出す。
 
 ```bash
-cd terraform/aws
+cd terraform/aws/environment/prod
 
-# 公開情報 (そのままシェルにエクスポートして良い)
-export JFS_DB_HOST=$(terraform output -raw juicefs_db_endpoint)
-export JFS_DB_PORT=$(terraform output -raw juicefs_db_port)
-export JFS_DB_USER=$(terraform output -raw juicefs_db_master_username)   # "juicefs"
+# JuiceFS メタデータ DB (sensitive object)
+export JFS_DB_HOST=$(terraform output -json juicefs_db | jq -r '.endpoint')
+export JFS_DB_PORT=$(terraform output -json juicefs_db | jq -r '.port')
+export JFS_DB_USER=$(terraform output -json juicefs_db | jq -r '.master_username')   # "juicefs"
 export JFS_DB_NAME=juicefs
-export JFS_S3_BUCKET=$(terraform output -raw juicefs_s3_bucket_name)
-export JFS_S3_ACCESS_KEY=$(terraform output -raw juicefs_s3_iam_access_key_id)
+export JFS_DB_PASS=$(terraform output -json juicefs_db | jq -r '.master_password')
 
-# 機密情報 (シェル履歴・スクリーンショットに残らないよう注意)
-export JFS_DB_PASS=$(terraform output -raw juicefs_db_master_password)
-export JFS_S3_SECRET_KEY=$(terraform output -raw juicefs_s3_iam_secret_access_key)
+# JuiceFS object storage (sensitive object)
+export JFS_S3_BUCKET=$(terraform output -json juicefs_s3 | jq -r '.bucket_name')
+export JFS_S3_ACCESS_KEY=$(terraform output -json juicefs_s3 | jq -r '.iam_access_key_id')
+export JFS_S3_SECRET_KEY=$(terraform output -json juicefs_s3 | jq -r '.iam_secret_access_key')
 ```
 
-これらの値は `terraform/aws/README.md` の Outputs 表にも対応関係を記載している。
+> シェル履歴・スクリーンショットに `JFS_DB_PASS` / `JFS_S3_SECRET_KEY` が残らないよう注意。
+
+これらの値は [`terraform/aws/environment/prod/README.md`](../terraform/aws/environment/prod/README.md) の Outputs 表にも対応関係を記載している。
 
 ## 2. メタデータ DB への接続テスト (任意)
 
@@ -66,7 +69,7 @@ JuiceFS は AES-GCM + RSA のハイブリッド暗号によるクライアント
 
 ### RSA 秘密鍵とパスフレーズの生成
 
-k3s クラスタのいずれかのノード上で以下を実行する。鍵もパスフレーズもノード内に閉じて管理し、Lightsail スナップショット任せにせず別経路でもバックアップを取る (本リポジトリでは生成後に 1Password に登録し、`group_vars/k3s_cluster/vault.yml` 経由で全ノード / CSI Secret に配布する想定)。
+k3s クラスタのいずれかのノード上で以下を実行する。鍵もパスフレーズもノード内に閉じて管理し、Lightsail スナップショット任せにせず別経路でもバックアップを取る (本リポジトリでは生成後に 1Password に登録し、`group_vars/k3s_cluster/vault_juicefs.yml` 経由で全ノード / CSI Secret に配布する想定)。
 
 ```bash
 # 鍵置き場を root only で用意
@@ -206,7 +209,7 @@ JFS_RSA_PASSPHRASE=...
 
 ### k3s から使う場合
 
-本リポジトリでは [JuiceFS CSI Driver](https://juicefs.com/docs/csi/introduction) を ansible (`roles/cluster_juicefs_csi`) で helm デプロイし、`group_vars/k3s_cluster/vault.yml` の値から CSI Secret を組み立てる。要点:
+本リポジトリでは [JuiceFS CSI Driver](https://juicefs.com/docs/csi/introduction) を ansible (`roles/cluster_juicefs_csi`) で helm デプロイし、`group_vars/k3s_cluster/vault_juicefs.yml` の値から CSI Secret を組み立てる。要点:
 
 - Secret に以下を入れる (`vault_juicefs_*` から組み立て):
   - `metaurl` (`postgres://...?sslmode=require`、**パスワード抜き**)
@@ -234,7 +237,7 @@ aws lightsail update-relational-database \
   --apply-immediately
 ```
 
-4. `juicefs mount` 実行側 (`group_vars/k3s_cluster/vault.yml` の `vault_juicefs_meta_password` → JuiceFS CSI Secret の `envs.META_PASSWORD`、および手動 mount 用 systemd unit があればその `EnvironmentFile`) のパスワードを `$NEW_PASS` で更新
+4. `juicefs mount` 実行側 (`group_vars/k3s_cluster/vault_juicefs.yml` の `vault_juicefs_meta_password` → JuiceFS CSI Secret の `envs.META_PASSWORD`、および手動 mount 用 systemd unit があればその `EnvironmentFile`) のパスワードを `$NEW_PASS` で更新
 5. 以降のローテートはコンソール / CLI 側のみで完結。Terraform は触らない (state 上の値は使われていない過去のパスワードになる)
 
 なお **暗号化用 RSA 秘密鍵そのもの** は `juicefs format` 時点でメタデータ DB に登録された後は変更できない (公式仕様)。鍵をローテートしたい場合はファイルシステムを作り直す (Section 7) しかなく、データを別ファイルシステムにコピーしてから旧 FS を破棄する手順が必要になる。**運用開始前に強いパスフレーズを設定し、以後は鍵自体ではなくパスフレーズを保護する** という設計にすること。
@@ -269,7 +272,8 @@ aws s3 rm "s3://${JFS_S3_BUCKET}" --recursive
 ## 参考
 
 - 本リポジトリ
-  - [`terraform/aws/README.md`](../terraform/aws/README.md)
+  - [`terraform/aws/README.md`](../terraform/aws/README.md) — 全体構成 / backend
+  - [`terraform/aws/environment/prod/README.md`](../terraform/aws/environment/prod/README.md) — 本書が参照する `module.lightsail_juicefs_db` / `module.juicefs_s3` を持つ環境 (output 一覧含む)
   - [`terraform/aws/modules/lightsail_database/README.md`](../terraform/aws/modules/lightsail_database/README.md)
   - [`terraform/aws/modules/s3/README.md`](../terraform/aws/modules/s3/README.md)
 - JuiceFS 公式

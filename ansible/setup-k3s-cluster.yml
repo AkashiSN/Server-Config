@@ -8,10 +8,11 @@
     - node_facts
     - node_common
 
-- name: Install k3s server and helm CLI
+- name: Install k3s server and helm / juicefs CLI
   hosts: k3s_server
   roles:
     - helm_cli
+    - juicefs_cli
     - k3s_server
 
 - name: Join k3s agents to the cluster

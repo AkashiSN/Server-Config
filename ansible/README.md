@@ -32,6 +32,7 @@
 | `roles/node_facts/` | default NIC / private IPv4 / IPv6 prefix を register |
 | `roles/node_common/` | hostname 設定 + パッケージ更新 + timezone / swap / logrotate |
 | `roles/helm_cli/` | helm + helm-diff plugin |
+| `roles/juicefs_cli/` | JuiceFS CE CLI (`/usr/local/bin/juicefs`) を k3s server ノードに pin install。`juicefs format` / `status` / `dump` などの管理用途。Pod 内 mount は `cluster_juicefs_csi` が担当 |
 | `roles/k3s_server/` | k3s server インストール + node-token を `k3s_token` fact に bind |
 | `roles/k3s_agent/` | server の node-token (`hostvars['k3s-server'].k3s_token`) と private IP で agent join |
 | `roles/cluster_gateway_api/` / `cluster_cert_manager/` / `cluster_traefik/` / `cluster_argocd/` / `cluster_juicefs_csi/` | Helm リリースと付随リソース。`cluster_gateway_api` は Gateway API (Standard channel) CRD を最初に投入。`cluster_cert_manager` は Helm values の `config.enableGatewayAPI: true` で Gateway shim を有効化し、`Gateway` の `cert-manager.io/cluster-issuer` annotation 経由で listener 用 Secret を自動発行する。`cluster_traefik` は k3s 同梱 Traefik v3 の values を HelmChartConfig で上書きする (Gateway / HTTPRoute は各アプリ namespace に自前で持つ方針)。`cluster_argocd` は `argo-cd` namespace の Gateway 投入 + helm release |
