@@ -7,7 +7,10 @@
 - 各ノードに Tailscale 経由 (または初回ブートストラップ時のみ public IPv4 経由) で SSH 到達できること
   - DNS は Tailscale MagicDNS (`<host>.<tailnet>.ts.net`) または `inventory.yml` の `ansible_host` (`<host>.akashisn.info`) を想定
 - ローカルに `ansible` / `ansible-playbook` がインストール済みであること
-- [1Password CLI (`op`)](https://developer.1password.com/docs/cli/) にサインイン済みで、`op://Private/ansible-vault/password` および `op://Private/ansible-vault/vault.yml` にアクセスできること
+- AWS CLI に `sylc` profile が設定済みで `/ansible/k3s_cluster/vault_password` と `/ansible/k3s_cluster/vault/<group>` の SSM Parameter (`ap-northeast-1`) を読める権限があること
+  - `vault-pass.sh` が `aws --profile sylc ssm get-parameter` で ansible-vault パスワードを引く
+  - `make credential` が同じく `--profile sylc` で 6 ファイル分の vault yaml を 6 個の SSM Parameter から取得する
+- 1Password CLI (`op`) は **任意** (`make upload-credential` で 1Password の `ansible-vault` item に file attachment としてバックアップする時のみ必要)
 - Ansible collections のインストール
 
   ```bash
@@ -20,11 +23,12 @@
 | --- | --- |
 | `ansible.cfg` | inventory / vault パスワードファイル / python interpreter (3.12) の設定 |
 | `inventory.yml` | `k3s_cluster` (`k3s_server` + `k3s_agent`) のホスト定義。各 host に `k3s_node_labels` を書けば `--node-label` で適用される |
-| `vault-pass.sh` | 1Password から vault パスワードを読み取るスクリプト (`ansible.cfg` から参照) |
+| `vault-pass.sh` | AWS SSM Parameter `/ansible/k3s_cluster/vault_password` (`--profile sylc`) から ansible-vault パスワードを読み取るスクリプト (`ansible.cfg` の `vault_password_file` から参照) |
+| `Makefile` | `credential` (SSM → ローカル) / `upload-credential` (ローカル → 1Password) / `clean` / `k3s-cluster` ターゲット。VAULT_GROUPS で 6 ファイルを一括処理 |
 | `requirements.yml` | 必要な Ansible collections (`community.general`, `kubernetes.core`) |
 | `setup-k3s-cluster.yml` | エントリ playbook (`node_facts` → `node_common` → `helm_cli` → `k3s_server` → `k3s_agent` → `cluster_*` の順に実行) |
 | `group_vars/k3s_cluster/vars.yml` | 平文の共通変数 (k3s channel / TLS SAN / domain / ArgoCD / JuiceFS 設定) |
-| `group_vars/k3s_cluster/vault.yml` | 暗号化済み secret (`make credential` で取得 / `ansible-vault` で編集) |
+| `group_vars/k3s_cluster/vault_{common,argocd,juicefs,postgres_backup,immich,nextcloud}.yml` | 用途別に **6 ファイルに分割** された暗号化済み secret。`make credential` で SSM から取得、`make upload-credential` で 1Password に push、編集は `ansible-vault edit group_vars/k3s_cluster/vault_<group>.yml` |
 | `roles/node_facts/` | default NIC / private IPv4 / IPv6 prefix を register |
 | `roles/node_common/` | hostname 設定 + パッケージ更新 + timezone / swap / logrotate |
 | `roles/helm_cli/` | helm + helm-diff plugin |
@@ -70,49 +74,45 @@ sudo cloudflared service install <TUNNEL_TOKEN>
 
 3 ノード全てで両方が完了したら、`main.tf` の 22/TCP ブロックを **再コメント** して `terraform apply` で port を閉じる。以降の SSH / ansible 接続は Tailscale または Cloudflare Tunnel 経由のみ。
 
-### 3. `group_vars/k3s_cluster/vault.yml` の取得
+### 3. vault ファイル群の取得
 
-1Password から vault ファイルをローカルに取得します。
+vault は用途別に **6 ファイルに分割** されており、それぞれが独立した SSM Parameter `/ansible/k3s_cluster/vault/<group>` に ansible-vault 暗号文として保管されています。
 
 ```bash
 make credential
 ```
 
-内部で `op read "op://Private/ansible-vault/vault.yml" > group_vars/k3s_cluster/vault.yml` を実行します。`ansible.cfg` の `vault_password_file = vault-pass.sh` 経由で 1Password (`op://Private/ansible-vault/password`) から復号鍵が自動取得されます。
+内部で `VAULT_GROUPS := common argocd juicefs postgres_backup immich nextcloud` を loop し、`aws --profile sylc ssm get-parameter --name /ansible/k3s_cluster/vault/<group>` の結果を `group_vars/k3s_cluster/vault_<group>.yml` に書き出します。playbook 実行時には `ansible.cfg` の `vault_password_file = vault-pass.sh` が SSM Parameter `/ansible/k3s_cluster/vault_password` から復号鍵を引きます。
 
-vault に登録すべき secret 一覧と取得元:
+#### 各 vault ファイルの中身
 
-| キー | 取得元 | 取得コマンド例 |
+| ファイル | キー | 取得元 |
 | --- | --- | --- |
-| `vault_tailnet_dns_name` | Tailscale 管理画面 (Tailnet name + `.ts.net`) | — |
-| `vault_juicefs_metaurl` | terraform output から組み立て (PostgreSQL DSN、**パスワード抜き**) | 下記スニペット参照 |
-| `vault_juicefs_meta_password` | `juicefs_db` output (sensitive) | `terraform output -json juicefs_db \| jq -r '.master_password'` |
-| `vault_juicefs_s3_bucket` | `juicefs_s3` output | `terraform output -json juicefs_s3 \| jq -r '.bucket_name'` |
-| `vault_juicefs_s3_access_key_id` | `juicefs_s3` output | `terraform output -json juicefs_s3 \| jq -r '.iam_access_key_id'` |
-| `vault_juicefs_s3_secret_access_key` | `juicefs_s3` output (sensitive) | `terraform output -json juicefs_s3 \| jq -r '.iam_secret_access_key'` |
-| `vault_postgres_backup_s3_bucket` | `postgres_backup_s3` output | `terraform output -json postgres_backup_s3 \| jq -r '.bucket_name'` |
-| `vault_postgres_backup_s3_access_key_id` | `postgres_backup_s3` output | `terraform output -json postgres_backup_s3 \| jq -r '.iam_access_key_id'` |
-| `vault_postgres_backup_s3_secret_access_key` | `postgres_backup_s3` output (sensitive) | `terraform output -json postgres_backup_s3 \| jq -r '.iam_secret_access_key'` |
-| `vault_immich_walg_libsodium_key` | base64 32 byte (生成 + 1Password 登録 + 紙 QR 二重保管) | `openssl rand -base64 32` (詳細は [`../docs/postgres-walg-backup-ja.md`](../docs/postgres-walg-backup-ja.md)) |
-| `vault_cloudflare_token` | Cloudflare ダッシュボード (DNS Edit 権限) | — |
-| `vault_email` | ACME 登録用メールアドレス | — |
-| `vault_argocd_oidc_issuer` | Cloudflare Zero Trust の OIDC アプリ | — |
-| `vault_argocd_oidc_client_id` | 同上 | — |
-| `vault_argocd_oidc_client_secret` | 同上 | — |
-| `vault_argocd_webhook_github_secret` | GitHub webhook 用シークレット | — |
-| `vault_immich_postgres_user_password` | Immich Postgres ユーザパスワード | — |
-| `vault_nextcloud_email_address` | Nextcloud 通知メール from アドレス | — |
-| `vault_nextcloud_smtp_password` | Nextcloud SMTP パスワード | — |
-| `vault_nextcloud_admin_user` | Nextcloud 管理者ユーザ名 | — |
-| `vault_nextcloud_admin_password` | Nextcloud 管理者パスワード | — |
-| `vault_nextcloud_postgres_password` | Nextcloud Postgres パスワード | — |
-| `vault_nextcloud_oidc_issuer` | Nextcloud OIDC issuer URL | — |
-| `vault_nextcloud_oidc_client_id` | Nextcloud OIDC client id | — |
-| `vault_nextcloud_oidc_client_secret` | Nextcloud OIDC client secret | — |
+| `vault_common.yml` | `vault_tailnet_dns_name` | Tailscale 管理画面 (Tailnet name + `.ts.net`) |
+| | `vault_cloudflare_token` | Cloudflare ダッシュボード (DNS Edit 権限) |
+| | `vault_email` | ACME / 通知用メールアドレス |
+| `vault_argocd.yml` | `vault_argocd_oidc_issuer` / `_client_id` / `_client_secret` | Cloudflare Zero Trust の OIDC アプリ |
+| | `vault_argocd_webhook_github_secret` | GitHub webhook 用シークレット |
+| `vault_juicefs.yml` | `vault_juicefs_metaurl` | terraform output から組み立て (PostgreSQL DSN、**パスワード抜き**) — 下記スニペット |
+| | `vault_juicefs_meta_password` | `terraform output -json juicefs_db \| jq -r '.master_password'` |
+| | `vault_juicefs_s3_bucket` | `terraform output -json juicefs_s3 \| jq -r '.bucket_name'` |
+| | `vault_juicefs_s3_access_key_id` | `terraform output -json juicefs_s3 \| jq -r '.iam_access_key_id'` |
+| | `vault_juicefs_s3_secret_access_key` | `terraform output -json juicefs_s3 \| jq -r '.iam_secret_access_key'` |
+| `vault_postgres_backup.yml` | `vault_postgres_backup_s3_bucket` | `terraform output -json postgres_backup_s3 \| jq -r '.bucket_name'` |
+| | `vault_postgres_backup_s3_access_key_id` | `terraform output -json postgres_backup_s3 \| jq -r '.iam_access_key_id'` |
+| | `vault_postgres_backup_s3_secret_access_key` | `terraform output -json postgres_backup_s3 \| jq -r '.iam_secret_access_key'` |
+| `vault_immich.yml` | `vault_immich_postgres_user_password` | Immich Postgres ユーザパスワード |
+| | `vault_immich_walg_libsodium_key` | base64 32 byte (`openssl rand -base64 32` + 紙 QR 二重保管、詳細 [`../docs/postgres-walg-backup-ja.md`](../docs/postgres-walg-backup-ja.md)) |
+| `vault_nextcloud.yml` | `vault_nextcloud_smtp_password` | Nextcloud SMTP パスワード |
+| | `vault_nextcloud_admin_user` / `_admin_password` | Nextcloud 管理者ユーザ名 / パスワード |
+| | `vault_nextcloud_postgres_password` | Nextcloud Postgres パスワード |
+| | `vault_nextcloud_oidc_issuer` / `_client_id` / `_client_secret` | Nextcloud OIDC |
 
 > **`K3S_TOKEN` は vault 登録不要**: k3s server が起動時に `/var/lib/rancher/k3s/server/node-token` を自動生成し、`roles/k3s_server` が slurp で `k3s_token` fact 化、`roles/k3s_agent` が `hostvars['k3s-server'].k3s_token` で参照します。
 
-`vault_juicefs_metaurl` の組み立て例 (terraform/aws ディレクトリで実行)。**パスワードは含めない** こと:
+#### `vault_juicefs_metaurl` の組み立て
+
+terraform/aws ディレクトリで実行。**パスワードは含めない** こと:
 
 ```bash
 JF_USER=$(terraform output -json juicefs_db | jq -r '.master_username')
@@ -121,7 +121,28 @@ JF_PORT=$(terraform output -json juicefs_db | jq -r '.port')
 echo "postgres://${JF_USER}@${JF_HOST}:${JF_PORT}/juicefs?sslmode=require"
 ```
 
-パスワード (`vault_juicefs_meta_password`) は `terraform output -json juicefs_db | jq -r '.master_password'` で取得し、JuiceFS CSI secret の `envs` フィールド経由で `META_PASSWORD` 環境変数として注入される (URL エンコード不要、平文 secret に metaurl 全体を埋めない)。
+パスワード (`vault_juicefs_meta_password`) は `terraform output -json juicefs_db | jq -r '.master_password'` で取得し、JuiceFS CSI secret の `envs` フィールド経由で `META_PASSWORD` 環境変数として注入されます (URL エンコード不要、平文 secret に metaurl 全体を埋めない)。
+
+#### vault を編集して反映する
+
+SSM Parameter Store 側は [`terraform/aws/environment/secrets`](../terraform/aws/environment/secrets/README.md) が `for_each` で 6 ファイル分の `aws_ssm_parameter` を一括管理しています。ローカルで内容を更新したあとは terraform apply で SSM に反映、1Password にはバックアップとして push、という流れです。
+
+```bash
+# 編集 (どれか 1 ファイル)
+ansible-vault edit group_vars/k3s_cluster/vault_nextcloud.yml
+
+# SSM Parameter Store に反映 (運用上のソース)
+cd ../terraform/aws/environment/secrets
+terraform apply
+
+# 1Password の `ansible-vault` item に file attachment として push (任意のバックアップ)
+cd ../../../../ansible
+make upload-credential
+```
+
+`make upload-credential` は `VAULT_GROUPS` を loop して 6 ファイル全部を `op item edit ansible-vault "vault_<group>.yml[file]=..."` で更新します。
+
+> `/ansible/k3s_cluster/vault_password` (ansible-vault 復号鍵そのもの) は terraform 管理外で `lifecycle.ignore_changes = [value]` で `PLACEHOLDER` のまま。初回 apply 後に手動で `aws ssm put-parameter --profile sylc --name /ansible/k3s_cluster/vault_password --type SecureString --value '<実値>' --overwrite` で投入する。詳細は secrets 側 README 参照。
 
 ### 4. プロビジョニング実行
 
@@ -159,7 +180,7 @@ nmap -p 6443 $(cd ../terraform/aws && terraform output -json k3s_cluster | jq -r
 make clean
 ```
 
-`group_vars/k3s_cluster/vault.yml` を削除します（リポジトリ外に漏らさないため）。再度プロビジョニングする場合は `make credential` で取り直します。
+`VAULT_GROUPS` を loop して `group_vars/k3s_cluster/vault_{common,argocd,juicefs,postgres_backup,immich,nextcloud}.yml` の 6 ファイルを削除します (リポジトリ外に漏らさないため)。再度プロビジョニングする場合は `make credential` で SSM から取り直します。
 
 ## node label の指定
 
