@@ -5,18 +5,18 @@ all:
         k3s_server:
           hosts:
             k3s-server:
-              ansible_host: k3s-server.akashisn.info
+              ansible_host: k3s-server
               # k3s_node_labels:
               #   - role.example=true
         k3s_agent:
           hosts:
             k3s-agent-0:
-              ansible_host: k3s-agent-0.akashisn.info
+              ansible_host: k3s-agent-0
               k3s_node_labels:
                 - storage.immich-db=true
                 - traefik=true
             k3s-agent-1:
-              ansible_host: k3s-agent-1.akashisn.info
+              ansible_host: k3s-agent-1
               k3s_node_labels:
                 - traefik=true
                 # - storage.nextcloud=true

@@ -17,6 +17,15 @@ credential:
 	    > $(CURDIR)/group_vars/k3s_cluster/vault_$$g.yml; \
 	done
 
+# 1Password の `ansible-vault` item に各 vault_*.yml を file attachment として登録する。
+# field セレクタが `.` を階層区切りとして解釈するため `\.` でエスケープする。
+.PHONY: upload-credential
+upload-credential:
+	@for g in $(VAULT_GROUPS); do \
+	  op item edit ansible-vault \
+	    "vault_$$g\.yml[file]=$(CURDIR)/group_vars/k3s_cluster/vault_$$g.yml"; \
+	done
+
 .PHONY: k3s-cluster
 k3s-cluster:
 	cd $(CURDIR) ; \
