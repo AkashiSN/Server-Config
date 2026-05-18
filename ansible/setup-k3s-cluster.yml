@@ -30,11 +30,24 @@
     - cluster_juicefs_csi
     - cluster_app_secrets
   tasks:
-    - name: Wait for all pods to be ready
-      ansible.builtin.command:
-        cmd: kubectl get pods -A -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}'
-      register: result
-      until: result.stdout.find("False") == -1
+    # Job (helm-install-* / pre-sync hook 等) の Pod は完了後に status.phase=Succeeded
+    # で残り、`type=Ready` condition は False (reason: PodCompleted) のままになるため、
+    # Succeeded フェーズの Pod を field-selector で除外してから Ready=True 以外を探す。
+    - name: Wait for all non-completed pods to be Ready
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          not_ready=$(kubectl get pods -A \
+            --field-selector=status.phase!=Succeeded \
+            -o jsonpath='{range .items[*]}{.metadata.namespace}/{.metadata.name}:{.status.conditions[?(@.type=="Ready")].status}{"\n"}{end}' \
+            | grep -v ':True$' || true)
+          if [ -n "$not_ready" ]; then
+            echo "$not_ready" >&2
+            exit 1
+          fi
+        executable: /bin/bash
+      register: pods_check
+      until: pods_check.rc == 0
       retries: 60
       delay: 10
       changed_when: false
