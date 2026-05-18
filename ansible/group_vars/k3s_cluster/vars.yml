@@ -43,9 +43,9 @@ immich_postgres_user_password: "{{ vault_immich_postgres_user_password }}"
 immich_walg_libsodium_key: "{{ vault_immich_walg_libsodium_key }}"
 
 # Secrets - nextcloud
-nextcloud_email_address: "{{ vault_nextcloud_email_address }}"
+nextcloud_email_address: "{{ email }}"
 nextcloud_smtp_password: "{{ vault_nextcloud_smtp_password }}"
-nextcloud_admin_user: "{{ vault_nextcloud_admin_user }}"
+nextcloud_admin_user: "{{ email }}"
 nextcloud_admin_password: "{{ vault_nextcloud_admin_password }}"
 nextcloud_postgres_password: "{{ vault_nextcloud_postgres_password }}"
 nextcloud_oidc_issuer: "{{ vault_nextcloud_oidc_issuer }}"

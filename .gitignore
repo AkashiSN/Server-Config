@@ -3,7 +3,7 @@
 .credential
 *.env
 *.gpg
-vault.yml
+vault*.yml
 !.gitkeep
 .kubeconfig
 *.local.json
