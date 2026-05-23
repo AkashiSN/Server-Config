@@ -8,4 +8,4 @@ spec:
   resources:
     requests:
       storage: 2Ti
-  storageClassName: s3ql-storage
+  storageClassName: local-storage
