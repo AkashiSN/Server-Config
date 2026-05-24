@@ -27,7 +27,7 @@ spec:
             - name: TZ
               value: Asia/Tokyo
             - name: POSTGRES_USER
-              value: postgres
+              value: immich
             - name: POSTGRES_PASSWORD_FILE
               value: /secrets/immich_postgres_user_password
             - name: POSTGRES_DB
