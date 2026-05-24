@@ -20,10 +20,19 @@ spec:
       labels:
         app: immich-microservices
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
       containers:
         - name: immich-microservices
           image: ghcr.io/immich-app/immich-server:v2.7.5
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           envFrom:
             - configMapRef:
                 name: immich-env
