@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: nextcloud
-          image: nextcloud:33.0.5-fpm-alpine
+          image: nextcloud:34.0.0-fpm-alpine
           command: ["/bin/sh"]
           args: ["-c", "exit 0"]
       restartPolicy: Never
