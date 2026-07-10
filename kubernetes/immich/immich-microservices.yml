@@ -27,7 +27,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: immich-microservices
-          image: ghcr.io/immich-app/immich-server:v3.0.1
+          image: ghcr.io/immich-app/immich-server:v3.0.2
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
